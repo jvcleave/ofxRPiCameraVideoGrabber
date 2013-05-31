@@ -72,7 +72,7 @@ void testApp::setup()
 	{
 		ofLogVerbose() << "OMX_Init PASS";
 	}
-	error = OMX_ErrorNone;
+	
     for (int i = 0; OMX_ErrorNoMore != error; i++)
 	{
 		error = OMX_ComponentNameEnum(name, OMX_MAX_STRINGNAME_SIZE, i);
@@ -81,10 +81,11 @@ void testApp::setup()
 			listRoles(name);
 		}
     }
+	OMX_CALLBACKTYPE clockCallbacks;
 	
 	const std::string componentName = "OMX.broadcom.clock";
 	clockCallbacks.EventHandler    = &testApp::EventHandlerCallback;
-	error = OMX_GetHandle(&clock, (OMX_STRING)componentName.c_str(), NULL /*appPriv */, &clockCallbacks);
+	error = OMX_GetHandle(&clock, (OMX_STRING)componentName.c_str(), NULL, &clockCallbacks);
 	if(error == OMX_ErrorNone) 
 	{
 		ofLogVerbose() << "clock OMX_GetHandle PASS";
@@ -92,6 +93,7 @@ void testApp::setup()
 	{
 		ofLog(OF_LOG_ERROR, "clock OMX_GetHandle FAIL omx_err(0x%08x)\n", error);
 	}
+	
 	OMX_TIME_CONFIG_CLOCKSTATETYPE omxTimeConfigClockStateType;
 	OMX_INIT_STRUCTURE(omxTimeConfigClockStateType);
 	
@@ -107,9 +109,12 @@ void testApp::setup()
 		ofLog(OF_LOG_ERROR, "clock OMX_SetConfig FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	OMX_CONFIG_REQUESTCALLBACKTYPE omxConfigRequestCallbackType;
-	OMX_INIT_STRUCTURE(omxConfigRequestCallbackType);
 	
+	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
+	OMX_INIT_STRUCTURE(cameraCallback);
+	cameraCallback.nPortIndex=OMX_ALL;
+	cameraCallback.nIndex=OMX_IndexParamCameraDeviceNumber;
+	cameraCallbacks.bEnable = OMX_TRUE;
 	const std::string cameraComponentName = "OMX.broadcom.camera";
 	cameraCallbacks.EventHandler    = &testApp::cameraEventHandlerCallback;
 	
