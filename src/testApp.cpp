@@ -55,7 +55,7 @@ OMX_ERRORTYPE testApp::EventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR p
 OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
 											OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-	ofLogVerbose() << "cameraEventHandlerCallback";
+	//ofLogVerbose() << "cameraEventHandlerCallback";
 	ofLog(OF_LOG_VERBOSE, 
 		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 		  __func__, eEvent, nData1, nData2, pEventData);
@@ -63,89 +63,158 @@ OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX
 	{
 		case OMX_EventCmdComplete:
 		{
-			ofLogVerbose() << "OMX_EventCmdComplete";
+			ofLogVerbose() << __func__ <<  " OMX_EventCmdComplete";
 			break;
 		}
 		case OMX_EventError:
 		{
-			ofLogVerbose() << "OMX_EventError";
+			ofLogVerbose() << __func__ <<  " OMX_EventError";
 			break;
 		}
 		case OMX_EventMark:
 		{
-			ofLogVerbose() << "OMX_EventMark";
+			ofLogVerbose() << __func__ <<  " OMX_EventMark";
 			break;
 		}
 		case OMX_EventPortSettingsChanged:
 		{
-			ofLogVerbose() << "OMX_EventPortSettingsChanged";
+			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
 			break;
 		}
 		case OMX_EventBufferFlag:
 		{
-			ofLogVerbose() << "OMX_EventBufferFlag";
+			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
 			break;
 		}
 		case OMX_EventResourcesAcquired:
 		{
-			ofLogVerbose() << "OMX_EventResourcesAcquired";
+			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
 			break;
 		}
 		case OMX_EventComponentResumed:
 		{
-			ofLogVerbose() << "OMX_EventComponentResumed";
+			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
 			break;
 		}
 		case OMX_EventDynamicResourcesAvailable:
 		{
-			ofLogVerbose() << "OMX_EventDynamicResourcesAvailable";
+			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
 			break;
 		}
 		case OMX_EventPortFormatDetected:
 		{
-			ofLogVerbose() << "OMX_EventPortFormatDetected";
+			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
 			break;
 		}
 		case OMX_EventKhronosExtensions:
 		{
-			ofLogVerbose() << "OMX_EventKhronosExtensions";
+			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
 			break;
 		}
 		case OMX_EventVendorStartUnused:
 		{
-			ofLogVerbose() << "OMX_EventVendorStartUnused";
+			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
 			break;
 		}
 		case OMX_EventParamOrConfigChanged:
 		{
-			//OMX_HANDLETYPE *ctx = static_cast<OMX_HANDLETYPE*>(pAppData);
-			ofLogVerbose() << "OMX_EventParamOrConfigChanged";
-			OMX_ERRORTYPE error = OMX_SendCommand(hComponent, OMX_CommandStateSet, OMX_StateIdle, NULL);
-			if (error == OMX_ErrorNone) 
-			{
-				ofLogVerbose() << "camera OMX_SendCommand PASS";
-			}else 
-			{
-				ofLog(OF_LOG_ERROR, "camera OMX_SendCommand FAIL omx_err(0x%08x)\n", error);
-			}
-			OMX_CONFIG_PORTBOOLEANTYPE cameraport;
-			OMX_INIT_STRUCTURE(cameraport);
-			cameraport.nPortIndex = 71;
-			cameraport.bEnabled = OMX_TRUE;
-			error =OMX_SetParameter(hComponent, OMX_IndexConfigPortCapturing, &cameraport);	
-			if (error == OMX_ErrorNone) 
-			{
-				ofLogVerbose() << "camera OMX_SetParameter PASS";
-			}else 
-			{
-				ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
-			}
+			
+			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";
+			testApp *app = static_cast<testApp*>(pAppData);
+			app->onCameraEventParamOrConfigChanged();
+			
 			
 			break;
 		}
 		case OMX_EventMax:
 		{
-			ofLogVerbose() << "OMX_EventMax";
+			ofLogVerbose() << __func__ <<  " OMX_EventMax";
+			break;
+		}		
+		default:
+		{
+			ofLogVerbose() << __func__ <<  "DEFAULT";
+			break;
+		}
+			
+	}
+	//ofLogVerbose() << "END --- cameraEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE testApp::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
+												  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	//ofLogVerbose() << "renderEventHandlerCallback";
+	ofLog(OF_LOG_VERBOSE, 
+		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
+		  __func__, eEvent, nData1, nData2, pEventData);
+	switch (eEvent) 
+	{
+		case OMX_EventCmdComplete:
+		{
+			ofLogVerbose() << __func__ << " OMX_EventCmdComplete";
+			break;
+		}
+		case OMX_EventError:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventError";
+			break;
+		}
+		case OMX_EventMark:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMark";
+			break;
+		}
+		case OMX_EventPortSettingsChanged:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
+			break;
+		}
+		case OMX_EventBufferFlag:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
+			break;
+		}
+		case OMX_EventResourcesAcquired:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
+			break;
+		}
+		case OMX_EventComponentResumed:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
+			break;
+		}
+		case OMX_EventDynamicResourcesAvailable:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
+			break;
+		}
+		case OMX_EventPortFormatDetected:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
+			break;
+		}
+		case OMX_EventKhronosExtensions:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
+			break;
+		}
+		case OMX_EventVendorStartUnused:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
+			break;
+		}
+		case OMX_EventParamOrConfigChanged:
+		{
+			
+			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";			
+			break;
+		}
+		case OMX_EventMax:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMax";
 			break;
 		}		
 		default:
@@ -155,7 +224,58 @@ OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX
 		}
 			
 	}
+	//ofLogVerbose() << "END --- renderEventHandlerCallback";
 	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE testApp::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
+                                           OMX_IN OMX_PTR pAppData,
+                                           OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "renderEmptyBufferDone";
+	return OMX_ErrorNone;
+}
+OMX_ERRORTYPE testApp::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
+                                          OMX_IN OMX_PTR pAppData,
+                                          OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "renderFillBufferDone";
+
+	return OMX_ErrorNone;
+}
+
+void testApp::onCameraEventParamOrConfigChanged()
+{
+	ofLogVerbose() << "onCameraEventParamOrConfigChanged";
+	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+	OMX_INIT_STRUCTURE(cameraport);
+	cameraport.nPortIndex = 71;
+	cameraport.bEnabled = OMX_TRUE;
+	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetParameter PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
+	}
+	std::string componentName = "";
+	componentName = "OMX.broadcom.egl_render";
+	renderCallbacks.EventHandler    = &testApp::renderEventHandlerCallback;
+	renderCallbacks.EmptyBufferDone = &testApp::renderEmptyBufferDone;
+	renderCallbacks.FillBufferDone = &testApp::renderFillBufferDone;
+	error = OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
+	DisableAllPorts(&render);
+	
 }
 //--------------------------------------------------------------
 void testApp::setup()
@@ -184,7 +304,7 @@ void testApp::setup()
 	const std::string cameraComponentName = "OMX.broadcom.camera";
 	cameraCallbacks.EventHandler    = &testApp::cameraEventHandlerCallback;
 	
-	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), NULL , &cameraCallbacks);
+	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
 	
 	if(error == OMX_ErrorNone) 
 	{
