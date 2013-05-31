@@ -115,7 +115,50 @@ void testApp::setup()
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL omx_err(0x%08x)\n", error);
 	}
-
+	/*OMX_PARAM_CAMERAISPTUNERTYPE omxParamCameraISPTunerType;
+	OMX_INIT_STRUCTURE(omxParamCameraISPTunerType);
+	error = OMX_GetParameter(camera, OMX_IndexParamISPTunerName, &omxParamCameraISPTunerType);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamISPTunerName PASS";
+		
+		ofLogVerbose() << "port_param.nStartPortNumber: " << omxParamCameraISPTunerType.tuner_name;
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamISPTunerName FAIL omx_err(0x%08x)\n", error);
+	}*/
+	
+	OMX_PORT_PARAM_TYPE port_param;
+	OMX_INIT_STRUCTURE(port_param);
+	
+	error = OMX_GetParameter(camera, OMX_IndexParamOtherInit, &port_param);
+	
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamOtherInit PASS";
+		
+		ofLogVerbose() << "port_param.nStartPortNumber: " << port_param.nStartPortNumber;
+		ofLogVerbose() << "port_param.nPorts: " << port_param.nPorts;
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamOtherInit FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	
+	OMX_PARAM_U32TYPE cameraDeviceNumber;
+	OMX_INIT_STRUCTURE(cameraDeviceNumber);
+	cameraDeviceNumber.nPortIndex = 71;
+	cameraDeviceNumber.nU32 = 0;
+	error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &cameraDeviceNumber);
+	
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber FAIL omx_err(0x%08x)\n", error);
+	}
+	
 	
 }
 
