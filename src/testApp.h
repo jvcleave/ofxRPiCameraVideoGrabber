@@ -39,5 +39,6 @@ class testApp : public ofBaseApp{
 	
 	static OMX_ERRORTYPE cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
 													 OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
+	OMX_ERRORTYPE DisableAllPorts(OMX_HANDLETYPE* m_handle);
 };
 
