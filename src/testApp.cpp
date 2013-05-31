@@ -13,7 +13,7 @@ memset(&(a), 0, sizeof(a)); \
 void testApp::listRoles(char *name) {
     OMX_U32 numRoles;
 	vector<OMX_U8*> roles;
-    /* get the number of roles by passing in a NULL roles param */
+    //get the number of roles by passing in a NULL roles param 
     OMX_ERRORTYPE err = OMX_GetRolesOfComponent(name, &numRoles, NULL);
     if (err != OMX_ErrorNone) 
 	{
@@ -22,7 +22,7 @@ void testApp::listRoles(char *name) {
     }
 	ofLogVerbose() << "numRoles: " << numRoles;
 	
-    /* now get the roles */
+    //now get the roles 
 	
     for (int i = 0; i < numRoles; i++) 
 	{
@@ -59,6 +59,80 @@ OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX
 	ofLog(OF_LOG_VERBOSE, 
 		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 		  __func__, eEvent, nData1, nData2, pEventData);
+	switch (eEvent) 
+	{
+		case OMX_EventCmdComplete:
+		{
+			ofLogVerbose() << "OMX_EventCmdComplete";
+			break;
+		}
+		case OMX_EventError:
+		{
+			ofLogVerbose() << "OMX_EventError";
+			break;
+		}
+		case OMX_EventMark:
+		{
+			ofLogVerbose() << "OMX_EventMark";
+			break;
+		}
+		case OMX_EventPortSettingsChanged:
+		{
+			ofLogVerbose() << "OMX_EventPortSettingsChanged";
+			break;
+		}
+		case OMX_EventBufferFlag:
+		{
+			ofLogVerbose() << "OMX_EventBufferFlag";
+			break;
+		}
+		case OMX_EventResourcesAcquired:
+		{
+			ofLogVerbose() << "OMX_EventResourcesAcquired";
+			break;
+		}
+		case OMX_EventComponentResumed:
+		{
+			ofLogVerbose() << "OMX_EventComponentResumed";
+			break;
+		}
+		case OMX_EventDynamicResourcesAvailable:
+		{
+			ofLogVerbose() << "OMX_EventDynamicResourcesAvailable";
+			break;
+		}
+		case OMX_EventPortFormatDetected:
+		{
+			ofLogVerbose() << "OMX_EventPortFormatDetected";
+			break;
+		}
+		case OMX_EventKhronosExtensions:
+		{
+			ofLogVerbose() << "OMX_EventKhronosExtensions";
+			break;
+		}
+		case OMX_EventVendorStartUnused:
+		{
+			ofLogVerbose() << "OMX_EventVendorStartUnused";
+			break;
+		}
+		case OMX_EventParamOrConfigChanged:
+		{
+			ofLogVerbose() << "OMX_EventParamOrConfigChanged";
+			break;
+		}
+		case OMX_EventMax:
+		{
+			ofLogVerbose() << "OMX_EventMax";
+			break;
+		}		
+		default:
+		{
+			ofLogVerbose() << "DEFAULT";
+			break;
+		}
+			
+	}
 	return OMX_ErrorNone;
 }
 //--------------------------------------------------------------
@@ -81,44 +155,14 @@ void testApp::setup()
 			listRoles(name);
 		}
     }
-	OMX_CALLBACKTYPE clockCallbacks;
-	
-	const std::string componentName = "OMX.broadcom.clock";
-	clockCallbacks.EventHandler    = &testApp::EventHandlerCallback;
-	error = OMX_GetHandle(&clock, (OMX_STRING)componentName.c_str(), NULL, &clockCallbacks);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "clock OMX_GetHandle PASS";
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "clock OMX_GetHandle FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	OMX_TIME_CONFIG_CLOCKSTATETYPE omxTimeConfigClockStateType;
-	OMX_INIT_STRUCTURE(omxTimeConfigClockStateType);
-	
-	omxTimeConfigClockStateType.eState = OMX_TIME_ClockStateWaitingForStartTime;
-	
-	error = OMX_SetConfig(clock, OMX_IndexConfigTimeClockState, &omxTimeConfigClockStateType);
-	
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "clock OMX_SetConfig PASS";
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "clock OMX_SetConfig FAIL omx_err(0x%08x)\n", error);
-	}
+		
 	
 	
-	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
-	OMX_INIT_STRUCTURE(cameraCallback);
-	cameraCallback.nPortIndex=OMX_ALL;
-	cameraCallback.nIndex=OMX_IndexParamCameraDeviceNumber;
-	cameraCallbacks.bEnable = OMX_TRUE;
+	
 	const std::string cameraComponentName = "OMX.broadcom.camera";
 	cameraCallbacks.EventHandler    = &testApp::cameraEventHandlerCallback;
 	
-	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), NULL /*appPriv */, &cameraCallbacks);
+	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), NULL , &cameraCallbacks);
 	
 	if(error == OMX_ErrorNone) 
 	{
@@ -126,36 +170,6 @@ void testApp::setup()
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	
-	
-	/*typedef struct OMX_CONFIG_CAMERAINFOTYPE
-	{
-		OMX_U32 nSize;
-		OMX_VERSIONTYPE nVersion;
-		OMX_U8 cameraname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
-		OMX_U8 lensname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
-		OMX_U16 nModelId;
-		OMX_U8 nManufacturerId;
-		OMX_U8 nRevNum;
-		OMX_U8 sSerialNumber[OMX_CONFIG_CAMERAINFOTYPE_SERIALNUM_LEN];
-		OMX_U8 sEpromVersion[OMX_CONFIG_CAMERAINFOTYPE_EPROMVER_LEN];
-		OMX_CONFIG_LENSCALIBRATIONVALUETYPE sLensCalibration;
-		OMX_U32 xFNumber;
-		OMX_U32 xFocalLength;
-	} OMX_CONFIG_CAMERAINFOTYPE;*/
-	
-	
-	OMX_PARAM_CAMERAISPTUNERTYPE omxParamCameraISPTunerType;
-	OMX_INIT_STRUCTURE(omxParamCameraISPTunerType);
-	error = OMX_SetParameter(camera, OMX_IndexParamISPTunerName, &omxParamCameraISPTunerType);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamISPTunerName PASS";
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamISPTunerName FAIL omx_err(0x%08x)\n", error);
 	}
 	
 	OMX_ERRORTYPE didDisable = DisableAllPorts(&camera);
@@ -167,107 +181,251 @@ void testApp::setup()
 		ofLog(OF_LOG_ERROR, "camera didDisable FAIL omx_err(0x%08x)\n", didDisable);
 	}
 	
-	OMX_PORT_PARAM_TYPE port_param;
-	OMX_INIT_STRUCTURE(port_param);
+	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
+	OMX_INIT_STRUCTURE(cameraCallback);
+	cameraCallback.nPortIndex=OMX_ALL;
+	cameraCallback.nIndex=OMX_IndexParamCameraDeviceNumber;
+	cameraCallback.bEnable = OMX_TRUE;
 	
-	error = OMX_GetParameter(camera, OMX_IndexParamVideoInit, &port_param);
+	error = OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
+	
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamOtherInit PASS";
-		
-		ofLogVerbose() << "port_param.nStartPortNumber: " << port_param.nStartPortNumber;
-		ofLogVerbose() << "port_param.nPorts: " << port_param.nPorts;
-		
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigRequestCallback PASS";
 	}else
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamOtherInit FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigRequestCallback FAIL omx_err(0x%08x)\n", error);
 	}
+
 	
-	/*OMX_PARAM_U32TYPE cameraDeviceNumber;
-	OMX_INIT_STRUCTURE(cameraDeviceNumber);
-	cameraDeviceNumber.nPortIndex = port_param.nStartPortNumber;
-	cameraDeviceNumber.nU32 = 0;
-	error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &cameraDeviceNumber);
-	
+	OMX_PARAM_U32TYPE device;
+	OMX_INIT_STRUCTURE(device);
+	device.nPortIndex = OMX_ALL;
+	device.nU32 = 0;
+	error =  OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
 	if(error == OMX_ErrorNone) 
 	{
 		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber PASS";
-		//ofLogVerbose() << "cameraDeviceNumber: " << cameraDeviceNumber.nU32;
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber FAIL omx_err(0x%08x)\n", error);
-	}*/
-	OMX_CONFIG_CAMERASENSORMODETYPE cameraSensorModeType;
-	OMX_INIT_STRUCTURE(cameraSensorModeType);
-	cameraSensorModeType.nPortIndex = port_param.nStartPortNumber;
-	error = OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &cameraSensorModeType);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexConfigCameraSensorModes PASS";
-
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexConfigCameraSensorModes FAIL omx_err(0x%08x)\n", error);
 	}
+	
+						  
+	//Set the resolution
+	OMX_PARAM_PORTDEFINITIONTYPE portdef;
+	OMX_INIT_STRUCTURE(portdef);
+	portdef.nPortIndex = 71;
+	
+	error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	portdef.format.image.nFrameWidth = 640;
+	portdef.format.image.nFrameHeight = 360;
+	portdef.format.image.nStride = 640;
+	error = OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamPortDefinition PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	
+	//Set the framerate 
+	OMX_CONFIG_FRAMERATETYPE framerate;
+	OMX_INIT_STRUCTURE(framerate);
+	framerate.nPortIndex = 71;
+	framerate.xEncodeFramerate = 25 << 16; //Q16 format - 25fps
+	error = OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerate);
+	
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigVideoFramerate PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigVideoFramerate FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	
+	//Set the sharpness 
+	OMX_CONFIG_SHARPNESSTYPE sharpness;
+	OMX_INIT_STRUCTURE(sharpness);
+	sharpness.nPortIndex = OMX_ALL;
+	sharpness.nSharpness = -50; //-100 to 100 
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpness);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonSharpness PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonSharpness FAIL omx_err(0x%08x)\n", error);
+	}
+	//Set the contrast 
+	OMX_CONFIG_CONTRASTTYPE contrast;
+	OMX_INIT_STRUCTURE(contrast);
+	contrast.nPortIndex = OMX_ALL;
+	contrast.nContrast = -10; //-100 to 100 
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrast);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonContrast PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonContrast FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//Set the brightness
+	OMX_CONFIG_BRIGHTNESSTYPE brightness;
+	OMX_INIT_STRUCTURE(brightness);
+	brightness.nPortIndex = OMX_ALL;
+	brightness.nBrightness = 50; //0 to 100 
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightness);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonBrightness PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonBrightness FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//Set the saturation 
+	OMX_CONFIG_SATURATIONTYPE saturation;
+	OMX_INIT_STRUCTURE(saturation);
+	saturation.nPortIndex = OMX_ALL;
+	saturation.nSaturation = 0; //-100 to 100 
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturation);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonSaturation PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonSaturation FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	
+	//Video stabilisation
+	OMX_CONFIG_FRAMESTABTYPE framestab;
+	OMX_INIT_STRUCTURE(framestab);
+	framestab.nPortIndex = OMX_ALL;
+	framestab.bStab = OMX_FALSE;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestab);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonFrameStabilisation PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonFrameStabilisation FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//Set EV compensation, ISO and metering mode
+	OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+	OMX_INIT_STRUCTURE(exposurevalue);
+	exposurevalue.nPortIndex = OMX_ALL;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL omx_err(0x%08x)\n", error);
+	}	 
+		 
+	ofLog(OF_LOG_VERBOSE, "nSensitivity=%d\n", exposurevalue.nSensitivity);
+	
+	exposurevalue.xEVCompensation = 0;  //Fixed point value stored as Q16 
+	exposurevalue.nSensitivity = 100;	//< e.g. nSensitivity = 100 implies "ISO 100" 
+	exposurevalue.bAutoSensitivity = OMX_FALSE;
+	exposurevalue.eMetering = OMX_MeteringModeAverage; 
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+	 if(error == OMX_ErrorNone) 
+	 {
+		 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
+	 }else
+	 {
+		 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL omx_err(0x%08x)\n", error);
+	 }
+		 
+		 
+	//Set exposure mode
+	OMX_CONFIG_EXPOSURECONTROLTYPE exposure;
+	OMX_INIT_STRUCTURE(exposure);
+	exposure.nPortIndex = OMX_ALL;
+	exposure.eExposureControl = OMX_ExposureControlAuto;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposure);
+	if(error == OMX_ErrorNone) 
+	{
+	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
+	}else
+	{
+	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL omx_err(0x%08x)\n", error);
+	}
+		 
+	//Set AWB mode 
+	OMX_CONFIG_WHITEBALCONTROLTYPE awb;
+	OMX_INIT_STRUCTURE(awb);
+	awb.nPortIndex = OMX_ALL;
+	awb.eWhiteBalControl = OMX_WhiteBalControlAuto;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &awb);
 
-	
-	/*OMX_PARAM_CAMERAFLASHTYPE cameraFlashType;
-	OMX_INIT_STRUCTURE(cameraFlashType);
-	cameraFlashType.eFlashType = OMX_CameraFlashDefault;
-	cameraFlashType.nPortIndex = 73;
-	error = OMX_SetParameter(camera, OMX_IndexParamCameraFlashType, &cameraFlashType);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamCameraFlashType PASS";
+	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance PASS";
 	}else
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamCameraFlashType FAIL omx_err(0x%08x)\n", error);
-	}*/
+	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance FAIL omx_err(0x%08x)\n", error);
+	}
 	
-	
-	
-	/*OMX_CONFIG_CAMERAINFOTYPE cameraInfoType;
-	OMX_INIT_STRUCTURE(cameraInfoType);
-	
-	error = OMX_GetParameter(camera, OMX_IndexConfigCameraInfo, &cameraInfoType);
-	
+	//Set image effect 
+	OMX_CONFIG_IMAGEFILTERTYPE imagefilter;
+	OMX_INIT_STRUCTURE(imagefilter);
+	imagefilter.nPortIndex = OMX_ALL;
+	imagefilter.eImageFilter = OMX_ImageFilterNone;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilter);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexConfigCameraInfo PASS";
+	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
 	}else
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexConfigCameraInfo FAIL omx_err(0x%08x)\n", error);
-	}*/
+	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
+	}
 	
-	
-	/*OMX_PORT_PARAM_TYPE port_param;
-	OMX_INIT_STRUCTURE(port_param);
-	
-	error = OMX_GetParameter(camera, OMX_IndexParamOtherInit, &port_param);
-	
+	//Set colour effect 
+	OMX_CONFIG_COLORENHANCEMENTTYPE colour;
+	OMX_INIT_STRUCTURE(colour);
+	colour.nPortIndex = OMX_ALL;
+	colour.bColorEnhancement = OMX_FALSE;
+	colour.nCustomizedU = 128;
+	colour.nCustomizedV = 128;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colour);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamOtherInit PASS";
-		
-		ofLogVerbose() << "port_param.nStartPortNumber: " << port_param.nStartPortNumber;
-		ofLogVerbose() << "port_param.nPorts: " << port_param.nPorts;
-		OMX_ERRORTYPE didDisable = DisableAllPorts(&camera);
-		if(didDisable == OMX_ErrorNone) 
-		{
-			ofLogVerbose() << "camera didDisable PASS";
-		}else 
-		{
-			ofLog(OF_LOG_ERROR, "camera didDisable FAIL omx_err(0x%08x)\n", didDisable);
-		}
+	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement PASS";
+	}else
+	{
+	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//Turn off the LED - doesn't work! 
+	OMX_CONFIG_PRIVACYINDICATORTYPE privacy;
+	OMX_INIT_STRUCTURE(privacy);
+	privacy.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOff;
+	error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
+	if(error == OMX_ErrorNone) 
+	{
+	ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator PASS";
+	}else
+	{
+	ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator FAIL omx_err(0x%08x)\n", error);
+	}	 
 
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamOtherInit FAIL omx_err(0x%08x)\n", error);
-	}*/
-	
-	
-	
-	
 	
 }
 OMX_ERRORTYPE testApp::DisableAllPorts(OMX_HANDLETYPE* m_handle)
@@ -312,13 +470,8 @@ OMX_ERRORTYPE testApp::DisableAllPorts(OMX_HANDLETYPE* m_handle)
 					ofLog(OF_LOG_VERBOSE, "\nCOMXCoreComponent::DisableAllPorts - Error disable port %d on component %s omx_err(0x%08x)", 
 						  (int)(ports.nStartPortNumber) + j, "m_componentName", (int)omx_err);
 				}
-				/*omx_err = WaitForCommand(OMX_CommandPortDisable, ports.nStartPortNumber+j);
-				if(omx_err != OMX_ErrorNone && omx_err != OMX_ErrorSameState)
-				{
-					UnLock();
-					return omx_err;
-				}*/
 			}
+	
 		}
 	}
 	

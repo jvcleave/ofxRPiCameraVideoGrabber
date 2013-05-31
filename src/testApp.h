@@ -27,9 +27,7 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);		
 	
-	OMX_HANDLETYPE clock;
 	OMX_HANDLETYPE camera;
-	OMX_CALLBACKTYPE clockCallbacks;
 	OMX_CALLBACKTYPE cameraCallbacks;
 
 	
