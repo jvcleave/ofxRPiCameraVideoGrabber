@@ -118,7 +118,29 @@ OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX
 		}
 		case OMX_EventParamOrConfigChanged:
 		{
+			//OMX_HANDLETYPE *ctx = static_cast<OMX_HANDLETYPE*>(pAppData);
 			ofLogVerbose() << "OMX_EventParamOrConfigChanged";
+			OMX_ERRORTYPE error = OMX_SendCommand(hComponent, OMX_CommandStateSet, OMX_StateIdle, NULL);
+			if (error == OMX_ErrorNone) 
+			{
+				ofLogVerbose() << "camera OMX_SendCommand PASS";
+			}else 
+			{
+				ofLog(OF_LOG_ERROR, "camera OMX_SendCommand FAIL omx_err(0x%08x)\n", error);
+			}
+			OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+			OMX_INIT_STRUCTURE(cameraport);
+			cameraport.nPortIndex = 71;
+			cameraport.bEnabled = OMX_TRUE;
+			error =OMX_SetParameter(hComponent, OMX_IndexConfigPortCapturing, &cameraport);	
+			if (error == OMX_ErrorNone) 
+			{
+				ofLogVerbose() << "camera OMX_SetParameter PASS";
+			}else 
+			{
+				ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
+			}
+			
 			break;
 		}
 		case OMX_EventMax:
