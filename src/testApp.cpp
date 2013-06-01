@@ -10,428 +10,14 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
 
-void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
-{
-	keyPressed((int)e.character);
-}
 
-void testApp::generateEGLImage()
-{
-	eglBuffer = NULL;
-	
-	//ofDisableArbTex();
-	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-	
-	
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	display = appEGLWindow->getEglDisplay();
-	context = appEGLWindow->getEglContext();
-	
-	
-	tex.allocate(videoWidth, videoHeight, GL_RGBA);
-	tex.getTextureData().bFlipTexture = true;
-	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = tex.getTextureData().textureID;
-	
-	//TODO - should be a way to use ofPixels for the getPixels() functions?
-	glEnable(GL_TEXTURE_2D);
-	
-	// setup first texture
-	int dataSize = videoWidth * videoHeight * 4;
-	
-	GLubyte* pixelData = new GLubyte [dataSize];
-	
-	
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-	
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-	
-	delete[] pixelData;
-	
-	
-	// Create EGL Image
-	eglImage = eglCreateImageKHR(
-								 display,
-								 context,
-								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)textureID,
-								 0);
-    glDisable(GL_TEXTURE_2D);
-	if (eglImage == EGL_NO_IMAGE_KHR)
-	{
-		ofLogError()	<< "Create EGLImage FAIL";
-		return;
-	}
-	else
-	{
-		ofLogVerbose()	<< "Create EGLImage PASS";
-	}
-}
-void testApp::listRoles(char *name) {
-    OMX_U32 numRoles;
-	vector<OMX_U8*> roles;
-    //get the number of roles by passing in a NULL roles param 
-    OMX_ERRORTYPE err = OMX_GetRolesOfComponent(name, &numRoles, NULL);
-    if (err != OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "Getting roles failed";
-		return;
-    }
-	ofLogVerbose() << "numRoles: " << numRoles;
-	
-    //now get the roles 
-	
-    for (int i = 0; i < numRoles; i++) 
-	{
-		unsigned char* role = new unsigned char[OMX_MAX_STRINGNAME_SIZE];
-		roles.push_back(role);
-    }
-    err = OMX_GetRolesOfComponent(name, &numRoles, &roles[0]);
-    if (err != OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "OMX_GetRolesOfComponent FAIL";
-		return;
-    }
-    for (int i = 0; i < roles.size(); i++) 
-	{
-		ofLogVerbose() << "role: " << roles[i];
-    }
-	
-}
-OMX_ERRORTYPE testApp::EventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
-									  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//ofLogVerbose() << "EventHandlerCallback";
-	
-	ofLog(OF_LOG_VERBOSE, 
-		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-		  __func__, eEvent, nData1, nData2, pEventData);
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
-											OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//ofLogVerbose() << "cameraEventHandlerCallback";
-	ofLog(OF_LOG_VERBOSE, 
-		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-		  __func__, eEvent, nData1, nData2, pEventData);
-	switch (eEvent) 
-	{
-		case OMX_EventCmdComplete:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventCmdComplete";
-			break;
-		}
-		case OMX_EventError:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventError";
-			break;
-		}
-		case OMX_EventMark:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventMark";
-			break;
-		}
-		case OMX_EventPortSettingsChanged:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
-			break;
-		}
-		case OMX_EventBufferFlag:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
-			break;
-		}
-		case OMX_EventResourcesAcquired:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
-			break;
-		}
-		case OMX_EventComponentResumed:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
-			break;
-		}
-		case OMX_EventDynamicResourcesAvailable:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
-			break;
-		}
-		case OMX_EventPortFormatDetected:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
-			break;
-		}
-		case OMX_EventKhronosExtensions:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
-			break;
-		}
-		case OMX_EventVendorStartUnused:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
-			break;
-		}
-		case OMX_EventParamOrConfigChanged:
-		{
-			
-			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";
-			testApp *app = static_cast<testApp*>(pAppData);
-			app->onCameraEventParamOrConfigChanged();
-			
-			
-			break;
-		}
-		case OMX_EventMax:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventMax";
-			break;
-		}		
-		default:
-		{
-			ofLogVerbose() << __func__ <<  "DEFAULT";
-			break;
-		}
-			
-	}
-	//ofLogVerbose() << "END --- cameraEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE testApp::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
-												  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//ofLogVerbose() << "renderEventHandlerCallback";
-	ofLog(OF_LOG_VERBOSE, 
-		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-		  __func__, eEvent, nData1, nData2, pEventData);
-	switch (eEvent) 
-	{
-		case OMX_EventCmdComplete:
-		{
-			ofLogVerbose() << __func__ << " OMX_EventCmdComplete";
-			break;
-		}
-		case OMX_EventError:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventError";
-			break;
-		}
-		case OMX_EventMark:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventMark";
-			break;
-		}
-		case OMX_EventPortSettingsChanged:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
-			break;
-		}
-		case OMX_EventBufferFlag:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
-			break;
-		}
-		case OMX_EventResourcesAcquired:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
-			break;
-		}
-		case OMX_EventComponentResumed:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
-			break;
-		}
-		case OMX_EventDynamicResourcesAvailable:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
-			break;
-		}
-		case OMX_EventPortFormatDetected:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
-			break;
-		}
-		case OMX_EventKhronosExtensions:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
-			break;
-		}
-		case OMX_EventVendorStartUnused:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
-			break;
-		}
-		case OMX_EventParamOrConfigChanged:
-		{
-			
-			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";			
-			break;
-		}
-		case OMX_EventMax:
-		{
-			ofLogVerbose() << __func__ <<  " OMX_EventMax";
-			break;
-		}		
-		default:
-		{
-			ofLogVerbose() << "DEFAULT";
-			break;
-		}
-			
-	}
-	//ofLogVerbose() << "END --- renderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE testApp::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
-                                           OMX_IN OMX_PTR pAppData,
-                                           OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose() << "renderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-OMX_ERRORTYPE testApp::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
-                                          OMX_IN OMX_PTR pAppData,
-                                          OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	//ofLogVerbose() << "renderFillBufferDone!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-	
-	testApp *app = static_cast<testApp*>(pAppData);
-	OMX_ERRORTYPE error = OMX_FillThisBuffer(app->render, app->eglBuffer);
-	/*if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
-	}*/
-	return OMX_ErrorNone;
-}
-
-void testApp::onCameraEventParamOrConfigChanged()
-{
-	ofLogVerbose() << "onCameraEventParamOrConfigChanged";
-	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
-	OMX_INIT_STRUCTURE(cameraport);
-	cameraport.nPortIndex = 71;
-	cameraport.bEnabled = OMX_TRUE;
-	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SetParameter PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
-	}
-	std::string componentName = "";
-	componentName = "OMX.broadcom.egl_render";
-	renderCallbacks.EventHandler    = &testApp::renderEventHandlerCallback;
-	renderCallbacks.EmptyBufferDone = &testApp::renderEmptyBufferDone;
-	renderCallbacks.FillBufferDone = &testApp::renderFillBufferDone;
-	error = OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
-	DisableAllPorts(&render);
-	
-	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_StateIdle PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
-	}
-	error = OMX_SetupTunnel(camera, 71, render, 220);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_SetupTunnel PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SetupTunnel FAIL omx_err(0x%08x)\n", error);
-	}
-	error = OMX_SendCommand(camera, OMX_CommandPortEnable, 71, NULL);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_CommandPortEnable PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, 221, NULL);
-	
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_CommandPortEnable PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
-	
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_SendCommand 220 OMX_CommandPortEnable PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand 220 OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	error = OMX_UseEGLImage(render, &eglBuffer, 221, this, eglImage);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_UseEGLImage-----> PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL omx_err(0x%08x)\n", error);
-	}
-	
-	//omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
-	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_StateExecuting PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
-	}
-	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_StateExecuting PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
-	}
-	error = OMX_FillThisBuffer(render, eglBuffer);
-	if(error == OMX_ErrorNone)
-	{
-		ofLogVerbose() << "render OMX_FillThisBuffer PASS";
-		isReady = true;
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL omx_err(0x%08x)", error);
-		//return false;
-	}
-}
 //--------------------------------------------------------------
 void testApp::setup()
 {
 	isReady = false;
 	doShader = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetVerticalSync(true); 
 	consoleListener.setup(this);
 	bcm_host_init();
 	videoWidth			= 1920;
@@ -453,7 +39,32 @@ void testApp::setup()
 			listRoles(name);
 		}
     }
-		
+	effects.push_back(OMX_ImageFilterNone);
+	effects.push_back(OMX_ImageFilterNoise);
+	effects.push_back(OMX_ImageFilterEmboss);
+	effects.push_back(OMX_ImageFilterNegative);
+	effects.push_back(OMX_ImageFilterSketch);
+	effects.push_back(OMX_ImageFilterOilPaint);
+	effects.push_back(OMX_ImageFilterHatch);
+	effects.push_back(OMX_ImageFilterGpen);
+	effects.push_back(OMX_ImageFilterAntialias); 
+	effects.push_back(OMX_ImageFilterDeRing);       
+	effects.push_back(OMX_ImageFilterSolarize);
+	effects.push_back(OMX_ImageFilterWatercolor);
+	effects.push_back(OMX_ImageFilterPastel);
+	effects.push_back(OMX_ImageFilterSharpen);
+	effects.push_back(OMX_ImageFilterFilm);
+	effects.push_back(OMX_ImageFilterBlur);
+	effects.push_back(OMX_ImageFilterSaturation);
+	effects.push_back(OMX_ImageFilterDeInterlaceLineDouble);
+	effects.push_back(OMX_ImageFilterDeInterlaceAdvanced);
+	effects.push_back(OMX_ImageFilterColourSwap);
+	effects.push_back(OMX_ImageFilterWashedOut);
+	effects.push_back(OMX_ImageFilterColourPoint);
+	effects.push_back(OMX_ImageFilterPosterise);
+	effects.push_back(OMX_ImageFilterColourBalance);
+	effects.push_back(OMX_ImageFilterCartoon);
+	
 	
 	
 	
@@ -541,7 +152,7 @@ void testApp::setup()
 	OMX_CONFIG_FRAMERATETYPE framerate;
 	OMX_INIT_STRUCTURE(framerate);
 	framerate.nPortIndex = 71;
-	framerate.xEncodeFramerate = 25 << 16; //Q16 format - 25fps
+	framerate.xEncodeFramerate = 30 << 16; //Q16 format - 25fps
 	error = OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerate);
 	
 	if(error == OMX_ErrorNone) 
@@ -821,16 +432,465 @@ void testApp::exit()
 		ofLogVerbose() << "OMX_Deinit PASS";
 	}
 	bcm_host_deinit();
-	
+	if (eglImage != NULL)  
+	{
+		eglDestroyImageKHR(display, eglImage);
+	}
 	
 }
 //--------------------------------------------------------------
-void testApp::keyPressed  (int key){
+void testApp::keyPressed  (int key)
+{
 
-	if (key == 'e') 
+	if (key == 's') 
 	{
 		doShader = !doShader;
+		//tex.getTextureData().bFlipTexture = !tex.getTextureData().bFlipTexture;
+		//tex.relo
+	}
+	if (key == 'e')
+	{
+		ofLogVerbose() << "OMX_ImageFilterHatch start";
+		OMX_CONFIG_IMAGEFILTERTYPE imagefilter;
+		OMX_INIT_STRUCTURE(imagefilter);
+		imagefilter.nPortIndex = OMX_ALL;
+		imagefilter.eImageFilter = effects[effectsCounter];
+		OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilter);
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
+		}else
+		{
+			ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
+		}
 		
+		if (effectsCounter+1<effects.size())
+		{
+			effectsCounter++;
+		}else 
+		{
+			effectsCounter=0;
+		}
+		ofLogVerbose() << "effectsCounter: " << effectsCounter;
+	}
+
+
+}
+
+void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
+{
+	keyPressed((int)e.character);
+}
+
+void testApp::generateEGLImage()
+{
+	eglBuffer = NULL;
+	
+	//ofDisableArbTex();
+	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+	
+	
+	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+	display = appEGLWindow->getEglDisplay();
+	context = appEGLWindow->getEglContext();
+	
+	
+	tex.allocate(videoWidth, videoHeight, GL_RGBA);
+	tex.getTextureData().bFlipTexture = false;
+	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
+	textureID = tex.getTextureData().textureID;
+	
+	//TODO - should be a way to use ofPixels for the getPixels() functions?
+	glEnable(GL_TEXTURE_2D);
+	
+	// setup first texture
+	int dataSize = videoWidth * videoHeight * 4;
+	
+	GLubyte* pixelData = new GLubyte [dataSize];
+	
+	
+    memset(pixelData, 0xff, dataSize);  // white texture, opaque
+	
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+	
+	delete[] pixelData;
+	
+	
+	// Create EGL Image
+	eglImage = eglCreateImageKHR(
+								 display,
+								 context,
+								 EGL_GL_TEXTURE_2D_KHR,
+								 (EGLClientBuffer)textureID,
+								 0);
+    glDisable(GL_TEXTURE_2D);
+	if (eglImage == EGL_NO_IMAGE_KHR)
+	{
+		ofLogError()	<< "Create EGLImage FAIL";
+		return;
+	}
+	else
+	{
+		ofLogVerbose()	<< "Create EGLImage PASS";
+	}
+}
+void testApp::listRoles(char *name) {
+    OMX_U32 numRoles;
+	vector<OMX_U8*> roles;
+    //get the number of roles by passing in a NULL roles param 
+    OMX_ERRORTYPE err = OMX_GetRolesOfComponent(name, &numRoles, NULL);
+    if (err != OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "Getting roles failed";
+		return;
+    }
+	ofLogVerbose() << "numRoles: " << numRoles;
+	
+    //now get the roles 
+	
+    for (int i = 0; i < numRoles; i++) 
+	{
+		unsigned char* role = new unsigned char[OMX_MAX_STRINGNAME_SIZE];
+		roles.push_back(role);
+    }
+    err = OMX_GetRolesOfComponent(name, &numRoles, &roles[0]);
+    if (err != OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "OMX_GetRolesOfComponent FAIL";
+		return;
+    }
+    for (int i = 0; i < roles.size(); i++) 
+	{
+		ofLogVerbose() << "role: " << roles[i];
+    }
+	
+}
+OMX_ERRORTYPE testApp::EventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
+											OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	//ofLogVerbose() << "EventHandlerCallback";
+	
+	ofLog(OF_LOG_VERBOSE, 
+		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
+		  __func__, eEvent, nData1, nData2, pEventData);
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE testApp::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
+												  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	//ofLogVerbose() << "cameraEventHandlerCallback";
+	ofLog(OF_LOG_VERBOSE, 
+		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
+		  __func__, eEvent, nData1, nData2, pEventData);
+	switch (eEvent) 
+	{
+		case OMX_EventCmdComplete:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventCmdComplete";
+			break;
+		}
+		case OMX_EventError:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventError";
+			break;
+		}
+		case OMX_EventMark:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMark";
+			break;
+		}
+		case OMX_EventPortSettingsChanged:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
+			break;
+		}
+		case OMX_EventBufferFlag:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
+			break;
+		}
+		case OMX_EventResourcesAcquired:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
+			break;
+		}
+		case OMX_EventComponentResumed:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
+			break;
+		}
+		case OMX_EventDynamicResourcesAvailable:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
+			break;
+		}
+		case OMX_EventPortFormatDetected:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
+			break;
+		}
+		case OMX_EventKhronosExtensions:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
+			break;
+		}
+		case OMX_EventVendorStartUnused:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
+			break;
+		}
+		case OMX_EventParamOrConfigChanged:
+		{
+			
+			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";
+			testApp *app = static_cast<testApp*>(pAppData);
+			app->onCameraEventParamOrConfigChanged();
+			
+			
+			break;
+		}
+		case OMX_EventMax:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMax";
+			break;
+		}		
+		default:
+		{
+			ofLogVerbose() << __func__ <<  "DEFAULT";
+			break;
+		}
+			
+	}
+	//ofLogVerbose() << "END --- cameraEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE testApp::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,
+												  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	//ofLogVerbose() << "renderEventHandlerCallback";
+	ofLog(OF_LOG_VERBOSE, 
+		  "testApp::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
+		  __func__, eEvent, nData1, nData2, pEventData);
+	switch (eEvent) 
+	{
+		case OMX_EventCmdComplete:
+		{
+			ofLogVerbose() << __func__ << " OMX_EventCmdComplete";
+			break;
+		}
+		case OMX_EventError:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventError";
+			break;
+		}
+		case OMX_EventMark:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMark";
+			break;
+		}
+		case OMX_EventPortSettingsChanged:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortSettingsChanged";
+			break;
+		}
+		case OMX_EventBufferFlag:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventBufferFlag";
+			break;
+		}
+		case OMX_EventResourcesAcquired:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventResourcesAcquired";
+			break;
+		}
+		case OMX_EventComponentResumed:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventComponentResumed";
+			break;
+		}
+		case OMX_EventDynamicResourcesAvailable:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventDynamicResourcesAvailable";
+			break;
+		}
+		case OMX_EventPortFormatDetected:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventPortFormatDetected";
+			break;
+		}
+		case OMX_EventKhronosExtensions:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventKhronosExtensions";
+			break;
+		}
+		case OMX_EventVendorStartUnused:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventVendorStartUnused";
+			break;
+		}
+		case OMX_EventParamOrConfigChanged:
+		{
+			
+			ofLogVerbose() << __func__ <<  " OMX_EventParamOrConfigChanged";			
+			break;
+		}
+		case OMX_EventMax:
+		{
+			ofLogVerbose() << __func__ <<  " OMX_EventMax";
+			break;
+		}		
+		default:
+		{
+			ofLogVerbose() << "DEFAULT";
+			break;
+		}
+			
+	}
+	//ofLogVerbose() << "END --- renderEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE testApp::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
+											 OMX_IN OMX_PTR pAppData,
+											 OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "renderEmptyBufferDone";
+	return OMX_ErrorNone;
+}
+OMX_ERRORTYPE testApp::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
+											OMX_IN OMX_PTR pAppData,
+											OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	//ofLogVerbose() << "renderFillBufferDone!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+	
+	testApp *app = static_cast<testApp*>(pAppData);
+	OMX_ERRORTYPE error = OMX_FillThisBuffer(app->render, app->eglBuffer);
+	/*if (error == OMX_ErrorNone) 
+	 {
+	 ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
+	 }else 
+	 {
+	 ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
+	 }*/
+	return OMX_ErrorNone;
+}
+
+void testApp::onCameraEventParamOrConfigChanged()
+{
+	ofLogVerbose() << "onCameraEventParamOrConfigChanged";
+	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+	OMX_INIT_STRUCTURE(cameraport);
+	cameraport.nPortIndex = 71;
+	cameraport.bEnabled = OMX_TRUE;
+	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SetParameter PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
+	}
+	std::string componentName = "";
+	componentName = "OMX.broadcom.egl_render";
+	renderCallbacks.EventHandler    = &testApp::renderEventHandlerCallback;
+	renderCallbacks.EmptyBufferDone = &testApp::renderEmptyBufferDone;
+	renderCallbacks.FillBufferDone = &testApp::renderFillBufferDone;
+	error = OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
+	DisableAllPorts(&render);
+	
+	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_StateIdle PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SetupTunnel(camera, 71, render, 220);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SetupTunnel PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SetupTunnel FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SendCommand(camera, OMX_CommandPortEnable, 71, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, 221, NULL);
+	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
+	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand 220 OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand 220 OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	error = OMX_UseEGLImage(render, &eglBuffer, 221, this, eglImage);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_UseEGLImage-----> PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
+	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_StateExecuting PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_StateExecuting PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_FillThisBuffer(render, eglBuffer);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose() << "render OMX_FillThisBuffer PASS";
+		isReady = true;
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL omx_err(0x%08x)", error);
+		//return false;
 	}
 }
 

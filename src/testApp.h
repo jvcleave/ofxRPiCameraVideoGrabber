@@ -64,5 +64,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	bool doShader;
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
+	vector<OMX_IMAGEFILTERTYPE> effects;
+	int effectsCounter;
 };
 
