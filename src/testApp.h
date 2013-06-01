@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
+#include "ConsoleListener.h"
 
 #include <IL/OMX_Core.h>
 #include <IL/OMX_Component.h>
@@ -10,7 +11,7 @@
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
 
-class testApp : public ofBaseApp{
+class testApp : public ofBaseApp, public SSHKeyListener{
 
 	public:
 
@@ -57,5 +58,11 @@ class testApp : public ofBaseApp{
 	EGLContext context;
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 	bool isReady;
+	
+	ofShader shader;
+	
+	bool doShader;
+	void onCharacterReceived(SSHKeyListenerEventData& e);
+	ConsoleListener consoleListener;
 };
 

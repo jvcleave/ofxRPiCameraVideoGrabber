@@ -9,11 +9,19 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
+
+void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
+{
+	keyPressed((int)e.character);
+}
+
 void testApp::generateEGLImage()
 {
 	eglBuffer = NULL;
 	
-	ofDisableArbTex();
+	//ofDisableArbTex();
+	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+	
 	
 	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
 	display = appEGLWindow->getEglDisplay();
@@ -21,7 +29,7 @@ void testApp::generateEGLImage()
 	
 	
 	tex.allocate(videoWidth, videoHeight, GL_RGBA);
-	//tex.getTextureData().bFlipTexture = true;
+	tex.getTextureData().bFlipTexture = true;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
@@ -422,10 +430,12 @@ void testApp::onCameraEventParamOrConfigChanged()
 void testApp::setup()
 {
 	isReady = false;
+	doShader = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
+	consoleListener.setup(this);
 	bcm_host_init();
-	videoWidth			= 1280;
-	videoHeight			= 720;
+	videoWidth			= 1920;
+	videoHeight			= 1080;
 	generateEGLImage();
 	
 	char name[OMX_MAX_STRINGNAME_SIZE];
@@ -770,18 +780,34 @@ OMX_ERRORTYPE testApp::DisableAllPorts(OMX_HANDLETYPE* m_handle)
 //--------------------------------------------------------------
 void testApp::update()
 {
-	
+	if (!isReady) 
+	{
+		return;
+	}
 }
 
 
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	if (isReady) 
+	if (!isReady) 
+	{
+		return;
+	}
+	if (doShader) 
+	{
+		shader.begin();
+		shader.setUniformTexture("tex0", tex, textureID);
+		shader.setUniform1f("time", ofGetElapsedTimef());
+		shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+		ofRect(0, 0, ofGetWidth(), ofGetHeight());
+		shader.end();
+	}else 
 	{
 		tex.draw(0, 0);
-
 	}
+
+	
 	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 100, 100, ofColor::black, ofColor::yellow);
 }
 
@@ -801,7 +827,11 @@ void testApp::exit()
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key){
 
-	
+	if (key == 'e') 
+	{
+		doShader = !doShader;
+		
+	}
 }
 
 //--------------------------------------------------------------
