@@ -565,7 +565,7 @@ OMX_ERRORTYPE ofxOMXVideoGrabber::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hCo
 {	
 	ofxOMXVideoGrabber *grabber = static_cast<ofxOMXVideoGrabber*>(pAppData);
 	OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
-	grabber->applyEffect();
+	//grabber->applyEffect();
 	return error;
 }
 
