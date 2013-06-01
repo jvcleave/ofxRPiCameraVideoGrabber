@@ -9,7 +9,58 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
-
+void testApp::generateEGLImage()
+{
+	eglBuffer = NULL;
+	
+	ofDisableArbTex();
+	
+	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+	display = appEGLWindow->getEglDisplay();
+	context = appEGLWindow->getEglContext();
+	
+	
+	tex.allocate(videoWidth, videoHeight, GL_RGBA);
+	tex.getTextureData().bFlipTexture = true;
+	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
+	textureID = tex.getTextureData().textureID;
+	
+	//TODO - should be a way to use ofPixels for the getPixels() functions?
+	glEnable(GL_TEXTURE_2D);
+	
+	// setup first texture
+	int dataSize = videoWidth * videoHeight * 4;
+	
+	GLubyte* pixelData = new GLubyte [dataSize];
+	
+	
+    memset(pixelData, 0xff, dataSize);  // white texture, opaque
+	
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoWidth, videoHeight, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+	
+	delete[] pixelData;
+	
+	
+	// Create EGL Image
+	eglImage = eglCreateImageKHR(
+								 display,
+								 context,
+								 EGL_GL_TEXTURE_2D_KHR,
+								 (EGLClientBuffer)textureID,
+								 0);
+    glDisable(GL_TEXTURE_2D);
+	if (eglImage == EGL_NO_IMAGE_KHR)
+	{
+		ofLogError()	<< "Create EGLImage FAIL";
+		return;
+	}
+	else
+	{
+		ofLogVerbose()	<< "Create EGLImage PASS";
+	}
+}
 void testApp::listRoles(char *name) {
     OMX_U32 numRoles;
 	vector<OMX_U8*> roles;
@@ -301,7 +352,7 @@ void testApp::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, 221, NULL);
 	
 	if (error == OMX_ErrorNone) 
 	{
@@ -311,6 +362,17 @@ void testApp::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
+	
+	error = OMX_UseEGLImage(render, &eglBuffer, 221, this, eglImage);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_UseEGLImage-----> PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	//omx_err = m_omx_render.UseEGLImage(&eglBuffer, m_omx_render.GetOutputPort(), NULL, eglImage);
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 	if (error == OMX_ErrorNone) 
 	{
@@ -327,12 +389,27 @@ void testApp::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
 	}
+	error = OMX_FillThisBuffer(render, eglBuffer);
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose() << "render OMX_FillThisBuffer PASS";
+		isReady = true;
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL omx_err(0x%08x)", error);
+		//return false;
+	}
 }
 //--------------------------------------------------------------
 void testApp::setup()
 {
+	isReady = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	bcm_host_init();
+	videoWidth			= 640;
+	videoHeight			= 360;
+	generateEGLImage();
+	
 	char name[OMX_MAX_STRINGNAME_SIZE];
 	OMX_ERRORTYPE error = OMX_Init();
 	if (error == OMX_ErrorNone) 
@@ -419,9 +496,9 @@ void testApp::setup()
 		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	portdef.format.image.nFrameWidth = 640;
-	portdef.format.image.nFrameHeight = 360;
-	portdef.format.image.nStride = 640;
+	portdef.format.image.nFrameWidth = videoWidth;
+	portdef.format.image.nFrameHeight = videoHeight;
+	portdef.format.image.nStride = videoWidth;
 	error = OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
 	if(error == OMX_ErrorNone) 
 	{
@@ -681,7 +758,13 @@ void testApp::update()
 
 //--------------------------------------------------------------
 void testApp::draw(){
+
+	if (isReady) 
+	{
+		tex.draw(0, 0);
+
 	}
+}
 
 
 
