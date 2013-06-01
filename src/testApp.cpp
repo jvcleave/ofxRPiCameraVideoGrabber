@@ -21,7 +21,7 @@ void testApp::generateEGLImage()
 	
 	
 	tex.allocate(videoWidth, videoHeight, GL_RGBA);
-	tex.getTextureData().bFlipTexture = true;
+	//tex.getTextureData().bFlipTexture = true;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
@@ -290,8 +290,17 @@ OMX_ERRORTYPE testApp::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
                                           OMX_IN OMX_PTR pAppData,
                                           OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {
-	ofLogVerbose() << "renderFillBufferDone";
-
+	//ofLogVerbose() << "renderFillBufferDone!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+	
+	testApp *app = static_cast<testApp*>(pAppData);
+	OMX_ERRORTYPE error = OMX_FillThisBuffer(app->render, app->eglBuffer);
+	/*if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
+	}*/
 	return OMX_ErrorNone;
 }
 
@@ -362,6 +371,15 @@ void testApp::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
+	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand 220 OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand 220 OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
 	
 	error = OMX_UseEGLImage(render, &eglBuffer, 221, this, eglImage);
 	if (error == OMX_ErrorNone) 
@@ -406,8 +424,8 @@ void testApp::setup()
 	isReady = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	bcm_host_init();
-	videoWidth			= 640;
-	videoHeight			= 360;
+	videoWidth			= 1280;
+	videoHeight			= 720;
 	generateEGLImage();
 	
 	char name[OMX_MAX_STRINGNAME_SIZE];
@@ -764,6 +782,7 @@ void testApp::draw(){
 		tex.draw(0, 0);
 
 	}
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 100, 100, ofColor::black, ofColor::yellow);
 }
 
 
