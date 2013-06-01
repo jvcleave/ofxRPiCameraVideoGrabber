@@ -250,10 +250,10 @@ void testApp::onCameraEventParamOrConfigChanged()
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SendCommand PASS";
+		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
 	}
 	
 	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
@@ -276,6 +276,57 @@ void testApp::onCameraEventParamOrConfigChanged()
 	error = OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
 	DisableAllPorts(&render);
 	
+	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_StateIdle PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SetupTunnel(camera, 71, render, 220);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SetupTunnel PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SetupTunnel FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SendCommand(camera, OMX_CommandPortEnable, 71, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
+	
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_CommandPortEnable PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+	}
+	
+	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "render OMX_SendCommand OMX_StateExecuting PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
+	}
+	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "camera OMX_SendCommand OMX_StateExecuting PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
+	}
 }
 //--------------------------------------------------------------
 void testApp::setup()
@@ -504,10 +555,10 @@ void testApp::setup()
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposure);
 	if(error == OMX_ErrorNone) 
 	{
-	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
 	}else
 	{
-	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL omx_err(0x%08x)\n", error);
 	}
 		 
 	//Set AWB mode 
@@ -519,10 +570,10 @@ void testApp::setup()
 
 	if(error == OMX_ErrorNone) 
 	{
-	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance PASS";
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance PASS";
 	}else
 	{
-	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance FAIL omx_err(0x%08x)\n", error);
 	}
 	
 	//Set image effect 
@@ -533,10 +584,10 @@ void testApp::setup()
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilter);
 	if(error == OMX_ErrorNone) 
 	{
-	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
 	}else
 	{
-	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
 	}
 	
 	//Set colour effect 
@@ -549,10 +600,10 @@ void testApp::setup()
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colour);
 	if(error == OMX_ErrorNone) 
 	{
-	 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement PASS";
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement PASS";
 	}else
 	{
-	 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement FAIL omx_err(0x%08x)\n", error);
 	}
 	
 	//Turn off the LED - doesn't work! 
@@ -562,10 +613,10 @@ void testApp::setup()
 	error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
 	if(error == OMX_ErrorNone) 
 	{
-	ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator PASS";
+		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator PASS";
 	}else
 	{
-	ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator FAIL omx_err(0x%08x)\n", error);
 	}	 
 
 	
