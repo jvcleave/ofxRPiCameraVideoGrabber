@@ -23,10 +23,10 @@ class ofxOMXVideoGrabber
 public:
 	ofxOMXVideoGrabber();
 	~ofxOMXVideoGrabber();
-	void setup(int videoWidth, int videoHeight);
+	void setup(int videoWidth, int videoHeight, int framerate);
 	void draw();
 	void close();
-	void applyEffect();
+	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 	
@@ -46,7 +46,7 @@ public:
 	
 	int videoWidth;
 	int videoHeight;
-	
+	int framerate;
 	
 	EGLImageKHR eglImage;
 	EGLDisplay display;
@@ -56,7 +56,6 @@ public:
 	
 	bool isReady;
 	
-	vector<OMX_IMAGEFILTERTYPE> effects;
-	int effectsCounter;
+	
 	bool isClosed;
 };

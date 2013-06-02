@@ -2,6 +2,7 @@
  *  ofxOMXVideoGrabber.cpp
  *
  *  Created by jason van cleave on 6/1/13.
+ *  Thanks to https://github.com/linuxstb/pidvbip for the example of configuring the camera via OMX
  *
  */
 
@@ -15,6 +16,9 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
+#define EGL_RENDER_INPUT_PORT	220
+#define EGL_RENDER_OUTPUT_PORT	221
+#define CAMERA_OUTPUT_PORT		71
 
 ofxOMXVideoGrabber::ofxOMXVideoGrabber()
 {
@@ -24,12 +28,12 @@ ofxOMXVideoGrabber::ofxOMXVideoGrabber()
 void ofxOMXVideoGrabber::close()
 {
 	isReady = false;
-	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	/*OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	
-	error = OMX_SendCommand(camera, OMX_CommandFlush, 71, NULL);
-	error = OMX_SendCommand(render, OMX_CommandFlush, 220, NULL);
-	error = OMX_SendCommand(render, OMX_CommandFlush, 221, NULL);
+	error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
+	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_OUTPUT_PORT, NULL);
 	
 	disableAllPortsForComponent(&render);
 	disableAllPortsForComponent(&camera);
@@ -40,11 +44,14 @@ void ofxOMXVideoGrabber::close()
 	{
 		ofLogVerbose() << "OMX_Deinit PASS";
 	}
+	error = OMX_Deinit(); 
+	*/
+	OMX_Deinit();
 	if (eglImage != NULL)  
 	{
 		eglDestroyImageKHR(display, eglImage);
 	}
-	error = OMX_Deinit();
+	
 	isClosed = true;
 }
 ofxOMXVideoGrabber::~ofxOMXVideoGrabber()
@@ -53,11 +60,12 @@ ofxOMXVideoGrabber::~ofxOMXVideoGrabber()
 }
 
 
-void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
+void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, int framerate=60)
 {
 	bcm_host_init();
 	this->videoWidth = videoWidth;
 	this->videoHeight = videoHeight;
+	this->framerate = framerate;
 	generateEGLImage();
 	
 	OMX_ERRORTYPE error = OMX_Init();
@@ -65,36 +73,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	{
 		ofLogVerbose() << "OMX_Init PASS";
 	}
-	effects.push_back(OMX_ImageFilterNone);
-	effects.push_back(OMX_ImageFilterNoise);
-	effects.push_back(OMX_ImageFilterEmboss);
-	effects.push_back(OMX_ImageFilterNegative);
-	effects.push_back(OMX_ImageFilterSketch);
-	effects.push_back(OMX_ImageFilterOilPaint);
-	effects.push_back(OMX_ImageFilterHatch);
-	effects.push_back(OMX_ImageFilterGpen);
-	effects.push_back(OMX_ImageFilterAntialias); 
-	effects.push_back(OMX_ImageFilterDeRing);       
-	effects.push_back(OMX_ImageFilterSolarize);
-	effects.push_back(OMX_ImageFilterWatercolor);
-	effects.push_back(OMX_ImageFilterPastel);
-	effects.push_back(OMX_ImageFilterSharpen);
-	effects.push_back(OMX_ImageFilterFilm);
-	effects.push_back(OMX_ImageFilterBlur);
-	effects.push_back(OMX_ImageFilterSaturation);
-	effects.push_back(OMX_ImageFilterDeInterlaceLineDouble);
-	effects.push_back(OMX_ImageFilterDeInterlaceAdvanced);
-	effects.push_back(OMX_ImageFilterColourSwap);
-	effects.push_back(OMX_ImageFilterWashedOut);
-	effects.push_back(OMX_ImageFilterColourPoint);
-	effects.push_back(OMX_ImageFilterPosterise);
-	effects.push_back(OMX_ImageFilterColourBalance);
-	effects.push_back(OMX_ImageFilterCartoon);
-	
-	
-	
-	
-	
+
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &ofxOMXVideoGrabber::cameraEventHandlerCallback;
 	
@@ -103,7 +82,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_GetHandle PASS";
+		ofLogVerbose() <<	"camera OMX_GetHandle PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL omx_err(0x%08x)\n", error);
@@ -112,7 +91,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	OMX_ERRORTYPE didDisable = disableAllPortsForComponent(&camera);
 	if(didDisable == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera didDisable PASS";
+		ofLogVerbose() <<	"camera didDisable PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "camera didDisable FAIL omx_err(0x%08x)\n", didDisable);
@@ -128,7 +107,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigRequestCallback PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigRequestCallback PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigRequestCallback FAIL omx_err(0x%08x)\n", error);
@@ -142,7 +121,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error =  OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber PASS";
+		ofLogVerbose() <<	"camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamCameraDeviceNumber FAIL omx_err(0x%08x)\n", error);
@@ -152,12 +131,12 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE portdef;
 	OMX_INIT_STRUCTURE(portdef);
-	portdef.nPortIndex = 71;
+	portdef.nPortIndex = CAMERA_OUTPUT_PORT;
 	
 	error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
+		ofLogVerbose() <<	"camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", error);
@@ -169,7 +148,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamPortDefinition PASS";
+		ofLogVerbose() <<	"camera OMX_SetParameter OMX_IndexParamPortDefinition PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamPortDefinition FAIL omx_err(0x%08x)\n", error);
@@ -177,15 +156,15 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	
 	
 	//Set the framerate 
-	OMX_CONFIG_FRAMERATETYPE framerate;
-	OMX_INIT_STRUCTURE(framerate);
-	framerate.nPortIndex = 71;
-	framerate.xEncodeFramerate = 30 << 16; //Q16 format - 25fps
-	error = OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerate);
+	OMX_CONFIG_FRAMERATETYPE framerateConfig;
+	OMX_INIT_STRUCTURE(framerateConfig);
+	framerateConfig.nPortIndex = CAMERA_OUTPUT_PORT;
+	framerateConfig.xEncodeFramerate = framerate << 16; //Q16 format - 25fps
+	error = OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
 	
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigVideoFramerate PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigVideoFramerate PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigVideoFramerate FAIL omx_err(0x%08x)\n", error);
@@ -200,7 +179,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpness);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonSharpness PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonSharpness PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonSharpness FAIL omx_err(0x%08x)\n", error);
@@ -213,7 +192,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrast);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonContrast PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonContrast PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonContrast FAIL omx_err(0x%08x)\n", error);
@@ -227,7 +206,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightness);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonBrightness PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonBrightness PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonBrightness FAIL omx_err(0x%08x)\n", error);
@@ -241,7 +220,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturation);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonSaturation PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonSaturation PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonSaturation FAIL omx_err(0x%08x)\n", error);
@@ -256,7 +235,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestab);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonFrameStabilisation PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonFrameStabilisation PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonFrameStabilisation FAIL omx_err(0x%08x)\n", error);
@@ -269,7 +248,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL omx_err(0x%08x)\n", error);
@@ -284,7 +263,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL omx_err(0x%08x)\n", error);
@@ -299,7 +278,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposure);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL omx_err(0x%08x)\n", error);
@@ -314,7 +293,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonWhiteBalance FAIL omx_err(0x%08x)\n", error);
@@ -328,23 +307,23 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilter);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	//Set colour effect 
-	OMX_CONFIG_COLORENHANCEMENTTYPE colour;
-	OMX_INIT_STRUCTURE(colour);
-	colour.nPortIndex = OMX_ALL;
-	colour.bColorEnhancement = OMX_FALSE;
-	colour.nCustomizedU = 128;
-	colour.nCustomizedV = 128;
-	error = OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colour);
+	//Set color effect 
+	OMX_CONFIG_COLORENHANCEMENTTYPE color;
+	OMX_INIT_STRUCTURE(color);
+	color.nPortIndex = OMX_ALL;
+	color.bColorEnhancement = OMX_FALSE;
+	color.nCustomizedU = 128;
+	color.nCustomizedV = 128;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &color);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonColorEnhancement FAIL omx_err(0x%08x)\n", error);
@@ -357,7 +336,7 @@ void ofxOMXVideoGrabber::setup(int videoWidth=1280, int videoHeight=720)
 	error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigPrivacyIndicator FAIL omx_err(0x%08x)\n", error);
@@ -419,30 +398,23 @@ OMX_ERRORTYPE ofxOMXVideoGrabber::disableAllPortsForComponent(OMX_HANDLETYPE* m_
 	return OMX_ErrorNone;
 }
 
-void ofxOMXVideoGrabber::applyEffect()
+void ofxOMXVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
 	ofLogVerbose() << "applyEffect start";
-	OMX_CONFIG_IMAGEFILTERTYPE imagefilter;
-	OMX_INIT_STRUCTURE(imagefilter);
-	imagefilter.nPortIndex = OMX_ALL;
-	imagefilter.eImageFilter = effects[effectsCounter];
-	OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilter);
+	OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+	OMX_INIT_STRUCTURE(imagefilterConfig);
+	imagefilterConfig.nPortIndex = OMX_ALL;
+	imagefilterConfig.eImageFilter = imageFilter;
+	OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
+		ofLogVerbose() <<	"camera OMX_SetConfig OMX_IndexConfigCommonImageFilter PASS";
 	}else
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonImageFilter FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	if ((unsigned int)effectsCounter+1<effects.size())
-	{
-		effectsCounter++;
-	}else 
-	{
-		effectsCounter=0;
-	}
-	ofLogVerbose() << "effectsCounter: " << effectsCounter;
+
 }
 
 void ofxOMXVideoGrabber::generateEGLImage()
@@ -575,7 +547,7 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_StateIdle PASS";
+		ofLogVerbose() <<	"camera OMX_SendCommand OMX_StateIdle PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
@@ -583,12 +555,12 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	
 	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
 	OMX_INIT_STRUCTURE(cameraport);
-	cameraport.nPortIndex = 71;
+	cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
 	cameraport.bEnabled = OMX_TRUE;
 	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SetParameter PASS";
+		ofLogVerbose() <<	"camera OMX_SetParameter PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter FAIL omx_err(0x%08x)\n", error);
@@ -605,52 +577,52 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_StateIdle PASS";
+		ofLogVerbose() <<	"render OMX_SendCommand OMX_StateIdle PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL omx_err(0x%08x)\n", error);
 	}
-	error = OMX_SetupTunnel(camera, 71, render, 220);
+	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_SetupTunnel PASS";
+		ofLogVerbose() <<	"render OMX_SetupTunnel PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SetupTunnel FAIL omx_err(0x%08x)\n", error);
 	}
-	error = OMX_SendCommand(camera, OMX_CommandPortEnable, 71, NULL);
+	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_CommandPortEnable PASS";
+		ofLogVerbose() <<	"camera OMX_SendCommand OMX_CommandPortEnable PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, 221, NULL);
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
 	
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_CommandPortEnable PASS";
+		ofLogVerbose() <<	"render OMX_SendCommand OMX_CommandPortEnable PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, 220, NULL);
+	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_INPUT_PORT, NULL);
 	
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_SendCommand 220 OMX_CommandPortEnable PASS";
+		ofLogVerbose() <<	"render OMX_SendCommand EGL_RENDER_INPUT_PORT OMX_CommandPortEnable PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand 220 OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand EGL_RENDER_INPUT_PORT OMX_CommandPortEnable FAIL omx_err(0x%08x)\n", error);
 	}
 	
-	error = OMX_UseEGLImage(render, &eglBuffer, 221, this, eglImage);
+	error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImage);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_UseEGLImage-----> PASS";
+		ofLogVerbose() <<	"render OMX_UseEGLImage-----> PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL omx_err(0x%08x)\n", error);
@@ -659,7 +631,7 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "render OMX_SendCommand OMX_StateExecuting PASS";
+		ofLogVerbose() <<	"render OMX_SendCommand OMX_StateExecuting PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
@@ -668,7 +640,7 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose() << "camera OMX_SendCommand OMX_StateExecuting PASS";
+		ofLogVerbose() <<	"camera OMX_SendCommand OMX_StateExecuting PASS";
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateExecuting FAIL omx_err(0x%08x)\n", error);
@@ -677,7 +649,7 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 	error = OMX_FillThisBuffer(render, eglBuffer);
 	if(error == OMX_ErrorNone)
 	{
-		ofLogVerbose() << "render OMX_FillThisBuffer PASS";
+		ofLogVerbose() <<	"render OMX_FillThisBuffer PASS";
 		isReady = true;
 	}else 
 	{
