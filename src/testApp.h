@@ -33,5 +33,6 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	ofxOMXVideoGrabber omxVideoGrabber;
 	vector<OMX_IMAGEFILTERTYPE> imageFilters;
 	int imageFiltersCounter;
+	
 };
 

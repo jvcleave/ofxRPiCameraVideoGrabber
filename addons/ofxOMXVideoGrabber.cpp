@@ -28,24 +28,79 @@ ofxOMXVideoGrabber::ofxOMXVideoGrabber()
 void ofxOMXVideoGrabber::close()
 {
 	isReady = false;
-	/*OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "camera OMX_StateIdle PASS";
+	}else 
+	{
+		ofLogVerbose() << __func__ << "camera OMX_StateIdle FAIL";
+
+	}
+
+	
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "render OMX_StateIdle PASS";
+	}else 
+	{
+		ofLogVerbose() << __func__ << "render OMX_StateIdle FAIL";
+		
+	}
 	
 	error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
-	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
-	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_OUTPUT_PORT, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "camera OMX_CommandFlush PASS";
+	}else 
+	{
+		ofLogVerbose() << __func__ << "camera OMX_CommandFlush FAIL";
+		
+	}
 	
+	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "render OMX_CommandFlush PASS";
+	}else 
+	{
+		ofLogVerbose() << __func__ << "render OMX_CommandFlush FAIL";
+		
+	}
+	
+	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_OUTPUT_PORT, NULL);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "render OMX_CommandFlush EGL_RENDER_OUTPUT_PORT PASS";
+	}else 
+	{
+		ofLogVerbose() << __func__ << "render OMX_CommandFlush EGL_RENDER_OUTPUT_PORT FAIL";
+		
+	}
 	disableAllPortsForComponent(&render);
 	disableAllPortsForComponent(&camera);
 	
-	OMX_FreeHandle(render);
-	OMX_FreeHandle(camera);
+	error = OMX_FreeHandle(render);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "render OMX_FreeHandle PASS";
+
+	}
+	
+	error = OMX_FreeHandle(camera);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << __func__ << "camera OMX_FreeHandle PASS";
+		
+	}
+	
 	if (error == OMX_ErrorNone) 
 	{
 		ofLogVerbose() << "OMX_Deinit PASS";
 	}
 	error = OMX_Deinit(); 
-	*/
+	
 	OMX_Deinit();
 	if (eglImage != NULL)  
 	{
@@ -56,7 +111,7 @@ void ofxOMXVideoGrabber::close()
 }
 ofxOMXVideoGrabber::~ofxOMXVideoGrabber()
 {
-	close();
+	//close();
 }
 
 

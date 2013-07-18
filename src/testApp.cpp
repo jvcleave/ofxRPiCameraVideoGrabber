@@ -72,7 +72,7 @@ void testApp::draw(){
 		shader.begin();
 		shader.setUniformTexture("tex0", omxVideoGrabber.tex, omxVideoGrabber.textureID);
 		shader.setUniform1f("time", ofGetElapsedTimef());
-		shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+		shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight()); 
 		ofRect(0, 0, ofGetWidth(), ofGetHeight());
 		shader.end();
 	}else 
@@ -88,12 +88,11 @@ void testApp::draw(){
 
 void testApp::exit()
 {
-	if (!omxVideoGrabber.isClosed) 
+	/*if (!omxVideoGrabber.isClosed) 
 	{
 		ofLogVerbose() << "closing manually";
 		omxVideoGrabber.close();
-	}
-	bcm_host_deinit();
+	}*/
 
 }
 //--------------------------------------------------------------
