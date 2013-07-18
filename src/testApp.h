@@ -28,6 +28,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	ofShader shader;
 	
 	bool doShader;
+	bool isShaderLoaded;
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
 	ofxOMXVideoGrabber omxVideoGrabber;
