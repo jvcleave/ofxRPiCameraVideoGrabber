@@ -489,6 +489,8 @@ void ofxOMXVideoGrabber::generateEGLImage()
 	tex.getTextureData().bFlipTexture = false;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
+	tex.getTextureData().tex_t = 1.0f;
+	tex.getTextureData().tex_u = 1.0f;
 	
 	ofLogVerbose(__func__) << "tex.getWidth(): " << tex.getWidth() << "tex.getHeight(): " <<  tex.getHeight();
 	//TODO - should be a way to use ofPixels for the getPixels() functions?
