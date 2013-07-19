@@ -27,6 +27,7 @@ public:
 	ConsoleListener()
 	{
 		listener = NULL;
+		getPocoThread().setName("ConsoleListener");
 	}
 	
 	void setup(SSHKeyListener* listener_)

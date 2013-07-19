@@ -22,7 +22,7 @@ class ofxOMXVideoGrabber
 
 public:
 	ofxOMXVideoGrabber();
-	~ofxOMXVideoGrabber();
+
 	void setup(int videoWidth, int videoHeight, int framerate);
 	void draw();
 	void close();
@@ -58,4 +58,24 @@ public:
 	
 	
 	bool isClosed;
+	static string LOG_NAME;
+	
+	int sharpness;	//	-100 to 100
+	int contrast;	//  -100 to 100 
+	int brightness; //     0 to 100
+	int saturation; //  -100 to 100 
+	
+	void setSharpness(int sharpness_);
+	void setContrast(int contrast_);
+	void setBrightness(int brightness_);
+	void setSaturation(int saturation_);
+	
+	void setFrameStabilization(bool doStabilization);
+	void setMeteringMode(OMX_METERINGTYPE meteringType);
+	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
+
+	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+	void setColorEnhancement(bool doColorEnhance);
+	void setLEDStatus(bool status);
+	
 };

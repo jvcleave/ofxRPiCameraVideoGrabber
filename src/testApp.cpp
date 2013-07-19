@@ -45,8 +45,7 @@ void testApp::setup()
 	doShader = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	consoleListener.setup(this);
-	isShaderLoaded = false;
-	//shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
 	omxVideoGrabber.setup(1280, 720, 60);
 	
 }
@@ -68,32 +67,21 @@ void testApp::draw(){
 	{
 		return;
 	}
-	string info;
 	if (doShader) 
 	{
-		if (!isShaderLoaded) 
-		{
-			isShaderLoaded  = shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-		}
 		shader.begin();
 		omxVideoGrabber.draw();
-		shader.setUniformTexture("tex0", omxVideoGrabber.tex, omxVideoGrabber.textureID);
+		//shader.setUniformTexture("tex0", omxVideoGrabber.tex, omxVideoGrabber.textureID);
 		shader.setUniform1f("time", ofGetElapsedTimef());
 		shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight()); 
 		shader.end();
-		
-		info = "ODDLY IF I USE MY A SECOND SHADER THE IMAGE IS SCALED CORRECTLY";
-		
 	}else 
 	{
 		omxVideoGrabber.draw();
-		info = "HERE THE TEXTURE IS SCALED LARGER THAN 1280X720";
-		
-		
 	}
 
 	
-	ofDrawBitmapStringHighlight(info, 100, 100, ofColor::black, ofColor::yellow);
+	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 100, 100, ofColor::black, ofColor::yellow);
 }
 
 
