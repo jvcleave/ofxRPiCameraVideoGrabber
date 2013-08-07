@@ -4,7 +4,7 @@
 #include "ofAppEGLWindow.h"
 #include "ConsoleListener.h"
 #include "ofxOMXVideoGrabber.h"
-
+#include "ImageFilterCollection.h"
 
 class testApp : public ofBaseApp, public SSHKeyListener{
 
@@ -32,8 +32,8 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
 	ofxOMXVideoGrabber omxVideoGrabber;
-	vector<OMX_IMAGEFILTERTYPE> imageFilters;
-	int imageFiltersCounter;
+	
+	ImageFilterCollection filterCollection;
 	
 };
 

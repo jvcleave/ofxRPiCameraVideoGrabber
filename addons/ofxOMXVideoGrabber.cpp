@@ -473,8 +473,8 @@ void ofxOMXVideoGrabber::generateEGLImage()
 	tex.getTextureData().bFlipTexture = false;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
-	tex.getTextureData().tex_t = 1.0f;
-	tex.getTextureData().tex_u = 1.0f;
+	//tex.getTextureData().tex_t = 1.0f;
+	//tex.getTextureData().tex_u = 1.0f;
 	
 	glEnable(GL_TEXTURE_2D);
 	
