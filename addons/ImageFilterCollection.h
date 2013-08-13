@@ -25,6 +25,7 @@ class ImageFilterCollection
 public:
 	ImageFilterCollection()
 	{
+		filterList = "FILTERS:\n";
 		createImageFilter("None", OMX_ImageFilterNone);
 		createImageFilter("Noise", OMX_ImageFilterNoise);
 		createImageFilter("Emboss", OMX_ImageFilterEmboss);
@@ -59,6 +60,7 @@ public:
 		filter.name = name;
 		filter.type = filterType;
 		imageFilters.push_back(filter);
+		filterList += ofToString(imageFilters.size()) + " " + name + "\n";
 	}
 	
 	ImageFilter getRandomFilter()
@@ -75,7 +77,7 @@ public:
 	
 	ImageFilter getNextFilter()
 	{
-		if (currentFilterIndex+1 < (unsigned int)imageFilters.size()) 
+		if (currentFilterIndex+1 < imageFilters.size()) 
 		{
 			return setCurrentFilter(currentFilterIndex+1);
 		}else 
@@ -89,7 +91,7 @@ public:
 		bool didMatch = false;
 		int matchingIndex = currentFilterIndex;
 		
-		for (int i =0; i<(unsigned int)imageFilters.size(); i++) 
+		for (unsigned int i =0; i<imageFilters.size(); i++) 
 		{
 			if (imageFilters[i].name == name) 
 			{
@@ -109,9 +111,9 @@ public:
 		
 	}
 	
-	int currentFilterIndex;
+	unsigned int currentFilterIndex;
 	ImageFilter currentFilter;
 	vector<ImageFilter> imageFilters;
-	
+	string filterList;
 	
 };

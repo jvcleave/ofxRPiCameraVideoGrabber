@@ -47,8 +47,8 @@ void testApp::draw(){
 
 	stringstream info;
 	info << "CURRENT FILTER: " << filterCollection.currentFilter.name << "\n";
-	info << "APP FPS: " << ofToString(ofGetFrameRate());
-	
+	info << "APP FPS: " << ofToString(ofGetFrameRate()) << "\n";
+	info << filterCollection.filterList << "\n";
 	ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
 }
 
