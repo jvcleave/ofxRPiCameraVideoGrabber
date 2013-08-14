@@ -1,19 +1,8 @@
 precision highp float;
 
-uniform sampler2D c;
-uniform float useTexture;
-uniform float useColors;
-uniform vec4 color;
-
-varying float depth;
-varying vec4 colorVarying;
-varying vec2 texCoordVarying;
-
 uniform vec2 resolution;
 uniform float time;
 uniform sampler2D tex0;
-uniform sampler2D tex1;
-uniform sampler2D tex2;
 
 
 // http://www.iquilezles.org/apps/shadertoy/?p=Postpro		

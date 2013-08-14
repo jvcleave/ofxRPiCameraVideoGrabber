@@ -473,8 +473,6 @@ void ofxOMXVideoGrabber::generateEGLImage()
 	tex.getTextureData().bFlipTexture = false;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
-	//tex.getTextureData().tex_t = 1.0f;
-	//tex.getTextureData().tex_u = 1.0f;
 	
 	glEnable(GL_TEXTURE_2D);
 	
@@ -697,8 +695,13 @@ void ofxOMXVideoGrabber::onCameraEventParamOrConfigChanged()
 		isReady = true;
 	}else 
 	{
-		ofLog(OF_LOG_ERROR,			"render OMX_FillThisBuffer FAIL omx_err(0x%08x)", error);
+		ofLog(OF_LOG_ERROR,			"render OMX_FillThisBuffer FAIL error: 0x%08x", error);
 	}
+}
+
+ofTexture& ofxOMXVideoGrabber::getTextureReference()
+{
+	return tex;
 }
 
 void ofxOMXVideoGrabber::close()

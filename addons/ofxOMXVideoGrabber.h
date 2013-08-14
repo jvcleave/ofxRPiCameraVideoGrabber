@@ -27,6 +27,8 @@ public:
 	void draw();
 	void close();
 	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
+	ofTexture& getTextureReference();
+	
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 	
