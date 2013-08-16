@@ -34,8 +34,7 @@ public:
 	
 	OMX_HANDLETYPE camera;
 	OMX_HANDLETYPE render;
-	
-	
+		
 	static OMX_ERRORTYPE cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
 	
 	static OMX_ERRORTYPE renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
@@ -73,11 +72,11 @@ public:
 	void setSaturation(int saturation_);
 	
 	void setFrameStabilization(bool doStabilization);
-	void setMeteringMode(OMX_METERINGTYPE meteringType);
+	void setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation=0, int sensitivity = 100, bool autoSensitivity = false);
 	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
 
 	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
-	void setColorEnhancement(bool doColorEnhance);
+	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
 	void setLEDStatus(bool status);
 	
 };
