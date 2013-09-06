@@ -124,16 +124,6 @@ RESAMPLE_STATIC=$(FFMPEG_LIBS)/libswresample.a
 #PROJECT_DEFINES += OMX_SKIP64BIT 
 
 
-PROGRAMMABLE_HEADER_PATH = ../../../libs/openFrameworks/gl/ofGLProgrammableRenderer.h
-
-exist := $(wildcard $(PROGRAMMABLE_HEADER_PATH))
-ifneq ($(strip $(exist)),)
-$(info Found Programmable renderer at $(PROGRAMMABLE_HEADER_PATH))
-PROJECT_DEFINES += PROGRAMMABLE_PRESENT 
-else
-$(info Could not find Programmable renderer at $(PROGRAMMABLE_HEADER_PATH))
-endif
-
 
 ################################################################################
 # PROJECT CFLAGS

@@ -5,10 +5,13 @@
 class SSHKeyListenerEventData
 {
 public:
-	SSHKeyListenerEventData(char character_)
+	SSHKeyListenerEventData(char character_, void* listener_)
 	{
 		character = character_;
+		listener = listener_;
 	}
+	void* listener;
+	
 	char character;
 };
 
@@ -18,34 +21,46 @@ public:
 	virtual void onCharacterReceived(SSHKeyListenerEventData& e) = 0;
 };
 
-class ConsoleListener: public ofThread
+class ConsoleListener: public Poco::Runnable
 {
 public:
 	SSHKeyListener* listener;
-	
-	
+	Poco::Thread thread;
 	ConsoleListener()
 	{
 		listener = NULL;
-		getPocoThread().setName("ConsoleListener");
+		
+	}
+	
+	~ConsoleListener()
+	{
+		thread.tryJoin(50);
+		ofLogVerbose() << "~ConsoleListener END";
 	}
 	
 	void setup(SSHKeyListener* listener_)
 	{
 		listener = listener_;
-		startThread(false, true);
+		//thread.setOSPriority(Poco::Thread::getMinOSPriority());
+		thread.start(*this);
 	}
-	void threadedFunction()
+	void run()
 	{
-		while (isThreadRunning()) 
+		
+		while (thread.isRunning()) 
 		{
-			char buffer[10];
-			if (fgets(buffer, 10 , stdin) != NULL) 
+			if (listener != NULL) 
 			{
-				SSHKeyListenerEventData eventData(buffer[0]);
-				listener->onCharacterReceived(eventData);
+				
+				char buffer[10];
+				if (fgets(buffer, 10 , stdin) != NULL) 
+				{
+					
+					SSHKeyListenerEventData eventData(buffer[0], (void *)this);
+					listener->onCharacterReceived(eventData);
+					
+				}
 			}
-			
 		}
 	}
 	
@@ -57,12 +72,12 @@ public:
 USAGE:
 
 1.add to testApp.h
-
+ 
 #include "ConsoleListener.h"
-
+ 
 //extend testApp 
 class testApp : public ofBaseApp, public SSHKeyListener
-
+ 
 2. add required callback definition and instance
 
 void onCharacterReceived(SSHKeyListenerEventData& e);
@@ -70,21 +85,21 @@ ConsoleListener consoleListener;
 
 3. add to testApp.cpp
 
-void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
-{
+ void testApp::onCharacterReceived(SSHKeyListenerEventData& e)
+ {
 	keyPressed((int)e.character);
-}
-
+ }
+ 
 add in testApp::setup()
 
 consoleListener.setup(this);
 
 4. and later
-void testApp::keyPressed  (int key){
-	
-	if (key == 'e') 
-	{
+ void testApp::keyPressed  (int key){
+ 
+	 if (key == 'e') 
+	 {
 		ofLogVerbose() << "e pressed!";
-	}
-}
+	 }
+ }
 #endif

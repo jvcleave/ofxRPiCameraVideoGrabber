@@ -9,7 +9,7 @@ void testApp::setup()
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	consoleListener.setup(this);
 	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-	omxVideoGrabber.setup(1280, 720, 60);
+	videoGrabber.setup(1280, 720, 60);
 	
 	
 	
@@ -18,7 +18,7 @@ void testApp::setup()
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if (!omxVideoGrabber.isReady) 
+	if (!videoGrabber.isReady) 
 	{
 		return;
 	}
@@ -28,7 +28,7 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	if (!omxVideoGrabber.isReady) 
+	if (!videoGrabber.isReady) 
 	{
 		return;
 	}
@@ -38,7 +38,7 @@ void testApp::draw(){
 		int height = ofGetHeight();
 		
 		shader.begin();
-			shader.setUniformTexture("tex0", omxVideoGrabber.getTextureReference(), omxVideoGrabber.textureID);
+			shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.textureID);
 			shader.setUniform1f("time", ofGetElapsedTimef());
 			shader.setUniform2f("resolution", (float)width, (float)height); 
 			ofRect(0, 0, width, height);
@@ -46,7 +46,7 @@ void testApp::draw(){
 		
 	}else 
 	{
-		omxVideoGrabber.draw();
+		videoGrabber.draw();
 	}
 
 	stringstream info;
@@ -68,12 +68,12 @@ void testApp::keyPressed  (int key)
 	}
 	if (key == 'r')
 	{
-		omxVideoGrabber.applyImageFilter(filterCollection.getRandomFilter().type);
+		videoGrabber.applyImageFilter(filterCollection.getRandomFilter().type);
 		
 	}
 	if (key == 'e')
 	{
-		omxVideoGrabber.applyImageFilter(filterCollection.getNextFilter().type);
+		videoGrabber.applyImageFilter(filterCollection.getNextFilter().type);
 	}
 
 }

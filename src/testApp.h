@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "ConsoleListener.h"
-#include "ofxOMXVideoGrabber.h"
+#include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
 class testApp : public ofBaseApp, public SSHKeyListener{
@@ -23,7 +23,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	bool isShaderLoaded;
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
-	ofxOMXVideoGrabber omxVideoGrabber;
+	ofxRPiCameraVideoGrabber videoGrabber;
 	
 	ImageFilterCollection filterCollection;
 	
