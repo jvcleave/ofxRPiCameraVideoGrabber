@@ -24,9 +24,13 @@ string ofxRPiCameraVideoGrabber::LOG_NAME = "ofxRPiCameraVideoGrabber";
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	isReady = false;
-	isClosed = false;
-	eglBuffer = NULL;
+	ready		= false;
+	eglBuffer	= NULL;
+	videoWidth	= 0;
+	videoHeight	= 0;
+	framerate	= 0;
+	textureID	= 0;
+	frameCounter = 0;
 }
 
 
@@ -109,6 +113,24 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	setLEDStatus(false);
 }
 
+int ofxRPiCameraVideoGrabber::getWidth()
+{
+	return videoWidth;
+}
+int ofxRPiCameraVideoGrabber::getHeight()
+{
+	return videoHeight;
+}
+
+int ofxRPiCameraVideoGrabber::getFrameRate()
+{
+	return framerate;
+}
+
+GLuint ofxRPiCameraVideoGrabber::getTextureID()
+{
+	return textureID;
+}
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
@@ -120,6 +142,10 @@ void ofxRPiCameraVideoGrabber::draw()
 	tex.draw(0, 0);
 }
 
+bool ofxRPiCameraVideoGrabber::isReady()
+{
+	return ready;
+}
 void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -449,6 +475,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::renderEmptyBufferDone(OMX_IN OMX_HANDLET
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	ofxRPiCameraVideoGrabber *grabber = static_cast<ofxRPiCameraVideoGrabber*>(pAppData);
+	grabber->frameCounter++;
 	OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
 	return error;
 }
@@ -548,7 +575,7 @@ void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 	if(error == OMX_ErrorNone)
 	{
 		ofLogVerbose(LOG_NAME) << "render OMX_FillThisBuffer PASS";
-		isReady = true;
+		ready = true;
 	}else 
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL error: 0x%08x", error);
@@ -559,7 +586,7 @@ void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 //app and camera seem to close fine on exit
 void ofxRPiCameraVideoGrabber::close()
 {
-	isReady = false;
+	ready = false;
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
@@ -616,7 +643,6 @@ void ofxRPiCameraVideoGrabber::close()
 		eglDestroyImageKHR(display, eglImage);
 	}
 	
-	isClosed = true;
 }
 
 

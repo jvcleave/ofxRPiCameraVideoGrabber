@@ -3,45 +3,37 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-
-	
-	doShader = false;
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	consoleListener.setup(this);
+	ofSetVerticalSync(false);
+	
+	doDrawInfo	= true;
+	doShader	= false;
 	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
+	
+	consoleListener.setup(this);
 	videoGrabber.setup(1280, 720, 60);
-	
-	
 	
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if (!videoGrabber.isReady) 
-	{
-		return;
-	}
+	
 }
 
 
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	if (!videoGrabber.isReady) 
-	{
-		return;
-	}
 	if (doShader) 
 	{
 		int width = ofGetWidth();
 		int height = ofGetHeight();
 		
 		shader.begin();
-			shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.textureID);
 			shader.setUniform1f("time", ofGetElapsedTimef());
 			shader.setUniform2f("resolution", (float)width, (float)height); 
-			ofRect(0, 0, width, height);
+			videoGrabber.draw();
 		shader.end();
 		
 	}else 
@@ -50,32 +42,49 @@ void testApp::draw(){
 	}
 
 	stringstream info;
-	info << "SHADER ENABLED: "	<< doShader << "\n";
-	info << "CURRENT FILTER: "	<< filterCollection.currentFilter.name << "\n";
-	info << "APP FPS: "			<< ofToString(ofGetFrameRate()) << "\n";
-	
+	info << "App FPS: " << ofGetFrameRate() << "\n";
+	info << "Camera frameCounter: " << videoGrabber.frameCounter << "\n";
+	info << "App frameCounter: " << ofGetFrameNum() << "\n";
+	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
+	info << "CURRENT FILTER: " << filterCollection.currentFilter.name << "\n";
 	info <<	filterCollection.filterList << "\n";
-	ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
+	
+	info << "\n";
+	info << "Press s to enable Shader ENABLED: " << doShader << "\n";
+	info << "Press e to increment filter" << "\n";
+	info << "Press r for Random filter" << "\n";
+	info << "Press g to Toggle info" << "\n";
+	
+	if (doDrawInfo && !doShader) 
+	{
+		ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
+	}
+	//
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed  (int key)
 {
-
+	ofLogVerbose(__func__) << key;
 	if (key == 's') 
 	{
 		doShader = !doShader;
+		
 	}
 	if (key == 'r')
 	{
 		videoGrabber.applyImageFilter(filterCollection.getRandomFilter().type);
-		
 	}
+	
 	if (key == 'e')
 	{
 		videoGrabber.applyImageFilter(filterCollection.getNextFilter().type);
 	}
-
+	
+	if (key == 'g')
+	{
+		doDrawInfo = !doDrawInfo;
+	}
 }
 
 void testApp::onCharacterReceived(SSHKeyListenerEventData& e)

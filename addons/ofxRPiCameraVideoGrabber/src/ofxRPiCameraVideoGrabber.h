@@ -25,10 +25,32 @@ public:
 
 	void setup(int videoWidth, int videoHeight, int framerate);
 	void draw();
-	void close();
+	
 	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
 	ofTexture& getTextureReference();
+
+	void setSharpness(int sharpness_);
+	void setContrast(int contrast_);
+	void setBrightness(int brightness_);
+	void setSaturation(int saturation_);
 	
+	void setFrameStabilization(bool doStabilization);
+	void setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation=0, int sensitivity = 100, bool autoSensitivity = false);
+	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
+	
+	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
+	void setLEDStatus(bool status);
+	
+	GLuint getTextureID();
+	
+	int getWidth();
+	int getHeight();
+	int getFrameRate();
+	bool isReady();
+	int frameCounter;
+	
+private:
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 	
@@ -55,10 +77,9 @@ public:
 	
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 	
-	bool isReady;
+	bool ready;
 	
 	
-	bool isClosed;
 	static string LOG_NAME;
 	
 	int sharpness;	//	-100 to 100
@@ -66,17 +87,8 @@ public:
 	int brightness; //     0 to 100
 	int saturation; //  -100 to 100 
 	
-	void setSharpness(int sharpness_);
-	void setContrast(int contrast_);
-	void setBrightness(int brightness_);
-	void setSaturation(int saturation_);
+	void close();
 	
-	void setFrameStabilization(bool doStabilization);
-	void setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation=0, int sensitivity = 100, bool autoSensitivity = false);
-	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
 
-	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
-	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
-	void setLEDStatus(bool status);
 	
 };
