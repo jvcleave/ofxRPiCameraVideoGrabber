@@ -50,6 +50,9 @@ public:
 	bool isReady();
 	int frameCounter;
 	
+	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+	void checkConfig();
+	
 private:
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);

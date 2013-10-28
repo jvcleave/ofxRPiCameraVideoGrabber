@@ -111,8 +111,97 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	applyImageFilter(OMX_ImageFilterNone);
 	setColorEnhancement(false);	 
 	setLEDStatus(false);
+	/*
+	 OMX_COMMONFLICKERCANCEL_OFF,
+	 OMX_COMMONFLICKERCANCEL_AUTO,
+	 OMX_COMMONFLICKERCANCEL_50,
+	 OMX_COMMONFLICKERCANCEL_60
+	 */
+	setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
+	checkConfig();
+}
+void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
+{
+	ofLogVerbose() << "setFlickerCancellation";
+	OMX_CONFIG_FLICKERCANCELTYPE controlType;
+	OMX_INIT_STRUCTURE(controlType);
+	
+	controlType.nPortIndex = OMX_ALL;
+	
+	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "camera OMX_GetConfig OMX_IndexConfigCommonFlickerCancellation PASS ";
+		switch (controlType.eFlickerCancel) 
+		{
+			case OMX_COMMONFLICKERCANCEL_OFF:
+			{
+				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_OFF";
+				break;
+			}
+			case OMX_COMMONFLICKERCANCEL_AUTO:
+			{
+				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_AUTO";
+				break;
+			}
+			case OMX_COMMONFLICKERCANCEL_50:
+			{
+				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_50";
+				break;
+			}
+			case OMX_COMMONFLICKERCANCEL_60:
+			{
+				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_60";
+				break;
+			}
+			default:
+				break;
+		}
+		
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
+		
+	}
+	
+	
+	controlType.eFlickerCancel = eFlickerCancel;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonFlickerCancellation OMX_COMMONFLICKERCANCEL_AUTO PASS ";
+
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
+
+	}
+
+	
+	
 }
 
+void ofxRPiCameraVideoGrabber::checkConfig()
+{
+	//ofLogVerbose() << "checkConfig";
+//	OMX_CONFIG_SCENEDETECTTYPE controlType;
+//	OMX_INIT_STRUCTURE(controlType);
+//	
+//	controlType.nPortIndex = OMX_ALL;
+//	//controlType.eMode = OMX_FaceDetectionControlOn;
+//	//controlType.nFrames = 0;
+//	//controlType.nMaxRegions = 0;
+//	//controlType.nQuality = 50;
+//	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonSceneDetected, &controlType);
+//	if(error != OMX_ErrorNone) 
+//	{
+//		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig FAIL error: 0x%08x", error);
+//	}else
+//	{
+//		ofLogVerbose(__func__) << "camera OMX_GetConfig PASS!!!!!!!! ";
+//	}
+	
+}
 int ofxRPiCameraVideoGrabber::getWidth()
 {
 	return videoWidth;
