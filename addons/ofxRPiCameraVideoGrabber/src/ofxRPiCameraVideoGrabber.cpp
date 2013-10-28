@@ -121,6 +121,23 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	enableAllAlgorithms();
 	enableFaceDetection();
 	
+	error = OMX_ErrorNone;
+	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+	OMX_INIT_STRUCTURE(controlType);
+	controlType.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
+	controlType.bDisabled = OMX_TRUE;
+	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+	
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm  PASS!!!!!!!! ";
+		ofLogVerbose() << "DISABLE EFFECTS PASS <-------------";
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm FAIL error: 0x%08x", error);
+
+	}
+	
 }
 
 void ofxRPiCameraVideoGrabber::enableFaceDetection()
@@ -189,7 +206,7 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
 		
 	}
-	
+
 	
 	controlType.eFlickerCancel = eFlickerCancel;
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
@@ -202,9 +219,6 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
 
 	}
-
-	
-	
 }
 
 void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
@@ -219,7 +233,7 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 	types[OMX_CameraDisableAlgorithmFacetracking]			= "OMX_CameraDisableAlgorithmFacetracking";
 	types[OMX_CameraDisableAlgorithmRedEyeReduction]		= "OMX_CameraDisableAlgorithmRedEyeReduction";
 	types[OMX_CameraDisableAlgorithmVideoStabilisation]		= "OMX_CameraDisableAlgorithmVideoStabilisation";
-	/*types[OMX_CameraDisableAlgorithmWriteRaw]				= "OMX_CameraDisableAlgorithmWriteRaw";
+	types[OMX_CameraDisableAlgorithmWriteRaw]				= "OMX_CameraDisableAlgorithmWriteRaw";
 	types[OMX_CameraDisableAlgorithmVideoDenoise]			= "OMX_CameraDisableAlgorithmVideoDenoise";
 	types[OMX_CameraDisableAlgorithmStillsDenoise]			= "OMX_CameraDisableAlgorithmStillsDenoise";
 	types[OMX_CameraDisableAlgorithmAntiShake]				= "OMX_CameraDisableAlgorithmAntiShake";
@@ -229,27 +243,67 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 	types[OMX_CameraDisableAlgorithmFaceRecognition]		= "OMX_CameraDisableAlgorithmFaceRecognition";
 	types[OMX_CameraDisableAlgorithmFaceBeautification]		= "OMX_CameraDisableAlgorithmFaceBeautification";
 	types[OMX_CameraDisableAlgorithmSceneDetection]			= "OMX_CameraDisableAlgorithmSceneDetection";
-	types[OMX_CameraDisableAlgorithmHighDynamicRange]		= "OMX_CameraDisableAlgorithmHighDynamicRange";*/
+	types[OMX_CameraDisableAlgorithmHighDynamicRange]		= "OMX_CameraDisableAlgorithmHighDynamicRange";
 	
 	
-	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	
+	/*for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
 	{
 		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 		OMX_INIT_STRUCTURE(controlType);
 		controlType.eAlgorithm = (*i).first;
+		error = OMX_GetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "ALGORITHM CONFIG GET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
+		}else
+		{
+			ofLogError(__func__) << "ALGORITHM CONFIG GET FAIL " << (*i).second;
+			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
+		}
+		
+		
+		
 		controlType.bDisabled = OMX_FALSE;
 		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
 		
 		if(error == OMX_ErrorNone) 
 		{
-			ofLogVerbose(__func__) << "PASSED ALGORITHM: " << (*i).second;			
+			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
 		}else
 		{
-			ofLogError(__func__) << "FAILED ALGORITHM: " << (*i).second;
-			//ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
+			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
 		}
+	}*/
+	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	{
+		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+		OMX_INIT_STRUCTURE(controlType);
+		controlType.bDisabled = OMX_FALSE;
+		error = OMX_GetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "ALGORITHM CONFIG GET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
+		}else
+		{
+			ofLogError(__func__) << "ALGORITHM CONFIG GET FAIL " << (*i).second;
+		}
+		
+		
+		/*
+		
+		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+		
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
+		}else
+		{
+			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
+			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
+		}*/
 	}
-
 	
 }
 int ofxRPiCameraVideoGrabber::getWidth()
