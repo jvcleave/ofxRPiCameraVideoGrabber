@@ -51,8 +51,8 @@ public:
 	int frameCounter;
 	
 	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
-	void checkConfig();
-	
+	void enableAllAlgorithms();
+	void enableFaceDetection();
 private:
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);

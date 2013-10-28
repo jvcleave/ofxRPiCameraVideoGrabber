@@ -118,8 +118,34 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	 OMX_COMMONFLICKERCANCEL_60
 	 */
 	setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
-	checkConfig();
+	enableAllAlgorithms();
+	enableFaceDetection();
+	
 }
+
+void ofxRPiCameraVideoGrabber::enableFaceDetection()
+{
+	OMX_ERRORTYPE error = OMX_ErrorNone;
+	
+	OMX_CONFIG_FACEDETECTIONCONTROLTYPE type;
+	OMX_INIT_STRUCTURE(type);
+	type.nPortIndex = OMX_ALL;
+	type.nFrames = 0;
+	type.nMaxRegions = 0;
+	type.nQuality = 50;
+	type.eMode = OMX_FaceDetectionControlOn;
+	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFaceDetectionControl, &type);
+	
+	if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonFaceDetectionControl FAIL error: 0x%08x", error);
+	}else
+	{
+		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonFaceDetectionControl  PASS!!!!!!!! ";
+	
+	}
+}
+
 void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
 	ofLogVerbose() << "setFlickerCancellation";
@@ -181,25 +207,49 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 	
 }
 
-void ofxRPiCameraVideoGrabber::checkConfig()
+void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 {
-	//ofLogVerbose() << "checkConfig";
-//	OMX_CONFIG_SCENEDETECTTYPE controlType;
-//	OMX_INIT_STRUCTURE(controlType);
-//	
-//	controlType.nPortIndex = OMX_ALL;
-//	//controlType.eMode = OMX_FaceDetectionControlOn;
-//	//controlType.nFrames = 0;
-//	//controlType.nMaxRegions = 0;
-//	//controlType.nQuality = 50;
-//	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonSceneDetected, &controlType);
-//	if(error != OMX_ErrorNone) 
-//	{
-//		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig FAIL error: 0x%08x", error);
-//	}else
-//	{
-//		ofLogVerbose(__func__) << "camera OMX_GetConfig PASS!!!!!!!! ";
-//	}
+	ofLogVerbose() << "enableAllAlgorithms";
+	
+	
+	map<OMX_CAMERADISABLEALGORITHMTYPE, string> types;
+
+	OMX_ERRORTYPE error = OMX_ErrorNone;
+	
+	types[OMX_CameraDisableAlgorithmFacetracking]			= "OMX_CameraDisableAlgorithmFacetracking";
+	types[OMX_CameraDisableAlgorithmRedEyeReduction]		= "OMX_CameraDisableAlgorithmRedEyeReduction";
+	types[OMX_CameraDisableAlgorithmVideoStabilisation]		= "OMX_CameraDisableAlgorithmVideoStabilisation";
+	/*types[OMX_CameraDisableAlgorithmWriteRaw]				= "OMX_CameraDisableAlgorithmWriteRaw";
+	types[OMX_CameraDisableAlgorithmVideoDenoise]			= "OMX_CameraDisableAlgorithmVideoDenoise";
+	types[OMX_CameraDisableAlgorithmStillsDenoise]			= "OMX_CameraDisableAlgorithmStillsDenoise";
+	types[OMX_CameraDisableAlgorithmAntiShake]				= "OMX_CameraDisableAlgorithmAntiShake";
+	types[OMX_CameraDisableAlgorithmImageEffects]			= "OMX_CameraDisableAlgorithmImageEffects";
+	types[OMX_CameraDisableAlgorithmDarkSubtract]			= "OMX_CameraDisableAlgorithmDarkSubtract";
+	types[OMX_CameraDisableAlgorithmDynamicRangeExpansion]	= "OMX_CameraDisableAlgorithmDynamicRangeExpansion";
+	types[OMX_CameraDisableAlgorithmFaceRecognition]		= "OMX_CameraDisableAlgorithmFaceRecognition";
+	types[OMX_CameraDisableAlgorithmFaceBeautification]		= "OMX_CameraDisableAlgorithmFaceBeautification";
+	types[OMX_CameraDisableAlgorithmSceneDetection]			= "OMX_CameraDisableAlgorithmSceneDetection";
+	types[OMX_CameraDisableAlgorithmHighDynamicRange]		= "OMX_CameraDisableAlgorithmHighDynamicRange";*/
+	
+	
+	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	{
+		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+		OMX_INIT_STRUCTURE(controlType);
+		controlType.eAlgorithm = (*i).first;
+		controlType.bDisabled = OMX_FALSE;
+		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+		
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "PASSED ALGORITHM: " << (*i).second;			
+		}else
+		{
+			ofLogError(__func__) << "FAILED ALGORITHM: " << (*i).second;
+			//ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm FAIL error: 0x%08x", error);
+		}
+	}
+
 	
 }
 int ofxRPiCameraVideoGrabber::getWidth()
