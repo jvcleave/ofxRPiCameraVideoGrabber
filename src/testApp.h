@@ -28,5 +28,6 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
+	ofFbo fbo;
 };
 

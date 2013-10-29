@@ -31,15 +31,34 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	framerate	= 0;
 	textureID	= 0;
 	frameCounter = 0;
+	updateFrameCounter = 0;
+	hasNewFrame = false;
+	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 
+void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
+{
+	
+	if (frameCounter > updateFrameCounter) 
+	{
+		updateFrameCounter = frameCounter;
+		hasNewFrame = true;
+	}else
+	{
+		hasNewFrame = false;
+	}
+}
+
+bool ofxRPiCameraVideoGrabber::isFrameNew()
+{
+	return hasNewFrame;
+}
 
 void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, int framerate=60)
 {
 	this->videoWidth = videoWidth;
 	this->videoHeight = videoHeight;
 	this->framerate = framerate;
-	
 	generateEGLImage();
 	
 	OMX_ERRORTYPE error = OMX_Init();
@@ -59,7 +78,155 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
 	
+	//enableAllAlgorithms();
+	
 	disableAllPortsForComponent(&camera);
+	
+	////////////
+	
+	
+	OMX_VIDEO_PARAM_PORTFORMATTYPE portFormatType;
+	OMX_INIT_STRUCTURE(portFormatType);
+	portFormatType.nPortIndex = CAMERA_OUTPUT_PORT;
+	error = OMX_GetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
+	
+	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
+	map<OMX_COLOR_FORMATTYPE, string> colorFormats;
+	
+	if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
+	}else 
+	{
+		//able to set to
+		/*
+		 OMX_COLOR_Format24bitRGB888
+		 OMX_COLOR_FormatYUV420PackedPlanar
+		 OMX_COLOR_FormatYUV422PackedPlanar
+		 OMX_COLOR_FormatYCbYCr
+		 OMX_COLOR_FormatYCrYCb
+		 OMX_COLOR_FormatCbYCrY
+		 OMX_COLOR_FormatCrYCbY
+		 OMX_COLOR_FormatYUV420PackedSemiPlanar
+		 */
+		
+		
+		
+		colorFormats[OMX_COLOR_FormatUnused] = "OMX_COLOR_FormatUnused";
+		colorFormats[OMX_COLOR_FormatMonochrome] = "OMX_COLOR_FormatMonochrome";
+		colorFormats[OMX_COLOR_Format8bitRGB332] = "OMX_COLOR_Format8bitRGB332";
+		colorFormats[OMX_COLOR_Format12bitRGB444] = "OMX_COLOR_Format12bitRGB444";
+		colorFormats[OMX_COLOR_Format16bitARGB4444] = "OMX_COLOR_Format16bitARGB4444";
+		colorFormats[OMX_COLOR_Format16bitARGB1555] = "OMX_COLOR_Format16bitARGB1555";
+		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitRGB565";
+		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitBGR565";
+		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format18bitRGB666";
+		colorFormats[OMX_COLOR_Format18bitARGB1665] = "OMX_COLOR_Format18bitARGB1665";
+		colorFormats[OMX_COLOR_Format19bitARGB1666] = "OMX_COLOR_Format19bitARGB1666"; 
+		colorFormats[OMX_COLOR_Format24bitRGB888] = "OMX_COLOR_Format24bitRGB888";
+		colorFormats[OMX_COLOR_Format24bitBGR888] = "OMX_COLOR_Format24bitBGR888";
+		colorFormats[OMX_COLOR_Format24bitARGB1887] = "OMX_COLOR_Format24bitARGB1887";
+		colorFormats[OMX_COLOR_Format25bitARGB1888] = "OMX_COLOR_Format25bitARGB1888";
+		colorFormats[OMX_COLOR_Format32bitBGRA8888] = "OMX_COLOR_Format32bitBGRA8888";
+		colorFormats[OMX_COLOR_Format32bitARGB8888] = "OMX_COLOR_Format32bitARGB8888";
+		colorFormats[OMX_COLOR_FormatYUV411Planar] = "OMX_COLOR_FormatYUV411Planar";
+		colorFormats[OMX_COLOR_FormatYUV411PackedPlanar] = "OMX_COLOR_FormatYUV411PackedPlanar";
+		colorFormats[OMX_COLOR_FormatYUV420Planar] = "OMX_COLOR_FormatYUV420Planar";
+		colorFormats[OMX_COLOR_FormatYUV420PackedPlanar] = "OMX_COLOR_FormatYUV420PackedPlanar";
+		colorFormats[OMX_COLOR_FormatYUV420SemiPlanar] = "OMX_COLOR_FormatYUV420SemiPlanar";
+		colorFormats[OMX_COLOR_FormatYUV422Planar] = "OMX_COLOR_FormatYUV422Planar";
+		colorFormats[OMX_COLOR_FormatYUV422PackedPlanar] = "OMX_COLOR_FormatYUV422PackedPlanar";
+		colorFormats[OMX_COLOR_FormatYUV422SemiPlanar] = "OMX_COLOR_FormatYUV422SemiPlanar";
+		colorFormats[OMX_COLOR_FormatYCbYCr] = "OMX_COLOR_FormatYCbYCr";
+		colorFormats[OMX_COLOR_FormatYCrYCb] = "OMX_COLOR_FormatYCrYCb";
+		colorFormats[OMX_COLOR_FormatCbYCrY] = "OMX_COLOR_FormatCbYCrY";
+		colorFormats[OMX_COLOR_FormatCrYCbY] = "OMX_COLOR_FormatCrYCbY";
+		colorFormats[OMX_COLOR_FormatYUV444Interleaved] = "OMX_COLOR_FormatYUV444Interleaved";
+		colorFormats[OMX_COLOR_FormatRawBayer8bit] = "OMX_COLOR_FormatRawBayer8bit";
+		colorFormats[OMX_COLOR_FormatRawBayer10bit] = "OMX_COLOR_FormatRawBayer10bit";
+		colorFormats[OMX_COLOR_FormatRawBayer8bitcompressed] = "OMX_COLOR_FormatRawBayer8bitcompressed";
+		colorFormats[OMX_COLOR_FormatL2] = "OMX_COLOR_FormatL2"; 
+		colorFormats[OMX_COLOR_FormatL4] = "OMX_COLOR_FormatL4"; 
+		colorFormats[OMX_COLOR_FormatL8] = "OMX_COLOR_FormatL8"; 
+		colorFormats[OMX_COLOR_FormatL16] = "OMX_COLOR_FormatL16"; 
+		colorFormats[OMX_COLOR_FormatL24] = "OMX_COLOR_FormatL24"; 
+		colorFormats[OMX_COLOR_FormatL32] = "OMX_COLOR_FormatL32";
+		colorFormats[OMX_COLOR_FormatYUV420PackedSemiPlanar] = "OMX_COLOR_FormatYUV420PackedSemiPlanar";
+		colorFormats[OMX_COLOR_FormatYUV422PackedSemiPlanar] = "OMX_COLOR_FormatYUV422PackedSemiPlanar";
+		colorFormats[OMX_COLOR_Format18BitBGR666] = "OMX_COLOR_Format18BitBGR666";
+		colorFormats[OMX_COLOR_Format24BitARGB6666] = "OMX_COLOR_Format24BitARGB6666";
+		colorFormats[OMX_COLOR_Format24BitABGR6666] = "OMX_COLOR_Format24BitABGR6666";
+		colorFormats[OMX_COLOR_FormatKhronosExtensions] = "OMX_COLOR_FormatKhronosExtensions";
+		colorFormats[OMX_COLOR_FormatVendorStartUnused] = "OMX_COLOR_FormatVendorStartUnused";
+		colorFormats[OMX_COLOR_Format32bitABGR8888] = "OMX_COLOR_Format32bitABGR8888";
+		colorFormats[OMX_COLOR_Format8bitPalette] = "OMX_COLOR_Format8bitPalette";
+		colorFormats[OMX_COLOR_FormatYUVUV128] = "OMX_COLOR_FormatYUVUV128";
+		colorFormats[OMX_COLOR_FormatRawBayer12bit] = "OMX_COLOR_FormatRawBayer12bit";
+		colorFormats[OMX_COLOR_FormatBRCMEGL] = "OMX_COLOR_FormatBRCMEGL";
+		colorFormats[OMX_COLOR_FormatBRCMOpaque] = "OMX_COLOR_FormatBRCMOpaque";
+		colorFormats[OMX_COLOR_FormatYVU420PackedPlanar] = "OMX_COLOR_FormatYVU420PackedPlanar";
+		colorFormats[OMX_COLOR_FormatYVU420PackedSemiPlanar] = "OMX_COLOR_FormatYVU420PackedSemiPlanar";
+		
+		ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
+		
+		
+		videoCodingTypes[OMX_VIDEO_CodingUnused] = "Value when coding is NA";
+		videoCodingTypes[OMX_VIDEO_CodingAutoDetect] = "Autodetection of coding type";
+		videoCodingTypes[OMX_VIDEO_CodingMPEG2] = "AKA: H.262";
+		videoCodingTypes[OMX_VIDEO_CodingH263] = "H.263";
+		videoCodingTypes[OMX_VIDEO_CodingMPEG4] = "MPEG-4";
+		videoCodingTypes[OMX_VIDEO_CodingWMV] = "all versions of Windows Media Video";
+		videoCodingTypes[OMX_VIDEO_CodingRV] = "all versions of Real Video";
+		videoCodingTypes[OMX_VIDEO_CodingAVC] = "H.264 AVC";
+		videoCodingTypes[OMX_VIDEO_CodingMJPEG] = "Motion JPEG";
+		videoCodingTypes[OMX_VIDEO_CodingKhronosExtensions] = "Reserved region for introducing Khronos Standard Extensions "; 
+		videoCodingTypes[OMX_VIDEO_CodingVendorStartUnused] = "Reserved region for introducing Vendor Extensions";
+		videoCodingTypes[OMX_VIDEO_CodingVP6] = "On2 VP6";
+		videoCodingTypes[OMX_VIDEO_CodingVP7] = "On2 VP7";
+		videoCodingTypes[OMX_VIDEO_CodingVP8] = "On2 VP8";
+		videoCodingTypes[OMX_VIDEO_CodingYUV] = "raw YUV video";
+		videoCodingTypes[OMX_VIDEO_CodingSorenson] = "Sorenson";
+		videoCodingTypes[OMX_VIDEO_CodingTheora] = "Theora";
+		videoCodingTypes[OMX_VIDEO_CodingMVC] = "H.264 MVC"; 	
+		videoCodingTypes[OMX_VIDEO_CodingMax] = "0x7FFFFFFF";
+		
+		ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
+		ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
+		ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
+		//OMX_U32 nIndex;
+		//OMX_VIDEO_CODINGTYPE eCompressionFormat; 
+		//OMX_COLOR_FORMATTYPE eColorFormat;
+		//OMX_U32 xFramerate;
+#if 0
+		for( map<OMX_COLOR_FORMATTYPE, string>::iterator i=colorFormats.begin(); i!=colorFormats.end(); ++i)
+		{
+			
+			portFormatType.eColorFormat = (*i).first;
+			error = OMX_SetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
+			
+			if(error == OMX_ErrorNone) 
+			{
+				ofLogVerbose(__func__) << "SET " << (*i).second << " OMX_COLOR_FORMATTYPE PASS";			
+			}else
+			{
+				//ofLogError(__func__) << "SET " << (*i).second << " OMX_COLOR_FORMATTYPE FAIL";
+				//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
+			}
+		}
+
+		
+		portFormatType.eColorFormat = OMX_COLOR_Format24bitRGB888;
+		error = OMX_SetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "SET OMX_COLOR_FORMATTYPE OMX_COLOR_Format24bitRGB888 PASS";
+		}
+#endif	
+	}
+
+
+	
+	
 	
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
@@ -77,6 +244,14 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	
 	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
 	
+	
+	
+	
+	//////////////////
+	
+	
+	
+	
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE portdef;
 	OMX_INIT_STRUCTURE(portdef);
@@ -90,6 +265,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	
 	OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
 	
+		
 	
 	//Set the framerate 
 	OMX_CONFIG_FRAMERATETYPE framerateConfig;
@@ -98,7 +274,6 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	framerateConfig.xEncodeFramerate = framerate << 16; //Q16 format - 25fps
 	
 	OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
-	
 	
 	setExposureMode(OMX_ExposureControlAuto);
 	setMeteringMode(OMX_MeteringModeAverage);
@@ -117,32 +292,85 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	 OMX_COMMONFLICKERCANCEL_50,
 	 OMX_COMMONFLICKERCANCEL_60
 	 */
-	setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
-	enableAllAlgorithms();
-	enableFaceDetection();
-	
-	error = OMX_ErrorNone;
-	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-	OMX_INIT_STRUCTURE(controlType);
-	controlType.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
-	controlType.bDisabled = OMX_TRUE;
-	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-	
+	setFlickerCancellation(OMX_COMMONFLICKERCANCEL_OFF);
+	//
+	//enableFaceTracking();
+	//disableImageEffects();
+	OMX_CONFIG_BOOLEANTYPE doBurstMode;
+	OMX_INIT_STRUCTURE(doBurstMode);
+	doBurstMode.bEnabled = OMX_TRUE;
+	error =  OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &doBurstMode);
 	if(error == OMX_ErrorNone) 
 	{
-		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm  PASS!!!!!!!! ";
-		ofLogVerbose() << "DISABLE EFFECTS PASS <-------------";
+		ofLogVerbose(__func__) << "BURST MODE ENABLED PASS";
+		
 	}else
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexParamCameraDisableAlgorithm FAIL error: 0x%08x", error);
-
+		ofLog(OF_LOG_ERROR, "BURST MODE ENABLED  FAIL error: 0x%08x", error);
+		
 	}
 	
 }
 
-void ofxRPiCameraVideoGrabber::enableFaceDetection()
+void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
+	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+	OMX_INIT_STRUCTURE(controlType);
+	controlType.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
+	if (doDisable) {
+		controlType.bDisabled = OMX_TRUE;
+	}else 
+	{
+		controlType.bDisabled = OMX_FALSE;
+	}
+
+	
+	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+	
+	
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "toggleImageEffects PASS";
+		
+	}else
+	{
+		ofLog(OF_LOG_ERROR, "toggleImageEffects FAIL error: 0x%08x", error);
+		
+	}
+	
+}
+void ofxRPiCameraVideoGrabber::enableImageEffects()
+{
+	toggleImageEffects(true);
+}
+
+void ofxRPiCameraVideoGrabber::disableImageEffects()
+{
+	toggleImageEffects(false);
+}
+
+void ofxRPiCameraVideoGrabber::enableFaceTracking()
+{
+	
+	OMX_ERRORTYPE error = OMX_ErrorNone;
+	
+	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+	OMX_INIT_STRUCTURE(controlType);
+	controlType.eAlgorithm = OMX_CameraDisableAlgorithmFacetracking;
+	controlType.bDisabled = OMX_FALSE;
+	
+	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+	
+	if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "SET DISABLE FACE TRACKING TO FALSE - FAIL error: 0x%08x", error);
+	}else
+	{
+		ofLogVerbose(__func__) << "SET DISABLE FACE TRACKING TO FALSE - PASS!!!!!!!! ";
+		
+	}
+
 	
 	OMX_CONFIG_FACEDETECTIONCONTROLTYPE type;
 	OMX_INIT_STRUCTURE(type);
@@ -152,15 +380,30 @@ void ofxRPiCameraVideoGrabber::enableFaceDetection()
 	type.nQuality = 50;
 	type.eMode = OMX_FaceDetectionControlOn;
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFaceDetectionControl, &type);
+	if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "ENABLE FACE TRACKING FAIL error: 0x%08x", error);
+	}else
+	{
+		ofLogVerbose(__func__) << "ENABLE FACE TRACKING PASS";
+		
+	}
+	
+	OMX_CONFIG_BOOLEANTYPE doDrawBoxesType;
+	OMX_INIT_STRUCTURE(doDrawBoxesType);
+	doDrawBoxesType.bEnabled = OMX_TRUE;
+	
+	error = OMX_SetConfig(camera, OMX_IndexConfigDrawBoxAroundFaces, &doDrawBoxesType);
 	
 	if(error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonFaceDetectionControl FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "SET DrawBoxAroundFaces - FAIL error: 0x%08x", error);
 	}else
 	{
-		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonFaceDetectionControl  PASS!!!!!!!! ";
-	
+		ofLogVerbose(__func__) << "SET DrawBoxAroundFaces - PASS!!!!!!!! ";
+		
 	}
+	
 }
 
 void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
@@ -247,63 +490,42 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 	
 	
 	
+	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	{
+		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
+		OMX_INIT_STRUCTURE(controlType);
+		controlType.eAlgorithm = (*i).first;
+		controlType.bDisabled = OMX_FALSE;
+		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
+		
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
+		}else
+		{
+			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
+			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
+		}
+	}
 	/*for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
 	{
 		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 		OMX_INIT_STRUCTURE(controlType);
 		controlType.eAlgorithm = (*i).first;
-		error = OMX_GetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "ALGORITHM CONFIG GET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
-		}else
-		{
-			ofLogError(__func__) << "ALGORITHM CONFIG GET FAIL " << (*i).second;
-			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
-		}
-		
-		
-		
 		controlType.bDisabled = OMX_FALSE;
 		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		
 		if(error == OMX_ErrorNone) 
 		{
-			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
+			ofLogVerbose(__func__) << "ALGORITHM CONFIG SET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
 		}else
 		{
-			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
-			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
+			ofLogError(__func__) << "ALGORITHM CONFIG SET FAIL " << (*i).second;
+			ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
 		}
+		
+		
+	
 	}*/
-	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
-	{
-		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-		OMX_INIT_STRUCTURE(controlType);
-		controlType.bDisabled = OMX_FALSE;
-		error = OMX_GetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "ALGORITHM CONFIG GET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
-		}else
-		{
-			ofLogError(__func__) << "ALGORITHM CONFIG GET FAIL " << (*i).second;
-		}
-		
-		
-		/*
-		
-		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
-		}else
-		{
-			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
-			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
-		}*/
-	}
 	
 }
 int ofxRPiCameraVideoGrabber::getWidth()
@@ -566,7 +788,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage()
 	context = appEGLWindow->getEglContext();
 	
 	
-	tex.allocate(videoWidth, videoHeight, GL_RGBA);
+	tex.allocate(videoWidth, videoHeight, GL_RGB);
 	tex.getTextureData().bFlipTexture = false;
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
@@ -654,7 +876,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::cameraEventHandlerCallback(OMX_HANDLETYP
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-	logEvent(__func__, eEvent);
+	//logEvent(__func__, eEvent);
 	return OMX_ErrorNone;
 }
 

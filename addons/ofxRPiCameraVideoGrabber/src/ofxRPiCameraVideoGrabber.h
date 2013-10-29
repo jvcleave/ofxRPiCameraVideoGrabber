@@ -48,12 +48,22 @@ public:
 	int getHeight();
 	int getFrameRate();
 	bool isReady();
-	int frameCounter;
+	
 	
 	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
 	void enableAllAlgorithms();
-	void enableFaceDetection();
+	void enableFaceTracking();
+	void disableImageEffects();
+	void enableImageEffects();
+	bool isFrameNew();
 private:
+	
+	void onUpdate(ofEventArgs & args);
+	bool hasNewFrame;
+	
+	int frameCounter;
+	int updateFrameCounter;
+	
 	void onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 	
@@ -92,6 +102,6 @@ private:
 	
 	void close();
 	
-
+	void toggleImageEffects(bool doDisable);
 	
 };

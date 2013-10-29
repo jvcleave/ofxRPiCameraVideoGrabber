@@ -4,7 +4,7 @@
 void testApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetVerticalSync(false);
+	//ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
 	doShader	= false;
@@ -12,39 +12,49 @@ void testApp::setup()
 	
 	consoleListener.setup(this);
 	videoGrabber.setup(1280, 720, 60);
+	fbo.allocate(ofGetWidth(), ofGetHeight());
 	
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	
+	if (doShader) 
+	{
+		if (videoGrabber.isFrameNew())
+		{
+			fbo.begin();
+				ofClear(0, 0, 0, 0);
+				shader.begin();
+					shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), 1);
+					shader.setUniform1f("time", ofGetElapsedTimef());
+					shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight()); 
+					videoGrabber.draw();
+					shader.end();
+			fbo.end();
+		}
+	}
 }
 
 
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	if (doShader) 
-	{
-		int width = ofGetWidth();
-		int height = ofGetHeight();
-		
-		shader.begin();
-			shader.setUniform1f("time", ofGetElapsedTimef());
-			shader.setUniform2f("resolution", (float)width, (float)height); 
-			videoGrabber.draw();
-		shader.end();
-		
-	}else 
+	if (!doShader)
 	{
 		videoGrabber.draw();
+	}else
+	{
+		fbo.draw(0, 0);
 	}
+
+	
+	
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
-	info << "Camera frameCounter: " << videoGrabber.frameCounter << "\n";
-	info << "App frameCounter: " << ofGetFrameNum() << "\n";
+	//info << "Camera frameCounter: " << videoGrabber.frameCounter << "\n";
+	//info << "App frameCounter: " << ofGetFrameNum() << "\n";
 	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
 	info << "CURRENT FILTER: " << filterCollection.currentFilter.name << "\n";
 	info <<	filterCollection.filterList << "\n";
@@ -55,7 +65,7 @@ void testApp::draw(){
 	info << "Press r for Random filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
 	
-	if (doDrawInfo && !doShader) 
+	if (doDrawInfo) 
 	{
 		ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
 	}
