@@ -90,15 +90,14 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	portFormatType.nPortIndex = CAMERA_OUTPUT_PORT;
 	error = OMX_GetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
 	
-	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
-	map<OMX_COLOR_FORMATTYPE, string> colorFormats;
+	
 	
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
 	}else 
 	{
-		//able to set to
+		//camera color spaces
 		/*
 		 OMX_COLOR_Format24bitRGB888
 		 OMX_COLOR_FormatYUV420PackedPlanar
@@ -110,7 +109,13 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		 OMX_COLOR_FormatYUV420PackedSemiPlanar
 		 */
 		
-		
+		//egl_render color spaces
+		/*
+		 OMX_COLOR_Format18bitRGB666
+		 OMX_COLOR_FormatYUV420PackedPlanar
+		 OMX_COLOR_FormatYUV422PackedPlanar
+		 OMX_COLOR_Format32bitABGR8888
+		 */
 		
 		colorFormats[OMX_COLOR_FormatUnused] = "OMX_COLOR_FormatUnused";
 		colorFormats[OMX_COLOR_FormatMonochrome] = "OMX_COLOR_FormatMonochrome";
@@ -193,6 +198,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
 		ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
 		ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
+		
 		//OMX_U32 nIndex;
 		//OMX_VIDEO_CODINGTYPE eCompressionFormat; 
 		//OMX_COLOR_FORMATTYPE eColorFormat;
@@ -215,7 +221,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		}
 
 		
-		portFormatType.eColorFormat = OMX_COLOR_Format24bitRGB888;
+		portFormatType.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
 		error = OMX_SetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
 		if(error == OMX_ErrorNone) 
 		{
@@ -275,8 +281,43 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	
 	OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
 	
+	
+	OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+	OMX_INIT_STRUCTURE(exposurevalue);
+	exposurevalue.nPortIndex = OMX_ALL;
+	error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "OMX_CONFIG_EXPOSUREVALUETYPE PASS";
+		stringstream info;
+		info << "OMX_METERINGTYPE: " << exposurevalue.eMetering << "\n";
+		info << "xEVCompensation: " << exposurevalue.xEVCompensation << "\n";
+		info << "nApertureFNumber: " << exposurevalue.nApertureFNumber << "\n";
+		info << "bAutoAperture: " << exposurevalue.bAutoAperture << "\n";
+		info << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec << "\n";
+		info << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed << "\n";
+		info << "nSensitivity: " << exposurevalue.nSensitivity << "\n";
+		info << "bAutoSensitivity: " << exposurevalue.bAutoSensitivity << "\n";
+		ofLogVerbose() << "CAMERA EXPOSURE INFO: " << info.str();
+		
+	}
+#if 0
+	OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32 nPortIndex;
+    OMX_METERINGTYPE eMetering;
+    OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
+    OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
+    OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
+    OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
+    OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
+    OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
+    OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
+#endif
+	
+	
 	setExposureMode(OMX_ExposureControlAuto);
-	setMeteringMode(OMX_MeteringModeAverage);
+	setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
 	setSharpness(-50);
 	setContrast(-10);
 	setBrightness(50);
@@ -285,21 +326,26 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	setWhiteBalance(OMX_WhiteBalControlAuto);
 	applyImageFilter(OMX_ImageFilterNone);
 	setColorEnhancement(false);	 
-	setLEDStatus(false);
+	//setLEDStatus(false);
 	/*
 	 OMX_COMMONFLICKERCANCEL_OFF,
 	 OMX_COMMONFLICKERCANCEL_AUTO,
 	 OMX_COMMONFLICKERCANCEL_50,
 	 OMX_COMMONFLICKERCANCEL_60
 	 */
-	setFlickerCancellation(OMX_COMMONFLICKERCANCEL_OFF);
+	//setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
 	//
 	//enableFaceTracking();
 	//disableImageEffects();
+	
+	
+}
+void ofxRPiCameraVideoGrabber::enableBurstMode()
+{
 	OMX_CONFIG_BOOLEANTYPE doBurstMode;
 	OMX_INIT_STRUCTURE(doBurstMode);
 	doBurstMode.bEnabled = OMX_TRUE;
-	error =  OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &doBurstMode);
+	OMX_ERRORTYPE error =  OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &doBurstMode);
 	if(error == OMX_ErrorNone) 
 	{
 		ofLogVerbose(__func__) << "BURST MODE ENABLED PASS";
@@ -309,9 +355,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		ofLog(OF_LOG_ERROR, "BURST MODE ENABLED  FAIL error: 0x%08x", error);
 		
 	}
-	
 }
-
 void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -587,7 +631,7 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, in
 	OMX_INIT_STRUCTURE(exposurevalue);
 	exposurevalue.nPortIndex = OMX_ALL;
 	
-	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+	error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR,	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
@@ -595,6 +639,8 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, in
 		
 	exposurevalue.xEVCompensation = evCompensation;	//Fixed point value stored as Q16 
 	exposurevalue.nSensitivity = sensitivity;		//< e.g. nSensitivity = 100 implies "ISO 100" 
+	exposurevalue.bAutoAperture = OMX_TRUE;
+	//exposurevalue.nApertureFNumber = 2;
 	if (autoSensitivity)
 	{
 		exposurevalue.bAutoSensitivity	= OMX_TRUE;
@@ -934,6 +980,66 @@ void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 	}
+	
+	
+#if 0
+	OMX_VIDEO_PARAM_PORTFORMATTYPE eglOutputPortType;
+	OMX_INIT_STRUCTURE(eglOutputPortType);
+	eglOutputPortType.nPortIndex = EGL_RENDER_OUTPUT_PORT;
+	error = OMX_GetConfig(render, OMX_IndexParamVideoPortFormat, &eglOutputPortType);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "EGL_RENDER_INPUT_PORT OMX_COLOR_FORMATTYPE is " << colorFormats[eglOutputPortType.eColorFormat]; //
+		
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_GetConfig FAIL error: 0x%08x", error);
+		
+	}
+#endif
+	
+#if 1
+	OMX_PARAM_PORTDEFINITIONTYPE portFormatType;
+	OMX_INIT_STRUCTURE(portFormatType);
+	portFormatType.nPortIndex = EGL_RENDER_OUTPUT_PORT;
+	error = OMX_GetConfig(render, OMX_IndexParamPortDefinition, &portFormatType);
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "EGL_RENDER_INPUT_PORT GET CONFIG PASS";
+		switch (portFormatType.eDomain) 
+		{
+				
+				
+			case OMX_PortDomainVideo:
+			{
+				ofLogVerbose() << "TYPE IS video";
+				break;
+			}
+			case OMX_PortDomainImage:
+			{
+				ofLogVerbose() << "TYPE IS image";
+				break;
+			}
+			case OMX_PortDomainOther:
+			{
+				ofLogVerbose() << "TYPE IS other";
+				break;
+			}
+			default:
+				break;
+		}
+		//		OMX_AUDIO_PORTDEFINITIONTYPE audio;
+		//        OMX_VIDEO_PORTDEFINITIONTYPE video;
+		//        OMX_IMAGE_PORTDEFINITIONTYPE image;
+		//        OMX_OTHER_PORTDEFINITIONTYPE other;
+		
+		
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_GetConfig FAIL error: 0x%08x", error);
+		
+	}
+#endif
 	
 	//Create camera->egl_render Tunnel
 	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);

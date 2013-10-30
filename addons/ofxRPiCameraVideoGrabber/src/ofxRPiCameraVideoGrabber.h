@@ -56,6 +56,10 @@ public:
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
+	
+	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
+	map<OMX_COLOR_FORMATTYPE, string> colorFormats;
+	void enableBurstMode();
 private:
 	
 	void onUpdate(ofEventArgs & args);
