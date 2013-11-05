@@ -17,6 +17,8 @@
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
 
+#include "OMX_Maps.h"
+
 class ofxRPiCameraVideoGrabber
 {
 
@@ -57,9 +59,20 @@ public:
 	void enableImageEffects();
 	bool isFrameNew();
 	
+	OMX_Maps omxMaps;
+	
 	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
 	map<OMX_COLOR_FORMATTYPE, string> colorFormats;
+	map<OMX_EVENTTYPE, string> eventTypes;
+	map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithms;
+	
 	void enableBurstMode();
+	
+	int getSharpness()		{ return sharpness; }
+	int getContrast()		{ return contrast;	}
+	int getBrightness()		{ return brightness; }
+	int getSaturation()		{ return saturation; }
+	
 private:
 	
 	void onUpdate(ofEventArgs & args);

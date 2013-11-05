@@ -7,32 +7,24 @@ void testApp::setup()
 	//ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
-	doShader	= false;
-	shader.load("PostProcessing.vert", "PostProcessing.frag", "");
-	
+		
 	consoleListener.setup(this);
 	videoGrabber.setup(1280, 720, 60);
-	fbo.allocate(ofGetWidth(), ofGetHeight());
 	
+	
+	ofx::HTTP::BasicServerSettings settings;
+    settings.setPort(8998);
+	server = ofx::HTTP::BasicServer::makeShared(settings);
+    server->start();
+	controlPanel.setup(&videoGrabber);
 }
 
 //--------------------------------------------------------------
 void testApp::update()
 {
-	if (doShader) 
+	if (videoGrabber.isFrameNew())
 	{
-		if (videoGrabber.isFrameNew())
-		{
-			fbo.begin();
-				ofClear(0, 0, 0, 0);
-				shader.begin();
-					shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), 1);
-					shader.setUniform1f("time", ofGetElapsedTimef());
-					shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight()); 
-					videoGrabber.draw();
-					shader.end();
-			fbo.end();
-		}
+		
 	}
 }
 
@@ -40,13 +32,7 @@ void testApp::update()
 //--------------------------------------------------------------
 void testApp::draw(){
 
-	if (!doShader)
-	{
-		videoGrabber.draw();
-	}else
-	{
-		fbo.draw(0, 0);
-	}
+	videoGrabber.draw();
 
 	
 	
@@ -60,7 +46,6 @@ void testApp::draw(){
 	info <<	filterCollection.filterList << "\n";
 	
 	info << "\n";
-	info << "Press s to enable Shader ENABLED: " << doShader << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press r for Random filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
@@ -76,11 +61,7 @@ void testApp::draw(){
 void testApp::keyPressed  (int key)
 {
 	ofLogVerbose(__func__) << key;
-	if (key == 's') 
-	{
-		doShader = !doShader;
-		
-	}
+	
 	if (key == 'r')
 	{
 		videoGrabber.applyImageFilter(filterCollection.getRandomFilter().type);
@@ -95,6 +76,11 @@ void testApp::keyPressed  (int key)
 	{
 		doDrawInfo = !doDrawInfo;
 	}
+	if (key == 's') {
+		controlPanel.saveXML();
+		
+	}
+	
 }
 
 void testApp::onCharacterReceived(SSHKeyListenerEventData& e)

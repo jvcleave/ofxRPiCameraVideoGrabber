@@ -8,6 +8,7 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
+
 #define OMX_INIT_STRUCTURE(a) \
 memset(&(a), 0, sizeof(a)); \
 (a).nSize = sizeof(a); \
@@ -33,6 +34,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	frameCounter = 0;
 	updateFrameCounter = 0;
 	hasNewFrame = false;
+	videoCodingTypes	= omxMaps.videoCodingTypes;
+	colorFormats		= omxMaps.colorFormats;
+	eventTypes			= omxMaps.eventTypes; 
+	algorithms			= omxMaps.algorithms;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 
@@ -64,7 +69,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	OMX_ERRORTYPE error = OMX_Init();
 	if (error == OMX_ErrorNone) 
 	{
-		ofLogVerbose(LOG_NAME) << "OMX_Init PASS";
+		ofLogVerbose(__func__) << "OMX_Init PASS";
 	}
 
 	OMX_CALLBACKTYPE cameraCallbacks;
@@ -117,84 +122,8 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		 OMX_COLOR_Format32bitABGR8888
 		 */
 		
-		colorFormats[OMX_COLOR_FormatUnused] = "OMX_COLOR_FormatUnused";
-		colorFormats[OMX_COLOR_FormatMonochrome] = "OMX_COLOR_FormatMonochrome";
-		colorFormats[OMX_COLOR_Format8bitRGB332] = "OMX_COLOR_Format8bitRGB332";
-		colorFormats[OMX_COLOR_Format12bitRGB444] = "OMX_COLOR_Format12bitRGB444";
-		colorFormats[OMX_COLOR_Format16bitARGB4444] = "OMX_COLOR_Format16bitARGB4444";
-		colorFormats[OMX_COLOR_Format16bitARGB1555] = "OMX_COLOR_Format16bitARGB1555";
-		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitRGB565";
-		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitBGR565";
-		colorFormats[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format18bitRGB666";
-		colorFormats[OMX_COLOR_Format18bitARGB1665] = "OMX_COLOR_Format18bitARGB1665";
-		colorFormats[OMX_COLOR_Format19bitARGB1666] = "OMX_COLOR_Format19bitARGB1666"; 
-		colorFormats[OMX_COLOR_Format24bitRGB888] = "OMX_COLOR_Format24bitRGB888";
-		colorFormats[OMX_COLOR_Format24bitBGR888] = "OMX_COLOR_Format24bitBGR888";
-		colorFormats[OMX_COLOR_Format24bitARGB1887] = "OMX_COLOR_Format24bitARGB1887";
-		colorFormats[OMX_COLOR_Format25bitARGB1888] = "OMX_COLOR_Format25bitARGB1888";
-		colorFormats[OMX_COLOR_Format32bitBGRA8888] = "OMX_COLOR_Format32bitBGRA8888";
-		colorFormats[OMX_COLOR_Format32bitARGB8888] = "OMX_COLOR_Format32bitARGB8888";
-		colorFormats[OMX_COLOR_FormatYUV411Planar] = "OMX_COLOR_FormatYUV411Planar";
-		colorFormats[OMX_COLOR_FormatYUV411PackedPlanar] = "OMX_COLOR_FormatYUV411PackedPlanar";
-		colorFormats[OMX_COLOR_FormatYUV420Planar] = "OMX_COLOR_FormatYUV420Planar";
-		colorFormats[OMX_COLOR_FormatYUV420PackedPlanar] = "OMX_COLOR_FormatYUV420PackedPlanar";
-		colorFormats[OMX_COLOR_FormatYUV420SemiPlanar] = "OMX_COLOR_FormatYUV420SemiPlanar";
-		colorFormats[OMX_COLOR_FormatYUV422Planar] = "OMX_COLOR_FormatYUV422Planar";
-		colorFormats[OMX_COLOR_FormatYUV422PackedPlanar] = "OMX_COLOR_FormatYUV422PackedPlanar";
-		colorFormats[OMX_COLOR_FormatYUV422SemiPlanar] = "OMX_COLOR_FormatYUV422SemiPlanar";
-		colorFormats[OMX_COLOR_FormatYCbYCr] = "OMX_COLOR_FormatYCbYCr";
-		colorFormats[OMX_COLOR_FormatYCrYCb] = "OMX_COLOR_FormatYCrYCb";
-		colorFormats[OMX_COLOR_FormatCbYCrY] = "OMX_COLOR_FormatCbYCrY";
-		colorFormats[OMX_COLOR_FormatCrYCbY] = "OMX_COLOR_FormatCrYCbY";
-		colorFormats[OMX_COLOR_FormatYUV444Interleaved] = "OMX_COLOR_FormatYUV444Interleaved";
-		colorFormats[OMX_COLOR_FormatRawBayer8bit] = "OMX_COLOR_FormatRawBayer8bit";
-		colorFormats[OMX_COLOR_FormatRawBayer10bit] = "OMX_COLOR_FormatRawBayer10bit";
-		colorFormats[OMX_COLOR_FormatRawBayer8bitcompressed] = "OMX_COLOR_FormatRawBayer8bitcompressed";
-		colorFormats[OMX_COLOR_FormatL2] = "OMX_COLOR_FormatL2"; 
-		colorFormats[OMX_COLOR_FormatL4] = "OMX_COLOR_FormatL4"; 
-		colorFormats[OMX_COLOR_FormatL8] = "OMX_COLOR_FormatL8"; 
-		colorFormats[OMX_COLOR_FormatL16] = "OMX_COLOR_FormatL16"; 
-		colorFormats[OMX_COLOR_FormatL24] = "OMX_COLOR_FormatL24"; 
-		colorFormats[OMX_COLOR_FormatL32] = "OMX_COLOR_FormatL32";
-		colorFormats[OMX_COLOR_FormatYUV420PackedSemiPlanar] = "OMX_COLOR_FormatYUV420PackedSemiPlanar";
-		colorFormats[OMX_COLOR_FormatYUV422PackedSemiPlanar] = "OMX_COLOR_FormatYUV422PackedSemiPlanar";
-		colorFormats[OMX_COLOR_Format18BitBGR666] = "OMX_COLOR_Format18BitBGR666";
-		colorFormats[OMX_COLOR_Format24BitARGB6666] = "OMX_COLOR_Format24BitARGB6666";
-		colorFormats[OMX_COLOR_Format24BitABGR6666] = "OMX_COLOR_Format24BitABGR6666";
-		colorFormats[OMX_COLOR_FormatKhronosExtensions] = "OMX_COLOR_FormatKhronosExtensions";
-		colorFormats[OMX_COLOR_FormatVendorStartUnused] = "OMX_COLOR_FormatVendorStartUnused";
-		colorFormats[OMX_COLOR_Format32bitABGR8888] = "OMX_COLOR_Format32bitABGR8888";
-		colorFormats[OMX_COLOR_Format8bitPalette] = "OMX_COLOR_Format8bitPalette";
-		colorFormats[OMX_COLOR_FormatYUVUV128] = "OMX_COLOR_FormatYUVUV128";
-		colorFormats[OMX_COLOR_FormatRawBayer12bit] = "OMX_COLOR_FormatRawBayer12bit";
-		colorFormats[OMX_COLOR_FormatBRCMEGL] = "OMX_COLOR_FormatBRCMEGL";
-		colorFormats[OMX_COLOR_FormatBRCMOpaque] = "OMX_COLOR_FormatBRCMOpaque";
-		colorFormats[OMX_COLOR_FormatYVU420PackedPlanar] = "OMX_COLOR_FormatYVU420PackedPlanar";
-		colorFormats[OMX_COLOR_FormatYVU420PackedSemiPlanar] = "OMX_COLOR_FormatYVU420PackedSemiPlanar";
-		
 		ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
-		
-		
-		videoCodingTypes[OMX_VIDEO_CodingUnused] = "Value when coding is NA";
-		videoCodingTypes[OMX_VIDEO_CodingAutoDetect] = "Autodetection of coding type";
-		videoCodingTypes[OMX_VIDEO_CodingMPEG2] = "AKA: H.262";
-		videoCodingTypes[OMX_VIDEO_CodingH263] = "H.263";
-		videoCodingTypes[OMX_VIDEO_CodingMPEG4] = "MPEG-4";
-		videoCodingTypes[OMX_VIDEO_CodingWMV] = "all versions of Windows Media Video";
-		videoCodingTypes[OMX_VIDEO_CodingRV] = "all versions of Real Video";
-		videoCodingTypes[OMX_VIDEO_CodingAVC] = "H.264 AVC";
-		videoCodingTypes[OMX_VIDEO_CodingMJPEG] = "Motion JPEG";
-		videoCodingTypes[OMX_VIDEO_CodingKhronosExtensions] = "Reserved region for introducing Khronos Standard Extensions "; 
-		videoCodingTypes[OMX_VIDEO_CodingVendorStartUnused] = "Reserved region for introducing Vendor Extensions";
-		videoCodingTypes[OMX_VIDEO_CodingVP6] = "On2 VP6";
-		videoCodingTypes[OMX_VIDEO_CodingVP7] = "On2 VP7";
-		videoCodingTypes[OMX_VIDEO_CodingVP8] = "On2 VP8";
-		videoCodingTypes[OMX_VIDEO_CodingYUV] = "raw YUV video";
-		videoCodingTypes[OMX_VIDEO_CodingSorenson] = "Sorenson";
-		videoCodingTypes[OMX_VIDEO_CodingTheora] = "Theora";
-		videoCodingTypes[OMX_VIDEO_CodingMVC] = "H.264 MVC"; 	
-		videoCodingTypes[OMX_VIDEO_CodingMax] = "0x7FFFFFFF";
-		
+
 		ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
 		ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
 		ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
@@ -513,28 +442,15 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 	ofLogVerbose() << "enableAllAlgorithms";
 	
 	
-	map<OMX_CAMERADISABLEALGORITHMTYPE, string> types;
+	
 
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
-	types[OMX_CameraDisableAlgorithmFacetracking]			= "OMX_CameraDisableAlgorithmFacetracking";
-	types[OMX_CameraDisableAlgorithmRedEyeReduction]		= "OMX_CameraDisableAlgorithmRedEyeReduction";
-	types[OMX_CameraDisableAlgorithmVideoStabilisation]		= "OMX_CameraDisableAlgorithmVideoStabilisation";
-	types[OMX_CameraDisableAlgorithmWriteRaw]				= "OMX_CameraDisableAlgorithmWriteRaw";
-	types[OMX_CameraDisableAlgorithmVideoDenoise]			= "OMX_CameraDisableAlgorithmVideoDenoise";
-	types[OMX_CameraDisableAlgorithmStillsDenoise]			= "OMX_CameraDisableAlgorithmStillsDenoise";
-	types[OMX_CameraDisableAlgorithmAntiShake]				= "OMX_CameraDisableAlgorithmAntiShake";
-	types[OMX_CameraDisableAlgorithmImageEffects]			= "OMX_CameraDisableAlgorithmImageEffects";
-	types[OMX_CameraDisableAlgorithmDarkSubtract]			= "OMX_CameraDisableAlgorithmDarkSubtract";
-	types[OMX_CameraDisableAlgorithmDynamicRangeExpansion]	= "OMX_CameraDisableAlgorithmDynamicRangeExpansion";
-	types[OMX_CameraDisableAlgorithmFaceRecognition]		= "OMX_CameraDisableAlgorithmFaceRecognition";
-	types[OMX_CameraDisableAlgorithmFaceBeautification]		= "OMX_CameraDisableAlgorithmFaceBeautification";
-	types[OMX_CameraDisableAlgorithmSceneDetection]			= "OMX_CameraDisableAlgorithmSceneDetection";
-	types[OMX_CameraDisableAlgorithmHighDynamicRange]		= "OMX_CameraDisableAlgorithmHighDynamicRange";
 	
 	
 	
-	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	
+	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=algorithms.begin(); i!=algorithms.end(); ++i)
 	{
 		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 		OMX_INIT_STRUCTURE(controlType);
@@ -551,7 +467,7 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
 		}
 	}
-	/*for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=types.begin(); i!=types.end(); ++i)
+	/*for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=algorithms.begin(); i!=algorithms.end(); ++i)
 	{
 		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 		OMX_INIT_STRUCTURE(controlType);
@@ -875,40 +791,20 @@ void ofxRPiCameraVideoGrabber::generateEGLImage()
 	}
 }
 
-void logEvent(string callingFunction, OMX_EVENTTYPE eEvent)
-{
-	switch (eEvent) 
-	{
-		case OMX_EventError:						ofLogError(callingFunction)	  <<  " OMX_EventError";						break;
-			
-		case OMX_EventCmdComplete:					ofLogVerbose(callingFunction) <<  " OMX_EventCmdComplete";					break;
-		case OMX_EventMark:							ofLogVerbose(callingFunction) <<  " OMX_EventMark";							break;
-		case OMX_EventPortSettingsChanged:			ofLogVerbose(callingFunction) <<  " OMX_EventPortSettingsChanged";			break;
-		case OMX_EventBufferFlag:					ofLogVerbose(callingFunction) <<  " OMX_EventBufferFlag";					break;
-		case OMX_EventResourcesAcquired:			ofLogVerbose(callingFunction) <<  " OMX_EventResourcesAcquired";			break;
-		case OMX_EventComponentResumed:				ofLogVerbose(callingFunction) <<  " OMX_EventComponentResumed";				break;
-		case OMX_EventDynamicResourcesAvailable:	ofLogVerbose(callingFunction) <<  " OMX_EventDynamicResourcesAvailable";	break;
-		case OMX_EventPortFormatDetected:			ofLogVerbose(callingFunction) <<  " OMX_EventPortFormatDetected";			break;
-		case OMX_EventKhronosExtensions:			ofLogVerbose(callingFunction) <<  " OMX_EventKhronosExtensions";			break;
-		case OMX_EventVendorStartUnused:			ofLogVerbose(callingFunction) <<  " OMX_EventVendorStartUnused";			break;
-		case OMX_EventMax:							ofLogVerbose(callingFunction) <<  " OMX_EventMax";							break;
-		case OMX_EventParamOrConfigChanged:			ofLogVerbose(callingFunction) <<  " OMX_EventParamOrConfigChanged";			break;
-			
-		default:									ofLogVerbose(callingFunction) <<	"DEFAULT";								break;
-	}
-}
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
 	/*ofLog(OF_LOG_VERBOSE, 
 		  "ofxRPiCameraVideoGrabber::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 		  __func__, eEvent, nData1, nData2, pEventData);*/
-	logEvent(__func__, eEvent);
+	ofxRPiCameraVideoGrabber *grabber = static_cast<ofxRPiCameraVideoGrabber*>(pAppData);
+	ofLogVerbose(__func__) << grabber->eventTypes[eEvent];
 	switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:
 		{
-			ofxRPiCameraVideoGrabber *grabber = static_cast<ofxRPiCameraVideoGrabber*>(pAppData);
+			
 			grabber->onCameraEventParamOrConfigChanged();
 			break;
 		}			
@@ -922,7 +818,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::cameraEventHandlerCallback(OMX_HANDLETYP
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-	//logEvent(__func__, eEvent);
 	return OMX_ErrorNone;
 }
 

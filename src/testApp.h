@@ -5,6 +5,9 @@
 #include "ConsoleListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
+#include "ControlPanel.h"
+#include "ofxHTTP.h"
+
 
 class testApp : public ofBaseApp, public SSHKeyListener{
 
@@ -17,10 +20,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 		void keyPressed(int key);
 
 
-	ofShader shader;
 	
-	bool doShader;
-	bool isShaderLoaded;
 	void onCharacterReceived(SSHKeyListenerEventData& e);
 	ConsoleListener consoleListener;
 	ofxRPiCameraVideoGrabber videoGrabber;
@@ -28,6 +28,11 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
-	ofFbo fbo;
+	
+	ControlPanel controlPanel;
+	
+	
+	 ofx::HTTP::BasicServer::SharedPtr server;
+	
 };
 
