@@ -34,10 +34,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	frameCounter = 0;
 	updateFrameCounter = 0;
 	hasNewFrame = false;
-	videoCodingTypes	= omxMaps.videoCodingTypes;
-	colorFormats		= omxMaps.colorFormats;
-	eventTypes			= omxMaps.eventTypes; 
-	algorithms			= omxMaps.algorithms;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 
@@ -122,9 +118,9 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		 OMX_COLOR_Format32bitABGR8888
 		 */
 		
-		ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
+		ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << omxMaps.colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
 
-		ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
+		ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << omxMaps.videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
 		ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
 		ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
 		
@@ -450,7 +446,7 @@ void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
 	
 	
 	
-	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=algorithms.begin(); i!=algorithms.end(); ++i)
+	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=omxMaps.algorithms.begin(); i!=omxMaps.algorithms.end(); ++i)
 	{
 		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 		OMX_INIT_STRUCTURE(controlType);
@@ -799,7 +795,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::cameraEventHandlerCallback(OMX_HANDLETYP
 		  "ofxRPiCameraVideoGrabber::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 		  __func__, eEvent, nData1, nData2, pEventData);*/
 	ofxRPiCameraVideoGrabber *grabber = static_cast<ofxRPiCameraVideoGrabber*>(pAppData);
-	ofLogVerbose(__func__) << grabber->eventTypes[eEvent];
+	ofLogVerbose(__func__) << grabber->omxMaps.eventTypes[eEvent];
 	switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:

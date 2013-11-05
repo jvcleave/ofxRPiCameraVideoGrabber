@@ -20,21 +20,76 @@
 class OMX_Maps
 {
 public:
+	
+	
 	OMX_Maps()
 	{
 		
+		
+		imageFilterTypes[OMX_ImageFilterNone] = "OMX_ImageFilterNone";
+		imageFilterTypes[OMX_ImageFilterNoise] = "OMX_ImageFilterNoise";
+		imageFilterTypes[OMX_ImageFilterEmboss] = "OMX_ImageFilterEmboss";
+		imageFilterTypes[OMX_ImageFilterNegative] = "OMX_ImageFilterNegative";
+		imageFilterTypes[OMX_ImageFilterSketch] = "OMX_ImageFilterSketch";
+		imageFilterTypes[OMX_ImageFilterOilPaint] = "OMX_ImageFilterOilPaint";
+		imageFilterTypes[OMX_ImageFilterHatch] = "OMX_ImageFilterHatch";
+		imageFilterTypes[OMX_ImageFilterGpen] = "OMX_ImageFilterGpen";
+		imageFilterTypes[OMX_ImageFilterAntialias] = "OMX_ImageFilterAntialias";
+		imageFilterTypes[OMX_ImageFilterDeRing] = "OMX_ImageFilterDeRing";
+		imageFilterTypes[OMX_ImageFilterSolarize] = "OMX_ImageFilterSolarize";
+		imageFilterTypes[OMX_ImageFilterWatercolor] = "OMX_ImageFilterWatercolor";
+		imageFilterTypes[OMX_ImageFilterPastel] = "OMX_ImageFilterPastel";
+		imageFilterTypes[OMX_ImageFilterSharpen] = "OMX_ImageFilterSharpen";
+		imageFilterTypes[OMX_ImageFilterFilm] = "OMX_ImageFilterFilm";
+		imageFilterTypes[OMX_ImageFilterBlur] = "OMX_ImageFilterBlur";
+		imageFilterTypes[OMX_ImageFilterSaturation] = "OMX_ImageFilterSaturation";
+		imageFilterTypes[OMX_ImageFilterDeInterlaceLineDouble] = "OMX_ImageFilterDeInterlaceLineDouble";
+		imageFilterTypes[OMX_ImageFilterDeInterlaceAdvanced] = "OMX_ImageFilterDeInterlaceAdvanced";
+		imageFilterTypes[OMX_ImageFilterColourSwap] = "OMX_ImageFilterColourSwap";
+		imageFilterTypes[OMX_ImageFilterWashedOut] = "OMX_ImageFilterWashedOut";
+		imageFilterTypes[OMX_ImageFilterColourPoint] = "OMX_ImageFilterColourPoint";
+		imageFilterTypes[OMX_ImageFilterPosterise] = "OMX_ImageFilterPosterise";
+		imageFilterTypes[OMX_ImageFilterColourBalance] = "OMX_ImageFilterColourBalance";
+		imageFilterTypes[OMX_ImageFilterCartoon] = "OMX_ImageFilterCartoon";
+		
+		map<OMX_IMAGEFILTERTYPE, string>::iterator imageFilterIterator = imageFilterTypes.begin();
+		while (imageFilterIterator != imageFilterTypes.end()) 
+		{
+			
+			erasePrefix(&imageFilterIterator->second, "OMX_ImageFilter");
+			imageFilterNames.push_back((*imageFilterIterator).second);
+			++imageFilterIterator;
+		}
+		
+		whiteBalanceControlTypes[OMX_WhiteBalControlOff] = "OMX_WhiteBalControlOff";
+		whiteBalanceControlTypes[OMX_WhiteBalControlAuto] = "OMX_WhiteBalControlAuto";
+		whiteBalanceControlTypes[OMX_WhiteBalControlSunLight] = "OMX_WhiteBalControlSunLight";
+		whiteBalanceControlTypes[OMX_WhiteBalControlCloudy] = "OMX_WhiteBalControlCloudy";
+		whiteBalanceControlTypes[OMX_WhiteBalControlShade] = "OMX_WhiteBalControlShade";
+		whiteBalanceControlTypes[OMX_WhiteBalControlTungsten] = "OMX_WhiteBalControlTungsten";
+		whiteBalanceControlTypes[OMX_WhiteBalControlFluorescent] = "OMX_WhiteBalControlFluorescent";
+		whiteBalanceControlTypes[OMX_WhiteBalControlIncandescent] = "OMX_WhiteBalControlIncandescent";
+		whiteBalanceControlTypes[OMX_WhiteBalControlFlash] = "OMX_WhiteBalControlFlash";
+		whiteBalanceControlTypes[OMX_WhiteBalControlHorizon] = "OMX_WhiteBalControlHorizon";
+		
+		map<OMX_WHITEBALCONTROLTYPE, string>::iterator whiteBalanceIterator = whiteBalanceControlTypes.begin();
+		while (whiteBalanceIterator != whiteBalanceControlTypes.end()) 
+		{
+			erasePrefix(&whiteBalanceIterator->second, "OMX_WhiteBalControl");
+			whiteBalanceNames.push_back((*whiteBalanceIterator).second);
+			++whiteBalanceIterator;
+		}
 		
 		
 		meteringTypes[OMX_MeteringModeAverage] = "OMX_MeteringModeAverage";
 		meteringTypes[OMX_MeteringModeSpot] = "OMX_MeteringModeSpot";
 		meteringTypes[OMX_MeteringModeMatrix] = "OMX_MeteringModeMatrix";
-		meteringTypes[OMX_MeteringKhronosExtensions] = "OMX_MeteringKhronosExtensions";
-		meteringTypes[OMX_MeteringVendorStartUnused] = "OMX_MeteringVendorStartUnused";
 		meteringTypes[OMX_MeteringModeBacklit] = "OMX_MeteringModeBacklit";
 		
 		map<OMX_METERINGTYPE, string>::iterator meteringIterator = meteringTypes.begin();
 		while (meteringIterator != meteringTypes.end()) 
 		{
+			erasePrefix(&meteringIterator->second, "OMX_MeteringMode");
 			meteringNames.push_back((*meteringIterator).second);
 			++meteringIterator;
 		}
@@ -49,18 +104,16 @@ public:
 		exposureControlTypes[OMX_ExposureControlBeach] = "OMX_ExposureControlBeach";
 		exposureControlTypes[OMX_ExposureControlLargeAperture] = "OMX_ExposureControlLargeAperture";
 		exposureControlTypes[OMX_ExposureControlSmallAperture] = "OMX_ExposureControlSmallAperture";
-		exposureControlTypes[OMX_ExposureControlKhronosExtensions] = "OMX_ExposureControlKhronosExtensions";
-		exposureControlTypes[OMX_ExposureControlVendorStartUnused] = "OMX_ExposureControlVendorStartUnused";
 		exposureControlTypes[OMX_ExposureControlVeryLong] = "OMX_ExposureControlVeryLong";
 		exposureControlTypes[OMX_ExposureControlFixedFps] = "OMX_ExposureControlFixedFps";
 		exposureControlTypes[OMX_ExposureControlNightWithPreview] = "OMX_ExposureControlNightWithPreview";
 		exposureControlTypes[OMX_ExposureControlAntishake] = "OMX_ExposureControlAntishake";
 		exposureControlTypes[OMX_ExposureControlFireworks] = "OMX_ExposureControlFireworks";
-		exposureControlTypes[OMX_ExposureControlMax] = "OMX_ExposureControlMax";
 		
 		map<OMX_EXPOSURECONTROLTYPE, string>::iterator exposureIterator = exposureControlTypes.begin();
 		while (exposureIterator != exposureControlTypes.end()) 
 		{
+			erasePrefix(&exposureIterator->second, "OMX_ExposureControl");
 			exposureControlNames.push_back((*exposureIterator).second);
 			++exposureIterator;
 		}
@@ -110,8 +163,6 @@ public:
 		colorFormats[OMX_COLOR_Format18BitBGR666] = "OMX_COLOR_Format18BitBGR666";
 		colorFormats[OMX_COLOR_Format24BitARGB6666] = "OMX_COLOR_Format24BitARGB6666";
 		colorFormats[OMX_COLOR_Format24BitABGR6666] = "OMX_COLOR_Format24BitABGR6666";
-		colorFormats[OMX_COLOR_FormatKhronosExtensions] = "OMX_COLOR_FormatKhronosExtensions";
-		colorFormats[OMX_COLOR_FormatVendorStartUnused] = "OMX_COLOR_FormatVendorStartUnused";
 		colorFormats[OMX_COLOR_Format32bitABGR8888] = "OMX_COLOR_Format32bitABGR8888";
 		colorFormats[OMX_COLOR_Format8bitPalette] = "OMX_COLOR_Format8bitPalette";
 		colorFormats[OMX_COLOR_FormatYUVUV128] = "OMX_COLOR_FormatYUVUV128";
@@ -121,18 +172,14 @@ public:
 		colorFormats[OMX_COLOR_FormatYVU420PackedPlanar] = "OMX_COLOR_FormatYVU420PackedPlanar";
 		colorFormats[OMX_COLOR_FormatYVU420PackedSemiPlanar] = "OMX_COLOR_FormatYVU420PackedSemiPlanar";
 		
-		
-		
-		
 		map<OMX_COLOR_FORMATTYPE, string>::iterator colorFormatsIterator = colorFormats.begin();
 		while (colorFormatsIterator != colorFormats.end()) 
 		{
+			erasePrefix(&colorFormatsIterator->second, "OMX_COLOR_Format");
 			colorFormatNames.push_back((*colorFormatsIterator).second);
 			++colorFormatsIterator;
 			
 		}
-		
-		
 		
 		
 		videoCodingTypes[OMX_VIDEO_CodingUnused] = "OMX_VIDEO_CodingUnused";
@@ -144,8 +191,6 @@ public:
 		videoCodingTypes[OMX_VIDEO_CodingRV] = "OMX_VIDEO_CodingRV";
 		videoCodingTypes[OMX_VIDEO_CodingAVC] = "OMX_VIDEO_CodingAVC";
 		videoCodingTypes[OMX_VIDEO_CodingMJPEG] = "OMX_VIDEO_CodingMJPEG";
-		videoCodingTypes[OMX_VIDEO_CodingKhronosExtensions] = "OMX_VIDEO_CodingKhronosExtensions"; 
-		videoCodingTypes[OMX_VIDEO_CodingVendorStartUnused] = "OMX_VIDEO_CodingVendorStartUnused";
 		videoCodingTypes[OMX_VIDEO_CodingVP6] = "OMX_VIDEO_CodingVP6";
 		videoCodingTypes[OMX_VIDEO_CodingVP7] = "OMX_VIDEO_CodingVP7";
 		videoCodingTypes[OMX_VIDEO_CodingVP8] = "OMX_VIDEO_CodingVP8";
@@ -153,11 +198,11 @@ public:
 		videoCodingTypes[OMX_VIDEO_CodingSorenson] = "OMX_VIDEO_CodingSorenson";
 		videoCodingTypes[OMX_VIDEO_CodingTheora] = "OMX_VIDEO_CodingTheora";
 		videoCodingTypes[OMX_VIDEO_CodingMVC] = "OMX_VIDEO_CodingMVC"; 	
-		videoCodingTypes[OMX_VIDEO_CodingMax] = "OMX_VIDEO_CodingMax";
 		
 		map<OMX_VIDEO_CODINGTYPE, string>::iterator videoCodingTypesIterator = videoCodingTypes.begin();
 		while (videoCodingTypesIterator != videoCodingTypes.end()) 
 		{
+			erasePrefix(&videoCodingTypesIterator->second, "OMX_VIDEO_Coding");
 			videoCodingNames.push_back((*videoCodingTypesIterator).second);
 			++ videoCodingTypesIterator;
 		}
@@ -172,7 +217,6 @@ public:
 		eventTypes[OMX_EventDynamicResourcesAvailable] = "OMX_EventDynamicResourcesAvailable";
 		eventTypes[OMX_EventKhronosExtensions] = "OMX_EventKhronosExtensions";
 		eventTypes[OMX_EventVendorStartUnused] = "OMX_EventVendorStartUnused";
-		eventTypes[OMX_EventMax] = "OMX_EventMax";
 		eventTypes[OMX_EventParamOrConfigChanged] = "OMX_EventParamOrConfigChanged";
 		
 		
@@ -195,15 +239,23 @@ public:
 		map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator algorithmIterator = algorithms.begin();
 		while (algorithmIterator != algorithms.end()) 
 		{
+			erasePrefix(&algorithmIterator->second, "OMX_CameraDisableAlgorithm");
 			algorithmNames.push_back((*algorithmIterator).second);
 			++algorithmIterator;
 		}
 		
 		
 	}
+	void erasePrefix(string* content, string prefix)
+	{
+		content->erase(0, prefix.size());
+	}
 	
+	vector<string> imageFilterNames;
+	map<OMX_IMAGEFILTERTYPE, string> imageFilterTypes;
 	
-	
+	vector<string> whiteBalanceNames;
+	map<OMX_WHITEBALCONTROLTYPE, string> whiteBalanceControlTypes;
 	
 	vector<string> meteringNames;
 	map<OMX_METERINGTYPE, string> meteringTypes;

@@ -23,23 +23,24 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	parameters.setName("root");
     
     sharpness.set("sharpness", rpiCameraVideoGrabber->getSharpness(), -100, 100);
-    contrast.set("contrast", rpiCameraVideoGrabber->getContrast(), -100, 100);
-    brightness.set("brightness", rpiCameraVideoGrabber->getBrightness(), 0, 100);
-    saturation.set("saturation", rpiCameraVideoGrabber->getSaturation(), -100, 100);
-    frameStabilizationEnabled.set("FrameStabilization", false);
-    colorEnhancementEnabled.set("ColorEnhancement", false);
-    ledEnabled.set("LED", false);
-	
-	
-	
-	
-	
 	sharpness.addListener(this, &ControlPanel::onSharpnessChanged);
+	
+    contrast.set("contrast", rpiCameraVideoGrabber->getContrast(), -100, 100);
 	contrast.addListener(this, &ControlPanel::onContrastChanged);
+	
+    brightness.set("brightness", rpiCameraVideoGrabber->getBrightness(), 0, 100);
 	brightness.addListener(this, &ControlPanel::onBrightnessChanged);
+	
+    saturation.set("saturation", rpiCameraVideoGrabber->getSaturation(), -100, 100);
 	saturation.addListener(this, &ControlPanel::onSaturationChanged);
+	
+    frameStabilizationEnabled.set("FrameStabilization", false);
 	frameStabilizationEnabled.addListener(this, &ControlPanel::onFrameStabilizationChanged);
+	
+    colorEnhancementEnabled.set("ColorEnhancement", false);
 	colorEnhancementEnabled.addListener(this, &ControlPanel::onColorEnhancementChanged);
+	
+    ledEnabled.set("LED", false);
 	ledEnabled.addListener(this, &ControlPanel::onLEDEnabledChanged);
 	
 	size_t i=0;
@@ -70,6 +71,21 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		item.set(rpiCameraVideoGrabber->omxMaps.meteringNames[i], false);
 		meteringNames.add(item);
 	}
+	whiteBalanceNames.setName("whiteBalanceNames");	
+	for (i=0; i<rpiCameraVideoGrabber->omxMaps.whiteBalanceNames.size(); i++)
+	{
+		ofParameter<bool> item;
+		item.set(rpiCameraVideoGrabber->omxMaps.whiteBalanceNames[i], false);
+		whiteBalanceNames.add(item);
+	}
+	
+	imageFilterNames.setName("imageFilterNames");
+	for (i=0; i<rpiCameraVideoGrabber->omxMaps.imageFilterNames.size(); i++)
+	{
+		ofParameter<bool> item;
+		item.set(rpiCameraVideoGrabber->omxMaps.imageFilterNames[i], false);
+		imageFilterNames.add(item);
+	}
 	
 	parameters.add(frameStabilizationEnabled);
 	parameters.add(sharpness);
@@ -81,6 +97,8 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		parameters.add(videoCodingNames);
 		parameters.add(exposureControlNames);
 		parameters.add(meteringNames);
+		parameters.add(whiteBalanceNames);
+		parameters.add(imageFilterNames);
 		
 	
 	enableSync = false;
@@ -97,7 +115,6 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 }
 void ControlPanel::saveXML()
 {
-	//gui.saveToFile("DocumentRoot/index.html");
 	string filename = ofToDataPath("DocumentRoot/output.xml", true);
 	
 	ofFile existingFile(filename);
@@ -105,7 +122,6 @@ void ControlPanel::saveXML()
 	
 	serializer->load(filename);
 	serializer->serialize(parameters);
-	//saveTo(*serializer);
 	serializer->save(filename);
 }
 

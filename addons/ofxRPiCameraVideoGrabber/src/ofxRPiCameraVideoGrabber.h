@@ -61,10 +61,6 @@ public:
 	
 	OMX_Maps omxMaps;
 	
-	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
-	map<OMX_COLOR_FORMATTYPE, string> colorFormats;
-	map<OMX_EVENTTYPE, string> eventTypes;
-	map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithms;
 	
 	void enableBurstMode();
 	

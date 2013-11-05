@@ -31,6 +31,8 @@ private:
 	ofParameterGroup videoCodingNames;
 	ofParameterGroup exposureControlNames;
 	ofParameterGroup meteringNames;
+	ofParameterGroup whiteBalanceNames;
+	ofParameterGroup imageFilterNames;
 	
 	ofxOscParameterSync sync;
 	
