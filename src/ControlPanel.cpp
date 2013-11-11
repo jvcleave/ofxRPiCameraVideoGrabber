@@ -6,12 +6,14 @@ ControlPanel::ControlPanel()
 	localPort = 6666;
 	remotePort = 6667;
 	rpiCameraVideoGrabber = NULL;
-	serializer = ofPtr<ofBaseFileSerializer> (new ofXml);
+	serializer = new ofXml();
 }
+
 void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
 {
 	ofLogVerbose() << "onParameterGroupChanged";
 }
+
 void ControlPanel::onVideoCodingNamesChanged(ofAbstractParameter & param)
 {
 	ofLogVerbose() << "onVideoCodingNamesChanged";
@@ -101,18 +103,47 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		parameters.add(imageFilterNames);
 		
 	
-	enableSync = false;
+	enableSync = true;
 	if (enableSync) 
 	{
 		sync.setup(parameters, localPort, "localhost", remotePort);
 		ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);
 	}
 	
-	
-	//ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
+	ofLogVerbose() << "parameters: " << parameters.toString();
+	ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
 	
 	
 }
+ofParameter<bool> createBoolean(ofXml& xmlParser)
+{
+    string childName = xmlParser.getName();
+    ofParameter<bool> item;
+    item.set(childName, xmlParser.getBoolValue());
+	ofLogVerbose() << "childName: " << childName;
+    return item;
+}
+
+ofParameterGroup* createParameterGroup(ofXml& xmlParser)
+{
+    ofParameterGroup* parameterGroup = new ofParameterGroup();
+    string elementName = xmlParser.getName();
+    parameterGroup->setName(elementName);
+	ofLogVerbose() << "elementName: " << elementName;
+    int numElementChildren = xmlParser.getNumChildren();
+    for(int j=0; j<numElementChildren; j++)
+    {
+        
+        xmlParser.setToChild(j);
+		ofParameter<bool> item = createBoolean(xmlParser);
+		parameterGroup->add(item);
+        xmlParser.setToParent();
+        
+    }
+    return parameterGroup;
+}
+
+
 void ControlPanel::saveXML()
 {
 	string filename = ofToDataPath("DocumentRoot/output.xml", true);
@@ -122,9 +153,91 @@ void ControlPanel::saveXML()
 	
 	serializer->load(filename);
 	serializer->serialize(parameters);
-	serializer->save(filename);
+	
+	ofXml xmlParser(*serializer);
+	ofLogVerbose() << "xmlParser toString: " << xmlParser.toString();
+	
+	int numRootChildren =  xmlParser.getNumChildren();
+    for(int i=0; i<numRootChildren; i++)
+    {
+		ofLogVerbose() << "xmlParent: " << xmlParser.getName();
+        xmlParser.setToChild(i);
+		ofLogVerbose() << "xmlChild: " << i << " : " << xmlParser.getName();
+		
+		int numElementChildren = xmlParser.getNumChildren();
+		if (numElementChildren>0)
+		{
+			
+			ofLogVerbose() << "xmlParser.getName(): " << xmlParser.getName() << " has " << numElementChildren << " children";
+			ofParameterGroup* parameterGroupPtr = createParameterGroup(xmlParser);
+			//ofLogVerbose() << "parameterGroup getName: " << parameterGroupPtr->getName();
+			for(int j=0; j<numElementChildren; j++)
+			{
+				xmlParser.setToChild(j);
+				ofLogVerbose() << "xmlParser name: " << xmlParser.getName();	
+				ofParameterGroup parameterGroup = *parameterGroupPtr;
+				ofLogVerbose() << "parameterGroup.getName: " << parameterGroup.getName();
+				ofLogVerbose() << "parameterGroup[xmlParser.getName()].getName: " << parameterGroup[xmlParser.getName()].getName();
+				createXMLFromParam(parameterGroup[xmlParser.getName()], xmlParser);
+				xmlParser.setToParent();
+			}
+			
+		}else 
+		{
+			createXMLFromParam(parameters.get(xmlParser.getName()), xmlParser);
+		}
+		
+        xmlParser.setToParent();
+    }
+	
+	
+	//createXMLFromParam(sharpness, xmlCopy);
+	ofLogVerbose() << "xmlParser processed: " << xmlParser.toString();
+	
+	//serializer->save(filename);
+	
+	
+	/*gui.setup();
+	 gui.add(parameters);
+	 gui.saveToFile(ofToDataPath("DocumentRoot/gui.xml", true));*/
 }
 
+void ControlPanel::createXMLFromParam(ofAbstractParameter parameter, ofXml& xml)
+{
+
+	string parameterName = xml.getName();
+	ofLogVerbose(__func__) << "parameterName: " << parameterName;
+	if(parameter.type()==typeid(ofParameter<int>).name())
+	{
+		xml.removeContents();
+		xml.addValue<string>("type", "int");
+		xml.addValue<int>("value", parameter.cast<int>());
+		xml.addValue<int>("min", parameter.cast<int>().getMin());
+		xml.addValue<int>("max", parameter.cast<int>().getMax());
+		
+	}
+	else if(parameter.type()==typeid(ofParameter<float>).name())
+	{
+		xml.removeContents();
+		xml.addValue<string>("type", "float");
+		xml.addValue<float>("value", parameter.cast<float>());
+		xml.addValue<float>("min", parameter.cast<float>().getMin());
+		xml.addValue<float>("max", parameter.cast<float>().getMax());
+	}
+	else if(parameter.type()==typeid(ofParameter<bool>).name())
+	{
+		xml.removeContents();
+		xml.addValue<string>("type", "bool");
+		xml.addValue<bool>("value", parameter.cast<bool>());
+	}
+	else if(parameter.type()==typeid(ofParameter<string>).name())
+	{
+		xml.removeContents();
+		xml.addValue<string>("type", "string");
+		xml.addValue<string>("value", parameter.cast<string>());
+	}
+		
+}
 void ControlPanel::onUpdate(ofEventArgs &args)
 {
 	sync.update();

@@ -10,7 +10,7 @@ void testApp::setup()
 		
 	consoleListener.setup(this);
 	videoGrabber.setup(1280, 720, 60);
-	
+	filterCollection.setup(&videoGrabber.omxMaps);
 	
 	ofx::HTTP::BasicServerSettings settings;
     settings.setPort(8998);
@@ -42,12 +42,11 @@ void testApp::draw(){
 	//info << "Camera frameCounter: " << videoGrabber.frameCounter << "\n";
 	//info << "App frameCounter: " << ofGetFrameNum() << "\n";
 	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
-	info << "CURRENT FILTER: " << filterCollection.currentFilter.name << "\n";
-	info <<	filterCollection.filterList << "\n";
+	info << "CURRENT FILTER: " << filterCollection.getCurrentFilterName() << "\n";
+	//info <<	filterCollection.filterList << "\n";
 	
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
-	info << "Press r for Random filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
 	
 	if (doDrawInfo) 
@@ -62,14 +61,10 @@ void testApp::keyPressed  (int key)
 {
 	ofLogVerbose(__func__) << key;
 	
-	if (key == 'r')
-	{
-		videoGrabber.applyImageFilter(filterCollection.getRandomFilter().type);
-	}
 	
 	if (key == 'e')
 	{
-		videoGrabber.applyImageFilter(filterCollection.getNextFilter().type);
+		videoGrabber.applyImageFilter(filterCollection.getNextFilter());
 	}
 	
 	if (key == 'g')
