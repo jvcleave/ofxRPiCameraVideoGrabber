@@ -16,8 +16,6 @@
 		<RV>0</RV>
 		<AVC>0</AVC>
 		<MJPEG>0</MJPEG>
-		<KhronosExtensions>0</KhronosExtensions>
-		<VendorStartUnused>0</VendorStartUnused>
 		<VP6>0</VP6>
 		<VP7>0</VP7>
 		<VP8>0</VP8>
@@ -25,7 +23,6 @@
 		<Sorenson>0</Sorenson>
 		<Theora>0</Theora>
 		<MVC>0</MVC>
-		<Max>0</Max>
 	</videoCodingNames>
 	<exposureControlNames>
 		<Off>0</Off>
@@ -38,14 +35,11 @@
 		<Beach>0</Beach>
 		<LargeAperture>0</LargeAperture>
 		<SmallAperture>0</SmallAperture>
-		<KhronosExtensions>0</KhronosExtensions>
-		<VendorStartUnused>0</VendorStartUnused>
 		<VeryLong>0</VeryLong>
 		<FixedFps>0</FixedFps>
 		<NightWithPreview>0</NightWithPreview>
 		<Antishake>0</Antishake>
 		<Fireworks>0</Fireworks>
-		<Max>0</Max>
 	</exposureControlNames>
 	<meteringNames>
 		<Average>0</Average>

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-//#include "ofxGui.h"
-
 #include "ofxOscParameterSync.h"
 #include "ofxRPiCameraVideoGrabber.h"
 
@@ -52,7 +50,6 @@ private:
 	ofXml* serializer;
 	bool enableSync;
 	
-	//ofxPanel gui;
-	void createXMLFromParam(ofAbstractParameter  parameter, ofXml& xml);
+	void createXMLFromParam(ofAbstractParameter&  parameter, ofXml& xml);
 	
 };

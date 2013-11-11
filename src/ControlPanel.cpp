@@ -120,7 +120,6 @@ ofParameter<bool> createBoolean(ofXml& xmlParser)
     string childName = xmlParser.getName();
     ofParameter<bool> item;
     item.set(childName, xmlParser.getBoolValue());
-	ofLogVerbose() << "childName: " << childName;
     return item;
 }
 
@@ -129,14 +128,13 @@ ofParameterGroup* createParameterGroup(ofXml& xmlParser)
     ofParameterGroup* parameterGroup = new ofParameterGroup();
     string elementName = xmlParser.getName();
     parameterGroup->setName(elementName);
-	ofLogVerbose() << "elementName: " << elementName;
     int numElementChildren = xmlParser.getNumChildren();
     for(int j=0; j<numElementChildren; j++)
     {
         
         xmlParser.setToChild(j);
-		ofParameter<bool> item = createBoolean(xmlParser);
-		parameterGroup->add(item);
+			ofParameter<bool> item = createBoolean(xmlParser);
+			parameterGroup->add(item);
         xmlParser.setToParent();
         
     }
@@ -160,53 +158,39 @@ void ControlPanel::saveXML()
 	int numRootChildren =  xmlParser.getNumChildren();
     for(int i=0; i<numRootChildren; i++)
     {
-		ofLogVerbose() << "xmlParent: " << xmlParser.getName();
         xmlParser.setToChild(i);
-		ofLogVerbose() << "xmlChild: " << i << " : " << xmlParser.getName();
-		
 		int numElementChildren = xmlParser.getNumChildren();
 		if (numElementChildren>0)
 		{
 			
-			ofLogVerbose() << "xmlParser.getName(): " << xmlParser.getName() << " has " << numElementChildren << " children";
 			ofParameterGroup* parameterGroupPtr = createParameterGroup(xmlParser);
-			//ofLogVerbose() << "parameterGroup getName: " << parameterGroupPtr->getName();
 			for(int j=0; j<numElementChildren; j++)
 			{
 				xmlParser.setToChild(j);
-				ofLogVerbose() << "xmlParser name: " << xmlParser.getName();	
-				ofParameterGroup parameterGroup = *parameterGroupPtr;
-				ofLogVerbose() << "parameterGroup.getName: " << parameterGroup.getName();
-				ofLogVerbose() << "parameterGroup[xmlParser.getName()].getName: " << parameterGroup[xmlParser.getName()].getName();
-				createXMLFromParam(parameterGroup[xmlParser.getName()], xmlParser);
+					ofParameterGroup parameterGroup = *parameterGroupPtr;
+					createXMLFromParam(parameterGroup[xmlParser.getName()], xmlParser);
 				xmlParser.setToParent();
 			}
 			
 		}else 
 		{
-			createXMLFromParam(parameters.get(xmlParser.getName()), xmlParser);
+			createXMLFromParam(parameters[xmlParser.getName()], xmlParser);
 		}
 		
         xmlParser.setToParent();
     }
 	
 	
-	//createXMLFromParam(sharpness, xmlCopy);
 	ofLogVerbose() << "xmlParser processed: " << xmlParser.toString();
+	serializer->save(filename);
 	
-	//serializer->save(filename);
 	
-	
-	/*gui.setup();
-	 gui.add(parameters);
-	 gui.saveToFile(ofToDataPath("DocumentRoot/gui.xml", true));*/
 }
 
-void ControlPanel::createXMLFromParam(ofAbstractParameter parameter, ofXml& xml)
+void ControlPanel::createXMLFromParam(ofAbstractParameter& parameter, ofXml& xml)
 {
 
 	string parameterName = xml.getName();
-	ofLogVerbose(__func__) << "parameterName: " << parameterName;
 	if(parameter.type()==typeid(ofParameter<int>).name())
 	{
 		xml.removeContents();
