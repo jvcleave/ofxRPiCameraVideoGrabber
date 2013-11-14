@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxOscParameterSync.h"
+#include "ofxGui.h"
+#include "OSCParameterSync.h"
 #include "ofxRPiCameraVideoGrabber.h"
 
 
@@ -16,14 +17,12 @@ public:
 	void saveXML();
 	void onParameterGroupChanged(ofAbstractParameter & param);
 	void onVideoCodingNamesChanged(ofAbstractParameter & param);
-private:
-	ofParameter<int> sharpness;
-	ofParameter<int> contrast;
-	ofParameter<int> brightness;
-	ofParameter<int> saturation;
-	ofParameter<bool> frameStabilizationEnabled;
-	ofParameter<bool> colorEnhancementEnabled;
-	ofParameter<bool> ledEnabled;
+	void onExposureControlNamesChanged(ofAbstractParameter & param);
+	void increaseContrast();
+	
+	ofxPanel gui;
+//private:
+	
 	
 	
 	ofParameterGroup parameters;
@@ -33,7 +32,7 @@ private:
 	ofParameterGroup whiteBalanceNames;
 	ofParameterGroup imageFilterNames;
 	
-	ofxOscParameterSync sync;
+	OSCParameterSync* sync;
 	
 	int localPort;
 	int remotePort;
@@ -51,5 +50,7 @@ private:
 	bool enableSync;
 	
 	void createXMLFromParam(ofAbstractParameter&  parameter, ofXml& xml);
+	
+	ofParameterGroup* guiParamGroup;
 	
 };

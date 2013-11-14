@@ -53,6 +53,9 @@ void testApp::draw(){
 	{
 		ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
 	}
+	
+	
+	controlPanel.gui.draw();
 	//
 }
 
@@ -74,6 +77,10 @@ void testApp::keyPressed  (int key)
 	if (key == 's') {
 		controlPanel.saveXML();
 		
+	}
+	if (key == 'c')
+	{
+		controlPanel.increaseContrast();
 	}
 	
 }
