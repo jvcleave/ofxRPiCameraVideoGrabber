@@ -3,6 +3,7 @@
 OSCParameterSync::OSCParameterSync() {
 	syncGroup = NULL;
 	updatingParameter = false;
+	enabled = true;
 }
 
 OSCParameterSync::~OSCParameterSync(){
@@ -19,6 +20,9 @@ void OSCParameterSync::setup(ofParameterGroup & group, int localPort, string hos
 }
 
 void OSCParameterSync::update(){
+	if (!enabled) {
+		return;
+	}
 	if(receiver.hasWaitingMessages()){
 		updatingParameter = true;
 		receiver.getParameter(*syncGroup);
@@ -28,7 +32,7 @@ void OSCParameterSync::update(){
 }
 
 void OSCParameterSync::parameterChanged( ofAbstractParameter & parameter ){
-	ofLogVerbose() << "parameterChanged updatingParameter: " << updatingParameter;
+	ofLogVerbose() << "parameterChanged updatingParameter: " << parameter.getName();
 	if(updatingParameter) return;
 	sender.sendParameter(parameter);
 }

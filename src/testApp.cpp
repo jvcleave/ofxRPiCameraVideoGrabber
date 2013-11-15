@@ -74,10 +74,6 @@ void testApp::keyPressed  (int key)
 	{
 		doDrawInfo = !doDrawInfo;
 	}
-	if (key == 's') {
-		controlPanel.saveXML();
-		
-	}
 	if (key == 'c')
 	{
 		controlPanel.increaseContrast();

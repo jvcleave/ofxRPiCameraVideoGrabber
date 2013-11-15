@@ -1,6 +1,35 @@
 #include "ControlPanel.h"
 
 
+ofParameter<bool> createBoolean(ofXml& xml)
+{
+    string childName = xml.getName();
+    ofParameter<bool> item;
+    item.set(childName, xml.getBoolValue());
+    return item;
+}
+
+ofParameterGroup* createParameterGroup(ofXml& xml)
+{
+    ofParameterGroup* parameterGroup = new ofParameterGroup();
+    string elementName = xml.getName();
+	xml.setAttribute("type", "group");
+    parameterGroup->setName(elementName);
+    int numElementChildren = xml.getNumChildren();
+    for(int i=0; i<numElementChildren; i++)
+    {
+        
+        xml.setToChild(i);
+			ofParameter<bool> item = createBoolean(xml);
+			parameterGroup->add(item);
+        xml.setToParent();
+        
+    }
+    return parameterGroup;
+}
+
+
+
 ControlPanel::ControlPanel()
 {
 	localPort = 6666;
@@ -11,34 +40,45 @@ ControlPanel::ControlPanel()
 
 void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
 {
-	ofLogVerbose(__func__) << "onParameterGroupChanged: " << param.getName();
-	//sync->sender.sendParameter(*param.getParent());
-	//sync->sender.sendParameter(guiParamGroup->get(param.getName()));
+	ofLogVerbose(__func__) << "param.getName: " << param.getName();
+	sync->sender.sendParameter(param);
 }
 
 void ControlPanel::onVideoCodingNamesChanged(ofAbstractParameter & param)
 {
-	ofLogVerbose() << "onVideoCodingNamesChanged";
+	ofLogVerbose(__func__) << "param.getName(): " << param.getName();
+	ofRemoveListener(videoCodingNames.parameterChangedE, this, &ControlPanel::onVideoCodingNamesChanged);	
+	for (int i=0; i<videoCodingNames.size(); i++) 
+	{
+		if(videoCodingNames.getName(i) != param.getName())
+		{
+			videoCodingNames.getBool(i) = false;
+			//ofLogVerbose(__func__) << "setting " << videoCodingNames.getName(i) << " to false";
+		}
+		
+	}
+	ofAddListener(videoCodingNames.parameterChangedE, this, &ControlPanel::onVideoCodingNamesChanged);	
+
 }
 void ControlPanel::onExposureControlNamesChanged(ofAbstractParameter & param)
 {
-	ofLogVerbose() << "onExposureControlNamesChanged";
+	ofLogVerbose(__func__) << "onExposureControlNamesChanged";
 	ofRemoveListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);
 	for (int i=0; i<exposureControlNames.size(); i++) 
 	{
 		if(exposureControlNames.getName(i) != param.getName())
 		{
-			ofLogVerbose() << "setting " << exposureControlNames.getName(i) << " to false";
-			param.cast<bool>().set(false);
+			//ofLogVerbose(__func__) << "setting " << exposureControlNames.getName(i) << " to false";
+			exposureControlNames.getBool(i) = false;
 		}
 	}
-	sync->update();
 	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);
 }
 
 
 void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 {
+	
 	ofParameter<int> sharpness;
 	ofParameter<int> contrast;
 	ofParameter<int> brightness;
@@ -130,62 +170,32 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		parameters.add(imageFilterNames);
 		
 	
-	gui.setup("camera");
-    
-    gui.add(parameters);
+	gui.setup(parameters);
+  
 	guiParamGroup = (ofParameterGroup*)&gui.getParameter();
-	enableSync = true;
+
 	sync = new OSCParameterSync();
-	
 	sync->setup(*guiParamGroup, localPort, "JVCTOWER.local", remotePort);
 	
-	ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);	
-	ofLogVerbose() << "parameters: " << parameters.toString();
-	//ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
-	serializer->serialize(*guiParamGroup);
-	serializer->save("remotegui.xml");
+	saveXML();
+	
+	//ofLogVerbose(__func__) << "parameters: " << parameters.toString();
+	ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
+	
+	gui.setPosition(204, 44);
+	
+	ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);
 	
 }
-ofParameter<bool> createBoolean(ofXml& xmlParser)
-{
-    string childName = xmlParser.getName();
-    ofParameter<bool> item;
-    item.set(childName, xmlParser.getBoolValue());
-    return item;
-}
 
-ofParameterGroup* createParameterGroup(ofXml& xmlParser)
-{
-    ofParameterGroup* parameterGroup = new ofParameterGroup();
-    string elementName = xmlParser.getName();
-	xmlParser.setAttribute("type", "group");
-    parameterGroup->setName(elementName);
-    int numElementChildren = xmlParser.getNumChildren();
-    for(int j=0; j<numElementChildren; j++)
-    {
-        
-        xmlParser.setToChild(j);
-			ofParameter<bool> item = createBoolean(xmlParser);
-			parameterGroup->add(item);
-        xmlParser.setToParent();
-        
-    }
-    return parameterGroup;
-}
 
 
 void ControlPanel::saveXML()
 {
-	string filename = ofToDataPath("DocumentRoot/output.xml", true);
-	
-	ofFile existingFile(filename);
-	existingFile.remove(false);
-	
-	serializer->load(filename);
 	serializer->serialize(parameters);
 	
 	ofXml xmlParser(*serializer);
-	ofLogVerbose() << "xmlParser toString: " << xmlParser.toString();
+	ofLogVerbose(__func__) << "xmlParser toString: " << xmlParser.toString();
 	
 	int numRootChildren =  xmlParser.getNumChildren();
     for(int i=0; i<numRootChildren; i++)
@@ -212,11 +222,9 @@ void ControlPanel::saveXML()
         xmlParser.setToParent();
     }
 	
-	
-	ofLogVerbose() << "xmlParser processed: " << xmlParser.toString();
-	serializer->save(filename);
-	string modified = ofToDataPath("DocumentRoot/modified.xml", true);
-	xmlParser.save(modified);
+	ofLogVerbose(__func__) << "xmlParser processed: " << xmlParser.toString();
+	string filename = ofToDataPath("DocumentRoot/modified.xml", true);
+	xmlParser.save(filename);
 	
 	
 }
@@ -256,36 +264,35 @@ void ControlPanel::onUpdate(ofEventArgs &args)
 
 void ControlPanel::increaseContrast()
 {
-	//contrast++;
-	//parameters.getInt("contrast")++;
-	guiParamGroup->getGroup("root").get("contrast").cast<int>()++;
-	//guiParamGroup->get("contrast").cast<int>()++;
+	guiParamGroup->get("contrast").cast<int>()++;
+//ofAbstractParameter randomName = videoCodingNames.get((int));
+	//ofLogVerbose(__func__) << "randomName.getName(): " << randomName.getName();
+	videoCodingNames.getBool(ofRandom(videoCodingNames.size()-1)) = true;
 	
 }
 
-void ControlPanel::onSharpnessChanged(int & sharpness_)
+void ControlPanel::onSharpnessChanged(int & sharpness)
 {
-	ofLogVerbose(__func__) << sharpness_;
-	rpiCameraVideoGrabber->setSharpness(sharpness_);
+	//ofLogVerbose(__func__) << sharpness;
+	rpiCameraVideoGrabber->setSharpness(sharpness);
 }
 
-void ControlPanel::onContrastChanged(int & contrast_)
+void ControlPanel::onContrastChanged(int & contrast)
 {
-	ofLogVerbose(__func__) << contrast_;
-	rpiCameraVideoGrabber->setContrast(contrast_);
-	//sync->sender.sendParameter(contrast);
+	//ofLogVerbose(__func__) << contrast;
+	rpiCameraVideoGrabber->setContrast(contrast);
 }
 
-void ControlPanel::onBrightnessChanged(int & brightness_)
+void ControlPanel::onBrightnessChanged(int & brightness)
 {
-	ofLogVerbose(__func__) << brightness_;
-	rpiCameraVideoGrabber->setBrightness(brightness_);
+	//ofLogVerbose(__func__) << brightness;
+	rpiCameraVideoGrabber->setBrightness(brightness);
 }
 
-void ControlPanel::onSaturationChanged(int & saturation_)
+void ControlPanel::onSaturationChanged(int & saturation)
 {
-	ofLogVerbose(__func__) << saturation_;
-	rpiCameraVideoGrabber->setSaturation(saturation_);
+	//ofLogVerbose(__func__) << saturation;
+	rpiCameraVideoGrabber->setSaturation(saturation);
 }
 void ControlPanel::onFrameStabilizationChanged(bool & doFrameStabilization)
 {

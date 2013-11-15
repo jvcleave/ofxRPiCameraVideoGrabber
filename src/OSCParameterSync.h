@@ -15,6 +15,7 @@ public:
 	void update();
 	ofxOscSender sender;
 	ofxOscReceiver receiver;
+	bool enabled;
 private:
 	void parameterChanged( ofAbstractParameter & parameter );
 	
