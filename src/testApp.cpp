@@ -55,7 +55,7 @@ void testApp::draw(){
 	}
 	
 	
-	controlPanel.gui.draw();
+	controlPanel.draw();
 	//
 }
 

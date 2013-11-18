@@ -4,7 +4,7 @@
 #include "ofxGui.h"
 #include "OSCParameterSync.h"
 #include "ofxRPiCameraVideoGrabber.h"
-
+#include "ParameterUtils.h"
 
 class ControlPanel
 {
@@ -13,6 +13,8 @@ public:
 	
 	void setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber);
 	void onUpdate(ofEventArgs &args);
+	
+	void draw();
 	ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber;
 	
 	void onParameterGroupChanged(ofAbstractParameter & param);
@@ -48,15 +50,17 @@ private:
 	void onFrameStabilizationChanged(bool &doFrameStabilization);
 	void onColorEnhancementChanged(bool &doColorEnhancement);
 	void onLEDEnabledChanged(bool &doEnableLED);
+	void onDrawGuiChanged(bool &doDrawGui);
+	
+	bool doDrawGui;
 	
 	
 	
-	ofXml* serializer;
 	
-	void createXMLFromParam(ofAbstractParameter&  parameter, ofXml& xml);
-	void saveXML();
+	
 	
 	ofParameterGroup* guiParamGroup;
+	ParameterUtils parameterUtils;
 	
 	
 };

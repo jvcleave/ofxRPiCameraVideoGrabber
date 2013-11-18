@@ -1,41 +1,11 @@
 #include "ControlPanel.h"
 
-
-ofParameter<bool> createBoolean(ofXml& xml)
-{
-    string childName = xml.getName();
-    ofParameter<bool> item;
-    item.set(childName, xml.getBoolValue());
-    return item;
-}
-
-ofParameterGroup* createParameterGroup(ofXml& xml)
-{
-    ofParameterGroup* parameterGroup = new ofParameterGroup();
-    string elementName = xml.getName();
-	xml.setAttribute("type", "group");
-    parameterGroup->setName(elementName);
-    int numElementChildren = xml.getNumChildren();
-    for(int i=0; i<numElementChildren; i++)
-    {
-        
-        xml.setToChild(i);
-			ofParameter<bool> item = createBoolean(xml);
-			parameterGroup->add(item);
-        xml.setToParent();
-        
-    }
-    return parameterGroup;
-}
-
-
-
 ControlPanel::ControlPanel()
 {
 	localPort = 6666;
 	remotePort = 7777;
 	rpiCameraVideoGrabber = NULL;
-	serializer = new ofXml();
+	doDrawGui = true;
 }
 
 void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
@@ -86,6 +56,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	ofParameter<bool> frameStabilizationEnabled;
 	ofParameter<bool> colorEnhancementEnabled;
 	ofParameter<bool> ledEnabled;
+	ofParameter<bool> drawGui;
 	
 	this->rpiCameraVideoGrabber = rpiCameraVideoGrabber;
 	parameters.setName("root");
@@ -110,6 +81,9 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	
     ledEnabled.set("LED", false);
 	ledEnabled.addListener(this, &ControlPanel::onLEDEnabledChanged);
+	
+	drawGui.set("drawGui", doDrawGui);
+	drawGui.addListener(this, &ControlPanel::onDrawGuiChanged);
 	
 	size_t i=0;
 	videoCodingNames.setName("videoCodingNames");
@@ -163,6 +137,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	parameters.add(saturation);
 	parameters.add(colorEnhancementEnabled);
 	parameters.add(ledEnabled);
+	parameters.add(drawGui);
 		parameters.add(videoCodingNames);
 		parameters.add(exposureControlNames);
 		parameters.add(meteringNames);
@@ -176,13 +151,13 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 
 	sync = new OSCParameterSync();
 	sync->setup(*guiParamGroup, localPort, "JVCTOWER.local", remotePort);
-	
-	saveXML();
+	string filename = ofToDataPath("DocumentRoot/modified.xml", true);
+	parameterUtils.saveXML(parameters, filename);
 	
 	//ofLogVerbose(__func__) << "parameters: " << parameters.toString();
 	ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
 	
-	gui.setPosition(204, 44);
+	gui.setPosition(300, 44);
 	
 	ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);
 	
@@ -190,84 +165,29 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 
 
 
-void ControlPanel::saveXML()
-{
-	serializer->serialize(parameters);
-	
-	ofXml xmlParser(*serializer);
-	ofLogVerbose(__func__) << "xmlParser toString: " << xmlParser.toString();
-	
-	int numRootChildren =  xmlParser.getNumChildren();
-    for(int i=0; i<numRootChildren; i++)
-    {
-        xmlParser.setToChild(i);
-		int numElementChildren = xmlParser.getNumChildren();
-		if (numElementChildren>0)
-		{
-			
-			ofParameterGroup* parameterGroupPtr = createParameterGroup(xmlParser);
-			for(int j=0; j<numElementChildren; j++)
-			{
-				xmlParser.setToChild(j);
-					ofParameterGroup parameterGroup = *parameterGroupPtr;
-					createXMLFromParam(parameterGroup[xmlParser.getName()], xmlParser);
-				xmlParser.setToParent();
-			}
-			
-		}else 
-		{
-			createXMLFromParam(parameters[xmlParser.getName()], xmlParser);
-		}
-		
-        xmlParser.setToParent();
-    }
-	
-	ofLogVerbose(__func__) << "xmlParser processed: " << xmlParser.toString();
-	string filename = ofToDataPath("DocumentRoot/modified.xml", true);
-	xmlParser.save(filename);
-	
-	
-}
 
-void ControlPanel::createXMLFromParam(ofAbstractParameter& parameter, ofXml& xml)
-{
-	
-	string parameterName = xml.getName();
-	if(parameter.type()==typeid(ofParameter<int>).name())
-	{
-		xml.setAttribute("type", "int");
-		xml.setAttribute("min", ofToString(parameter.cast<int>().getMin()));
-		xml.setAttribute("max", ofToString(parameter.cast<int>().getMax()));
-	}
-	else if(parameter.type()==typeid(ofParameter<float>).name())
-	{
-		
-		xml.setAttribute("type", "float");
-		xml.setAttribute("min", ofToString(parameter.cast<float>().getMin()));
-		xml.setAttribute("max", ofToString(parameter.cast<float>().getMax()));
-	}
-	else if(parameter.type()==typeid(ofParameter<bool>).name())
-	{
-		xml.setAttribute("type", "bool");
-	}
-	else if(parameter.type()==typeid(ofParameter<string>).name())
-	{
-		xml.setAttribute("type", "string");
-	}
-	
-}
+
 
 void ControlPanel::onUpdate(ofEventArgs &args)
 {
 	sync->update();
 }
 
+
+void ControlPanel::draw()
+{
+	if(!doDrawGui)
+	{
+		return;
+	}
+	gui.draw();
+}
 void ControlPanel::increaseContrast()
 {
 	guiParamGroup->get("contrast").cast<int>()++;
 //ofAbstractParameter randomName = videoCodingNames.get((int));
 	//ofLogVerbose(__func__) << "randomName.getName(): " << randomName.getName();
-	videoCodingNames.getBool(ofRandom(videoCodingNames.size()-1)) = true;
+	//videoCodingNames.getBool(ofRandom(videoCodingNames.size()-1)) = true;
 	
 }
 
@@ -307,5 +227,10 @@ void ControlPanel::onColorEnhancementChanged(bool & doColorEnhancement)
 void ControlPanel::onLEDEnabledChanged(bool & doEnableLED)
 {
 	rpiCameraVideoGrabber->setLEDStatus(doEnableLED);
+}
+
+void ControlPanel::onDrawGuiChanged(bool &doDrawGui)
+{
+	this->doDrawGui = doDrawGui;
 }
 

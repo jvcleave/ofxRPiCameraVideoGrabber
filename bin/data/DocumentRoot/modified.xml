@@ -6,6 +6,7 @@
 	<saturation max="100" min="-100" type="int">0</saturation>
 	<ColorEnhancement type="bool">0</ColorEnhancement>
 	<LED type="bool">0</LED>
+	<drawGui type="bool">1</drawGui>
 	<videoCodingNames type="group">
 		<Unused type="bool">0</Unused>
 		<AutoDetect type="bool">0</AutoDetect>
