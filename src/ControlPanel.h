@@ -12,21 +12,11 @@ public:
 	ControlPanel();
 	
 	void setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber);
-	void onUpdate(ofEventArgs &args);
-	
 	void draw();
-	ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber;
-	
-	void onParameterGroupChanged(ofAbstractParameter & param);
-	void onVideoCodingNamesChanged(ofAbstractParameter & param);
-	void onExposureControlNamesChanged(ofAbstractParameter & param);
 	void increaseContrast();
 	
-	ofxPanel gui;
 private:
-	
-	
-	
+
 	ofParameterGroup parameters;
 	ofParameterGroup videoCodingNames;
 	ofParameterGroup exposureControlNames;
@@ -40,6 +30,17 @@ private:
 	
 	int localPort;
 	int remotePort;
+
+	
+	bool doDrawGui;
+	
+	ofxPanel gui;
+	ofParameterGroup* guiParamGroup;
+	ParameterUtils parameterUtils;
+	
+	ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber;
+	
+	void onUpdate(ofEventArgs &args);
 	
 	
 	void onSharpnessChanged(int &sharpness);
@@ -52,15 +53,10 @@ private:
 	void onLEDEnabledChanged(bool &doEnableLED);
 	void onDrawGuiChanged(bool &doDrawGui);
 	
-	bool doDrawGui;
-	
-	
-	
-	
-	
-	
-	ofParameterGroup* guiParamGroup;
-	ParameterUtils parameterUtils;
-	
-	
+	void onParameterGroupChanged(ofAbstractParameter & param);
+	void onVideoCodingNamesChanged(ofAbstractParameter & param);
+	void onExposureControlNamesChanged(ofAbstractParameter & param);
+	void onWhiteBalanceNamesChanged(ofAbstractParameter & param);
+	void onImageFilterNamesChanged(ofAbstractParameter & param);
+	void onMeteringNamesChanged(ofAbstractParameter & param);
 };

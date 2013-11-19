@@ -12,6 +12,7 @@ void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
 {
 	ofLogVerbose(__func__) << "param.getName: " << param.getName();
 	sync->sender.sendParameter(param);
+	
 }
 
 void ControlPanel::onVideoCodingNamesChanged(ofAbstractParameter & param)
@@ -30,6 +31,64 @@ void ControlPanel::onVideoCodingNamesChanged(ofAbstractParameter & param)
 	ofAddListener(videoCodingNames.parameterChangedE, this, &ControlPanel::onVideoCodingNamesChanged);	
 
 }
+
+
+
+void ControlPanel::onImageFilterNamesChanged(ofAbstractParameter & param)
+{
+	
+	ofRemoveListener(imageFilterNames.parameterChangedE, this, &ControlPanel::onImageFilterNamesChanged);
+	for (int i=0; i<imageFilterNames.size(); i++) 
+	{
+		if(imageFilterNames.getName(i) != param.getName())
+		{
+			imageFilterNames.getBool(i) = false;
+		}else 
+		{
+			string selectedName = imageFilterNames.getName(i);
+			map<OMX_IMAGEFILTERTYPE, string>::iterator it;			
+			for (it = rpiCameraVideoGrabber->omxMaps.imageFilterTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.imageFilterTypes.end(); ++it)
+			{
+				if (it->second == selectedName)
+				{
+					rpiCameraVideoGrabber->applyImageFilter(it->first);
+					break;
+				}
+			}
+		}
+		
+	}
+	ofAddListener(imageFilterNames.parameterChangedE, this, &ControlPanel::onImageFilterNamesChanged);
+}
+
+void ControlPanel::onWhiteBalanceNamesChanged(ofAbstractParameter & param)
+{
+	
+	//gui.getGroup("whiteBalanceNames").maximize();
+	ofRemoveListener(whiteBalanceNames.parameterChangedE, this, &ControlPanel::onWhiteBalanceNamesChanged);
+	for (int i=0; i<whiteBalanceNames.size(); i++) 
+	{
+		if(whiteBalanceNames.getName(i) != param.getName())
+		{
+			whiteBalanceNames.getBool(i) = false;
+		}else 
+		{
+			string selectedName = whiteBalanceNames.getName(i);
+			map<OMX_WHITEBALCONTROLTYPE, string>::iterator it;			
+			for (it = rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes.end(); ++it)
+			{
+				if (it->second == selectedName)
+				{
+					rpiCameraVideoGrabber->setWhiteBalance(it->first);
+					break;
+				}
+			}
+		}
+		
+	}
+	ofAddListener(whiteBalanceNames.parameterChangedE, this, &ControlPanel::onWhiteBalanceNamesChanged);
+}
+
 void ControlPanel::onExposureControlNamesChanged(ofAbstractParameter & param)
 {
 	ofLogVerbose(__func__) << "onExposureControlNamesChanged";
@@ -38,11 +97,52 @@ void ControlPanel::onExposureControlNamesChanged(ofAbstractParameter & param)
 	{
 		if(exposureControlNames.getName(i) != param.getName())
 		{
-			//ofLogVerbose(__func__) << "setting " << exposureControlNames.getName(i) << " to false";
 			exposureControlNames.getBool(i) = false;
+		}else 
+		{
+			string selectedName = exposureControlNames.getName(i);
+			map<OMX_EXPOSURECONTROLTYPE, string>::iterator it;
+			for (it = rpiCameraVideoGrabber->omxMaps.exposureControlTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.exposureControlTypes.end(); ++it)
+			{
+				if (it->second == selectedName)
+				{
+					rpiCameraVideoGrabber->setExposureMode(it->first);
+					break;
+				}
+			}
+			
+			
+			
 		}
+
 	}
 	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);
+}
+
+void ControlPanel::onMeteringNamesChanged(ofAbstractParameter & param)
+{
+	ofRemoveListener(meteringNames.parameterChangedE, this, &ControlPanel::onMeteringNamesChanged);
+	for (int i=0; i<meteringNames.size(); i++) 
+	{
+		if(meteringNames.getName(i) != param.getName())
+		{
+			meteringNames.getBool(i) = false;
+		}else 
+		{
+			string selectedName = meteringNames.getName(i);
+			map<OMX_METERINGTYPE, string>::iterator it;
+			for (it = rpiCameraVideoGrabber->omxMaps.meteringTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.meteringTypes.end(); ++it)
+			{
+				if (it->second == selectedName)
+				{
+					rpiCameraVideoGrabber->setMeteringMode(it->first);
+					break;
+				}
+			}
+		}
+		
+	}
+	ofAddListener(meteringNames.parameterChangedE, this, &ControlPanel::onMeteringNamesChanged);
 }
 
 
@@ -105,6 +205,8 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		item.set(rpiCameraVideoGrabber->omxMaps.exposureControlNames[i], false);
 		exposureControlNames.add(item);
 	}
+	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);
+	
 	
 	meteringNames.setName("meteringNames");	
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.meteringNames.size(); i++)
@@ -113,7 +215,10 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		item.set(rpiCameraVideoGrabber->omxMaps.meteringNames[i], false);
 		meteringNames.add(item);
 	}
-	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);	
+	ofAddListener(meteringNames.parameterChangedE, this, &ControlPanel::onMeteringNamesChanged);
+	
+	
+	
 	whiteBalanceNames.setName("whiteBalanceNames");	
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.whiteBalanceNames.size(); i++)
 	{
@@ -121,6 +226,8 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		item.set(rpiCameraVideoGrabber->omxMaps.whiteBalanceNames[i], false);
 		whiteBalanceNames.add(item);
 	}
+	ofAddListener(whiteBalanceNames.parameterChangedE, this, &ControlPanel::onWhiteBalanceNamesChanged);
+	
 	
 	imageFilterNames.setName("imageFilterNames");
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.imageFilterNames.size(); i++)
@@ -129,6 +236,9 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 		item.set(rpiCameraVideoGrabber->omxMaps.imageFilterNames[i], false);
 		imageFilterNames.add(item);
 	}
+	ofAddListener(imageFilterNames.parameterChangedE, this, &ControlPanel::onImageFilterNamesChanged);
+	
+	
 	
 	parameters.add(frameStabilizationEnabled);
 	parameters.add(sharpness);
@@ -138,7 +248,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	parameters.add(colorEnhancementEnabled);
 	parameters.add(ledEnabled);
 	parameters.add(drawGui);
-		parameters.add(videoCodingNames);
+		//parameters.add(videoCodingNames);
 		parameters.add(exposureControlNames);
 		parameters.add(meteringNames);
 		parameters.add(whiteBalanceNames);
@@ -158,7 +268,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
 	
 	gui.setPosition(300, 44);
-	
+	gui.minimizeAll();
 	ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);
 	
 }
@@ -182,13 +292,10 @@ void ControlPanel::draw()
 	}
 	gui.draw();
 }
+
 void ControlPanel::increaseContrast()
 {
 	guiParamGroup->get("contrast").cast<int>()++;
-//ofAbstractParameter randomName = videoCodingNames.get((int));
-	//ofLogVerbose(__func__) << "randomName.getName(): " << randomName.getName();
-	//videoCodingNames.getBool(ofRandom(videoCodingNames.size()-1)) = true;
-	
 }
 
 void ControlPanel::onSharpnessChanged(int & sharpness)

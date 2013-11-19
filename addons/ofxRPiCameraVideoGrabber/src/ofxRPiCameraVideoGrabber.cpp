@@ -82,9 +82,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	//enableAllAlgorithms();
 	
 	disableAllPortsForComponent(&camera);
-	
-	////////////
-	
+
 	
 	OMX_VIDEO_PARAM_PORTFORMATTYPE portFormatType;
 	OMX_INIT_STRUCTURE(portFormatType);
@@ -128,36 +126,8 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 		//OMX_VIDEO_CODINGTYPE eCompressionFormat; 
 		//OMX_COLOR_FORMATTYPE eColorFormat;
 		//OMX_U32 xFramerate;
-#if 0
-		for( map<OMX_COLOR_FORMATTYPE, string>::iterator i=colorFormats.begin(); i!=colorFormats.end(); ++i)
-		{
-			
-			portFormatType.eColorFormat = (*i).first;
-			error = OMX_SetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
-			
-			if(error == OMX_ErrorNone) 
-			{
-				ofLogVerbose(__func__) << "SET " << (*i).second << " OMX_COLOR_FORMATTYPE PASS";			
-			}else
-			{
-				//ofLogError(__func__) << "SET " << (*i).second << " OMX_COLOR_FORMATTYPE FAIL";
-				//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
-			}
-		}
-
-		
-		portFormatType.eColorFormat = OMX_COLOR_FormatYUV420PackedPlanar;
-		error = OMX_SetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "SET OMX_COLOR_FORMATTYPE OMX_COLOR_Format24bitRGB888 PASS";
-		}
-#endif	
 	}
 
-
-	
-	
 	
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
@@ -174,14 +144,6 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	device.nU32			= 0;
 	
 	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
-	
-	
-	
-	
-	//////////////////
-	
-	
-	
 	
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE portdef;
@@ -319,62 +281,6 @@ void ofxRPiCameraVideoGrabber::disableImageEffects()
 	toggleImageEffects(false);
 }
 
-void ofxRPiCameraVideoGrabber::enableFaceTracking()
-{
-	
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	
-	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-	OMX_INIT_STRUCTURE(controlType);
-	controlType.eAlgorithm = OMX_CameraDisableAlgorithmFacetracking;
-	controlType.bDisabled = OMX_FALSE;
-	
-	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "SET DISABLE FACE TRACKING TO FALSE - FAIL error: 0x%08x", error);
-	}else
-	{
-		ofLogVerbose(__func__) << "SET DISABLE FACE TRACKING TO FALSE - PASS!!!!!!!! ";
-		
-	}
-
-	
-	OMX_CONFIG_FACEDETECTIONCONTROLTYPE type;
-	OMX_INIT_STRUCTURE(type);
-	type.nPortIndex = OMX_ALL;
-	type.nFrames = 0;
-	type.nMaxRegions = 0;
-	type.nQuality = 50;
-	type.eMode = OMX_FaceDetectionControlOn;
-	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFaceDetectionControl, &type);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "ENABLE FACE TRACKING FAIL error: 0x%08x", error);
-	}else
-	{
-		ofLogVerbose(__func__) << "ENABLE FACE TRACKING PASS";
-		
-	}
-	
-	OMX_CONFIG_BOOLEANTYPE doDrawBoxesType;
-	OMX_INIT_STRUCTURE(doDrawBoxesType);
-	doDrawBoxesType.bEnabled = OMX_TRUE;
-	
-	error = OMX_SetConfig(camera, OMX_IndexConfigDrawBoxAroundFaces, &doDrawBoxesType);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "SET DrawBoxAroundFaces - FAIL error: 0x%08x", error);
-	}else
-	{
-		ofLogVerbose(__func__) << "SET DrawBoxAroundFaces - PASS!!!!!!!! ";
-		
-	}
-	
-}
-
 void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
 	ofLogVerbose() << "setFlickerCancellation";
@@ -419,7 +325,6 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 		
 	}
 
-	
 	controlType.eFlickerCancel = eFlickerCancel;
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
 	if(error == OMX_ErrorNone) 
@@ -433,57 +338,6 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 	}
 }
 
-void ofxRPiCameraVideoGrabber::enableAllAlgorithms()
-{
-	ofLogVerbose() << "enableAllAlgorithms";
-	
-	
-	
-
-	OMX_ERRORTYPE error = OMX_ErrorNone;
-	
-	
-	
-	
-	
-	for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=omxMaps.algorithms.begin(); i!=omxMaps.algorithms.end(); ++i)
-	{
-		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-		OMX_INIT_STRUCTURE(controlType);
-		controlType.eAlgorithm = (*i).first;
-		controlType.bDisabled = OMX_FALSE;
-		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "SET " << (*i).second << " ALGORITHM PASS";			
-		}else
-		{
-			ofLogError(__func__) << "SET " << (*i).second << " ALGORITHM FAIL";
-			//ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
-		}
-	}
-	/*for( map<OMX_CAMERADISABLEALGORITHMTYPE, string>::iterator i=algorithms.begin(); i!=algorithms.end(); ++i)
-	{
-		OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-		OMX_INIT_STRUCTURE(controlType);
-		controlType.eAlgorithm = (*i).first;
-		controlType.bDisabled = OMX_FALSE;
-		error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose(__func__) << "ALGORITHM CONFIG SET PASS " << (*i).second << " controlType.bDisabled: " << controlType.bDisabled;	
-		}else
-		{
-			ofLogError(__func__) << "ALGORITHM CONFIG SET FAIL " << (*i).second;
-			ofLog(OF_LOG_ERROR, "error: 0x%08x", error);
-		}
-		
-		
-	
-	}*/
-	
-}
 int ofxRPiCameraVideoGrabber::getWidth()
 {
 	return videoWidth;
@@ -531,10 +385,17 @@ void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureM
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL error: 0x%08x", error);
+	}else 
+	{
+		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
 	}
-}
 
-void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation, int sensitivity, bool autoSensitivity)
+}
+void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
+											   int evCompensation,	//default 0
+											   int sensitivity,		//default 100
+											   bool autoSensitivity //default false
+											   )
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
@@ -801,8 +662,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::cameraEventHandlerCallback(OMX_HANDLETYP
 		case OMX_EventParamOrConfigChanged:
 		{
 			
-			grabber->onCameraEventParamOrConfigChanged();
-			break;
+			return grabber->onCameraEventParamOrConfigChanged();
 		}			
 		default: 
 		{
@@ -832,7 +692,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::renderFillBufferDone(OMX_IN OMX_HANDLETY
 	return error;
 }
 
-void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 {
 	ofLogVerbose(LOG_NAME) << "onCameraEventParamOrConfigChanged";
 	
@@ -871,66 +731,6 @@ void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 	}
-	
-	
-#if 0
-	OMX_VIDEO_PARAM_PORTFORMATTYPE eglOutputPortType;
-	OMX_INIT_STRUCTURE(eglOutputPortType);
-	eglOutputPortType.nPortIndex = EGL_RENDER_OUTPUT_PORT;
-	error = OMX_GetConfig(render, OMX_IndexParamVideoPortFormat, &eglOutputPortType);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "EGL_RENDER_INPUT_PORT OMX_COLOR_FORMATTYPE is " << colorFormats[eglOutputPortType.eColorFormat]; //
-		
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_GetConfig FAIL error: 0x%08x", error);
-		
-	}
-#endif
-	
-#if 1
-	OMX_PARAM_PORTDEFINITIONTYPE portFormatType;
-	OMX_INIT_STRUCTURE(portFormatType);
-	portFormatType.nPortIndex = EGL_RENDER_OUTPUT_PORT;
-	error = OMX_GetConfig(render, OMX_IndexParamPortDefinition, &portFormatType);
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "EGL_RENDER_INPUT_PORT GET CONFIG PASS";
-		switch (portFormatType.eDomain) 
-		{
-				
-				
-			case OMX_PortDomainVideo:
-			{
-				ofLogVerbose() << "TYPE IS video";
-				break;
-			}
-			case OMX_PortDomainImage:
-			{
-				ofLogVerbose() << "TYPE IS image";
-				break;
-			}
-			case OMX_PortDomainOther:
-			{
-				ofLogVerbose() << "TYPE IS other";
-				break;
-			}
-			default:
-				break;
-		}
-		//		OMX_AUDIO_PORTDEFINITIONTYPE audio;
-		//        OMX_VIDEO_PORTDEFINITIONTYPE video;
-		//        OMX_IMAGE_PORTDEFINITIONTYPE image;
-		//        OMX_OTHER_PORTDEFINITIONTYPE other;
-		
-		
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_GetConfig FAIL error: 0x%08x", error);
-		
-	}
-#endif
 	
 	//Create camera->egl_render Tunnel
 	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
@@ -992,6 +792,7 @@ void ofxRPiCameraVideoGrabber::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL error: 0x%08x", error);
 	}
+	return error;
 }
 
 //untested - I guess could be used to close manually

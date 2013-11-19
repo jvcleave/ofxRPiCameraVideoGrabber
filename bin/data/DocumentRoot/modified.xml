@@ -7,24 +7,6 @@
 	<ColorEnhancement type="bool">0</ColorEnhancement>
 	<LED type="bool">0</LED>
 	<drawGui type="bool">1</drawGui>
-	<videoCodingNames type="group">
-		<Unused type="bool">0</Unused>
-		<AutoDetect type="bool">0</AutoDetect>
-		<MPEG2 type="bool">0</MPEG2>
-		<H263 type="bool">0</H263>
-		<MPEG4 type="bool">0</MPEG4>
-		<WMV type="bool">0</WMV>
-		<RV type="bool">0</RV>
-		<AVC type="bool">0</AVC>
-		<MJPEG type="bool">0</MJPEG>
-		<VP6 type="bool">0</VP6>
-		<VP7 type="bool">0</VP7>
-		<VP8 type="bool">0</VP8>
-		<YUV type="bool">0</YUV>
-		<Sorenson type="bool">0</Sorenson>
-		<Theora type="bool">0</Theora>
-		<MVC type="bool">0</MVC>
-	</videoCodingNames>
 	<exposureControlNames type="group">
 		<Off type="bool">0</Off>
 		<Auto type="bool">0</Auto>

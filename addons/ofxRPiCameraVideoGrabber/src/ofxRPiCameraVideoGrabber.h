@@ -53,8 +53,6 @@ public:
 	
 	
 	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
-	void enableAllAlgorithms();
-	void enableFaceTracking();
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
@@ -77,7 +75,7 @@ private:
 	int frameCounter;
 	int updateFrameCounter;
 	
-	void onCameraEventParamOrConfigChanged();
+	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
 	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 	
 	OMX_HANDLETYPE camera;
