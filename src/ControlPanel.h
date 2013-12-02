@@ -5,6 +5,7 @@
 #include "OSCParameterSync.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ParameterUtils.h"
+#include "ToggleGroup.h"
 
 class ControlPanel
 {
@@ -59,4 +60,8 @@ private:
 	void onWhiteBalanceNamesChanged(ofAbstractParameter & param);
 	void onImageFilterNamesChanged(ofAbstractParameter & param);
 	void onMeteringNamesChanged(ofAbstractParameter & param);
+	
+	void onExposureControlToggleGroupChange(ToggleGroupListenerEventData & eventData);
+	
+	
 };

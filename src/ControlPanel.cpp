@@ -88,7 +88,19 @@ void ControlPanel::onWhiteBalanceNamesChanged(ofAbstractParameter & param)
 	}
 	ofAddListener(whiteBalanceNames.parameterChangedE, this, &ControlPanel::onWhiteBalanceNamesChanged);
 }
-
+void ControlPanel::onExposureControlToggleGroupChange(ToggleGroupListenerEventData & eventData)
+{
+	ofLogVerbose(__func__) << "eventData.selectedName:" << eventData.selectedName;
+	map<OMX_EXPOSURECONTROLTYPE, string>::iterator it;
+	for (it = rpiCameraVideoGrabber->omxMaps.exposureControlTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.exposureControlTypes.end(); ++it)
+	{
+		if (it->second == eventData.selectedName)
+		{
+			rpiCameraVideoGrabber->setExposureMode(it->first);
+			break;
+		}
+	}
+}
 void ControlPanel::onExposureControlNamesChanged(ofAbstractParameter & param)
 {
 	ofLogVerbose(__func__) << "onExposureControlNamesChanged";
@@ -185,6 +197,9 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	drawGui.set("drawGui", doDrawGui);
 	drawGui.addListener(this, &ControlPanel::onDrawGuiChanged);
 	
+	
+	
+	
 	size_t i=0;
 	videoCodingNames.setName("videoCodingNames");
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.videoCodingNames.size(); i++)
@@ -198,16 +213,19 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	
 	
 	
-	exposureControlNames.setName("exposureControlNames");
+	/*exposureControlNames.setName("exposureControlNames");
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.exposureControlNames.size(); i++)
 	{
 		ofParameter<bool> item;
 		item.set(rpiCameraVideoGrabber->omxMaps.exposureControlNames[i], false);
 		exposureControlNames.add(item);
 	}
-	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);
+	ofAddListener(exposureControlNames.parameterChangedE, this, &ControlPanel::onExposureControlNamesChanged);*/
 	
-	
+	ToggleGroup* exposureControlToggleGroup = new ToggleGroup();
+	exposureControlToggleGroup->setup(&exposureControlNames, "exposureControlNames", &rpiCameraVideoGrabber->omxMaps.getExposureControlNames());
+	exposureControlToggleGroup->addListener(this, &ControlPanel::onExposureControlToggleGroupChange);
+	//ofAddListener(exposureControlToggleGroup->changeDispatcher,this, &ControlPanel::onExposureControlToggleGroupChange);
 	meteringNames.setName("meteringNames");	
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.meteringNames.size(); i++)
 	{
@@ -249,7 +267,9 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	parameters.add(ledEnabled);
 	parameters.add(drawGui);
 		//parameters.add(videoCodingNames);
+		//parameters.add(exposureControlNames);
 		parameters.add(exposureControlNames);
+		
 		parameters.add(meteringNames);
 		parameters.add(whiteBalanceNames);
 		parameters.add(imageFilterNames);

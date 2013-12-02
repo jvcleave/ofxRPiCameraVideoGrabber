@@ -22,7 +22,7 @@ ofParameter<bool> ParameterUtils::createBoolean(ofXml& xml)
     return item;
 }
 
-ofParameterGroup* ParameterUtils::createParameterGroup(ofXml& xml)
+ofParameterGroup* ParameterUtils::createGuiToggleParameterGroup(ofXml& xml)
 {
     ofParameterGroup* parameterGroup = new ofParameterGroup();
     string elementName = xml.getName();
@@ -68,43 +68,89 @@ void ParameterUtils::createXMLFromParam(ofAbstractParameter& parameter, ofXml& x
 	}
 	
 }
+ofAbstractParameter* ParameterUtils::createGuiParameter(ofXml& xml)
+{
+    string childName = xml.getName();
+    string nodeType = xml.getAttribute("type");
+    if (nodeType == "bool")
+    {
+        ofParameter<bool>* boolItem = new ofParameter<bool>();
+        boolItem->set(childName, xml.getBoolValue());
+        return (ofAbstractParameter*) boolItem;
+    }
+    if (nodeType == "int")
+    {
+        ofParameter<int>* intItem = new  ofParameter<int>();
+        string min = xml.getAttribute("min");
+        string max = xml.getAttribute("max");
+        intItem->set(childName, xml.getIntValue(), ofToInt(min), ofToInt(max));
+        return (ofAbstractParameter*) intItem;
+    }
+    
+    if (nodeType == "float")
+    {
+        ofParameter<float>* floatItem = new  ofParameter<float>();
+        string min = xml.getAttribute("min");
+        string max = xml.getAttribute("max");
+        floatItem->set(childName, xml.getFloatValue(), ofToFloat(min), ofToFloat(max));
+        return (ofAbstractParameter*) floatItem;
+    }
+    return NULL;
+}
+
+ofParameterGroup* ParameterUtils::createGuiParameterGroup(ofXml& xml)
+{
+    ofParameterGroup* parameterGroup = new ofParameterGroup();
+    string elementName = xml.getName();
+    parameterGroup->setName(elementName);
+    int numElementChildren = xml.getNumChildren();
+    for(int j=0; j<numElementChildren; j++)
+    {
+        
+        xml.setToChild(j);
+		parameterGroup->add(*createGuiParameter(xml));
+        xml.setToParent();
+        
+    }
+    return parameterGroup;
+}
 
 void ParameterUtils::saveXML(ofParameterGroup& parameters, string filePath)
 {
 	serializer->serialize(parameters);
 	
-	ofXml xmlParser(*serializer);
-	ofLogVerbose(__func__) << "xmlParser toString: " << xmlParser.toString();
+	ofXml xml(*serializer);
+	ofLogVerbose(__func__) << "xml toString: " << xml.toString();
 	
-	int numRootChildren =  xmlParser.getNumChildren();
+	int numRootChildren =  xml.getNumChildren();
     for(int i=0; i<numRootChildren; i++)
     {
-        xmlParser.setToChild(i);
-		int numElementChildren = xmlParser.getNumChildren();
+        xml.setToChild(i);
+		int numElementChildren = xml.getNumChildren();
 		if (numElementChildren>0)
 		{
 			
-			ofParameterGroup* parameterGroupPtr = createParameterGroup(xmlParser);
+			ofParameterGroup* parameterGroupPtr = createGuiToggleParameterGroup(xml);
 			for(int j=0; j<numElementChildren; j++)
 			{
-				xmlParser.setToChild(j);
+				xml.setToChild(j);
 				ofParameterGroup parameterGroup = *parameterGroupPtr;
-				createXMLFromParam(parameterGroup[xmlParser.getName()], xmlParser);
-				xmlParser.setToParent();
+				createXMLFromParam(parameterGroup[xml.getName()], xml);
+				xml.setToParent();
 			}
 			
 		}else 
 		{
-			createXMLFromParam(parameters[xmlParser.getName()], xmlParser);
+			createXMLFromParam(parameters[xml.getName()], xml);
 		}
 		
-        xmlParser.setToParent();
+        xml.setToParent();
     }
 	
-	ofLogVerbose(__func__) << "xmlParser processed: " << xmlParser.toString();
+	ofLogVerbose(__func__) << "xml processed: " << xml.toString();
 	
 	
-	xmlParser.save(filePath);
+	xml.save(filePath);
 	
 	
 }
