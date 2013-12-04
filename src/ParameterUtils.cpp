@@ -14,6 +14,7 @@ ParameterUtils::ParameterUtils()
 	serializer = new ofXml();
 }
 
+
 ofParameter<bool> ParameterUtils::createBoolean(ofXml& xml)
 {
     string childName = xml.getName();
@@ -21,6 +22,7 @@ ofParameter<bool> ParameterUtils::createBoolean(ofXml& xml)
     item.set(childName, xml.getBoolValue());
     return item;
 }
+
 
 ofParameterGroup* ParameterUtils::createGuiToggleParameterGroup(ofXml& xml)
 {
@@ -40,6 +42,7 @@ ofParameterGroup* ParameterUtils::createGuiToggleParameterGroup(ofXml& xml)
     }
     return parameterGroup;
 }
+
 
 void ParameterUtils::createXMLFromParam(ofAbstractParameter& parameter, ofXml& xml)
 {
@@ -68,6 +71,8 @@ void ParameterUtils::createXMLFromParam(ofAbstractParameter& parameter, ofXml& x
 	}
 	
 }
+
+
 ofAbstractParameter* ParameterUtils::createGuiParameter(ofXml& xml)
 {
     string childName = xml.getName();
@@ -98,6 +103,7 @@ ofAbstractParameter* ParameterUtils::createGuiParameter(ofXml& xml)
     return NULL;
 }
 
+
 ofParameterGroup* ParameterUtils::createGuiParameterGroup(ofXml& xml)
 {
     ofParameterGroup* parameterGroup = new ofParameterGroup();
@@ -114,6 +120,7 @@ ofParameterGroup* ParameterUtils::createGuiParameterGroup(ofXml& xml)
     }
     return parameterGroup;
 }
+
 
 void ParameterUtils::saveXML(ofParameterGroup& parameters, string filePath)
 {
@@ -151,6 +158,5 @@ void ParameterUtils::saveXML(ofParameterGroup& parameters, string filePath)
 	
 	
 	xml.save(filePath);
-	
 	
 }

@@ -265,11 +265,6 @@ public:
 	vector<string> exposureControlNames;
 	map<OMX_EXPOSURECONTROLTYPE, string> exposureControlTypes;
 	
-	vector<string>& getExposureControlNames()
-	{
-		return exposureControlNames;
-	}
-	
 	
 	vector<string> videoCodingNames;
 	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;

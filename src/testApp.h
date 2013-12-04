@@ -32,7 +32,7 @@ class testApp : public ofBaseApp, public SSHKeyListener{
 	ControlPanel controlPanel;
 	
 	
-	 ofx::HTTP::BasicServer::SharedPtr server;
+	ofx::HTTP::BasicServer::SharedPtr server;
 	
 };
 

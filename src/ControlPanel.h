@@ -55,13 +55,14 @@ private:
 	void onDrawGuiChanged(bool &doDrawGui);
 	
 	void onParameterGroupChanged(ofAbstractParameter & param);
-	void onVideoCodingNamesChanged(ofAbstractParameter & param);
-	void onExposureControlNamesChanged(ofAbstractParameter & param);
-	void onWhiteBalanceNamesChanged(ofAbstractParameter & param);
-	void onImageFilterNamesChanged(ofAbstractParameter & param);
-	void onMeteringNamesChanged(ofAbstractParameter & param);
 	
 	void onExposureControlToggleGroupChange(ToggleGroupListenerEventData & eventData);
+	void onWhiteBalanceToggleGroupChange(ToggleGroupListenerEventData & eventData);
+	void onMeteringNamesToggleGroupChange(ToggleGroupListenerEventData & eventData);
+	void onImageFilterToggleGroupChange(ToggleGroupListenerEventData & eventData);
+
 	
-	
+	template<typename ListenerMethod>
+	ToggleGroup* createToggleGroup(ofParameterGroup* parameterGroup, string groupName, vector<string>* names, ListenerMethod callback);
+
 };

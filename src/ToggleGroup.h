@@ -20,6 +20,16 @@ public:
 		labels = NULL;
 		parameterGroup = NULL;
 	}
+	
+	
+	/*
+		The group has changed so we avoid a recurvsive loop by removing the
+		change listener
+		
+		We find all other items and set them to false
+	 
+		We then re-add the change listener
+	*/
 	void onGroupChanged(ofAbstractParameter & param)
 	{
 		
@@ -42,6 +52,13 @@ public:
 		ofAddListener(parameterGroup->parameterChangedE, this, &ToggleGroup::onGroupChanged);
 	}
 	
+	
+	/*
+	 Given an empty ofParameterGroup and labels, we name it
+	 and fill it with boolean items with each label
+	 
+	 We then listen for when this group is changed
+	*/
 	void setup(ofParameterGroup* parameterGroup, string groupName, vector<string>* labels)
 	{
 		size_t i=0;
@@ -57,10 +74,16 @@ public:
 		ofAddListener(parameterGroup->parameterChangedE, this, &ToggleGroup::onGroupChanged);	
 	}
 	
+	
+	//Kept this as a seperate method in case the controller didn't want to know for some reason
+	
 	template<class ListenerClass, typename ListenerMethod>
-	void addListener(ListenerClass * listener, ListenerMethod method){
+	void addListener(ListenerClass * listener, ListenerMethod method)
+	{
 		ofAddListener(changeDispatcher, listener, method);
 	}
+	
+	
 	ofParameterGroup* parameterGroup;
 	vector<string>* labels;
 	ofEvent<ToggleGroupListenerEventData> changeDispatcher;
