@@ -225,7 +225,9 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	ToggleGroup* exposureControlToggleGroup = new ToggleGroup();
 	exposureControlToggleGroup->setup(&exposureControlNames, "exposureControlNames", &rpiCameraVideoGrabber->omxMaps.getExposureControlNames());
 	exposureControlToggleGroup->addListener(this, &ControlPanel::onExposureControlToggleGroupChange);
-	//ofAddListener(exposureControlToggleGroup->changeDispatcher,this, &ControlPanel::onExposureControlToggleGroupChange);
+	
+	
+	
 	meteringNames.setName("meteringNames");	
 	for (i=0; i<rpiCameraVideoGrabber->omxMaps.meteringNames.size(); i++)
 	{
@@ -288,7 +290,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	ofAddListener(parameters.parameterChangedE, this, &ControlPanel::onParameterGroupChanged);
 	
 	gui.setPosition(300, 44);
-	gui.minimizeAll();
+	//gui.minimizeAll();
 	ofAddListener(ofEvents().update, this, &ControlPanel::onUpdate);
 	
 }
