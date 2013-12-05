@@ -19,57 +19,29 @@ void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
 
 void ControlPanel::onWhiteBalanceToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	map<OMX_WHITEBALCONTROLTYPE, string>::iterator it;			
-	for (it = rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes.end(); ++it)
-	{
-		if (it->second == eventData.selectedName)
-		{
-			rpiCameraVideoGrabber->setWhiteBalance(it->first);
-			break;
-		}
-	}
+	
+	rpiCameraVideoGrabber->setWhiteBalance(rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes[eventData.selectedName]);
 }
 
 
 void ControlPanel::onImageFilterToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	map<OMX_IMAGEFILTERTYPE, string>::iterator it;			
-	for (it = rpiCameraVideoGrabber->omxMaps.imageFilterTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.imageFilterTypes.end(); ++it)
-	{
-		if (it->second == eventData.selectedName)
-		{
-			rpiCameraVideoGrabber->applyImageFilter(it->first);
-			break;
-		}
-	}
+	
+	rpiCameraVideoGrabber->applyImageFilter(rpiCameraVideoGrabber->omxMaps.imageFilterTypes[eventData.selectedName]);
+
 }
 
 
 void ControlPanel::onExposureControlToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	map<OMX_EXPOSURECONTROLTYPE, string>::iterator it;
-	for (it = rpiCameraVideoGrabber->omxMaps.exposureControlTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.exposureControlTypes.end(); ++it)
-	{
-		if (it->second == eventData.selectedName)
-		{
-			rpiCameraVideoGrabber->setExposureMode(it->first);
-			break;
-		}
-	}
+	rpiCameraVideoGrabber->setExposureMode(rpiCameraVideoGrabber->omxMaps.exposureControlTypes[eventData.selectedName]);
+	
 }
 
 
 void ControlPanel::onMeteringNamesToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	map<OMX_METERINGTYPE, string>::iterator it;
-	for (it = rpiCameraVideoGrabber->omxMaps.meteringTypes.begin(); it != rpiCameraVideoGrabber->omxMaps.meteringTypes.end(); ++it)
-	{
-		if (it->second == eventData.selectedName)
-		{
-			rpiCameraVideoGrabber->setMeteringMode(it->first);
-			break;
-		}
-	}
+	rpiCameraVideoGrabber->setMeteringMode(rpiCameraVideoGrabber->omxMaps.meteringTypes[eventData.selectedName]);
 }
 
 
