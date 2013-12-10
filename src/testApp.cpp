@@ -16,7 +16,7 @@ void testApp::setup()
     settings.setPort(8998);
 	server = ofx::HTTP::BasicServer::makeShared(settings);
     server->start();
-	controlPanel.setup(&videoGrabber);
+	controlPanel.setup(&videoGrabber, "JVCTOWER.local");
 }
 
 //--------------------------------------------------------------

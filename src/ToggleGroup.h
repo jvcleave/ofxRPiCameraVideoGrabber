@@ -12,6 +12,7 @@ public:
 	string selectedName;
 };
 
+
 class ToggleGroup
 {
 public:
@@ -82,7 +83,6 @@ public:
 	{
 		ofAddListener(changeDispatcher, listener, method);
 	}
-	
 	
 	ofParameterGroup* parameterGroup;
 	vector<string>* labels;

@@ -12,7 +12,7 @@ class ControlPanel
 public:
 	ControlPanel();
 	
-	void setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber);
+	void setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string remoteIP);
 	void draw();
 	void increaseContrast();
 	
@@ -31,7 +31,7 @@ private:
 	
 	int localPort;
 	int remotePort;
-
+	string remoteIP;
 	
 	bool doDrawGui;
 	

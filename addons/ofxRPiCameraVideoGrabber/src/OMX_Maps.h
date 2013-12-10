@@ -25,7 +25,6 @@ public:
 	OMX_Maps()
 	{
 		
-		
 		imageFilterTypes["None"] = OMX_ImageFilterNone;
 		imageFilterTypes["Noise"] = OMX_ImageFilterNoise;
 		imageFilterTypes["Emboss"] = OMX_ImageFilterEmboss;

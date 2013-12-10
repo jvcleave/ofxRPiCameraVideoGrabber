@@ -45,8 +45,9 @@ void ControlPanel::onMeteringNamesToggleGroupChange(ToggleGroupListenerEventData
 }
 
 
-void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
+void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string remoteIP)
 {
+	
 	ofParameter<int> sharpness;
 	ofParameter<int> contrast;
 	ofParameter<int> brightness;
@@ -57,6 +58,8 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	ofParameter<bool> drawGui;
 	
 	this->rpiCameraVideoGrabber = rpiCameraVideoGrabber;
+	this->remoteIP = remoteIP;
+	
 	parameters.setName("root");
     
     sharpness.set("sharpness", rpiCameraVideoGrabber->getSharpness(), -100, 100);
@@ -122,7 +125,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber)
 	guiParamGroup = (ofParameterGroup*)&gui.getParameter();
 
 	sync = new OSCParameterSync();
-	sync->setup(*guiParamGroup, localPort, "JVCTOWER.local", remotePort);
+	sync->setup(*guiParamGroup, localPort, remoteIP, remotePort);
 	string filename = ofToDataPath("DocumentRoot/modified.xml", true);
 	parameterUtils.saveXML(parameters, filename);
 	
