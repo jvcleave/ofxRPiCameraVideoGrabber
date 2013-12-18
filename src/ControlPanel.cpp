@@ -6,6 +6,7 @@ ControlPanel::ControlPanel()
 	remotePort = 7777;
 	rpiCameraVideoGrabber = NULL;
 	doDrawGui = true;
+	doActionItem = false;
 }
 
 
@@ -48,14 +49,9 @@ void ControlPanel::onMeteringNamesToggleGroupChange(ToggleGroupListenerEventData
 void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string remoteIP)
 {
 	
-	ofParameter<int> sharpness;
-	ofParameter<int> contrast;
-	ofParameter<int> brightness;
-	ofParameter<int> saturation;
-	ofParameter<bool> frameStabilizationEnabled;
-	ofParameter<bool> colorEnhancementEnabled;
-	ofParameter<bool> ledEnabled;
-	ofParameter<bool> drawGui;
+	
+	
+	
 	
 	this->rpiCameraVideoGrabber = rpiCameraVideoGrabber;
 	this->remoteIP = remoteIP;
@@ -87,6 +83,8 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string
 	drawGui.addListener(this, &ControlPanel::onDrawGuiChanged);
 	
 	
+	actionItem.set("actionItem", doActionItem);
+	actionItem.addListener(this, &ControlPanel::onActionItemChanged);
 	ToggleGroup* exposureControlToggleGroup = createToggleGroup(&exposureControlNames, 
 																"exposureControlNames", 
 																&rpiCameraVideoGrabber->omxMaps.exposureControlNames,
@@ -114,6 +112,7 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string
 	parameters.add(colorEnhancementEnabled);
 	parameters.add(ledEnabled);
 	parameters.add(drawGui);
+	parameters.add(actionItem);
 		parameters.add(exposureControlNames);
 		parameters.add(meteringNames);
 		parameters.add(whiteBalanceNames);
@@ -222,4 +221,14 @@ void ControlPanel::onDrawGuiChanged(bool &doDrawGui)
 {
 	this->doDrawGui = doDrawGui;
 }
+
+void ControlPanel::onActionItemChanged(bool &doAction)
+{
+	this->doActionItem = doActionItem;
+	//ofSleepMillis(2000);
+	ofLogVerbose() << "actionItem: " << actionItem;
+	actionItem = false;
+	this->doActionItem = actionItem;
+}
+
 

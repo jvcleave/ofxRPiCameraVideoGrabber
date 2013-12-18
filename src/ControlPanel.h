@@ -33,7 +33,7 @@ private:
 	int remotePort;
 	string remoteIP;
 	
-	bool doDrawGui;
+	
 	
 	ofxPanel gui;
 	ofParameterGroup* guiParamGroup;
@@ -44,8 +44,24 @@ private:
 	void onUpdate(ofEventArgs &args);
 	
 	
+	
+	
+	ofParameter<int> sharpness;
+	ofParameter<int> contrast;
+	ofParameter<int> brightness;
+	ofParameter<int> saturation;
+	ofParameter<bool> frameStabilizationEnabled;
+	ofParameter<bool> colorEnhancementEnabled;
+	ofParameter<bool> ledEnabled;
+	
+	ofParameter<bool> drawGui;
+	bool doDrawGui;
+	
+	ofParameter<bool> actionItem;
+	bool doActionItem;
+	
 	void onSharpnessChanged(int &sharpness);
-	void onContrastChanged(int &constrast);
+	void onContrastChanged(int &contrast);
 	void onBrightnessChanged(int &brightness);
 	void onSaturationChanged(int &saturation);
 	
@@ -53,6 +69,10 @@ private:
 	void onColorEnhancementChanged(bool &doColorEnhancement);
 	void onLEDEnabledChanged(bool &doEnableLED);
 	void onDrawGuiChanged(bool &doDrawGui);
+	
+	
+	void onActionItemChanged(bool &doAction);
+	
 	
 	void onParameterGroupChanged(ofAbstractParameter & param);
 	

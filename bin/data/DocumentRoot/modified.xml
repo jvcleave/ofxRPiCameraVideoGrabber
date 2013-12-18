@@ -7,6 +7,7 @@
 	<ColorEnhancement type="bool">0</ColorEnhancement>
 	<LED type="bool">0</LED>
 	<drawGui type="bool">1</drawGui>
+	<actionItem type="bool">0</actionItem>
 	<exposureControlNames type="group">
 		<Antishake type="bool">0</Antishake>
 		<Auto type="bool">0</Auto>
