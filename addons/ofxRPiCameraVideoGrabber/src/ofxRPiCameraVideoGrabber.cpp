@@ -78,9 +78,7 @@ void ofxRPiCameraVideoGrabber::setup(int videoWidth=1280, int videoHeight=720, i
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
-	
-	//enableAllAlgorithms();
-	
+		
 	disableAllPortsForComponent(&camera);
 
 	

@@ -203,10 +203,10 @@ public:
 
 	}
 	
-	template<typename T>
-	void collectNames(map<string, T>& sourceMap, vector<string>& names)
+	template<typename OMXEnum>
+	void collectNames(map<string, OMXEnum>& sourceMap, vector<string>& names)
 	{
-		typename map<string, T>::iterator mapIterator = sourceMap.begin();
+		typename map<string, OMXEnum>::iterator mapIterator = sourceMap.begin();
 		while (mapIterator != sourceMap.end()) 
 		{
 			names.push_back((*mapIterator).first);
