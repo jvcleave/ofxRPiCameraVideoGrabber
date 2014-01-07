@@ -9,7 +9,14 @@ void testApp::setup()
 	doDrawInfo	= true;
 		
 	consoleListener.setup(this);
-	videoGrabber.setup(1280, 720, 60);
+	
+	OMXCameraSettings omxCameraSettings;
+	omxCameraSettings.width = 1280;
+	omxCameraSettings.height = 720;
+	omxCameraSettings.framerate = 60;
+	
+	
+	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup(&videoGrabber.omxMaps);
 	
 	ofx::HTTP::BasicServerSettings settings;
