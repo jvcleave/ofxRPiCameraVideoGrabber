@@ -39,7 +39,7 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
 	
-	omxCameraUtils.disableAllPortsForComponent(&camera);
+	OMXCameraUtils::disableAllPortsForComponent(&camera);
 	
 	
 	OMX_VIDEO_PARAM_PORTFORMATTYPE portFormatType;
@@ -285,7 +285,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	string componentName = "OMX.broadcom.egl_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
-	omxCameraUtils.disableAllPortsForComponent(&render);
+	OMXCameraUtils::disableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -393,8 +393,8 @@ void TextureEngine::close()
 		ofLogError(__func__) << "render OMX_CommandFlush EGL_RENDER_OUTPUT_PORT FAIL";
 	}
 	
-	omxCameraUtils.disableAllPortsForComponent(&render);
-	omxCameraUtils.disableAllPortsForComponent(&camera);
+	OMXCameraUtils::disableAllPortsForComponent(&render);
+	OMXCameraUtils::disableAllPortsForComponent(&camera);
 	
 	error = OMX_FreeHandle(render);
 	if (error != OMX_ErrorNone) 

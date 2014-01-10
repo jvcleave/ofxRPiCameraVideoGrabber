@@ -1,11 +1,27 @@
 #include "ofMain.h"
-#include "testApp.h"
 #include "ofGLProgrammableRenderer.h"
 
+//#define use_texturedRemoteApp 1
+#define use_textureApp 1
+
+#ifdef use_texturedRemoteApp
+#include "texturedRemoteApp.h"
 int main()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 	ofSetupOpenGL(1280, 720, OF_WINDOW);
-	ofRunApp( new testApp());
+	ofRunApp( new texturedRemoteApp());
 }
+#endif
+
+#ifdef use_textureApp
+#include "textureApp.h"
+int main()
+{
+	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
+	ofSetupOpenGL(1280, 720, OF_WINDOW);
+	ofRunApp( new textureApp());
+}
+#endif

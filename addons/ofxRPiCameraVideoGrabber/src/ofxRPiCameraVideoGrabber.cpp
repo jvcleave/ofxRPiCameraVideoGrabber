@@ -18,6 +18,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	
 	updateFrameCounter = 0;
 	hasNewFrame = false;
+	textureEngine = NULL;
 	//ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 #if 0
@@ -44,8 +45,13 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 {
 	
 	this->omxCameraSettings = omxCameraSettings;
-	textureEngine.setup(omxCameraSettings);
-	camera = textureEngine.camera;
+	if (omxCameraSettings.isUsingTexture) 
+	{
+		textureEngine = new TextureEngine();
+		textureEngine->setup(omxCameraSettings);
+		camera = textureEngine->camera;
+	}
+	
 	
 		
 	
@@ -200,22 +206,39 @@ int ofxRPiCameraVideoGrabber::getFrameRate()
 
 GLuint ofxRPiCameraVideoGrabber::getTextureID()
 {
-	return textureEngine.textureID;
+	if (!omxCameraSettings.isUsingTexture) 
+	{
+		return 0;
+	}
+	return textureEngine->textureID;
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
-	return textureEngine.tex;
+	if (!textureEngine) 
+	{
+		ofLogError() << "TEXTURE NOT ENABLED - EXITING";
+		ofExit(0);
+	}
+	return textureEngine->tex;
 }
 
 void ofxRPiCameraVideoGrabber::draw()
 {
-	textureEngine.tex.draw(0, 0);
+	if (!omxCameraSettings.isUsingTexture)
+	{
+		return;
+	}
+	textureEngine->tex.draw(0, 0);
 }
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
-	return textureEngine.ready;
+	if (omxCameraSettings.isUsingTexture && !textureEngine) 
+	{
+		return false;
+	}
+	return textureEngine->ready;
 }
 void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
 {

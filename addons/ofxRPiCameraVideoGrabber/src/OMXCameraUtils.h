@@ -27,6 +27,6 @@ class OMXCameraUtils
 {
 public:
 	OMXCameraUtils();
-	OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
+	static OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
 
 };

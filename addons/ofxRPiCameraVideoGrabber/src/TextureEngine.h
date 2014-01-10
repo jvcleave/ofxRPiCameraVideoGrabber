@@ -19,7 +19,7 @@ public:
 	TextureEngine();
 	void setup(OMXCameraSettings omxCameraSettings);
 	OMXCameraSettings omxCameraSettings;
-	OMXCameraUtils omxCameraUtils;
+	//OMXCameraUtils omxCameraUtils;
 
 	void generateEGLImage();
 	GLuint textureID;

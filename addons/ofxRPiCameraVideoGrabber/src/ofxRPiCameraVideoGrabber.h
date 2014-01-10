@@ -81,13 +81,8 @@ private:
 	void onUpdate(ofEventArgs & args);
 	bool hasNewFrame;
 	
-	
 	int updateFrameCounter;
 	OMX_HANDLETYPE camera;
-	
-	
-	
-	
 	
 	int sharpness;	//	-100 to 100
 	int contrast;	//  -100 to 100 
@@ -100,7 +95,7 @@ private:
 	
 	OMXCameraUtils omxCameraUtils;
 	
-	TextureEngine textureEngine;
+	TextureEngine* textureEngine;
 	
 	
 };
