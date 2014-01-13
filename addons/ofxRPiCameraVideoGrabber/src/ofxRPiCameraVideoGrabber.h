@@ -22,6 +22,7 @@
 #include "OMXCameraSettings.h"
 
 #include "TextureEngine.h"
+#include "NonTextureEngine.h"
 
 class ofxRPiCameraVideoGrabber
 {
@@ -96,6 +97,7 @@ private:
 	OMXCameraUtils omxCameraUtils;
 	
 	TextureEngine* textureEngine;
+	NonTextureEngine* engine;
 	
 	
 };

@@ -19,6 +19,7 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
+#define VIDEO_RENDER_INPUT_PORT	90
 #define EGL_RENDER_INPUT_PORT	220
 #define EGL_RENDER_OUTPUT_PORT	221
 #define CAMERA_OUTPUT_PORT		71

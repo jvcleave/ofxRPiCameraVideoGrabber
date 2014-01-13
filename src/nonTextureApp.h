@@ -7,7 +7,7 @@
 #include "ImageFilterCollection.h"
 
 
-class textureApp : public ofBaseApp, public SSHKeyListener{
+class nonTextureApp : public ofBaseApp, public SSHKeyListener{
 
 	public:
 
