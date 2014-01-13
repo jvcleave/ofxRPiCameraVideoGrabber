@@ -451,6 +451,7 @@ void ofxRPiCameraVideoGrabber::setLEDStatus(bool status)
 		ofLog(OF_LOG_ERROR, "camera setLEDStatus FAIL error: 0x%08x", error);
 	}
 }
+
 void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
 	OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
