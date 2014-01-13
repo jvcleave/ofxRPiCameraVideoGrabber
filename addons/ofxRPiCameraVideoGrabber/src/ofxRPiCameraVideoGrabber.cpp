@@ -8,19 +8,15 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
-
-
-
-
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	
 	
 	updateFrameCounter = 0;
 	hasNewFrame = false;
 	textureEngine = NULL;
 	//ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
+
 #if 0
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
@@ -52,8 +48,6 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 		camera = textureEngine->camera;
 	}
 	
-	
-		
 	
 	setExposureMode(OMX_ExposureControlAuto);
 	setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
@@ -95,6 +89,7 @@ void ofxRPiCameraVideoGrabber::enableBurstMode()
 		
 	}
 }
+
 void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -123,6 +118,7 @@ void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 	}
 	
 }
+
 void ofxRPiCameraVideoGrabber::enableImageEffects()
 {
 	toggleImageEffects(true);
@@ -194,6 +190,7 @@ int ofxRPiCameraVideoGrabber::getWidth()
 {
 	return omxCameraSettings.width;
 }
+
 int ofxRPiCameraVideoGrabber::getHeight()
 {
 	return omxCameraSettings.height;
@@ -240,6 +237,7 @@ bool ofxRPiCameraVideoGrabber::isReady()
 	}
 	return textureEngine->ready;
 }
+
 void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -260,6 +258,7 @@ void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureM
 	}
 
 }
+
 void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
 											   int evCompensation,	//default 0
 											   int sensitivity,		//default 100
@@ -395,7 +394,6 @@ void ofxRPiCameraVideoGrabber::setSaturation(int saturation_) //-100 to 100
 	}
 }
 
-
 void ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -411,7 +409,6 @@ void ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlTy
 		ofLog(OF_LOG_ERROR, "camera setWhiteBalance FAIL error: 0x%08x", error);
 	}
 }
-
 
 void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
