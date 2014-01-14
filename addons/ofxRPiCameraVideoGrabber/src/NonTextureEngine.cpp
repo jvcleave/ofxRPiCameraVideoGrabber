@@ -268,8 +268,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		
 		// Which one is effective, this or the configuration just below?
-		encoder_portdef.format.video.nBitrate     = 10000000;
-		
+		//encoder_portdef.format.video.nBitrate     = 10000000;
+		encoder_portdef.format.video.nBitrate     = 1000000;
 		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
 		
 		if(error != OMX_ErrorNone) 
@@ -393,7 +393,21 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}else 
+		{
+			ofLogVerbose() << "camera_portdef buffer info";
+			ofLog(OF_LOG_VERBOSE, 
+				  "nBufferCountMin(%u)					\n \
+				  nBufferCountActual(%u)				\n \
+				  nBufferSize(%u)						\n \
+				  nBufferAlignmen(%u) \n", 
+				  camera_portdef.nBufferCountMin, 
+				  camera_portdef.nBufferCountActual, 
+				  camera_portdef.nBufferSize, 
+				  camera_portdef.nBufferAlignment);
+			
 		}
+
 		
 		error =  OMX_AllocateBuffer(camera, &camera_ppBuffer_in, CAMERA_INPUT_PORT, NULL, camera_portdef.nBufferSize);
 		if (error != OMX_ErrorNone) 
@@ -408,12 +422,44 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}else 
+		{
+			ofLog(OF_LOG_VERBOSE, 
+				  "nBufferCountMin(%u)					\n \
+				  nBufferCountActual(%u)				\n \
+				  nBufferSize(%u)						\n \
+				  nBufferAlignmen(%u) \n", 
+				  encoder_portdef.nBufferCountMin, 
+				  encoder_portdef.nBufferCountActual, 
+				  encoder_portdef.nBufferSize, 
+				  encoder_portdef.nBufferAlignment);
+			
+			/*for (size_t i = 0; i < encoder_portdef.nBufferCountActual; i++)
+			{
+				OMX_BUFFERHEADERTYPE *buffer = NULL;
+				OMX_U8* data = NULL;
+				
+				OMX_ERRORTYPE omx_err = OMX_AllocateBuffer(encoder, &buffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoder_portdef.nBufferSize);
+				if(omx_err != OMX_ErrorNone)
+				{
+					ofLog(OF_LOG_ERROR, "encoder OMX_UseBuffer FAIL error: 0x%08x", omx_err);
+				}
+				
+				buffer->nInputPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+				buffer->nFilledLen      = 0;
+				buffer->nOffset         = 0;
+				buffer->pAppPrivate     = (void*)i;  
+				m_omx_input_buffers.push_back(buffer);
+				m_omx_input_available.push(buffer);
+			}*/
 		}
+		
 		
 		error =  OMX_AllocateBuffer(encoder, &encoder_ppBuffer_out, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoder_portdef.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
+			
 		}
 		
 		

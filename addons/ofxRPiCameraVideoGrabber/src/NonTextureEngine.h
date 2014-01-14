@@ -56,4 +56,8 @@ public:
 	
 	bool want_quit;
 	FILE *fd_out;
+	
+	std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_available;
+	std::vector<OMX_BUFFERHEADERTYPE*> m_omx_input_buffers;
+	
 };
