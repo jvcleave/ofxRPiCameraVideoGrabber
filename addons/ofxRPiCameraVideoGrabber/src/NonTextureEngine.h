@@ -46,4 +46,10 @@ public:
 	
 	int frameCounter;
 	bool ready;
+	bool doRecording;
+	
+	OMX_BUFFERHEADERTYPE *camera_ppBuffer_in;
+	
+	OMX_BUFFERHEADERTYPE *encoder_ppBuffer_out;
+
 };
