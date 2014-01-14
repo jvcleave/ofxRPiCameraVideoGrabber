@@ -14,6 +14,8 @@ NonTextureEngine::NonTextureEngine()
 	ready		= false;
 	doRecording = true;
 	frameCounter = 0;
+	want_quit = false;
+	fd_out = NULL;
 }
 
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
@@ -214,6 +216,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	if (doRecording) 
 	{
+		string filePath = ofToDataPath(ofGetTimestampString()+".mp4", true);
+		fd_out = fopen(filePath.c_str(), "w+");
+		
 		OMX_CALLBACKTYPE nullSinkCallbacks;
 		nullSinkCallbacks.EventHandler    = &NonTextureEngine::nullSinkEventHandlerCallback;
 		nullSinkCallbacks.EmptyBufferDone	= &NonTextureEngine::nullSinkEmptyBufferDone;
@@ -547,6 +552,61 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		return error;
 }
 
+int quit_detected = 0;
+int quit_in_keyframe = 0;
+int need_next_buffer_to_be_filled = 1;
+int encoder_output_buffer_available = 0;
+
+
+void NonTextureEngine::readFrame()
+{
+	
+    // fill_output_buffer_done_handler() has marked that there's
+	// a buffer for us to flush
+	if(encoder_output_buffer_available) 
+	{
+		// Print a message if the user wants to quit, but don't exit
+		// the loop until we are certain that we have processed
+		// a full frame till end of the frame, i.e. we're at the end
+		// of the current key frame if processing one or until
+		// the next key frame is detected. This way we should always
+		// avoid corruption of the last encoded at the expense of
+		// small delay in exiting.
+		if(want_quit && !quit_detected) 
+		{
+			ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
+			quit_detected = 1;
+			quit_in_keyframe = encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+		}
+		if(quit_detected && (quit_in_keyframe ^ (encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+		{
+			ofLogVerbose() << "Key frame boundry reached, exiting loop...";
+			fclose(fd_out);
+			//break;
+		}
+		// Flush buffer to output file
+		size_t output_written = fwrite(encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, 1, encoder_ppBuffer_out->nFilledLen, fd_out);
+		if(output_written != encoder_ppBuffer_out->nFilledLen) 
+		{
+			ofLogError(__func__) << " Failed to write to output file: " << strerror(errno);
+		}
+		ofLogVerbose() << "Read from output buffer and wrote to output file: " <<  encoder_ppBuffer_out->nFilledLen <<  " "  << encoder_ppBuffer_out->nAllocLen;
+		need_next_buffer_to_be_filled = 1;
+	}
+	// Buffer flushed, request a new buffer to be filled by the encoder component
+	if(need_next_buffer_to_be_filled) 
+	{
+		need_next_buffer_to_be_filled = 0;
+		encoder_output_buffer_available = 0;
+		OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+		if(error != OMX_ErrorNone) 
+		{
+			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+
+		}
+	}
+	
+}
 
 #pragma mark encoder callbacks
 OMX_ERRORTYPE NonTextureEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
@@ -565,8 +625,10 @@ OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCo
 
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	ofLogVerbose(__func__) << "encoderFillBufferDone";
+	encoder_output_buffer_available = 1;
+	grabber->readFrame();
 	return OMX_ErrorNone;
 }
 

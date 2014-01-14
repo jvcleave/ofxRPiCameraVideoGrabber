@@ -76,7 +76,7 @@ public:
 	int getSaturation()		{ return saturation; }
 	
 	OMXCameraSettings omxCameraSettings;
-	
+	NonTextureEngine* engine;
 private:
 	
 	void onUpdate(ofEventArgs & args);
@@ -97,7 +97,7 @@ private:
 	OMXCameraUtils omxCameraUtils;
 	
 	TextureEngine* textureEngine;
-	NonTextureEngine* engine;
+	
 	
 	
 };

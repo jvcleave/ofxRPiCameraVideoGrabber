@@ -51,5 +51,9 @@ public:
 	OMX_BUFFERHEADERTYPE *camera_ppBuffer_in;
 	
 	OMX_BUFFERHEADERTYPE *encoder_ppBuffer_out;
-
+	
+	void readFrame();
+	
+	bool want_quit;
+	FILE *fd_out;
 };

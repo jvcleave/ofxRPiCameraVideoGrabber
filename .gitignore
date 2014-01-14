@@ -6,3 +6,4 @@ obj
 *._*
 *2013*.jpg
 bin/ofxRPiCameraVideoGrabber
+bin/data/*.mp4

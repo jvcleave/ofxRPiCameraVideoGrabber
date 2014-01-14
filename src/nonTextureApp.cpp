@@ -55,9 +55,10 @@ void nonTextureApp::keyPressed  (int key)
 	{
 		doDrawInfo = !doDrawInfo;
 	}
-	if (key == 'c')
+	if (key == 'q')
 	{
-		//controlPanel.increaseContrast();
+		ofLogVerbose() << "SENDING QUIT";
+		videoGrabber.engine->want_quit = true;
 	}
 	
 }
