@@ -24,6 +24,11 @@ memset(&(a), 0, sizeof(a)); \
 #define EGL_RENDER_OUTPUT_PORT	221
 #define CAMERA_OUTPUT_PORT		71
 
+#define VIDEO_ENCODE_INPUT_PORT 200
+#define VIDEO_ENCODE_OUTPUT_PORT 201
+
+#define NULL_SINK_INPUT_PORT 240
+
 class OMXCameraUtils
 {
 public:

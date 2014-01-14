@@ -182,29 +182,7 @@ OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hCompo
 	return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE NonTextureEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "renderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
 
-
-OMX_ERRORTYPE NonTextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose() << "renderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE NonTextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	
-	grabber->frameCounter++;
-	ofLogVerbose(__func__) << "grabber->frameCounter: " << grabber->frameCounter;
-	//OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
-	return OMX_ErrorNone;
-}
 
 OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 {
@@ -217,6 +195,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 	}
 	
+
+	
 	//Enable Camera Output Port
 	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
 	OMX_INIT_STRUCTURE(cameraport);
@@ -228,6 +208,90 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
 	}
+	
+	
+	OMX_CALLBACKTYPE nullSinkCallbacks;
+	nullSinkCallbacks.EventHandler    = &NonTextureEngine::nullSinkEventHandlerCallback;
+	nullSinkCallbacks.EmptyBufferDone	= &NonTextureEngine::nullSinkEmptyBufferDone;
+	nullSinkCallbacks.FillBufferDone	= &NonTextureEngine::nullSinkFillBufferDone;
+	
+	string nullSinkComponentName = "OMX.broadcom.null_sink";
+	
+	error =OMX_GetHandle(&nullSink, (OMX_STRING)nullSinkComponentName.c_str(), this , &nullSinkCallbacks);
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "nullSink OMX_GetHandle FAIL error: 0x%08x", error);
+	}
+	
+	OMX_CALLBACKTYPE encoderCallbacks;
+	encoderCallbacks.EventHandler    = &NonTextureEngine::encoderEventHandlerCallback;
+	encoderCallbacks.EmptyBufferDone	= &NonTextureEngine::encoderEmptyBufferDone;
+	encoderCallbacks.FillBufferDone	= &NonTextureEngine::encoderFillBufferDone;
+	
+	
+	string encoderComponentName = "OMX.broadcom.video_encode";
+	
+	error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
+	}
+	
+	// Encoder input port definition is done automatically upon tunneling
+	
+    // Configure video format emitted by encoder output port
+    OMX_PARAM_PORTDEFINITIONTYPE encoder_portdef;
+    OMX_INIT_STRUCTURE(encoder_portdef);
+    encoder_portdef.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+	}
+	
+
+    encoder_portdef.format.video.nFrameWidth  = omxCameraSettings.width;
+    encoder_portdef.format.video.nFrameHeight = omxCameraSettings.height;
+    encoder_portdef.format.video.xFramerate   = omxCameraSettings.framerate << 16;
+    encoder_portdef.format.video.nStride      = omxCameraSettings.width;
+	
+
+    // Which one is effective, this or the configuration just below?
+    encoder_portdef.format.video.nBitrate     = 10000000;
+	
+	error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
+	
+    if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+
+    }
+    // Configure encoding bitrate
+    OMX_VIDEO_PARAM_BITRATETYPE encodingBitrate;
+    OMX_INIT_STRUCTURE(encodingBitrate);
+    encodingBitrate.eControlRate = OMX_Video_ControlRateVariable;
+    encodingBitrate.nTargetBitrate = encoder_portdef.format.video.nBitrate;
+    encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+	
+	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
+	
+    if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoBitrate FAIL error: 0x%08x", error);
+		
+    }
+    // Configure encoding format
+    OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
+    OMX_INIT_STRUCTURE(encodingFormat);
+    encodingFormat.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+    encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
+	
+	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
+	if(error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
+		
+    }
 	
 	//Set up renderer
 	OMX_CALLBACKTYPE renderCallbacks;
@@ -321,5 +385,77 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL error: 0x%08x", error);
 	}*/
 	return error;
+}
+
+
+#pragma mark encoder callbacks
+OMX_ERRORTYPE NonTextureEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose() << "encoderEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+
+OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "encoderEmptyBufferDone";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{	
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose(__func__) << "encoderFillBufferDone";
+	return OMX_ErrorNone;
+}
+
+#pragma mark nullsink callbacks
+
+OMX_ERRORTYPE NonTextureEngine::nullSinkEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose() << "nullSinkEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+
+OMX_ERRORTYPE NonTextureEngine::nullSinkEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "nullSinkEmptyBufferDone";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE NonTextureEngine::nullSinkFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{	
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose() << "nullSinkFillBufferDone ";
+	return OMX_ErrorNone;
+}
+
+
+#pragma mark render callbacks
+OMX_ERRORTYPE NonTextureEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+{
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose() << "renderEventHandlerCallback";
+	return OMX_ErrorNone;
+}
+
+
+OMX_ERRORTYPE NonTextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{
+	ofLogVerbose() << "renderEmptyBufferDone";
+	return OMX_ErrorNone;
+}
+
+OMX_ERRORTYPE NonTextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{	
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	
+	grabber->frameCounter++;
+	ofLogVerbose(__func__) << "grabber->frameCounter: " << grabber->frameCounter;
+	//OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
+	return OMX_ErrorNone;
 }
 
