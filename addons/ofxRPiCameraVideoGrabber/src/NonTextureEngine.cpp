@@ -162,9 +162,9 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 
 OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-	/*ofLog(OF_LOG_VERBOSE, 
+	ofLog(OF_LOG_VERBOSE, 
 	 "NonTextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-	 __func__, eEvent, nData1, nData2, pEventData);*/
+	 __func__, eEvent, nData1, nData2, pEventData);
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	//ofLogVerbose(__func__) << grabber->omxMaps.eventTypes[eEvent];
 	switch (eEvent) 
@@ -184,20 +184,24 @@ OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hCompo
 
 OMX_ERRORTYPE NonTextureEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
+	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
+	ofLogVerbose() << "renderEventHandlerCallback";
 	return OMX_ErrorNone;
 }
 
 
 OMX_ERRORTYPE NonTextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {
-	ofLogVerbose(__func__) << "renderEmptyBufferDone";
+	ofLogVerbose() << "renderEmptyBufferDone";
 	return OMX_ErrorNone;
 }
 
 OMX_ERRORTYPE NonTextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	//grabber->frameCounter++;
+	
+	grabber->frameCounter++;
+	ofLogVerbose(__func__) << "grabber->frameCounter: " << grabber->frameCounter;
 	//OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
 	return OMX_ErrorNone;
 }
@@ -225,7 +229,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
 	}
 	
-	//Set up texture renderer
+	//Set up renderer
 	OMX_CALLBACKTYPE renderCallbacks;
 	renderCallbacks.EventHandler    = &NonTextureEngine::renderEventHandlerCallback;
 	renderCallbacks.EmptyBufferDone	= &NonTextureEngine::renderEmptyBufferDone;
@@ -291,8 +295,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	region.dest_rect.x_offset = 0;
 	region.dest_rect.y_offset = 0;
-	region.dest_rect.width = ofGetWidth();
-	region.dest_rect.height = ofGetHeight();
+	region.dest_rect.width = omxCameraSettings.width;
+	region.dest_rect.height = omxCameraSettings.height;
 	
 	error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
 	
