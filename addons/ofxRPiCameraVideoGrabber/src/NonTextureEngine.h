@@ -16,6 +16,7 @@ class NonTextureEngine
 {
 public:
 	NonTextureEngine();
+	void close();
 	void setup(OMXCameraSettings omxCameraSettings);
 	OMXCameraSettings omxCameraSettings;
 	//OMXCameraUtils omxCameraUtils;
@@ -60,4 +61,6 @@ public:
 	std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_available;
 	std::vector<OMX_BUFFERHEADERTYPE*> m_omx_input_buffers;
 	
+	ofBuffer tmpBuffer;
+	string filePath;
 };

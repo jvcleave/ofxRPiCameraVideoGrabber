@@ -16,6 +16,9 @@ NonTextureEngine::NonTextureEngine()
 	frameCounter = 0;
 	want_quit = false;
 	fd_out = NULL;
+	
+	tmpBuffer.allocate(1024*50);
+	
 }
 
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
@@ -216,7 +219,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	if (doRecording) 
 	{
-		string filePath = ofToDataPath(ofGetTimestampString()+".mp4", true);
+		filePath = ofToDataPath(ofGetTimestampString()+".mp4", true);
 		fd_out = fopen(filePath.c_str(), "w+");
 		
 		OMX_CALLBACKTYPE nullSinkCallbacks;
@@ -269,7 +272,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		// Which one is effective, this or the configuration just below?
 		//encoder_portdef.format.video.nBitrate     = 10000000;
-		encoder_portdef.format.video.nBitrate     = 1000000;
+		encoder_portdef.format.video.nBitrate     = 10000000;
 		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
 		
 		if(error != OMX_ErrorNone) 
@@ -600,7 +603,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 int quit_detected = 0;
 int quit_in_keyframe = 0;
-int need_next_buffer_to_be_filled = 1;
+int need_next_buffer_to_be_filled = 0;
 int encoder_output_buffer_available = 0;
 
 
@@ -627,17 +630,40 @@ void NonTextureEngine::readFrame()
 		if(quit_detected && (quit_in_keyframe ^ (encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
 		{
 			ofLogVerbose() << "Key frame boundry reached, exiting loop...";
-			fclose(fd_out);
+			
+			bool didWrite = ofBufferToFile(filePath, tmpBuffer, true);
+			if(didWrite)
+			{
+				ofLogVerbose() << filePath << " SUCCESS";
+			}else
+			{
+				ofLogVerbose() << filePath << " FAIL";
+			}
+			//fwrite(tmp, 1, 102400, fd_out);
+			//fclose(fd_out);
+			//fclose(fd_out);
 			//break;
+			need_next_buffer_to_be_filled = 0;
+		}else 
+		{
+			tmpBuffer.append((const char*) encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen);
+			need_next_buffer_to_be_filled = 1;
 		}
+
+		//memcpy(tmp, encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen );
+		
+		//memcpy( tempBuffer, encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen );
+		
+		
+		
 		// Flush buffer to output file
-		size_t output_written = fwrite(encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, 1, encoder_ppBuffer_out->nFilledLen, fd_out);
+		/*size_t output_written = fwrite(encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, 1, encoder_ppBuffer_out->nFilledLen, fd_out);
 		if(output_written != encoder_ppBuffer_out->nFilledLen) 
 		{
 			ofLogError(__func__) << " Failed to write to output file: " << strerror(errno);
-		}
-		ofLogVerbose() << "Read from output buffer and wrote to output file: " <<  encoder_ppBuffer_out->nFilledLen <<  " "  << encoder_ppBuffer_out->nAllocLen;
-		need_next_buffer_to_be_filled = 1;
+		}*/
+		//ofLogVerbose() << "Read from output buffer and wrote to output file: " <<  encoder_ppBuffer_out->nFilledLen <<  " "  << encoder_ppBuffer_out->nAllocLen;
+		//need_next_buffer_to_be_filled = 1;
 	}
 	// Buffer flushed, request a new buffer to be filled by the encoder component
 	if(need_next_buffer_to_be_filled) 
@@ -648,12 +674,41 @@ void NonTextureEngine::readFrame()
 		if(error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-
+			//fclose(fd_out);
+			close();
+			
 		}
 	}
 	
 }
-
+void NonTextureEngine::close()
+{
+	
+	
+	encoder_ppBuffer_out->nFlags = OMX_BUFFERFLAG_EOS;
+	OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
+	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
+	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+	OMX_SendCommand(nullSink, OMX_CommandFlush, NULL_SINK_INPUT_PORT, NULL);
+	OMXCameraUtils::disableAllPortsForComponent(&encoder);
+	OMXCameraUtils::disableAllPortsForComponent(&nullSink);
+	OMXCameraUtils::disableAllPortsForComponent(&camera);
+	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, camera_ppBuffer_in);
+	OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoder_ppBuffer_out);
+	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	OMX_FreeHandle(camera);
+	OMX_FreeHandle(encoder);
+	OMX_FreeHandle(nullSink);
+	ofLogVerbose() << "~NonTextureEngine END";
+}
 #pragma mark encoder callbacks
 OMX_ERRORTYPE NonTextureEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
@@ -672,8 +727,9 @@ OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCo
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose(__func__) << "encoderFillBufferDone";
+	ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
 	encoder_output_buffer_available = 1;
+	grabber->frameCounter++;
 	grabber->readFrame();
 	return OMX_ErrorNone;
 }
@@ -721,7 +777,7 @@ OMX_ERRORTYPE NonTextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComp
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	
-	grabber->frameCounter++;
+	
 	ofLogVerbose(__func__) << "grabber->frameCounter: " << grabber->frameCounter;
 	//OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
 	return OMX_ErrorNone;
