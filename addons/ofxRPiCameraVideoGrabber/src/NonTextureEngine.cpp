@@ -17,7 +17,7 @@ NonTextureEngine::NonTextureEngine()
 	didWriteFile = false;
 	
 	MEGABYTE_IN_BITS = 8388608;
-	numMBps = 1.2;
+	numMBps = 0.2;
 	
 	want_quit = false;	
 	quit_detected = 0;
@@ -31,14 +31,16 @@ NonTextureEngine::NonTextureEngine()
 
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 {
+	
+	if(vcos_semaphore_create(&handler_lock, "handler_lock", 1) != VCOS_SUCCESS) 
+	{
+        ofLogError() << "Failed to create handler lock semaphore";
+    }
+	
 	this->omxCameraSettings = omxCameraSettings;
 	
-	OMX_ERRORTYPE error = OMX_Init();
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "OMX_Init PASS";
-	}
-	
+	OMX_ERRORTYPE error = OMX_ErrorNone;
+
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &NonTextureEngine::cameraEventHandlerCallback;
 	
@@ -90,7 +92,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
     portdef.format.video.nFrameHeight	= omxCameraSettings.height;
 	portdef.format.video.xFramerate		= omxCameraSettings.framerate << 16;
     portdef.format.video.nStride		= omxCameraSettings.width;
-	portdef.format.video.nSliceHeight			= omxCameraSettings.height;
+	portdef.format.video.nSliceHeight	= omxCameraSettings.height;
 	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
 	if(error != OMX_ErrorNone) 
 	{
@@ -101,11 +103,11 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	}
 	
 	//Set the framerate 
-	OMX_CONFIG_FRAMERATETYPE framerateConfig;
+	/*OMX_CONFIG_FRAMERATETYPE framerateConfig;
 	OMX_INIT_STRUCTURE(framerateConfig);
 	framerateConfig.nPortIndex = CAMERA_OUTPUT_PORT;
 	//framerateConfig.xEncodeFramerate = omxCameraSettings.framerate * (1<<16); //Q16 format - 25fps
-	framerateConfig.xEncodeFramerate = omxCameraSettings.framerate << 16;
+	//framerateConfig.xEncodeFramerate = omxCameraSettings.framerate << 16;
 	error =  OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
 	if(error != OMX_ErrorNone) 
 	{
@@ -113,7 +115,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	}else 
 	{
 		ofLogVerbose() << "camera OMX_SetConfig OMX_IndexParamVideoPortFormat PASS";
-	}
+	}*/
 	
 	
 	
@@ -161,42 +163,6 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		//OMX_COLOR_FORMATTYPE eColorFormat;
 		//OMX_U32 xFramerate;
 	}
-	
-	
-	
-	OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
-	OMX_INIT_STRUCTURE(exposurevalue);
-	exposurevalue.nPortIndex = OMX_ALL;
-	error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "OMX_CONFIG_EXPOSUREVALUETYPE PASS";
-		stringstream info;
-		info << "OMX_METERINGTYPE: " << exposurevalue.eMetering << "\n";
-		info << "xEVCompensation: " << exposurevalue.xEVCompensation << "\n";
-		info << "nApertureFNumber: " << exposurevalue.nApertureFNumber << "\n";
-		info << "bAutoAperture: " << exposurevalue.bAutoAperture << "\n";
-		info << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec << "\n";
-		info << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed << "\n";
-		info << "nSensitivity: " << exposurevalue.nSensitivity << "\n";
-		info << "bAutoSensitivity: " << exposurevalue.bAutoSensitivity << "\n";
-		ofLogVerbose() << "CAMERA EXPOSURE INFO: " << info.str();
-		
-	}
-#if 0
-	OMX_U32 nSize;
-    OMX_VERSIONTYPE nVersion;
-    OMX_U32 nPortIndex;
-    OMX_METERINGTYPE eMetering;
-    OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
-    OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
-    OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
-    OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
-    OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
-    OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
-    OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
-#endif
-
 	
 }
 
@@ -324,13 +290,17 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		encoder_portdef.format.video.nFrameWidth			= omxCameraSettings.width;
 		encoder_portdef.format.video.nFrameHeight			= omxCameraSettings.height;
-		encoder_portdef.format.video.xFramerate				= omxCameraSettings.framerate << 16;
+		encoder_portdef.format.video.xFramerate				= 0;
+		//encoder_portdef.format.video.xFramerate				= omxCameraSettings.framerate << 16;
 		encoder_portdef.format.video.nStride				= omxCameraSettings.width;
 		encoder_portdef.format.video.nSliceHeight			= omxCameraSettings.height;
+		//encoder_portdef.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
+		//encoder_portdef.format.video.bFlagErrorConcealment = OMX_TRUE;
 		//encoder_portdef.format.video.nBitrate     = 0;
 		//encoder_portdef.format.video.nBitrate     = 10000000;
 
 		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
+		//recordingBitRate = 0;
 		encoder_portdef.format.video.nBitrate = recordingBitRate;
 		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
 		
@@ -345,7 +315,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		encodingBitrate.eControlRate = OMX_Video_ControlRateVariable;
 		//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
 		
-		encodingBitrate.nTargetBitrate = encoder_portdef.format.video.nBitrate;
+		encodingBitrate.nTargetBitrate = recordingBitRate;
 		encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
 		
 		error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
@@ -749,6 +719,7 @@ void NonTextureEngine::readFrame()
 		}else 
 		{
 			tmpBuffer.append((const char*) encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen);
+			//ofLogVerbose() << "encoder_ppBuffer_out->nFilledLen: " << encoder_ppBuffer_out->nFilledLen;
 			need_next_buffer_to_be_filled = 1;
 		}
 	}
@@ -827,6 +798,7 @@ void NonTextureEngine::close()
 	OMX_FreeHandle(camera);
 	OMX_FreeHandle(encoder);
 	if(!usePreview) OMX_FreeHandle(nullSink);
+	vcos_semaphore_delete(&handler_lock);
 	ofLogVerbose(__func__) << " END";
 }
 
@@ -848,9 +820,11 @@ OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCo
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
-	grabber->encoder_output_buffer_available = 1;
-	grabber->frameCounter++;
+	vcos_semaphore_wait(&grabber->handler_lock);
+		ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
+		grabber->encoder_output_buffer_available = 1;
+		grabber->frameCounter++;
+		vcos_semaphore_post(&grabber->handler_lock);
 	grabber->readFrame();
 	return OMX_ErrorNone;
 }

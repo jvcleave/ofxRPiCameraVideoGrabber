@@ -41,6 +41,14 @@ bool ofxRPiCameraVideoGrabber::isFrameNew()
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 {
 	
+	OMX_ERRORTYPE error = OMX_Init();
+	if (error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "OMX_Init PASS";
+	}
+	
+	
+	
 	this->omxCameraSettings = omxCameraSettings;
 	if (omxCameraSettings.isUsingTexture) 
 	{

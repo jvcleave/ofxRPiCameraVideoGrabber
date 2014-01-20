@@ -22,11 +22,7 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	this->omxCameraSettings = omxCameraSettings;
 	generateEGLImage();
 	
-	OMX_ERRORTYPE error = OMX_Init();
-	if (error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "OMX_Init PASS";
-	}
+	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &TextureEngine::cameraEventHandlerCallback;
@@ -126,40 +122,6 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	
 	OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
 	
-	
-	OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
-	OMX_INIT_STRUCTURE(exposurevalue);
-	exposurevalue.nPortIndex = OMX_ALL;
-	error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "OMX_CONFIG_EXPOSUREVALUETYPE PASS";
-		stringstream info;
-		info << "OMX_METERINGTYPE: " << exposurevalue.eMetering << "\n";
-		info << "xEVCompensation: " << exposurevalue.xEVCompensation << "\n";
-		info << "nApertureFNumber: " << exposurevalue.nApertureFNumber << "\n";
-		info << "bAutoAperture: " << exposurevalue.bAutoAperture << "\n";
-		info << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec << "\n";
-		info << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed << "\n";
-		info << "nSensitivity: " << exposurevalue.nSensitivity << "\n";
-		info << "bAutoSensitivity: " << exposurevalue.bAutoSensitivity << "\n";
-		ofLogVerbose() << "CAMERA EXPOSURE INFO: " << info.str();
-		
-	}
-#if 0
-	OMX_U32 nSize;
-    OMX_VERSIONTYPE nVersion;
-    OMX_U32 nPortIndex;
-    OMX_METERINGTYPE eMetering;
-    OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
-    OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
-    OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
-    OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
-    OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
-    OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
-    OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
-#endif
-
 	
 }
 void TextureEngine::generateEGLImage()

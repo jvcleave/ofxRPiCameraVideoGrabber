@@ -13,7 +13,6 @@ void nonTextureApp::setup()
 	OMXCameraSettings omxCameraSettings;
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
-	omxCameraSettings.framerate = 60;
 	omxCameraSettings.isUsingTexture = false;
 	
 	

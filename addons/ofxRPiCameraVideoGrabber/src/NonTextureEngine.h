@@ -73,4 +73,5 @@ public:
 	int encoder_output_buffer_available;
 	bool usePreview;
 	
+	VCOS_SEMAPHORE_T handler_lock;
 };
