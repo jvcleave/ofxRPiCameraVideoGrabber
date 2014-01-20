@@ -11,7 +11,10 @@ void textureApp::setup()
 	consoleListener.setup(this);
 	
 	OMXCameraSettings omxCameraSettings;
-
+	//omxCameraSettings.width = 1280;
+	//omxCameraSettings.height = 720;
+	omxCameraSettings.framerate = 25;
+	//omxCameraSettings.isUsingTexture = true;
 	
 	
 	videoGrabber.setup(omxCameraSettings);

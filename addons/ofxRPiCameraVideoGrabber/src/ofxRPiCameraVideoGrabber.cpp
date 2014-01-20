@@ -47,7 +47,8 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 		textureEngine = new TextureEngine();
 		textureEngine->setup(omxCameraSettings);
 		camera = textureEngine->camera;
-	}else {
+	}else 
+	{
 		engine = new NonTextureEngine();
 		engine->setup(omxCameraSettings);
 		camera = engine->camera;

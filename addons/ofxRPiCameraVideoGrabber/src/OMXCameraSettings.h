@@ -13,7 +13,9 @@ public:
 	{
 		width = 1280;
 		height = 720;
-		framerate = 60;
+		//currently limited to 30fps
+		//http://www.raspberrypi.org/forums/viewtopic.php?p=490143#p490143
+		framerate = 30;
 		isUsingTexture = true;
 	}
 };

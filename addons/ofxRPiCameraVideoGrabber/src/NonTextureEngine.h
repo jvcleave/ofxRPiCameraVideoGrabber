@@ -12,6 +12,8 @@
 #include "OMXCameraSettings.h"
 #include "OMXCameraUtils.h"
 
+
+
 class NonTextureEngine
 {
 public:
@@ -54,13 +56,20 @@ public:
 	OMX_BUFFERHEADERTYPE *encoder_ppBuffer_out;
 	
 	void readFrame();
-	
+	void writeFile();
 	bool want_quit;
-	FILE *fd_out;
-	
-	std::queue<OMX_BUFFERHEADERTYPE*> m_omx_input_available;
-	std::vector<OMX_BUFFERHEADERTYPE*> m_omx_input_buffers;
 	
 	ofBuffer tmpBuffer;
-	string filePath;
+	
+	bool didWriteFile;
+	
+	int recordingBitRate;
+	int MEGABYTE_IN_BITS;
+	float numMBps;
+	
+	int quit_detected;
+	int quit_in_keyframe;
+	int need_next_buffer_to_be_filled;
+	int encoder_output_buffer_available;
+	
 };
