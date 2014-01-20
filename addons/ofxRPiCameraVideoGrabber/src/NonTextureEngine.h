@@ -71,5 +71,6 @@ public:
 	int quit_in_keyframe;
 	int need_next_buffer_to_be_filled;
 	int encoder_output_buffer_available;
+	bool usePreview;
 	
 };

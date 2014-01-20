@@ -25,6 +25,8 @@ NonTextureEngine::NonTextureEngine()
 	need_next_buffer_to_be_filled = 0;
 	encoder_output_buffer_available = 0;
 	
+	usePreview  = true;
+	
 }
 
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
@@ -254,20 +256,43 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	{
 		tmpBuffer.allocate(1024*50);
 		
-		
-		OMX_CALLBACKTYPE nullSinkCallbacks;
-		nullSinkCallbacks.EventHandler    = &NonTextureEngine::nullSinkEventHandlerCallback;
-		nullSinkCallbacks.EmptyBufferDone	= &NonTextureEngine::nullSinkEmptyBufferDone;
-		nullSinkCallbacks.FillBufferDone	= &NonTextureEngine::nullSinkFillBufferDone;
-		
-		string nullSinkComponentName = "OMX.broadcom.null_sink";
-		
-		error =OMX_GetHandle(&nullSink, (OMX_STRING)nullSinkComponentName.c_str(), this , &nullSinkCallbacks);
-		if (error != OMX_ErrorNone) 
+		if (usePreview) 
 		{
-			ofLog(OF_LOG_ERROR, "nullSink OMX_GetHandle FAIL error: 0x%08x", error);
+			//Set up renderer
+			OMX_CALLBACKTYPE renderCallbacks;
+			renderCallbacks.EventHandler    = &NonTextureEngine::renderEventHandlerCallback;
+			renderCallbacks.EmptyBufferDone	= &NonTextureEngine::renderEmptyBufferDone;
+			renderCallbacks.FillBufferDone	= &NonTextureEngine::renderFillBufferDone;
+			
+			string renderComponentName = "OMX.broadcom.video_render";
+			
+			OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+			OMXCameraUtils::disableAllPortsForComponent(&render);
+			
+			//Set renderer to Idle
+			error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			}
+		}else 
+		{
+			OMX_CALLBACKTYPE nullSinkCallbacks;
+			nullSinkCallbacks.EventHandler    = &NonTextureEngine::nullSinkEventHandlerCallback;
+			nullSinkCallbacks.EmptyBufferDone	= &NonTextureEngine::nullSinkEmptyBufferDone;
+			nullSinkCallbacks.FillBufferDone	= &NonTextureEngine::nullSinkFillBufferDone;
+			
+			string nullSinkComponentName = "OMX.broadcom.null_sink";
+			
+			error =OMX_GetHandle(&nullSink, (OMX_STRING)nullSinkComponentName.c_str(), this , &nullSinkCallbacks);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "nullSink OMX_GetHandle FAIL error: 0x%08x", error);
+			}
+			OMXCameraUtils::disableAllPortsForComponent(&nullSink);
 		}
-		OMXCameraUtils::disableAllPortsForComponent(&nullSink);
+
+		
 		
 		OMX_CALLBACKTYPE encoderCallbacks;
 		encoderCallbacks.EventHandler    = &NonTextureEngine::encoderEventHandlerCallback;
@@ -343,12 +368,25 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			
 		}
 		
-		// Tunnel camera preview output port and null sink input port
-		error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, nullSink, NULL_SINK_INPUT_PORT);
-		if(error != OMX_ErrorNone) 
+		if (usePreview) 
 		{
-			ofLog(OF_LOG_ERROR, "CAMERA_PREVIEW_PORT->NULL_SINK_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
+			//Create camera->video_render Tunnel
+			error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "camera->video_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+			}
+		}else 
+		{
+			// Tunnel camera preview output port and null sink input port
+			error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, nullSink, NULL_SINK_INPUT_PORT);
+			if(error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "CAMERA_PREVIEW_PORT->NULL_SINK_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
+			}
 		}
+
+		
 		
 		// Tunnel camera video output port and encoder input port
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, VIDEO_ENCODE_INPUT_PORT);
@@ -372,12 +410,19 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 		}
 		
-		//Set nullSink to Idle
-		error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		if (error != OMX_ErrorNone) 
+		if (usePreview) 
 		{
-			ofLog(OF_LOG_ERROR, "nullSink OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			//add renderer
+		}else
+		{
+			//Set nullSink to Idle
+			error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "nullSink OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			}
 		}
+		
 		
 		
 		
@@ -416,12 +461,27 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
 		}
 		
-		//Enable nullSink port
-		error = OMX_SendCommand(nullSink, OMX_CommandPortEnable, NULL_SINK_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
+		if (usePreview) 
 		{
-			ofLog(OF_LOG_ERROR, "nullSink OMX_CommandPortEnable NULL_SINK_INPUT_PORT FAIL error: 0x%08x", error);
+			//Enable render input port
+			error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
+			}
+			
+			
+		}else 
+		{
+			//Enable nullSink port
+			error = OMX_SendCommand(nullSink, OMX_CommandPortEnable, NULL_SINK_INPUT_PORT, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "nullSink OMX_CommandPortEnable NULL_SINK_INPUT_PORT FAIL error: 0x%08x", error);
+			}
 		}
+
+		
 		
 		// Allocate camera input buffer and encoder output buffer,
 		// buffers for tunneled ports are allocated internally by OMX
@@ -517,12 +577,53 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_StateExecuting FAIL error: 0x%08x", error);		
 		}
 		
-		//Start nullSink
-		error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-		if (error != OMX_ErrorNone) 
+		if (usePreview) 
 		{
-			ofLog(OF_LOG_ERROR, "nullSink OMX_StateExecuting FAIL error: 0x%08x", error);		
+			
+			//Start renderer
+			error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
+			}
+			
+			OMX_CONFIG_DISPLAYREGIONTYPE region;
+			
+			OMX_INIT_STRUCTURE(region);
+			region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
+			
+			region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
+			
+			region.fullscreen = OMX_FALSE;
+			region.noaspect = OMX_TRUE;
+			
+			region.dest_rect.x_offset = 0;
+			region.dest_rect.y_offset = 0;
+			region.dest_rect.width = omxCameraSettings.width;
+			region.dest_rect.height = omxCameraSettings.height;
+			
+			error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
+			
+			if(error == OMX_ErrorNone)
+			{
+				ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
+			}else 
+			{
+				ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
+			}
+			
+			
+		}else 
+		{
+			//Start nullSink
+			error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+			if (error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "nullSink OMX_StateExecuting FAIL error: 0x%08x", error);		
+			}
 		}
+
+		
 		
 		error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
 		
@@ -539,9 +640,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		renderCallbacks.EmptyBufferDone	= &NonTextureEngine::renderEmptyBufferDone;
 		renderCallbacks.FillBufferDone	= &NonTextureEngine::renderFillBufferDone;
 		
-		string componentName = "OMX.broadcom.video_render";
+		string renderComponentName = "OMX.broadcom.video_render";
 		
-		OMX_GetHandle(&render, (OMX_STRING)componentName.c_str(), this , &renderCallbacks);
+		OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
 		OMXCameraUtils::disableAllPortsForComponent(&render);
 		
 		//Set renderer to Idle
@@ -556,7 +657,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, VIDEO_RENDER_INPUT_PORT);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLog(OF_LOG_ERROR, "camera->video_render OMX_SetupTunnel FAIL error: 0x%08x", error);
 		}
 		
 		//Enable camera output port
@@ -708,21 +809,24 @@ void NonTextureEngine::close()
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
 	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
 	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
-	OMX_SendCommand(nullSink, OMX_CommandFlush, NULL_SINK_INPUT_PORT, NULL);
+	if(!usePreview) 
+	{
+		OMX_SendCommand(nullSink, OMX_CommandFlush, NULL_SINK_INPUT_PORT, NULL);
+	}
 	OMXCameraUtils::disableAllPortsForComponent(&encoder);
-	OMXCameraUtils::disableAllPortsForComponent(&nullSink);
+	if(!usePreview) OMXCameraUtils::disableAllPortsForComponent(&nullSink);
 	OMXCameraUtils::disableAllPortsForComponent(&camera);
 	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, camera_ppBuffer_in);
 	OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoder_ppBuffer_out);
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if(!usePreview) OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
 	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	if(!usePreview) OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
 	OMX_FreeHandle(camera);
 	OMX_FreeHandle(encoder);
-	OMX_FreeHandle(nullSink);
+	if(!usePreview) OMX_FreeHandle(nullSink);
 	ofLogVerbose(__func__) << " END";
 }
 
