@@ -26,6 +26,7 @@ NonTextureEngine::NonTextureEngine()
 	encoder_output_buffer_available = 0;
 	
 	usePreview  = true;
+	isWritingFile = false;
 	
 }
 
@@ -119,50 +120,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	
 	
 	
-	OMX_VIDEO_PARAM_PORTFORMATTYPE portFormatType;
-	OMX_INIT_STRUCTURE(portFormatType);
-	portFormatType.nPortIndex = CAMERA_OUTPUT_PORT;
-	error = OMX_GetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
-	
-	
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-	}else 
-	{
-		//camera color spaces
-		/*
-		 OMX_COLOR_Format24bitRGB888
-		 OMX_COLOR_FormatYUV420PackedPlanar
-		 OMX_COLOR_FormatYUV422PackedPlanar
-		 OMX_COLOR_FormatYCbYCr
-		 OMX_COLOR_FormatYCrYCb
-		 OMX_COLOR_FormatCbYCrY
-		 OMX_COLOR_FormatCrYCbY
-		 OMX_COLOR_FormatYUV420PackedSemiPlanar
-		 */
-		
-		//egl_render color spaces
-		/*
-		 OMX_COLOR_Format18bitRGB666
-		 OMX_COLOR_FormatYUV420PackedPlanar
-		 OMX_COLOR_FormatYUV422PackedPlanar
-		 OMX_COLOR_Format32bitABGR8888
-		 */
-		
-		//ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << omxMaps.colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
-		
-		//ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << omxMaps.videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
-		//ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
-		//ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
-		ofLog(OF_LOG_VERBOSE, "portFormatType.xFramerate: %u", portFormatType.xFramerate);
-		
-		//OMX_U32 nIndex;
-		//OMX_VIDEO_CODINGTYPE eCompressionFormat; 
-		//OMX_COLOR_FORMATTYPE eColorFormat;
-		//OMX_U32 xFramerate;
-	}
+	thread.start(*this);
 	
 }
 
@@ -692,55 +650,68 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 
 
-
+void NonTextureEngine::run()
+{
+	while (thread.isRunning()) 
+	{
+		if(encoder_output_buffer_available) 
+		{
+			// Print a message if the user wants to quit, but don't exit
+			// the loop until we are certain that we have processed
+			// a full frame till end of the frame, i.e. we're at the end
+			// of the current key frame if processing one or until
+			// the next key frame is detected. This way we should always
+			// avoid corruption of the last encoded at the expense of
+			// small delay in exiting.
+			if(want_quit && !quit_detected) 
+			{
+				ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
+				quit_detected = 1;
+				quit_in_keyframe = encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+			}
+			if(quit_detected && (quit_in_keyframe ^ (encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+			{
+				ofLogVerbose() << "Key frame boundry reached, exiting loop...";
+				writeFile();
+				
+				need_next_buffer_to_be_filled = 0;
+			}else 
+			{
+				tmpBuffer.append((const char*) encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen);
+				//ofLogVerbose() << "encoder_ppBuffer_out->nFilledLen: " << encoder_ppBuffer_out->nFilledLen;
+				need_next_buffer_to_be_filled = 1;
+			}
+		}
+		// Buffer flushed, request a new buffer to be filled by the encoder component
+		if(need_next_buffer_to_be_filled) 
+		{
+			need_next_buffer_to_be_filled = 0;
+			encoder_output_buffer_available = 0;
+			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+			if(error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+				close();
+				
+			}
+		}
+	}
+}
 void NonTextureEngine::readFrame()
 {
-	if(encoder_output_buffer_available) 
-	{
-		// Print a message if the user wants to quit, but don't exit
-		// the loop until we are certain that we have processed
-		// a full frame till end of the frame, i.e. we're at the end
-		// of the current key frame if processing one or until
-		// the next key frame is detected. This way we should always
-		// avoid corruption of the last encoded at the expense of
-		// small delay in exiting.
-		if(want_quit && !quit_detected) 
-		{
-			ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
-			quit_detected = 1;
-			quit_in_keyframe = encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
-		}
-		if(quit_detected && (quit_in_keyframe ^ (encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
-		{
-			ofLogVerbose() << "Key frame boundry reached, exiting loop...";
-			writeFile();
-			
-			need_next_buffer_to_be_filled = 0;
-		}else 
-		{
-			tmpBuffer.append((const char*) encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen);
-			//ofLogVerbose() << "encoder_ppBuffer_out->nFilledLen: " << encoder_ppBuffer_out->nFilledLen;
-			need_next_buffer_to_be_filled = 1;
-		}
-	}
-	// Buffer flushed, request a new buffer to be filled by the encoder component
-	if(need_next_buffer_to_be_filled) 
-	{
-		need_next_buffer_to_be_filled = 0;
-		encoder_output_buffer_available = 0;
-		OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-			close();
-			
-		}
-	}
+	
 	
 }
 
 void NonTextureEngine::writeFile()
 {
+	if (!isWritingFile) 
+	{
+		return;
+	}
+	mutex.lock();
+	isWritingFile = true;
+	thread.tryJoin(50);
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
@@ -765,10 +736,13 @@ void NonTextureEngine::writeFile()
 	{
 		ofLogVerbose() << filePath << " FAIL";
 	}
+	mutex.unlock();
+	isWritingFile = false;
 }
 
 void NonTextureEngine::close()
 {
+	
 	if(doRecording && !didWriteFile)
 	{
 		writeFile();
@@ -820,12 +794,12 @@ OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCo
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	vcos_semaphore_wait(&grabber->handler_lock);
+	grabber->mutex.lock();
 		ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
 		grabber->encoder_output_buffer_available = 1;
 		grabber->frameCounter++;
-		vcos_semaphore_post(&grabber->handler_lock);
-	grabber->readFrame();
+	grabber->mutex.unlock();
+	//grabber->readFrame();
 	return OMX_ErrorNone;
 }
 
