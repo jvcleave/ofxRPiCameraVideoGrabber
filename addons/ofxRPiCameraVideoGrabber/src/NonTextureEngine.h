@@ -14,7 +14,7 @@
 
 
 
-class NonTextureEngine: public Poco::Runnable
+class NonTextureEngine: public ofThread
 {
 public:
 	NonTextureEngine();
@@ -73,11 +73,8 @@ public:
 	int encoder_output_buffer_available;
 	bool usePreview;
 	
-	VCOS_SEMAPHORE_T handler_lock;
-	Poco::Thread thread;
-	Poco::FastMutex mutex;
 	
-	void run();
+	void threadedFunction();
 	bool isWritingFile;
 	
 };

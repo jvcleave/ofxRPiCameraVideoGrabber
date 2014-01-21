@@ -17,7 +17,7 @@ NonTextureEngine::NonTextureEngine()
 	didWriteFile = false;
 	
 	MEGABYTE_IN_BITS = 8388608;
-	numMBps = 0.2;
+	numMBps = 1.0;
 	
 	want_quit = false;	
 	quit_detected = 0;
@@ -33,10 +33,6 @@ NonTextureEngine::NonTextureEngine()
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 {
 	
-	if(vcos_semaphore_create(&handler_lock, "handler_lock", 1) != VCOS_SUCCESS) 
-	{
-        ofLogError() << "Failed to create handler lock semaphore";
-    }
 	
 	this->omxCameraSettings = omxCameraSettings;
 	
@@ -119,8 +115,9 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	}*/
 	
 	
-	
-	thread.start(*this);
+	bool doThreadBlocking	= false;
+	bool threadVerboseMode	= false;
+	startThread(doThreadBlocking, threadVerboseMode);
 	
 }
 
@@ -650,9 +647,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 
 
-void NonTextureEngine::run()
+void NonTextureEngine::threadedFunction()
 {
-	while (thread.isRunning()) 
+	while (isThreadRunning()) 
 	{
 		if(encoder_output_buffer_available) 
 		{
@@ -705,13 +702,8 @@ void NonTextureEngine::readFrame()
 
 void NonTextureEngine::writeFile()
 {
-	if (!isWritingFile) 
-	{
-		return;
-	}
-	mutex.lock();
+	stopThread();
 	isWritingFile = true;
-	thread.tryJoin(50);
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
@@ -736,7 +728,6 @@ void NonTextureEngine::writeFile()
 	{
 		ofLogVerbose() << filePath << " FAIL";
 	}
-	mutex.unlock();
 	isWritingFile = false;
 }
 
@@ -772,7 +763,6 @@ void NonTextureEngine::close()
 	OMX_FreeHandle(camera);
 	OMX_FreeHandle(encoder);
 	if(!usePreview) OMX_FreeHandle(nullSink);
-	vcos_semaphore_delete(&handler_lock);
 	ofLogVerbose(__func__) << " END";
 }
 
@@ -794,11 +784,11 @@ OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCo
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	grabber->mutex.lock();
+	grabber->lock();
 		ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
 		grabber->encoder_output_buffer_available = 1;
 		grabber->frameCounter++;
-	grabber->mutex.unlock();
+	grabber->unlock();
 	//grabber->readFrame();
 	return OMX_ErrorNone;
 }
