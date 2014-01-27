@@ -17,5 +17,6 @@ public:
 		//http://www.raspberrypi.org/forums/viewtopic.php?p=490143#p490143
 		framerate = 30;
 		isUsingTexture = true;
+		//doFlipTexture = false;
 	}
 };

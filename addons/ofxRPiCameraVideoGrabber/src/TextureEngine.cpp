@@ -132,8 +132,9 @@ void TextureEngine::generateEGLImage()
 	context = appEGLWindow->getEglContext();
 	
 	
-	tex.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGB);
-	tex.getTextureData().bFlipTexture = false;
+	tex.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	//tex.getTextureData().bFlipTexture = true;
+	
 	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
 	textureID = tex.getTextureData().textureID;
 	
