@@ -26,7 +26,6 @@ NonTextureEngine::NonTextureEngine()
 	encoder_output_buffer_available = 0;
 	
 	usePreview  = true;
-	isWritingFile = false;
 	
 }
 
@@ -115,7 +114,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	}*/
 	
 	
-	bool doThreadBlocking	= false;
+	bool doThreadBlocking	= true;
 	bool threadVerboseMode	= false;
 	startThread(doThreadBlocking, threadVerboseMode);
 	
@@ -175,7 +174,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	if (doRecording) 
 	{
-		tmpBuffer.allocate(1024*50);
+		//tmpBuffer.allocate(1024*50);
 		
 		if (usePreview) 
 		{
@@ -694,16 +693,10 @@ void NonTextureEngine::threadedFunction()
 		}
 	}
 }
-void NonTextureEngine::readFrame()
-{
-	
-	
-}
 
 void NonTextureEngine::writeFile()
 {
 	stopThread();
-	isWritingFile = true;
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
@@ -728,7 +721,6 @@ void NonTextureEngine::writeFile()
 	{
 		ofLogVerbose() << filePath << " FAIL";
 	}
-	isWritingFile = false;
 }
 
 void NonTextureEngine::close()
@@ -789,7 +781,6 @@ OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCom
 		grabber->encoder_output_buffer_available = 1;
 		grabber->frameCounter++;
 	grabber->unlock();
-	//grabber->readFrame();
 	return OMX_ErrorNone;
 }
 

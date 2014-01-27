@@ -75,6 +75,5 @@ public:
 	
 	
 	void threadedFunction();
-	bool isWritingFile;
 	
 };
