@@ -50,7 +50,6 @@ public:
 	
 	int frameCounter;
 	bool isOpen;
-	bool doRecording;
 	
 	OMX_BUFFERHEADERTYPE *cameraInputBuffer;
 	
@@ -72,7 +71,6 @@ public:
 	int isKeyframeValid;
 	bool doFillBuffer;
 	bool bufferAvailable;
-	bool usePreview;
 	
 	
 	void threadedFunction();

@@ -11,9 +11,18 @@ void nonTextureApp::setup()
 	consoleListener.setup(this);
 	
 	OMXCameraSettings omxCameraSettings;
-	omxCameraSettings.width = 1280;
-	omxCameraSettings.height = 720;
-	omxCameraSettings.isUsingTexture = false;
+	omxCameraSettings.width					= 1280;
+	omxCameraSettings.height				= 720;
+	omxCameraSettings.isUsingTexture		= false;
+	if (!omxCameraSettings.isUsingTexture) 
+	{
+		//some options available with direct-to-screen rendering
+		omxCameraSettings.doRecording			= true;						//default: false
+		omxCameraSettings.doRecordingPreview	= true;						//default: false
+		omxCameraSettings.previewWidth			= 640;	//default: omxCameraSettings.width
+		omxCameraSettings.previewHeight			= 480; //default: omxCameraSettings.height
+		omxCameraSettings.recordingFilePath		= "";						//will self generate if left blank
+	}
 	
 	
 	videoGrabber.setup(omxCameraSettings);
