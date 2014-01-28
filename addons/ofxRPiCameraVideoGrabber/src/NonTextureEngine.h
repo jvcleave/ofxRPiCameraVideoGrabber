@@ -60,7 +60,7 @@ public:
 	void writeFile();
 	bool stopRequested;
 	
-	ofBuffer tmpBuffer;
+	ofBuffer recordingFileBuffer;
 	
 	bool didWriteFile;
 	

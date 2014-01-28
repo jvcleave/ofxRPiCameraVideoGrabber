@@ -64,11 +64,11 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
 	
 	//Set the resolution
-	OMX_PARAM_PORTDEFINITIONTYPE portdef;
-	OMX_INIT_STRUCTURE(portdef);
-	portdef.nPortIndex = CAMERA_OUTPUT_PORT;
+	OMX_PARAM_PORTDEFINITIONTYPE cameraOutputPortDefinition;
+	OMX_INIT_STRUCTURE(cameraOutputPortDefinition);
+	cameraOutputPortDefinition.nPortIndex = CAMERA_OUTPUT_PORT;
 	
-	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
+	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
@@ -77,16 +77,17 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
 	}
 	
-	portdef.format.image.nFrameWidth = omxCameraSettings.width;
-	portdef.format.image.nFrameHeight = omxCameraSettings.height;
-	portdef.format.image.nStride = omxCameraSettings.width;
+	cameraOutputPortDefinition.format.image.nFrameWidth		= omxCameraSettings.width;
+	cameraOutputPortDefinition.format.image.nFrameHeight	= omxCameraSettings.height;
+	cameraOutputPortDefinition.format.image.nStride			= omxCameraSettings.width;
 	
-	portdef.format.video.nFrameWidth	= omxCameraSettings.width;
-    portdef.format.video.nFrameHeight	= omxCameraSettings.height;
-	portdef.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
-    portdef.format.video.nStride		= omxCameraSettings.width;
-	portdef.format.video.nSliceHeight	= omxCameraSettings.height;
-	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
+	cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
+    cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
+	cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
+    cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
+	cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
+	
+	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
@@ -94,6 +95,73 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	{
 		ofLogVerbose() << "camera OMX_SetParameter OMX_IndexParamPortDefinition PASS";
 	}
+	
+	OMX_PARAM_PORTDEFINITIONTYPE cameraPreviewPortDefinition;
+	OMX_INIT_STRUCTURE(cameraPreviewPortDefinition);
+	cameraPreviewPortDefinition.nPortIndex = CAMERA_PREVIEW_PORT;
+	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose() << "cameraPreviewPortDefinition  OMX_GetParameter OMX_IndexParamPortDefinition PASS";
+		
+		switch(cameraPreviewPortDefinition.eDomain)
+		{
+			case OMX_PortDomainVideo:
+			{
+				ofLogVerbose() << "OMX_VIDEO_PORTDEFINITIONTYPE";
+				stringstream videoInfo;
+				
+				videoInfo << "nFrameWidth: "	<< cameraPreviewPortDefinition.format.video.nFrameWidth			<< "\n";
+                videoInfo << "nFrameHeight: "	<< cameraPreviewPortDefinition.format.video.nFrameHeight		<< "\n";
+                videoInfo << "nStride: "		<< cameraPreviewPortDefinition.format.video.nStride				<< "\n";
+                videoInfo << "nSliceHeight: "	<< cameraPreviewPortDefinition.format.video.nSliceHeight		<< "\n";
+                videoInfo << "nBitrate: "		<< cameraPreviewPortDefinition.format.video.nBitrate			<< "\n";
+				
+				ofLogVerbose(__func__) << "videoInfo: \n" << videoInfo.str();
+				
+				break;
+			}
+			case OMX_PortDomainImage:
+			{
+				ofLogVerbose() << "OMX_IMAGE_PORTDEFINITIONTYPE";
+				ofLogVerbose() << "OMX_VIDEO_PORTDEFINITIONTYPE";
+				stringstream videoInfo;
+				
+				videoInfo << "nFrameWidth: "	<< cameraPreviewPortDefinition.format.video.nFrameWidth			<< "\n";
+                videoInfo << "nFrameHeight: "	<< cameraPreviewPortDefinition.format.video.nFrameHeight		<< "\n";
+                videoInfo << "nStride: "		<< cameraPreviewPortDefinition.format.video.nStride				<< "\n";
+                videoInfo << "nSliceHeight: "	<< cameraPreviewPortDefinition.format.video.nSliceHeight		<< "\n";
+                videoInfo << "nBitrate: "		<< cameraPreviewPortDefinition.format.video.nBitrate			<< "\n";
+				
+				ofLogVerbose(__func__) << "videoInfo: \n" << videoInfo.str();
+				break;
+			}
+			default:
+			{
+				ofLogVerbose() << "NOT DEFINED";
+			}
+		}
+		
+		//Set the preview to the same size as the recording
+		cameraPreviewPortDefinition.format.video = cameraOutputPortDefinition.format.video;
+		error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
+		if(error == OMX_ErrorNone) 
+		{
+			ofLogVerbose() << "cameraPreviewPortDefinition  OMX_SetParameter OMX_IndexParamPortDefinition PASS";
+			
+		}else 
+		{
+			ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}
+		
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+
+	}
+	
+	
+
 	
 	//Set the framerate 
 	/*OMX_CONFIG_FRAMERATETYPE framerateConfig;
@@ -227,29 +295,29 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		// Encoder input port definition is done automatically upon tunneling
 		
 		// Configure video format emitted by encoder output port
-		OMX_PARAM_PORTDEFINITIONTYPE encoder_portdef;
-		OMX_INIT_STRUCTURE(encoder_portdef);
-		encoder_portdef.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
+		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
+		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
+		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
 		}
 		
 		
-		encoder_portdef.format.video.nFrameWidth			= omxCameraSettings.width;
-		encoder_portdef.format.video.nFrameHeight			= omxCameraSettings.height;
-		encoder_portdef.format.video.xFramerate				= 0; //always 25
-		//encoder_portdef.format.video.xFramerate				= omxCameraSettings.framerate << 16;
-		encoder_portdef.format.video.nStride				= omxCameraSettings.width;
-		encoder_portdef.format.video.nSliceHeight			= omxCameraSettings.height;
-		//encoder_portdef.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
-		//encoder_portdef.format.video.bFlagErrorConcealment = OMX_TRUE;
+		encoderOutputPortDefinition.format.video.nFrameWidth			= omxCameraSettings.width;
+		encoderOutputPortDefinition.format.video.nFrameHeight			= omxCameraSettings.height;
+		encoderOutputPortDefinition.format.video.xFramerate				= 0; //always 25
+		//encoderOutputPortDefinition.format.video.xFramerate				= omxCameraSettings.framerate << 16;
+		encoderOutputPortDefinition.format.video.nStride				= omxCameraSettings.width;
+		encoderOutputPortDefinition.format.video.nSliceHeight			= omxCameraSettings.height;
+		//encoderOutputPortDefinition.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
+		//encoderOutputPortDefinition.format.video.bFlagErrorConcealment = OMX_TRUE;
 	
 
 		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
-		encoder_portdef.format.video.nBitrate = recordingBitRate;
-		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
+		encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
+		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		
 		if(error != OMX_ErrorNone) 
 		{
@@ -402,39 +470,39 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		// Allocate camera input buffer and encoder output buffer,
 		// buffers for tunneled ports are allocated internally by OMX
-		OMX_PARAM_PORTDEFINITIONTYPE camera_portdef;
-		OMX_INIT_STRUCTURE(camera_portdef);
-		camera_portdef.nPortIndex = CAMERA_INPUT_PORT;
-		error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &camera_portdef);
+		OMX_PARAM_PORTDEFINITIONTYPE cameraInputPortDefinition;
+		OMX_INIT_STRUCTURE(cameraInputPortDefinition);
+		cameraInputPortDefinition.nPortIndex = CAMERA_INPUT_PORT;
+		error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraInputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
 		}else 
 		{
-			ofLogVerbose() << "camera_portdef buffer info";
+			ofLogVerbose() << "cameraInputPortDefinition buffer info";
 			ofLog(OF_LOG_VERBOSE, 
 				  "nBufferCountMin(%u)					\n \
 				  nBufferCountActual(%u)				\n \
 				  nBufferSize(%u)						\n \
 				  nBufferAlignmen(%u) \n", 
-				  camera_portdef.nBufferCountMin, 
-				  camera_portdef.nBufferCountActual, 
-				  camera_portdef.nBufferSize, 
-				  camera_portdef.nBufferAlignment);
+				  cameraInputPortDefinition.nBufferCountMin, 
+				  cameraInputPortDefinition.nBufferCountActual, 
+				  cameraInputPortDefinition.nBufferSize, 
+				  cameraInputPortDefinition.nBufferAlignment);
 			
 		}
 
 		
-		error =  OMX_AllocateBuffer(camera, &cameraInputBuffer, CAMERA_INPUT_PORT, NULL, camera_portdef.nBufferSize);
+		error =  OMX_AllocateBuffer(camera, &cameraInputBuffer, CAMERA_INPUT_PORT, NULL, cameraInputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "camera OMX_AllocateBuffer CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
 		}
 		
 		
-		OMX_INIT_STRUCTURE(encoder_portdef);
-		encoder_portdef.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		error = OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
+		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
+		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+		error = OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
@@ -445,15 +513,15 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 				  nBufferCountActual(%u)				\n \
 				  nBufferSize(%u)						\n \
 				  nBufferAlignmen(%u) \n", 
-				  encoder_portdef.nBufferCountMin, 
-				  encoder_portdef.nBufferCountActual, 
-				  encoder_portdef.nBufferSize, 
-				  encoder_portdef.nBufferAlignment);
+				  encoderOutputPortDefinition.nBufferCountMin, 
+				  encoderOutputPortDefinition.nBufferCountActual, 
+				  encoderOutputPortDefinition.nBufferSize, 
+				  encoderOutputPortDefinition.nBufferAlignment);
 			
 		}
 		
 		
-		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoder_portdef.nBufferSize);
+		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
@@ -663,7 +731,7 @@ void NonTextureEngine::threadedFunction()
 				doFillBuffer = false;
 			}else 
 			{
-				tmpBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
 				//ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
 				doFillBuffer = true;
 			}
@@ -703,7 +771,7 @@ void NonTextureEngine::writeFile()
 	
 	string filePath = ofToDataPath(fileName.str(), true);
 	
-	didWriteFile = ofBufferToFile(filePath, tmpBuffer, true);
+	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
 	if(didWriteFile)
 	{
 		ofLogVerbose() << filePath << " SUCCESS";
