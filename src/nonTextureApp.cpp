@@ -57,7 +57,8 @@ void nonTextureApp::keyPressed  (int key)
 	if (key == 'q')
 	{
 		ofLogVerbose() << "SENDING QUIT";
-		videoGrabber.engine->want_quit = true;
+		//videoGrabber.engine->want_quit = true;
+		videoGrabber.stopRecording();
 	}
 	
 }

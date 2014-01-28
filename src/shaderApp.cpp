@@ -34,12 +34,8 @@ void shaderApp::setup()
 			fbo.getTextureReference().getTextureData().bFlipTexture = true;
 			shader.load("PostProcessing");
 		}
-
-		
-		//
-		
 		fbo.begin();
-		ofClear(0, 0, 0, 0);
+			ofClear(0, 0, 0, 0);
 		fbo.end();
 	}
 	

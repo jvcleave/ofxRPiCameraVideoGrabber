@@ -18,6 +18,7 @@ class NonTextureEngine: public ofThread
 {
 public:
 	NonTextureEngine();
+	~NonTextureEngine();
 	void close();
 	void setup(OMXCameraSettings omxCameraSettings);
 	OMXCameraSettings omxCameraSettings;
@@ -48,16 +49,16 @@ public:
 	
 	
 	int frameCounter;
-	bool ready;
+	bool isOpen;
 	bool doRecording;
 	
-	OMX_BUFFERHEADERTYPE *camera_ppBuffer_in;
+	OMX_BUFFERHEADERTYPE *cameraInputBuffer;
 	
-	OMX_BUFFERHEADERTYPE *encoder_ppBuffer_out;
+	OMX_BUFFERHEADERTYPE *encoderOutputBuffer;
 	
 	void readFrame();
 	void writeFile();
-	bool want_quit;
+	bool stopRequested;
 	
 	ofBuffer tmpBuffer;
 	
@@ -67,13 +68,15 @@ public:
 	int MEGABYTE_IN_BITS;
 	float numMBps;
 	
-	int quit_detected;
-	int quit_in_keyframe;
-	int need_next_buffer_to_be_filled;
-	int encoder_output_buffer_available;
+	bool isStopping;
+	int isKeyframeValid;
+	bool doFillBuffer;
+	bool bufferAvailable;
 	bool usePreview;
 	
 	
 	void threadedFunction();
+	
+	void stopRecording();
 	
 };

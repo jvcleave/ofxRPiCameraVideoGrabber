@@ -32,7 +32,7 @@ public:
 	
 	
 	ofxRPiCameraVideoGrabber();
-
+	~ofxRPiCameraVideoGrabber();
 	void setup(OMXCameraSettings omxCameraSettings);
 	void draw();
 	
@@ -76,7 +76,8 @@ public:
 	int getSaturation()		{ return saturation; }
 	
 	OMXCameraSettings omxCameraSettings;
-	NonTextureEngine* engine;
+	
+	void stopRecording();
 private:
 	
 	void onUpdate(ofEventArgs & args);
@@ -97,6 +98,7 @@ private:
 	OMXCameraUtils omxCameraUtils;
 	
 	TextureEngine* textureEngine;
+	NonTextureEngine* engine;
 	
 	
 	

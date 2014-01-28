@@ -17,7 +17,14 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	engine = NULL;
 	//ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
-
+ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
+{
+	if(engine)
+	{
+		delete engine;
+		engine = NULL;
+	}
+}
 #if 0
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
@@ -235,6 +242,14 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 	return textureEngine->tex;
 }
 
+
+void ofxRPiCameraVideoGrabber::stopRecording()
+{
+	if (engine) 
+	{
+		engine->stopRecording();
+	}
+}
 void ofxRPiCameraVideoGrabber::draw()
 {
 	if (!omxCameraSettings.isUsingTexture)

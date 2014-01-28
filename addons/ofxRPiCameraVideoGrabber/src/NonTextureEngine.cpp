@@ -1,16 +1,13 @@
 /*
- *  NonTextureEngine.cpp
- *  openFrameworksRPi
- *
- *  Created by jason van cleave on 1/7/14.
- *  Copyright 2014 jasonvancleave.com. All rights reserved.
- *
+ Thanks to Tuomas Jormola for the recording demos!
+ 
+ https://github.com/tjormola/rpi-openmax-demos/
  */
 
 #include "NonTextureEngine.h"
 NonTextureEngine::NonTextureEngine()
 {
-	ready		= false;
+	isOpen		= false;
 	doRecording = true;
 	frameCounter = 0;
 	
@@ -19,11 +16,11 @@ NonTextureEngine::NonTextureEngine()
 	MEGABYTE_IN_BITS = 8388608;
 	numMBps = 1.0;
 	
-	want_quit = false;	
-	quit_detected = 0;
-	quit_in_keyframe = 0;
-	need_next_buffer_to_be_filled = 0;
-	encoder_output_buffer_available = 0;
+	stopRequested = false;	
+	isStopping = false;
+	isKeyframeValid = false;
+	doFillBuffer = false;
+	bufferAvailable = false;
 	
 	usePreview  = true;
 	
@@ -86,7 +83,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	
 	portdef.format.video.nFrameWidth	= omxCameraSettings.width;
     portdef.format.video.nFrameHeight	= omxCameraSettings.height;
-	portdef.format.video.xFramerate		= omxCameraSettings.framerate << 16;
+	portdef.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
     portdef.format.video.nStride		= omxCameraSettings.width;
 	portdef.format.video.nSliceHeight	= omxCameraSettings.height;
 	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
@@ -173,9 +170,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	
 	if (doRecording) 
-	{
-		//tmpBuffer.allocate(1024*50);
-		
+	{		
 		if (usePreview) 
 		{
 			//Set up renderer
@@ -244,17 +239,15 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		encoder_portdef.format.video.nFrameWidth			= omxCameraSettings.width;
 		encoder_portdef.format.video.nFrameHeight			= omxCameraSettings.height;
-		encoder_portdef.format.video.xFramerate				= 0;
+		encoder_portdef.format.video.xFramerate				= 0; //always 25
 		//encoder_portdef.format.video.xFramerate				= omxCameraSettings.framerate << 16;
 		encoder_portdef.format.video.nStride				= omxCameraSettings.width;
 		encoder_portdef.format.video.nSliceHeight			= omxCameraSettings.height;
 		//encoder_portdef.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
 		//encoder_portdef.format.video.bFlagErrorConcealment = OMX_TRUE;
-		//encoder_portdef.format.video.nBitrate     = 0;
-		//encoder_portdef.format.video.nBitrate     = 10000000;
+	
 
 		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
-		//recordingBitRate = 0;
 		encoder_portdef.format.video.nBitrate = recordingBitRate;
 		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoder_portdef);
 		
@@ -432,7 +425,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		}
 
 		
-		error =  OMX_AllocateBuffer(camera, &camera_ppBuffer_in, CAMERA_INPUT_PORT, NULL, camera_portdef.nBufferSize);
+		error =  OMX_AllocateBuffer(camera, &cameraInputBuffer, CAMERA_INPUT_PORT, NULL, camera_portdef.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "camera OMX_AllocateBuffer CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
@@ -460,33 +453,13 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		}
 		
 		
-		error =  OMX_AllocateBuffer(encoder, &encoder_ppBuffer_out, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoder_portdef.nBufferSize);
+		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoder_portdef.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
 			
 		}
-		
-		
-		
-		/*
-		//Enable render input port
-		error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
-		}
-		
-		
-		//Start renderer
-		error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
-		}
-		*/
-		
-		
+
 		//Start camera
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
@@ -549,7 +522,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 		
 		
-		error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 		
 		if (error != OMX_ErrorNone) 
 		{
@@ -640,50 +613,67 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 	}
 
-		ready = true;
-		return error;
+	isOpen = true;
+	return error;
 }
 
+NonTextureEngine::~NonTextureEngine()
+{
+	if(isOpen)
+	{
+		close();
+	}
+}
 
+void NonTextureEngine::stopRecording()
+{
+	lock();
+	if(doRecording)
+	{
+		stopRequested = true;
+		writeFile();
+	}
+	unlock();
+}
 
 void NonTextureEngine::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
-		if(encoder_output_buffer_available) 
+		if(bufferAvailable) 
 		{
-			// Print a message if the user wants to quit, but don't exit
+			// The user wants to quit, but don't exit
 			// the loop until we are certain that we have processed
 			// a full frame till end of the frame, i.e. we're at the end
 			// of the current key frame if processing one or until
 			// the next key frame is detected. This way we should always
 			// avoid corruption of the last encoded at the expense of
 			// small delay in exiting.
-			if(want_quit && !quit_detected) 
+			if(stopRequested && !isStopping) 
 			{
 				ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
-				quit_detected = 1;
-				quit_in_keyframe = encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+				isStopping = true;
+				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
 			}
-			if(quit_detected && (quit_in_keyframe ^ (encoder_ppBuffer_out->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+			if(isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
 			{
 				ofLogVerbose() << "Key frame boundry reached, exiting loop...";
 				writeFile();
 				
-				need_next_buffer_to_be_filled = 0;
+				doFillBuffer = false;
 			}else 
 			{
-				tmpBuffer.append((const char*) encoder_ppBuffer_out->pBuffer + encoder_ppBuffer_out->nOffset, encoder_ppBuffer_out->nFilledLen);
-				//ofLogVerbose() << "encoder_ppBuffer_out->nFilledLen: " << encoder_ppBuffer_out->nFilledLen;
-				need_next_buffer_to_be_filled = 1;
+				tmpBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+				//ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
+				doFillBuffer = true;
 			}
 		}
 		// Buffer flushed, request a new buffer to be filled by the encoder component
-		if(need_next_buffer_to_be_filled) 
+		if(doFillBuffer) 
 		{
-			need_next_buffer_to_be_filled = 0;
-			encoder_output_buffer_available = 0;
-			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+			doFillBuffer = 0;
+			bufferAvailable = false;
+			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 			if(error != OMX_ErrorNone) 
 			{
 				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
@@ -730,8 +720,8 @@ void NonTextureEngine::close()
 	{
 		writeFile();
 	}
-	encoder_ppBuffer_out->nFlags = OMX_BUFFERFLAG_EOS;
-	OMX_FillThisBuffer(encoder, encoder_ppBuffer_out);
+	encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+	OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
@@ -744,8 +734,8 @@ void NonTextureEngine::close()
 	OMXCameraUtils::disableAllPortsForComponent(&encoder);
 	if(!usePreview) OMXCameraUtils::disableAllPortsForComponent(&nullSink);
 	OMXCameraUtils::disableAllPortsForComponent(&camera);
-	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, camera_ppBuffer_in);
-	OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoder_ppBuffer_out);
+	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, cameraInputBuffer);
+	OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if(!usePreview) OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -756,6 +746,7 @@ void NonTextureEngine::close()
 	OMX_FreeHandle(encoder);
 	if(!usePreview) OMX_FreeHandle(nullSink);
 	ofLogVerbose(__func__) << " END";
+	isOpen = false;
 }
 
 #pragma mark encoder callbacks
@@ -778,7 +769,7 @@ OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCom
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	grabber->lock();
 		ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
-		grabber->encoder_output_buffer_available = 1;
+		grabber->bufferAvailable = 1;
 		grabber->frameCounter++;
 	grabber->unlock();
 	return OMX_ErrorNone;
