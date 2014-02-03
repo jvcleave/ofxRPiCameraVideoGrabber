@@ -1,3 +1,5 @@
+*.mkv
+*.h264
 libs
 obj
 *.app

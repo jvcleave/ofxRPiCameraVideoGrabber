@@ -13,7 +13,7 @@ NonTextureEngine::NonTextureEngine()
 	didWriteFile = false;
 	
 	MEGABYTE_IN_BITS = 8388608;
-	numMBps = 1.0;
+	numMBps = 2.0;
 	
 	stopRequested = false;	
 	isStopping = false;
@@ -759,6 +759,8 @@ void NonTextureEngine::threadedFunction()
 
 void NonTextureEngine::writeFile()
 {
+	//format is raw H264 NAL Units
+	
 	stopThread();
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
@@ -771,8 +773,9 @@ void NonTextureEngine::writeFile()
 	
 	fileName << frameCounter << "numFrames";
 	
+	string mkvFilePath = fileName.str() + ".mkv";
 	
-	fileName << ".mp4";
+	fileName << ".h264";
 	
 	string filePath;
 	
@@ -788,6 +791,15 @@ void NonTextureEngine::writeFile()
 	if(didWriteFile)
 	{
 		ofLogVerbose() << filePath << " SUCCESS";
+		stringstream commandString;
+		commandString << "/usr/bin/mkvmerge -o ";
+		commandString << ofToDataPath(mkvFilePath, true);
+		commandString << " " << filePath;
+		commandString << " &";
+		string commandName = commandString.str();
+		ofLogVerbose() << "commandName: " << commandName;
+		//ofSystem(commandName);
+		system(commandName.c_str());
 	}else
 	{
 		ofLogVerbose() << filePath << " FAIL";
@@ -801,6 +813,7 @@ void NonTextureEngine::close()
 	{
 		writeFile();
 	}
+
 	encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
 	OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
@@ -826,6 +839,7 @@ void NonTextureEngine::close()
 	OMX_FreeHandle(camera);
 	OMX_FreeHandle(encoder);
 	if(!omxCameraSettings.doRecordingPreview) OMX_FreeHandle(nullSink);
+
 	ofLogVerbose(__func__) << " END";
 	isOpen = false;
 }

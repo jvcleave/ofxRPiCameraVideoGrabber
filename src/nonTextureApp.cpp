@@ -19,8 +19,8 @@ void nonTextureApp::setup()
 		//some options available with direct-to-screen rendering
 		omxCameraSettings.doRecording			= true;						//default: false
 		omxCameraSettings.doRecordingPreview	= true;						//default: false
-		omxCameraSettings.previewWidth			= 640;	//default: omxCameraSettings.width
-		omxCameraSettings.previewHeight			= 480; //default: omxCameraSettings.height
+		//omxCameraSettings.previewWidth			= 320;	//default: omxCameraSettings.width
+		//omxCameraSettings.previewHeight			= 240; //default: omxCameraSettings.height
 		omxCameraSettings.recordingFilePath		= "";						//will self generate if left blank
 	}
 	
