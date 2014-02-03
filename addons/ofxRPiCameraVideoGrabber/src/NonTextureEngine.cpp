@@ -15,12 +15,12 @@ NonTextureEngine::NonTextureEngine()
 	MEGABYTE_IN_BITS = 8388608;
 	numMBps = 2.0;
 	
-	stopRequested = false;	
+	stopRequested = false;	 
 	isStopping = false;
 	isKeyframeValid = false;
 	doFillBuffer = false;
 	bufferAvailable = false;
-		
+			
 }
 
 void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
@@ -790,16 +790,31 @@ void NonTextureEngine::writeFile()
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
 	if(didWriteFile)
 	{
-		ofLogVerbose() << filePath << " SUCCESS";
-		stringstream commandString;
-		commandString << "/usr/bin/mkvmerge -o ";
-		commandString << ofToDataPath(mkvFilePath, true);
-		commandString << " " << filePath;
-		commandString << " &";
-		string commandName = commandString.str();
-		ofLogVerbose() << "commandName: " << commandName;
-		//ofSystem(commandName);
-		system(commandName.c_str());
+		if (omxCameraSettings.doConvertToMKV) 
+		{
+			ofFile mkvmerge("/usr/bin/mkvmerge");
+			if(mkvmerge.exists())
+			{
+				string mkvmergePath = ofToDataPath("/usr/bin/mkvmerge", true);
+				ofLogVerbose() << filePath << " SUCCESS";
+				stringstream commandString;
+				commandString << "/usr/bin/mkvmerge -o ";
+				commandString << ofToDataPath(mkvFilePath, true);
+				commandString << " " << filePath;
+				commandString << " &";
+				string commandName = commandString.str();
+				ofLogVerbose() << "commandName: " << commandName;
+				//ofSystem(commandName);
+				
+				system(commandName.c_str());
+			}
+			
+		}else 
+		{
+			ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
+		}
+
+		
 	}else
 	{
 		ofLogVerbose() << filePath << " FAIL";
