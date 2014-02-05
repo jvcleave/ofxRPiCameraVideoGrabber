@@ -318,6 +318,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		encoderOutputPortDefinition.format.video.xFramerate				= 0; //always 25
 		//encoderOutputPortDefinition.format.video.xFramerate				= omxCameraSettings.framerate << 16;
 		encoderOutputPortDefinition.format.video.nStride				= omxCameraSettings.width;
+		
 		//encoderOutputPortDefinition.format.video.nSliceHeight			= omxCameraSettings.height;
 		//encoderOutputPortDefinition.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
 		//encoderOutputPortDefinition.format.video.bFlagErrorConcealment = OMX_TRUE;
@@ -567,13 +568,13 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			
 			region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
 			
-			region.fullscreen = OMX_FALSE;
+			region.fullscreen = OMX_TRUE;
 			region.noaspect = OMX_TRUE;
 			
 			region.dest_rect.x_offset = 0;
 			region.dest_rect.y_offset = 0;
-			region.dest_rect.width = omxCameraSettings.width;
-			region.dest_rect.height = omxCameraSettings.height;
+			region.dest_rect.width = omxCameraSettings.previewWidth; 
+			region.dest_rect.height = omxCameraSettings.previewHeight;
 			
 			error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
 			
@@ -584,7 +585,25 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			{
 				ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
 			}
-			
+			/*
+			 region.fullscreen = OMX_FALSE;
+			 region.noaspect = OMX_FALSE;
+			 
+			 region.dest_rect.x_offset = 0;
+			 region.dest_rect.y_offset = 0;
+			 //region.dest_rect.width = omxCameraSettings.previewWidth;
+			 //region.dest_rect.height = omxCameraSettings.previewHeight;
+			 region.dest_rect.width = ofGetWidth();
+			 region.dest_rect.height = ofGetHeight();
+			 error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
+			 
+			 if(error == OMX_ErrorNone)
+			 {
+			 ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
+			 }else 
+			 {
+			 ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
+			 }*/
 			
 		}else 
 		{
@@ -763,8 +782,9 @@ void NonTextureEngine::threadedFunction()
 void NonTextureEngine::writeFile()
 {
 	//format is raw H264 NAL Units
-	
+	ofLogVerbose(__func__) << "START";
 	stopThread();
+	ofLogVerbose(__func__) << "THREAD STOPPED";
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
@@ -793,6 +813,7 @@ void NonTextureEngine::writeFile()
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
 	if(didWriteFile)
 	{
+		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
 		if (omxCameraSettings.doConvertToMKV) 
 		{
 			ofFile mkvmerge("/usr/bin/mkvmerge");
@@ -809,18 +830,19 @@ void NonTextureEngine::writeFile()
 				ofLogVerbose() << "commandName: " << commandName;
 				//ofSystem(commandName);
 				
-				system(commandName.c_str());
+				int commandResult = system(commandName.c_str());
+				ofLogVerbose(__func__) << "commandResult: " << commandResult;
+			}else 
+			{
+				ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
 			}
 			
-		}else 
-		{
-			ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
 		}
 
 		
 	}else
 	{
-		ofLogVerbose() << filePath << " FAIL";
+		ofLogVerbose(__func__) << filePath << " FAIL";
 	}
 }
 

@@ -28,7 +28,7 @@ public:
 		previewWidth = width;
 		previewHeight = height;
 		recordingFilePath = "";
-		doConvertToMKV = true;
+		doConvertToMKV = false;
 		//doFlipTexture = false;
 	}
 };

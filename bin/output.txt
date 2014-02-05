@@ -1,0 +1,91 @@
+﻿mkvmerge v5.6.0 ('Kenya Kane') built on Jun  7 2012 15:57:56
+sps_info dump:
+  id:                                    0
+  profile_idc:                           100
+  profile_compat:                        0
+  level_idc:                             40
+  log2_max_frame_num:                    8
+  pic_order_cnt_type:                    2
+  log2_max_pic_order_cnt_lsb:            0
+  offset_for_non_ref_pic:                0
+  offset_for_top_to_bottom_field:        0
+  num_ref_frames_in_pic_order_cnt_cycle: 0
+  delta_pic_order_always_zero_flag:      0
+  frame_mbs_only:                        1
+  vui_present:                           1
+  ar_found:                              0
+  par_num:                               1
+  par_den:                               1
+  timing_info_present:                   0
+  num_units_in_tick:                     0
+  time_scale:                            0
+  fixed_frame_rate:                      0
+  crop_left:                             0
+  crop_top:                              0
+  crop_right:                            0
+  crop_bottom:                           4
+  width:                                 1920
+  height:                                1080
+  checksum:                              265e056b
+sps_info dump:
+  id:                                    0
+  profile_idc:                           100
+  profile_compat:                        0
+  level_idc:                             40
+  log2_max_frame_num:                    8
+  pic_order_cnt_type:                    2
+  log2_max_pic_order_cnt_lsb:            0
+  offset_for_non_ref_pic:                0
+  offset_for_top_to_bottom_field:        0
+  num_ref_frames_in_pic_order_cnt_cycle: 0
+  delta_pic_order_always_zero_flag:      0
+  frame_mbs_only:                        1
+  vui_present:                           1
+  ar_found:                              0
+  par_num:                               1
+  par_den:                               1
+  timing_info_present:                   0
+  num_units_in_tick:                     0
+  time_scale:                            0
+  fixed_frame_rate:                      0
+  crop_left:                             0
+  crop_top:                              0
+  crop_right:                            0
+  crop_bottom:                           4
+  width:                                 1920
+  height:                                1080
+  checksum:                              265e056b
+'/home/pi/openFrameworks/apps/CameraApps/ofxRPiCameraVideoGrabber/bin/data/2014-02-04-21-06-05-255_1920x1080_30fps_2MBps_2350numFrames.h264': Using the demultiplexer for the format 'AVC/h.264'.
+'/home/pi/openFrameworks/apps/CameraApps/ofxRPiCameraVideoGrabber/bin/data/2014-02-04-21-06-05-255_1920x1080_30fps_2MBps_2350numFrames.h264' track 0: Using the output module for the format 'AVC/h.264'.
+The file 'test_debug.mkv' has been opened for writing.
+sps_info dump:
+  id:                                    0
+  profile_idc:                           100
+  profile_compat:                        0
+  level_idc:                             40
+  log2_max_frame_num:                    8
+  pic_order_cnt_type:                    2
+  log2_max_pic_order_cnt_lsb:            0
+  offset_for_non_ref_pic:                0
+  offset_for_top_to_bottom_field:        0
+  num_ref_frames_in_pic_order_cnt_cycle: 0
+  delta_pic_order_always_zero_flag:      0
+  frame_mbs_only:                        1
+  vui_present:                           1
+  ar_found:                              0
+  par_num:                               1
+  par_den:                               1
+  timing_info_present:                   0
+  num_units_in_tick:                     0
+  time_scale:                            0
+  fixed_frame_rate:                      0
+  crop_left:                             0
+  crop_top:                              0
+  crop_right:                            0
+  crop_bottom:                           4
+  width:                                 1920
+  height:                                1080
+  checksum:                              265e056b
+Progress: 4%Progress: 12%Progress: 20%Progress: 24%Progress: 32%Progress: 39%Progress: 43%Progress: 51%Progress: 59%Progress: 63%Progress: 67%Progress: 70%Progress: 78%Progress: 82%Progress: 86%Progress: 90%Progress: 94%Progress: 98%Progress: 100%Progress: 100%
+The cue entries (the index) are being written...
+Muxing took 22 seconds.
