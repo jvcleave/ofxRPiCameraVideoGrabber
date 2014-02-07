@@ -11,16 +11,14 @@ void nonTextureApp::setup()
 	consoleListener.setup(this);
 	
 	OMXCameraSettings omxCameraSettings;
-	omxCameraSettings.width					= 1920;
-	omxCameraSettings.height				= 1080;
+	omxCameraSettings.width					= 1280;
+	omxCameraSettings.height				= 720;
 	omxCameraSettings.isUsingTexture		= false;
 	if (!omxCameraSettings.isUsingTexture) 
 	{
 		//some options available with direct-to-screen rendering
 		omxCameraSettings.doRecording			= true;		//default: false
-		omxCameraSettings.doRecordingPreview	= true;		//default: false
-		omxCameraSettings.previewWidth			= 640;		//default: omxCameraSettings.width
-		omxCameraSettings.previewHeight			= 480;		//default: omxCameraSettings.height
+		omxCameraSettings.enablePreview();
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
 		omxCameraSettings.doConvertToMKV		= false;	//converts file to .mkv using mkvmerge(if present)
 	}
@@ -70,7 +68,10 @@ void nonTextureApp::keyPressed  (int key)
 		//videoGrabber.engine->want_quit = true;
 		videoGrabber.stopRecording();
 	}
-	
+	if (key == 't')
+	{
+		videoGrabber.toggleLED();
+	}
 }
 
 void nonTextureApp::onCharacterReceived(SSHKeyListenerEventData& e)

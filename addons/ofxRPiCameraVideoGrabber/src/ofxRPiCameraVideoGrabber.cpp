@@ -81,6 +81,18 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 	setWhiteBalance(OMX_WhiteBalControlAuto);
 	applyImageFilter(OMX_ImageFilterNone);
 	setColorEnhancement(false);	 
+	
+	
+	//Requires gpio program provided via wiringPi
+	//https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+	
+	ofFile gpioProgram("/usr/local/bin/gpio");
+	if(gpioProgram.exists())
+	{
+		system("gpio export 5 out");
+		LED_CURRENT_STATE = true;
+		setLEDStatus(LED_CURRENT_STATE);
+	}
 	//setLEDStatus(false);
 	/*
 	 OMX_COMMONFLICKERCANCEL_OFF,
@@ -466,11 +478,16 @@ void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, i
 	}
 }
 
+void ofxRPiCameraVideoGrabber::toggleLED()
+{
+	setLEDStatus(!LED_CURRENT_STATE);
+}
 void ofxRPiCameraVideoGrabber::setLEDStatus(bool status)
 {
-	OMX_ERRORTYPE error = OMX_ErrorNone;
+	//OMX doesn't work - using GPIO 
+	/*OMX_ERRORTYPE error = OMX_ErrorNone;
 	
-	//Turn off the LED - doesn't work! 
+	
 	OMX_CONFIG_PRIVACYINDICATORTYPE privacy;
 	OMX_INIT_STRUCTURE(privacy);
 	privacy.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOff;
@@ -479,7 +496,12 @@ void ofxRPiCameraVideoGrabber::setLEDStatus(bool status)
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera setLEDStatus FAIL error: 0x%08x", error);
-	}
+	}*/
+	
+	LED_CURRENT_STATE = status;	
+	string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
+	int result = system(command.c_str());
+	ofLogVerbose() << "command: " << command << " result: " << result;
 }
 
 void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)

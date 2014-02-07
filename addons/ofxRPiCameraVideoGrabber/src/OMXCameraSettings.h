@@ -17,8 +17,8 @@ public:
 	bool doConvertToMKV;
 	OMXCameraSettings()
 	{
-		width = 1280;
-		height = 720;
+		width = 1920;
+		height = 1080;
 		//currently limited to 30fps
 		//http://www.raspberrypi.org/forums/viewtopic.php?p=490143#p490143
 		framerate = 30;
@@ -30,5 +30,21 @@ public:
 		recordingFilePath = "";
 		doConvertToMKV = false;
 		//doFlipTexture = false;
+	}
+	
+	void enablePreview()
+	{
+		if(width<=1280)
+		{
+			previewWidth = width;
+			previewHeight = height;
+		}else 
+		{
+			previewWidth = 0;
+			previewHeight = 0;
+		}
+
+		
+		doRecordingPreview = true;
 	}
 };

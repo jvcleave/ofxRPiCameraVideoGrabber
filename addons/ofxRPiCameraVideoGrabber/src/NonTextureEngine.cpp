@@ -569,11 +569,11 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
 			
 			region.fullscreen = OMX_TRUE;
-			region.noaspect = OMX_TRUE;
+			region.noaspect = OMX_FALSE;
 			
 			region.dest_rect.x_offset = 0;
 			region.dest_rect.y_offset = 0;
-			region.dest_rect.width = omxCameraSettings.previewWidth; 
+			region.dest_rect.width = omxCameraSettings.previewWidth;
 			region.dest_rect.height = omxCameraSettings.previewHeight;
 			
 			error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
@@ -848,38 +848,75 @@ void NonTextureEngine::writeFile()
 
 void NonTextureEngine::close()
 {
+	ofLogVerbose(__func__) << "START";
+	
+	encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+	OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+	
 	
 	if(omxCameraSettings.doRecording && !didWriteFile)
 	{
 		writeFile();
 	}
+	ofLogVerbose(__func__) << "OMX BREAKDOWN START";
 
-	encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-	OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
-	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
-	OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+	if(omxCameraSettings.doRecording)
+	{
+		OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+		OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+	}
+	
 	if(!omxCameraSettings.doRecordingPreview) 
 	{
 		OMX_SendCommand(nullSink, OMX_CommandFlush, NULL_SINK_INPUT_PORT, NULL);
 	}
-	OMXCameraUtils::disableAllPortsForComponent(&encoder);
-	if(!omxCameraSettings.doRecordingPreview) OMXCameraUtils::disableAllPortsForComponent(&nullSink);
+	if(omxCameraSettings.doRecording)
+	{
+		OMXCameraUtils::disableAllPortsForComponent(&encoder);
+	}
+	if(!omxCameraSettings.doRecordingPreview) 
+	{
+		OMXCameraUtils::disableAllPortsForComponent(&nullSink);
+	}
 	OMXCameraUtils::disableAllPortsForComponent(&camera);
 	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, cameraInputBuffer);
-	OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+	if(omxCameraSettings.doRecording)
+	{
+		OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+	}
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if(!omxCameraSettings.doRecordingPreview) OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if(omxCameraSettings.doRecording)
+	{
+		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	}
+	if(!omxCameraSettings.doRecordingPreview)
+	{
+		OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	}
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	if(!omxCameraSettings.doRecordingPreview) OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	if(omxCameraSettings.doRecording)
+	{
+		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	}
+	if(!omxCameraSettings.doRecordingPreview)
+	{
+		OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	}
 	OMX_FreeHandle(camera);
-	OMX_FreeHandle(encoder);
-	if(!omxCameraSettings.doRecordingPreview) OMX_FreeHandle(nullSink);
-
+	if(omxCameraSettings.doRecording)
+	{
+		OMX_FreeHandle(encoder);
+	}
+	
+	if(!omxCameraSettings.doRecordingPreview)
+	{
+		OMX_FreeHandle(nullSink);
+	}
+	
+	ofLogVerbose(__func__) << "OMX BREAKDOWN END";
 	ofLogVerbose(__func__) << " END";
 	isOpen = false;
 }
