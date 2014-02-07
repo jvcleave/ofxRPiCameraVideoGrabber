@@ -1,6 +1,6 @@
 *.mkv
 *.h264
-libs
+/libs
 obj
 *.app
 */bin/*
