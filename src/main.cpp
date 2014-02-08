@@ -1,10 +1,10 @@
 #include "ofMain.h"
 #include "ofGLProgrammableRenderer.h"
 
-#define use_texturedRemoteApp
+//#define use_texturedRemoteApp
 //#define use_textureApp
 //#define use_nonTextureApp
-//#define use_shaderApp
+#define use_shaderApp
 
 #ifdef use_texturedRemoteApp
 #include "texturedRemoteApp.h"

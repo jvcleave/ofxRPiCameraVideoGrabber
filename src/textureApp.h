@@ -5,7 +5,7 @@
 #include "ConsoleListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
-
+//#include "FBO.h"
 
 class textureApp : public ofBaseApp, public SSHKeyListener{
 
@@ -23,6 +23,8 @@ class textureApp : public ofBaseApp, public SSHKeyListener{
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
-
+	
+	ofFbo fbo;
+	
 };
 

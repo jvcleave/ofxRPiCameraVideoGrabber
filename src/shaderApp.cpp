@@ -23,9 +23,9 @@ void shaderApp::setup()
 		ofEnableAlphaBlending();
 		
 		filterCollection.setup(&videoGrabber.omxMaps);
-		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
-		
-		bool useShaderExample = true;
+		//fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
+		fbo.createAndAttachTexture(videoGrabber.getTextureReference(), GL_RGBA, 0);
+		bool useShaderExample = false;
 		if (useShaderExample) 
 		{
 			shader.load("shaderExample");
@@ -37,6 +37,15 @@ void shaderApp::setup()
 		fbo.begin();
 			ofClear(0, 0, 0, 0);
 		fbo.end();
+		
+		videoImage.allocate(omxCameraSettings.width, omxCameraSettings.height, OF_IMAGE_COLOR_ALPHA);
+		/*format = ofGetGLFormatFromInternal(pixelReader.settings.internalformat);	
+		if(format == GL_RGBA)
+		{
+			//ofLogVerbose() << "USING GL_RGBA";
+		}*/
+		/*pixels.allocate(settings.width,settings.height,ofGetImageTypeFromGLType(settings.internalformat));
+		;*/
 	}
 	
 		
@@ -45,33 +54,55 @@ void shaderApp::setup()
 //--------------------------------------------------------------
 void shaderApp::update()
 {
-	if(!doShader) return;
-	
+
 	fbo.begin();
-	ofClear(0, 0, 0, 0);
+	//ofClear(0, 0, 0, 0);
 	shader.begin();
 	shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.getTextureID());
 	shader.setUniform1f("time", ofGetElapsedTimef());
 	shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
 	videoGrabber.draw();
 	shader.end();
+	//glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
 	fbo.end();
 	
+	fbo.bind();
+	//fbo.readToPixels(videoImage.getPixelsRef());
+	glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
+	fbo.unbind();
+	videoImage.reloadTexture();
+	
+	return;
+	
+	
+	pixelReader.bind();
+	glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
+	pixelReader.unbind();
+	//int format = ofGetGLFormatFromInternal(settings.internalformat);
+		
+		//pixelReader.unbind();
+	//videoImage.reloadTexture();
+	//pixelReader.readToPixels(videoImage.getPixelsRef());
+		//int format = ofGetGLFormatFromInternal(settings.internalformat);
+		//glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), format, GL_UNSIGNED_BYTE, videoImage.getPixels());
+	//pixelReader.unbind();
 }
 
 
 //--------------------------------------------------------------
 void shaderApp::draw(){
-
-
-	if (doShader) 
+	
+	fbo.draw(0, 0);
+	
+	//fbo.getTextureReference().draw(0, 0, 640, 480);
+	/*if (doShader) 
 	{
 		fbo.draw(0, 0);
 	}else 
 	{
 		videoGrabber.draw();
-	}
-
+	}*/
+	videoImage.draw(0, 0, videoImage.getWidth()/2, videoImage.getHeight()/2);
 	
 
 	

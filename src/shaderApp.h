@@ -5,7 +5,7 @@
 #include "ConsoleListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
-
+#include "FBO.h"
 
 class shaderApp : public ofBaseApp, public SSHKeyListener{
 
@@ -24,8 +24,11 @@ class shaderApp : public ofBaseApp, public SSHKeyListener{
 	
 	bool doDrawInfo;
 	
-	ofFbo fbo;
+	FBO fbo;
 	ofShader shader;
 	bool doShader;
+	
+	FBO pixelReader;
+	ofImage videoImage;
 };
 
