@@ -13,7 +13,7 @@ void texturedRemoteApp::setup()
 	OMXCameraSettings omxCameraSettings;
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
-	omxCameraSettings.framerate = 60;
+	omxCameraSettings.framerate = 30;
 	
 	
 	videoGrabber.setup(omxCameraSettings);

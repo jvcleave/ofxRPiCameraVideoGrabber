@@ -1,9 +1,9 @@
 #include "ofMain.h"
 #include "ofGLProgrammableRenderer.h"
 
-//#define use_texturedRemoteApp
+#define use_texturedRemoteApp
 //#define use_textureApp
-#define use_nonTextureApp
+//#define use_nonTextureApp
 //#define use_shaderApp
 
 #ifdef use_texturedRemoteApp
@@ -13,7 +13,7 @@ int main()
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 	ofSetupOpenGL(1280, 720, OF_WINDOW);
-	ofRunApp( new texturedRemoteApp());
+	ofRunApp( new texturedRemoteApp()); 
 }
 #endif
 
