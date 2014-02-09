@@ -4,28 +4,36 @@
 void shaderApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	//ofSetVerticalSync(false);
+	ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
 		
 	consoleListener.setup(this);
 	
-	OMXCameraSettings omxCameraSettings;
+	
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
 	omxCameraSettings.framerate = 30;
 	omxCameraSettings.isUsingTexture = true;
 	videoGrabber.setup(omxCameraSettings);
 	
+
 	doShader = true;
+	doPixels = true;
+	
+	if (doPixels) 
+	{
+		videoPixels = new unsigned char[omxCameraSettings.width * omxCameraSettings.height *4];
+		videoTexture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	}
+	
 	if (doShader) 
 	{
 		ofEnableAlphaBlending();
 		
 		filterCollection.setup(&videoGrabber.omxMaps);
-		//fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
-		fbo.createAndAttachTexture(videoGrabber.getTextureReference(), GL_RGBA, 0);
-		bool useShaderExample = false;
+		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
+		bool useShaderExample = true;
 		if (useShaderExample) 
 		{
 			shader.load("shaderExample");
@@ -38,14 +46,6 @@ void shaderApp::setup()
 			ofClear(0, 0, 0, 0);
 		fbo.end();
 		
-		videoImage.allocate(omxCameraSettings.width, omxCameraSettings.height, OF_IMAGE_COLOR_ALPHA);
-		/*format = ofGetGLFormatFromInternal(pixelReader.settings.internalformat);	
-		if(format == GL_RGBA)
-		{
-			//ofLogVerbose() << "USING GL_RGBA";
-		}*/
-		/*pixels.allocate(settings.width,settings.height,ofGetImageTypeFromGLType(settings.internalformat));
-		;*/
 	}
 	
 		
@@ -54,59 +54,47 @@ void shaderApp::setup()
 //--------------------------------------------------------------
 void shaderApp::update()
 {
-
+	if (!doShader)
+	{
+		return;
+	}
 	fbo.begin();
-	//ofClear(0, 0, 0, 0);
-	shader.begin();
-	shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.getTextureID());
-	shader.setUniform1f("time", ofGetElapsedTimef());
-	shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-	videoGrabber.draw();
-	shader.end();
-	//glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
+		//ofClear(0, 0, 0, 0);
+		shader.begin();
+			shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.getTextureID());
+			shader.setUniform1f("time", ofGetElapsedTimef());
+			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
+			videoGrabber.draw();
+		shader.end();
+		if(doPixels)
+		{
+			glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, videoPixels);	
+		}	
 	fbo.end();
 	
-	fbo.bind();
-	//fbo.readToPixels(videoImage.getPixelsRef());
-	glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
-	fbo.unbind();
-	videoImage.reloadTexture();
-	
-	return;
-	
-	
-	pixelReader.bind();
-	glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, videoImage.getPixels());
-	pixelReader.unbind();
-	//int format = ofGetGLFormatFromInternal(settings.internalformat);
-		
-		//pixelReader.unbind();
-	//videoImage.reloadTexture();
-	//pixelReader.readToPixels(videoImage.getPixelsRef());
-		//int format = ofGetGLFormatFromInternal(settings.internalformat);
-		//glReadPixels(0,0, videoImage.getWidth(), videoImage.getHeight(), format, GL_UNSIGNED_BYTE, videoImage.getPixels());
-	//pixelReader.unbind();
+	if(doPixels)
+	{
+		videoTexture.loadData(videoPixels, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);	
+	}
+
 }
 
 
 //--------------------------------------------------------------
 void shaderApp::draw(){
 	
-	fbo.draw(0, 0);
-	
-	//fbo.getTextureReference().draw(0, 0, 640, 480);
-	/*if (doShader) 
+	if (doShader)
 	{
 		fbo.draw(0, 0);
+		if(doPixels)
+		{
+			videoTexture.draw(0, 0, omxCameraSettings.width/2, omxCameraSettings.height/2);
+		}
+		
 	}else 
 	{
 		videoGrabber.draw();
-	}*/
-	videoImage.draw(0, 0, videoImage.getWidth()/2, videoImage.getHeight()/2);
-	
-
-	
-	
+	}
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
@@ -152,7 +140,10 @@ void shaderApp::keyPressed  (int key)
 	{
 		doShader = !doShader;
 	}
-	
+	if (key == 'p')
+	{
+		doPixels = !doPixels;
+	}
 }
 
 void shaderApp::onCharacterReceived(SSHKeyListenerEventData& e)
