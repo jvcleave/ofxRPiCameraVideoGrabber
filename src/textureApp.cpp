@@ -15,7 +15,7 @@ void textureApp::setup()
 	omxCameraSettings.height = 720;
 	//omxCameraSettings.framerate = 25;
 	omxCameraSettings.isUsingTexture = true;
-	
+	omxCameraSettings.doRecording = false;
 	
 	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup(&videoGrabber.omxMaps);

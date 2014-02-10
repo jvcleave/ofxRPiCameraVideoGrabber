@@ -308,20 +308,27 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}else 
+		{
+			ofLogVerbose() << "encoderOutputPortDefinition buffer info";
+			ofLog(OF_LOG_VERBOSE, 
+				  "nBufferCountMin(%u)					\n \
+				  nBufferCountActual(%u)				\n \
+				  nBufferSize(%u)						\n \
+				  nBufferAlignmen(%u) \n", 
+				  encoderOutputPortDefinition.nBufferCountMin, 
+				  encoderOutputPortDefinition.nBufferCountActual, 
+				  encoderOutputPortDefinition.nBufferSize, 
+				  encoderOutputPortDefinition.nBufferAlignment);
 		}
+
 		
 		
 		encoderOutputPortDefinition.format.video.nFrameWidth			= omxCameraSettings.width;
 		encoderOutputPortDefinition.format.video.nFrameHeight			= omxCameraSettings.height;
 		encoderOutputPortDefinition.format.video.xFramerate				= 0; //always 25
-		//encoderOutputPortDefinition.format.video.xFramerate				= omxCameraSettings.framerate << 16;
 		encoderOutputPortDefinition.format.video.nStride				= omxCameraSettings.width;
 		
-		//encoderOutputPortDefinition.format.video.nSliceHeight			= omxCameraSettings.height;
-		//encoderOutputPortDefinition.format.video.eCompressionFormat		 = OMX_VIDEO_CodingMPEG4;
-		//encoderOutputPortDefinition.format.video.bFlagErrorConcealment = OMX_TRUE;
-	
-
 		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
 		encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
 		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
@@ -331,6 +338,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
 			
 		}
+		
+		
+		
 		// Configure encoding bitrate
 		OMX_VIDEO_PARAM_BITRATETYPE encodingBitrate;
 		OMX_INIT_STRUCTURE(encodingBitrate);
@@ -506,34 +516,16 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "camera OMX_AllocateBuffer CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
 		}
 		
-		
-		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		error = OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  encoderOutputPortDefinition.nBufferCountMin, 
-				  encoderOutputPortDefinition.nBufferCountActual, 
-				  encoderOutputPortDefinition.nBufferSize, 
-				  encoderOutputPortDefinition.nBufferAlignment);
-			
-		}
-		
-		
+		//while we are here with encoderOutputPortDefinition...
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
 			
 		}
+		
+		
+		
 
 		//Start camera
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
@@ -723,13 +715,15 @@ NonTextureEngine::~NonTextureEngine()
 
 void NonTextureEngine::stopRecording()
 {
-	lock();
+	
 	if(omxCameraSettings.doRecording)
 	{
-		stopRequested = true;
-		writeFile();
+		lock();
+			stopRequested = true;
+			writeFile();
+		unlock();
 	}
-	unlock();
+	
 }
 
 void NonTextureEngine::threadedFunction()
@@ -859,6 +853,7 @@ void NonTextureEngine::close()
 		//may have to revisit this if creating new instances of the videograbber
 		//otherwise OMX components seem smart enough to clean up themselves on destruction
 		ofLogVerbose(__func__) << "END - just exiting";
+		isOpen = false;
 		return;
 	}
 

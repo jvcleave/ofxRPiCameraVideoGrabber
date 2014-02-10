@@ -19,6 +19,7 @@ public:
 	TextureEngine();
 	~TextureEngine();
 	void setup(OMXCameraSettings omxCameraSettings);
+	void close();
 	OMXCameraSettings omxCameraSettings;
 	//OMXCameraUtils omxCameraUtils;
 
@@ -56,7 +57,7 @@ public:
 	
 	
 	int frameCounter;
-	bool ready;
+	bool isOpen;
 	
 	int recordingBitRate;
 	int MEGABYTE_IN_BITS;

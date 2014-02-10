@@ -24,6 +24,11 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 		delete engine;
 		engine = NULL;
 	}
+	if(textureEngine)
+	{
+		delete textureEngine;
+		textureEngine = NULL;
+	}
 }
 #if 0
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
@@ -277,11 +282,18 @@ void ofxRPiCameraVideoGrabber::draw()
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
-	if (omxCameraSettings.isUsingTexture && !textureEngine) 
+
+	if (engine) 
 	{
-		return false;
+		return engine->isOpen;
 	}
-	return textureEngine->ready;
+	
+	if (textureEngine) 
+	{
+		return textureEngine->isOpen;
+	}
+	
+	return false;
 }
 
 void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
