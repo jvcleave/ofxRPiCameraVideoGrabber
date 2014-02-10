@@ -186,10 +186,13 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		
 	}
 		
-	
-	bool doThreadBlocking	= true;
-	bool threadVerboseMode	= false;
-	startThread(doThreadBlocking, threadVerboseMode);
+	if (omxCameraSettings.doRecording) 
+	{
+		bool doThreadBlocking	= true;
+		bool threadVerboseMode	= false;
+		startThread(doThreadBlocking, threadVerboseMode);
+	}
+
 	
 }
 
@@ -849,9 +852,19 @@ void NonTextureEngine::writeFile()
 void NonTextureEngine::close()
 {
 	ofLogVerbose(__func__) << "START";
+	if(omxCameraSettings.doRecording)
+	{
+		encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+		OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+	}else 
+	{
+		//may have to revisit this if creating new instances of the videograbber
+		//otherwise OMX components seem smart enough to clean up themselves on destruction
+		ofLogVerbose(__func__) << "END - just exiting";
+		return;
+	}
+
 	
-	encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-	OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	
 	
 	if(omxCameraSettings.doRecording && !didWriteFile)
@@ -861,7 +874,11 @@ void NonTextureEngine::close()
 	ofLogVerbose(__func__) << "OMX BREAKDOWN START";
 
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
-	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
+	if (omxCameraSettings.doRecording) 
+	{
+		OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
+	}
+	
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
 	if(omxCameraSettings.doRecording)
 	{

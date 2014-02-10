@@ -74,7 +74,7 @@ void shaderApp::update()
 	
 	if(doPixels)
 	{
-		//videoTexture.loadData(videoPixels, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);	
+		videoTexture.loadData(videoPixels, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);	
 	}
 
 }

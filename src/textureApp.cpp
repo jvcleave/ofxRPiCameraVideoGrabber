@@ -14,15 +14,12 @@ void textureApp::setup()
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
 	//omxCameraSettings.framerate = 25;
-	//omxCameraSettings.isUsingTexture = true;
+	omxCameraSettings.isUsingTexture = true;
 	
 	
 	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup(&videoGrabber.omxMaps);
-	fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-	fbo.end();
+
 
 }
 
@@ -33,9 +30,7 @@ void textureApp::update()
 	{
 		
 	}*/
-	fbo.begin();
-		videoGrabber.draw();
-	fbo.end();
+
 }
 
 
@@ -43,7 +38,7 @@ void textureApp::update()
 void textureApp::draw(){
 
 	
-	fbo.draw(0, 0, fbo.getWidth()/2, fbo.getHeight()/2);
+	videoGrabber.draw();
 	
 	
 
