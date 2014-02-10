@@ -21,6 +21,7 @@ class textureApp : public ofBaseApp, public SSHKeyListener{
 	
 	ImageFilterCollection filterCollection;
 	
+	OMXCameraSettings omxCameraSettings;
 	bool doDrawInfo;
 		
 };

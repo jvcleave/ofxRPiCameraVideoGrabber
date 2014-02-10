@@ -10,12 +10,12 @@ void textureApp::setup()
 		
 	consoleListener.setup(this);
 	
-	OMXCameraSettings omxCameraSettings;
+	
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
 	//omxCameraSettings.framerate = 25;
 	omxCameraSettings.isUsingTexture = true;
-	//omxCameraSettings.doRecording = true;
+	omxCameraSettings.doRecording = true;
 	
 	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup(&videoGrabber.omxMaps);
@@ -40,7 +40,9 @@ void textureApp::draw(){
 	
 	videoGrabber.draw();
 	
-	
+	int drawWidth = omxCameraSettings.width/4;
+	int drawHeight = omxCameraSettings.height/4;
+	videoGrabber.getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
@@ -48,11 +50,17 @@ void textureApp::draw(){
 	//info << "App frameCounter: " << ofGetFrameNum() << "\n";
 	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
 	info << "CURRENT FILTER: " << filterCollection.getCurrentFilterName() << "\n";
+	//info << "DO RECORDING: " << omxCameraSettings.doRecording << "\n";
+	
 	//info <<	filterCollection.filterList << "\n";
 	
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
+	if (omxCameraSettings.doRecording) 
+	{
+		info << "Press q to stop recording" << "\n";
+	}
 	
 	if (doDrawInfo) 
 	{
