@@ -426,12 +426,14 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		}
 	}
 
-	
-	//Enable camera input port
-	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_INPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
+	if(omxCameraSettings.doRecording)
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
+		//Enable camera input port
+		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_INPUT_PORT, NULL);
+		if (error != OMX_ErrorNone) 
+		{
+			ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
+		}
 	}
 	
 	//Enable camera output port
@@ -707,16 +709,21 @@ void TextureEngine::stopRecording()
 
 TextureEngine::~TextureEngine()
 {
-	ofLogVerbose() << "~TextureEngine START";
+	ofLogVerbose(__func__) << " START";
 	if(isOpen)
 	{
+		stopRecording();
 		close();
 	}
-	ofLogVerbose() << "~TextureEngine END";
+	ofLogVerbose(__func__) << " END";
 }
 
 void TextureEngine::writeFile()
 {
+	if (didWriteFile) 
+	{
+		return;
+	}
 	//format is raw H264 NAL Units
 	ofLogVerbose(__func__) << "START";
 	stopThread();
@@ -816,10 +823,11 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 
 void TextureEngine::close()
 {
+	ofLogVerbose(__func__) << "START";
 	if(omxCameraSettings.doRecording)
 	{
-		encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-		OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+		//encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+		//OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	}else 
 	{
 		//may have to revisit this if creating new instances of the videograbber
@@ -829,6 +837,13 @@ void TextureEngine::close()
 		return;
 	}
 	
+	if(omxCameraSettings.doRecording && !didWriteFile)
+	{
+		writeFile();
+	}
+	isOpen = false;
+	ofLogVerbose(__func__) << "END";
+	return;
 	
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
@@ -839,7 +854,7 @@ void TextureEngine::close()
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLogError(__func__) << "render OMX_StateIdle FAIL";;
+		ofLogError(__func__) << "render OMX_StateIdle FAIL";
 	}
 	
 	error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
