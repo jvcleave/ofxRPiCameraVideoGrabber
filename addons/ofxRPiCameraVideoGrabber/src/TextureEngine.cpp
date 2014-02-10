@@ -425,16 +425,6 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "camera->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
 		}
 	}
-
-	if(omxCameraSettings.doRecording)
-	{
-		//Enable camera input port
-		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
-		}
-	}
 	
 	//Enable camera output port
 	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
@@ -504,39 +494,6 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
 		}
-		
-		// Allocate camera input buffer and encoder output buffer,
-		// buffers for tunneled ports are allocated internally by OMX
-		OMX_PARAM_PORTDEFINITIONTYPE cameraInputPortDefinition;
-		OMX_INIT_STRUCTURE(cameraInputPortDefinition);
-		cameraInputPortDefinition.nPortIndex = CAMERA_INPUT_PORT;
-		error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraInputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose() << "cameraInputPortDefinition buffer info";
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  cameraInputPortDefinition.nBufferCountMin, 
-				  cameraInputPortDefinition.nBufferCountActual, 
-				  cameraInputPortDefinition.nBufferSize, 
-				  cameraInputPortDefinition.nBufferAlignment);
-			
-		}
-		
-		
-		
-		error =  OMX_AllocateBuffer(camera, &cameraInputBuffer, CAMERA_INPUT_PORT, NULL, cameraInputPortDefinition.nBufferSize);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_AllocateBuffer CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
-		}
-		
 		
 		// Configure encoder output buffer
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
@@ -670,14 +627,14 @@ void TextureEngine::threadedFunction()
 			}else 
 			{
 				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
-				ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
+				//ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
 				doFillBuffer = true;
 			}
 		}
 		// Buffer flushed, request a new buffer to be filled by the encoder component
 		if(doFillBuffer) 
 		{
-			ofLogVerbose() << "filling buffer";
+			//ofLogVerbose() << "filling buffer";
 			doFillBuffer	= false;
 			bufferAvailable = false;
 			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
@@ -705,7 +662,6 @@ void TextureEngine::stopRecording()
 	}
 	
 }
-
 
 TextureEngine::~TextureEngine()
 {
@@ -810,7 +766,7 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->lock();
-	ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
+	//ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
 	grabber->bufferAvailable = true;
 	grabber->frameCounter++;
 	grabber->unlock();

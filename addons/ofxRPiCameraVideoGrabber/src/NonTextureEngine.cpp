@@ -264,22 +264,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			{
 				ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 			}
-		}else 
-		{
-			OMX_CALLBACKTYPE nullSinkCallbacks;
-			nullSinkCallbacks.EventHandler    = &NonTextureEngine::nullSinkEventHandlerCallback;
-			nullSinkCallbacks.EmptyBufferDone	= &NonTextureEngine::nullSinkEmptyBufferDone;
-			nullSinkCallbacks.FillBufferDone	= &NonTextureEngine::nullSinkFillBufferDone;
-			
-			string nullSinkComponentName = "OMX.broadcom.null_sink";
-			
-			error =OMX_GetHandle(&nullSink, (OMX_STRING)nullSinkComponentName.c_str(), this , &nullSinkCallbacks);
-			if (error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "nullSink OMX_GetHandle FAIL error: 0x%08x", error);
-			}
-			OMXCameraUtils::disableAllPortsForComponent(&nullSink);
-		}
+		} 
+		
 
 		
 		
@@ -378,14 +364,6 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			{
 				ofLog(OF_LOG_ERROR, "camera->video_render OMX_SetupTunnel FAIL error: 0x%08x", error);
 			}
-		}else 
-		{
-			// Tunnel camera preview output port and null sink input port
-			error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, nullSink, NULL_SINK_INPUT_PORT);
-			if(error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "CAMERA_PREVIEW_PORT->NULL_SINK_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
-			}
 		}
 
 		
@@ -412,36 +390,17 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 		}
 		
-		if (omxCameraSettings.doRecordingPreview) 
+		
+		if (omxCameraSettings.doRecordingPreview)
 		{
-			//add renderer
-		}else
-		{
-			//Set nullSink to Idle
-			error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
+			//Enable camera preview port
+			error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
 			if (error != OMX_ErrorNone) 
 			{
-				ofLog(OF_LOG_ERROR, "nullSink OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+				ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_PREVIEW_PORT FAIL error: 0x%08x", error);
 			}
 		}
-		
-		
-		
-		
-		//Enable camera preview port
-		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_PREVIEW_PORT FAIL error: 0x%08x", error);
-		}
-		
-		//Enable camera input port
-		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
-		}
-		
+	
 		//Enable camera output port
 		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
@@ -473,49 +432,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			}
 			
 			
-		}else 
-		{
-			//Enable nullSink port
-			error = OMX_SendCommand(nullSink, OMX_CommandPortEnable, NULL_SINK_INPUT_PORT, NULL);
-			if (error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "nullSink OMX_CommandPortEnable NULL_SINK_INPUT_PORT FAIL error: 0x%08x", error);
-			}
 		}
 
-		
-		
-		// Allocate camera input buffer and encoder output buffer,
-		// buffers for tunneled ports are allocated internally by OMX
-		OMX_PARAM_PORTDEFINITIONTYPE cameraInputPortDefinition;
-		OMX_INIT_STRUCTURE(cameraInputPortDefinition);
-		cameraInputPortDefinition.nPortIndex = CAMERA_INPUT_PORT;
-		error = OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraInputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose() << "cameraInputPortDefinition buffer info";
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  cameraInputPortDefinition.nBufferCountMin, 
-				  cameraInputPortDefinition.nBufferCountActual, 
-				  cameraInputPortDefinition.nBufferSize, 
-				  cameraInputPortDefinition.nBufferAlignment);
-			
-		}
-
-		
-		error =  OMX_AllocateBuffer(camera, &cameraInputBuffer, CAMERA_INPUT_PORT, NULL, cameraInputPortDefinition.nBufferSize);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera OMX_AllocateBuffer CAMERA_INPUT_PORT FAIL error: 0x%08x", error);
-		}
-		
 		//while we are here with encoderOutputPortDefinition...
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
@@ -595,16 +513,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			 ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
 			 }*/
 			
-		}else 
-		{
-			//Start nullSink
-			error = OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-			if (error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "nullSink OMX_StateExecuting FAIL error: 0x%08x", error);		
-			}
 		}
-
 		
 		
 		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
@@ -866,12 +775,6 @@ void NonTextureEngine::close()
 	}
 	ofLogVerbose(__func__) << "OMX BREAKDOWN START";
 
-	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_INPUT_PORT, NULL);
-	if (omxCameraSettings.doRecording) 
-	{
-		OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_PREVIEW_PORT, NULL);
-	}
-	
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
 	if(omxCameraSettings.doRecording)
 	{
@@ -879,51 +782,35 @@ void NonTextureEngine::close()
 		OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
 	}
 	
-	if(!omxCameraSettings.doRecordingPreview) 
-	{
-		OMX_SendCommand(nullSink, OMX_CommandFlush, NULL_SINK_INPUT_PORT, NULL);
-	}
 	if(omxCameraSettings.doRecording)
 	{
 		OMXCameraUtils::disableAllPortsForComponent(&encoder);
 	}
-	if(!omxCameraSettings.doRecordingPreview) 
-	{
-		OMXCameraUtils::disableAllPortsForComponent(&nullSink);
-	}
 	OMXCameraUtils::disableAllPortsForComponent(&camera);
-	OMX_FreeBuffer(camera, CAMERA_INPUT_PORT, cameraInputBuffer);
+
 	if(omxCameraSettings.doRecording)
 	{
 		OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
 	}
+	
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	
 	if(omxCameraSettings.doRecording)
 	{
 		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	}
-	if(!omxCameraSettings.doRecordingPreview)
-	{
-		OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	}
+	
 	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+	
 	if(omxCameraSettings.doRecording)
 	{
 		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
 	}
-	if(!omxCameraSettings.doRecordingPreview)
-	{
-		OMX_SendCommand(nullSink, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	}
+
 	OMX_FreeHandle(camera);
 	if(omxCameraSettings.doRecording)
 	{
 		OMX_FreeHandle(encoder);
-	}
-	
-	if(!omxCameraSettings.doRecordingPreview)
-	{
-		OMX_FreeHandle(nullSink);
 	}
 	
 	ofLogVerbose(__func__) << "OMX BREAKDOWN END";
@@ -954,30 +841,6 @@ OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCom
 		grabber->bufferAvailable = true;
 		grabber->frameCounter++;
 	grabber->unlock();
-	return OMX_ErrorNone;
-}
-
-#pragma mark nullsink callbacks
-
-OMX_ERRORTYPE NonTextureEngine::nullSinkEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "nullSinkEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-
-OMX_ERRORTYPE NonTextureEngine::nullSinkEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "nullSinkEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE NonTextureEngine::nullSinkFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "nullSinkFillBufferDone ";
 	return OMX_ErrorNone;
 }
 
