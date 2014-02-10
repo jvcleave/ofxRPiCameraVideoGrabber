@@ -7,18 +7,7 @@
 #include "NonTextureEngine.h"
 NonTextureEngine::NonTextureEngine()
 {
-	isOpen		= false;
-	frameCounter = 0;
-	
-	didWriteFile = false;
-	
-	numMBps = 2.0;
-	
-	stopRequested = false;	 
-	isStopping = false;
-	isKeyframeValid = false;
-	doFillBuffer = false;
-	bufferAvailable = false;
+
 			
 }
 
@@ -41,147 +30,31 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
 	
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
+	configureCameraResolution();
 	
-	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
-	OMX_INIT_STRUCTURE(cameraCallback);
-	cameraCallback.nPortIndex	=	OMX_ALL;
-	cameraCallback.nIndex		=	OMX_IndexParamCameraDeviceNumber;
-	cameraCallback.bEnable		=	OMX_TRUE;
 	
-	OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
 	
-	//Set the camera (always 0)
-	OMX_PARAM_U32TYPE device;
-	OMX_INIT_STRUCTURE(device);
-	device.nPortIndex	= OMX_ALL;
-	device.nU32			= 0;
 	
-	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
-	
-	//Set the resolution
-	OMX_PARAM_PORTDEFINITIONTYPE cameraOutputPortDefinition;
-	OMX_INIT_STRUCTURE(cameraOutputPortDefinition);
-	cameraOutputPortDefinition.nPortIndex = CAMERA_OUTPUT_PORT;
-	
-	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-	}else 
-	{
-		ofLogVerbose() << "camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
-	}
-	
-	cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
-    cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
-	cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
-    cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
-	//cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
-	
-	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose() << "cameraOutputPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "cameraOutputPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-
-	}
 	if (omxCameraSettings.doRecording && omxCameraSettings.doRecordingPreview) 
 	{
 		OMX_PARAM_PORTDEFINITIONTYPE cameraPreviewPortDefinition;
 		OMX_INIT_STRUCTURE(cameraPreviewPortDefinition);
 		cameraPreviewPortDefinition.nPortIndex = CAMERA_PREVIEW_PORT;
 		error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose() << "cameraPreviewPortDefinition  OMX_GetParameter OMX_IndexParamPortDefinition PASS";
-			
-			/*switch(cameraPreviewPortDefinition.eDomain)
-			 {
-			 case OMX_PortDomainVideo:
-			 {
-			 ofLogVerbose() << "OMX_VIDEO_PORTDEFINITIONTYPE";
-			 stringstream videoInfo;
-			 
-			 videoInfo << "nFrameWidth: "	<< cameraPreviewPortDefinition.format.video.nFrameWidth			<< "\n";
-			 videoInfo << "nFrameHeight: "	<< cameraPreviewPortDefinition.format.video.nFrameHeight		<< "\n";
-			 videoInfo << "nStride: "		<< cameraPreviewPortDefinition.format.video.nStride				<< "\n";
-			 videoInfo << "nSliceHeight: "	<< cameraPreviewPortDefinition.format.video.nSliceHeight		<< "\n";
-			 videoInfo << "nBitrate: "		<< cameraPreviewPortDefinition.format.video.nBitrate			<< "\n";
-			 
-			 ofLogVerbose(__func__) << "videoInfo: \n" << videoInfo.str();
-			 
-			 break;
-			 }
-			 case OMX_PortDomainImage:
-			 {
-			 ofLogVerbose() << "OMX_IMAGE_PORTDEFINITIONTYPE";
-			 ofLogVerbose() << "OMX_VIDEO_PORTDEFINITIONTYPE";
-			 stringstream videoInfo;
-			 
-			 videoInfo << "nFrameWidth: "	<< cameraPreviewPortDefinition.format.video.nFrameWidth			<< "\n";
-			 videoInfo << "nFrameHeight: "	<< cameraPreviewPortDefinition.format.video.nFrameHeight		<< "\n";
-			 videoInfo << "nStride: "		<< cameraPreviewPortDefinition.format.video.nStride				<< "\n";
-			 videoInfo << "nSliceHeight: "	<< cameraPreviewPortDefinition.format.video.nSliceHeight		<< "\n";
-			 videoInfo << "nBitrate: "		<< cameraPreviewPortDefinition.format.video.nBitrate			<< "\n";
-			 
-			 ofLogVerbose(__func__) << "videoInfo: \n" << videoInfo.str();
-			 break;
-			 }
-			 default:
-			 {
-			 ofLogVerbose() << "NOT DEFINED";
-			 }
-			 }*/
-			
-			//Set the preview to the same size as the recording
-			/*cameraPreviewPortDefinition.format.video = cameraOutputPortDefinition.format.video;
-			 error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-			 if(error == OMX_ErrorNone) 
-			 {
-			 ofLogVerbose() << "cameraPreviewPortDefinition  OMX_SetParameter OMX_IndexParamPortDefinition PASS";
-			 
-			 }else 
-			 {
-			 ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-			 }*/
-			
-		}else 
+		if(error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-			
 		}
+		
 		cameraPreviewPortDefinition.format.video.nFrameWidth		= omxCameraSettings.previewWidth;
 		cameraPreviewPortDefinition.format.video.nFrameHeight		= omxCameraSettings.previewHeight;
 		cameraPreviewPortDefinition.format.video.nStride			= omxCameraSettings.previewWidth;
-		//cameraPreviewPortDefinition.format.video.nSliceHeight		= omxCameraSettings.previewHeight;
 		error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-		if(error == OMX_ErrorNone) 
-		{
-			ofLogVerbose() << "cameraPreviewPortDefinition  OMX_SetParameter OMX_IndexParamPortDefinition PASS";
-			
-		}else 
+		if(error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+			
 		}
-		
-		
-		//Set the framerate 
-		/*OMX_CONFIG_FRAMERATETYPE framerateConfig;
-		 OMX_INIT_STRUCTURE(framerateConfig);
-		 framerateConfig.nPortIndex = CAMERA_OUTPUT_PORT;
-		 //framerateConfig.xEncodeFramerate = omxCameraSettings.framerate * (1<<16); //Q16 format - 25fps
-		 //framerateConfig.xEncodeFramerate = omxCameraSettings.framerate << 16;
-		 error =  OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
-		 if(error != OMX_ErrorNone) 
-		 {
-		 ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-		 }else 
-		 {
-		 ofLogVerbose() << "camera OMX_SetConfig OMX_IndexParamVideoPortFormat PASS";
-		 }*/
 		
 	}
 		
@@ -248,9 +121,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			//Set up renderer
 			OMX_CALLBACKTYPE renderCallbacks;
-			renderCallbacks.EventHandler    = &NonTextureEngine::renderEventHandlerCallback;
-			renderCallbacks.EmptyBufferDone	= &NonTextureEngine::renderEmptyBufferDone;
-			renderCallbacks.FillBufferDone	= &NonTextureEngine::renderFillBufferDone;
+			renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
+			renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+			renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
 			
 			string renderComponentName = "OMX.broadcom.video_render";
 			
@@ -269,8 +142,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		
 		OMX_CALLBACKTYPE encoderCallbacks;
-		encoderCallbacks.EventHandler    = &NonTextureEngine::encoderEventHandlerCallback;
-		encoderCallbacks.EmptyBufferDone	= &NonTextureEngine::encoderEmptyBufferDone;
+		encoderCallbacks.EventHandler    = &BaseEngine::encoderEventHandlerCallback;
+		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
 		encoderCallbacks.FillBufferDone	= &NonTextureEngine::encoderFillBufferDone;
 		
 		
@@ -281,79 +154,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
 		}
-		OMXCameraUtils::disableAllPortsForComponent(&encoder);
 		
-		// Encoder input port definition is done automatically upon tunneling
-		
-		// Configure video format emitted by encoder output port
-		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
-		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose() << "encoderOutputPortDefinition buffer info";
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  encoderOutputPortDefinition.nBufferCountMin, 
-				  encoderOutputPortDefinition.nBufferCountActual, 
-				  encoderOutputPortDefinition.nBufferSize, 
-				  encoderOutputPortDefinition.nBufferAlignment);
-		}
-
-		
-		
-		encoderOutputPortDefinition.format.video.nFrameWidth			= omxCameraSettings.width;
-		encoderOutputPortDefinition.format.video.nFrameHeight			= omxCameraSettings.height;
-		encoderOutputPortDefinition.format.video.xFramerate				= 0; //always 25
-		encoderOutputPortDefinition.format.video.nStride				= omxCameraSettings.width;
-		
-		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
-		encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
-		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-			
-		}
-		
-		
-		
-		// Configure encoding bitrate
-		OMX_VIDEO_PARAM_BITRATETYPE encodingBitrate;
-		OMX_INIT_STRUCTURE(encodingBitrate);
-		encodingBitrate.eControlRate = OMX_Video_ControlRateVariable;
-		//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
-		
-		encodingBitrate.nTargetBitrate = recordingBitRate;
-		encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		
-		error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
-		
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoBitrate FAIL error: 0x%08x", error);
-			
-		}
-		// Configure encoding format
-		OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
-		OMX_INIT_STRUCTURE(encodingFormat);
-		encodingFormat.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
-		
-		error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-			
-		}
+		configureEncoder();
 		
 		if (omxCameraSettings.doRecordingPreview) 
 		{
@@ -433,7 +235,14 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			
 		}
 
-		//while we are here with encoderOutputPortDefinition...
+		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
+		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
+		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
+		if (error != OMX_ErrorNone) 
+		{
+			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
@@ -529,9 +338,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	{
 		//Set up renderer
 		OMX_CALLBACKTYPE renderCallbacks;
-		renderCallbacks.EventHandler    = &NonTextureEngine::renderEventHandlerCallback;
-		renderCallbacks.EmptyBufferDone	= &NonTextureEngine::renderEmptyBufferDone;
-		renderCallbacks.FillBufferDone	= &NonTextureEngine::renderFillBufferDone;
+		renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
+		renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+		renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
 		
 		string renderComponentName = "OMX.broadcom.video_render";
 		
@@ -613,256 +422,20 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	return error;
 }
 
-NonTextureEngine::~NonTextureEngine()
-{
-	if(isOpen)
-	{
-		close();
-	}
-}
-
-void NonTextureEngine::stopRecording()
-{
-	
-	if(omxCameraSettings.doRecording)
-	{
-		lock();
-			stopRequested = true;
-			writeFile();
-		unlock();
-	}
-	
-}
-
-void NonTextureEngine::threadedFunction()
-{
-	while (isThreadRunning()) 
-	{
-		if(bufferAvailable) 
-		{
-			// The user wants to quit, but don't exit
-			// the loop until we are certain that we have processed
-			// a full frame till end of the frame, i.e. we're at the end
-			// of the current key frame if processing one or until
-			// the next key frame is detected. This way we should always
-			// avoid corruption of the last encoded at the expense of
-			// small delay in exiting.
-			if(stopRequested && !isStopping) 
-			{
-				ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
-				isStopping = true;
-				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
-			}
-			if(isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
-			{
-				ofLogVerbose() << "Key frame boundry reached, exiting loop...";
-				writeFile();
-				
-				doFillBuffer = false;
-			}else 
-			{
-				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
-				//ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
-				doFillBuffer = true;
-			}
-		}
-		// Buffer flushed, request a new buffer to be filled by the encoder component
-		if(doFillBuffer) 
-		{
-			doFillBuffer	= false;
-			bufferAvailable = false;
-			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-			if(error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-				close();
-				
-			}
-		}
-	}
-}
-
-void NonTextureEngine::writeFile()
-{
-	//format is raw H264 NAL Units
-	ofLogVerbose(__func__) << "START";
-	stopThread();
-	ofLogVerbose(__func__) << "THREAD STOPPED";
-	stringstream fileName;
-	fileName << ofGetTimestampString() << "_";
-	
-	fileName << omxCameraSettings.width << "x";
-	fileName << omxCameraSettings.height << "_";
-	fileName << omxCameraSettings.framerate << "fps_";
-	
-	fileName << numMBps << "MBps_";
-	
-	fileName << frameCounter << "numFrames";
-	
-	string mkvFilePath = fileName.str() + ".mkv";
-	
-	fileName << ".h264";
-	
-	string filePath;
-	
-	if (omxCameraSettings.recordingFilePath == "") 
-	{
-		filePath = ofToDataPath(fileName.str(), true);
-	}else
-	{
-		filePath = omxCameraSettings.recordingFilePath;
-	}
-	
-	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
-	if(didWriteFile)
-	{
-		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
-		if (omxCameraSettings.doConvertToMKV) 
-		{
-			ofFile mkvmerge("/usr/bin/mkvmerge");
-			if(mkvmerge.exists())
-			{
-				string mkvmergePath = ofToDataPath("/usr/bin/mkvmerge", true);
-				ofLogVerbose() << filePath << " SUCCESS";
-				stringstream commandString;
-				commandString << "/usr/bin/mkvmerge -o ";
-				commandString << ofToDataPath(mkvFilePath, true);
-				commandString << " " << filePath;
-				commandString << " &";
-				string commandName = commandString.str();
-				ofLogVerbose() << "commandName: " << commandName;
-				//ofSystem(commandName);
-				
-				int commandResult = system(commandName.c_str());
-				ofLogVerbose(__func__) << "commandResult: " << commandResult;
-			}else 
-			{
-				ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
-			}
-			
-		}
-
-		
-	}else
-	{
-		ofLogVerbose(__func__) << filePath << " FAIL";
-	}
-}
-
-void NonTextureEngine::close()
-{
-	ofLogVerbose(__func__) << "START";
-	if(omxCameraSettings.doRecording)
-	{
-		encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-		OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-	}else 
-	{
-		//may have to revisit this if creating new instances of the videograbber
-		//otherwise OMX components seem smart enough to clean up themselves on destruction
-		ofLogVerbose(__func__) << "END - just exiting";
-		isOpen = false;
-		return;
-	}
-
-	
-	
-	
-	if(omxCameraSettings.doRecording && !didWriteFile)
-	{
-		writeFile();
-	}
-	ofLogVerbose(__func__) << "OMX BREAKDOWN START";
-
-	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
-	if(omxCameraSettings.doRecording)
-	{
-		OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
-		OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
-	}
-	
-	if(omxCameraSettings.doRecording)
-	{
-		OMXCameraUtils::disableAllPortsForComponent(&encoder);
-	}
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
-
-	if(omxCameraSettings.doRecording)
-	{
-		OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
-	}
-	
-	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	
-	if(omxCameraSettings.doRecording)
-	{
-		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	}
-	
-	OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	
-	if(omxCameraSettings.doRecording)
-	{
-		OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-	}
-
-	OMX_FreeHandle(camera);
-	if(omxCameraSettings.doRecording)
-	{
-		OMX_FreeHandle(encoder);
-	}
-	
-	ofLogVerbose(__func__) << "OMX BREAKDOWN END";
-	ofLogVerbose(__func__) << " END";
-	isOpen = false;
-}
-
-#pragma mark encoder callbacks
-OMX_ERRORTYPE NonTextureEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "encoderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
 
 
-OMX_ERRORTYPE NonTextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose() << "encoderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
 
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	grabber->lock();
-		//ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
+		//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
 		grabber->bufferAvailable = true;
-		grabber->frameCounter++;
+		grabber->recordedFrameCounter++;
 	grabber->unlock();
 	return OMX_ErrorNone;
 }
 
 
-#pragma mark render callbacks
-OMX_ERRORTYPE NonTextureEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "renderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
 
-
-OMX_ERRORTYPE NonTextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);s
-	ofLogVerbose() << "renderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE NonTextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	return OMX_ErrorNone;
-}
 

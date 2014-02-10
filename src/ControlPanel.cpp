@@ -213,7 +213,7 @@ void ControlPanel::onColorEnhancementChanged(bool & doColorEnhancement)
 
 void ControlPanel::onLEDEnabledChanged(bool & doEnableLED)
 {
-	rpiCameraVideoGrabber->setLEDStatus(doEnableLED);
+	rpiCameraVideoGrabber->setLEDState(doEnableLED);
 }
 
 

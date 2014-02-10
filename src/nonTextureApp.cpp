@@ -17,8 +17,8 @@ void nonTextureApp::setup()
 	if (!omxCameraSettings.isUsingTexture) 
 	{
 		//some options available with direct-to-screen rendering
-		omxCameraSettings.doRecording			= true;		//default: false
-		omxCameraSettings.enablePreview();
+		omxCameraSettings.doRecording			= false;		//default: false
+		//omxCameraSettings.enablePreview();
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
 		omxCameraSettings.doConvertToMKV		= false;	//converts file to .mkv using mkvmerge(if present)
 	}

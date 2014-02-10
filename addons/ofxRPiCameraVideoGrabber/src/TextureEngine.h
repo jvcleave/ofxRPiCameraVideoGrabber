@@ -33,7 +33,6 @@ public:
 	
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 	
-	OMX_BUFFERHEADERTYPE *cameraInputBuffer;
 	OMX_BUFFERHEADERTYPE *encoderOutputBuffer;
 	
 	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
