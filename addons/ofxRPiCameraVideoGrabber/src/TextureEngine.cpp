@@ -16,8 +16,17 @@ TextureEngine::TextureEngine()
 	eglBuffer	= NULL;
 	frameCounter = 0;
 	
+	
+	didWriteFile = false;
+	
 	MEGABYTE_IN_BITS = 8388608;
 	numMBps = 2.0;
+	
+	stopRequested = false;	 
+	isStopping = false;
+	isKeyframeValid = false;
+	doFillBuffer = false;
+	bufferAvailable = false;
 }
 
 void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
@@ -582,8 +591,153 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
 	}
 	ready = true;
+	bool doThreadBlocking	= true;
+	bool threadVerboseMode	= false;
+	startThread(doThreadBlocking, threadVerboseMode);
 	return error;
 }
+
+void TextureEngine::threadedFunction()
+{
+
+	while (isThreadRunning()) 
+	{
+
+		if(bufferAvailable) 
+		{
+			// The user wants to quit, but don't exit
+			// the loop until we are certain that we have processed
+			// a full frame till end of the frame, i.e. we're at the end
+			// of the current key frame if processing one or until
+			// the next key frame is detected. This way we should always
+			// avoid corruption of the last encoded at the expense of
+			// small delay in exiting.
+			if(stopRequested && !isStopping) 
+			{
+				ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
+				isStopping = true;
+				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+			}
+			if(isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+			{
+				ofLogVerbose() << "Key frame boundry reached, exiting loop...";
+				writeFile();
+				
+				doFillBuffer = false;
+			}else 
+			{
+				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+				ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
+				doFillBuffer = true;
+			}
+		}
+		// Buffer flushed, request a new buffer to be filled by the encoder component
+		if(doFillBuffer) 
+		{
+			ofLogVerbose() << "filling buffer";
+			doFillBuffer	= false;
+			bufferAvailable = false;
+			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+			if(error != OMX_ErrorNone) 
+			{
+				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+				//close();
+				
+			}
+		}
+
+	}
+
+}
+
+void TextureEngine::stopRecording()
+{
+	lock();
+	//if(omxCameraSettings.doRecording)
+	//{
+		stopRequested = true;
+		writeFile();
+	//}
+	unlock();
+}
+
+
+TextureEngine::~TextureEngine()
+{
+	ofLogVerbose() << "~TextureEngine";
+	if(!didWriteFile)
+	{
+		writeFile();
+	}
+}
+
+void TextureEngine::writeFile()
+{
+	//format is raw H264 NAL Units
+	ofLogVerbose(__func__) << "START";
+	stopThread();
+	ofLogVerbose(__func__) << "THREAD STOPPED";
+	stringstream fileName;
+	fileName << ofGetTimestampString() << "_";
+	
+	fileName << omxCameraSettings.width << "x";
+	fileName << omxCameraSettings.height << "_";
+	fileName << omxCameraSettings.framerate << "fps_";
+	
+	fileName << numMBps << "MBps_";
+	
+	fileName << frameCounter << "numFrames";
+	
+	string mkvFilePath = fileName.str() + ".mkv";
+	
+	fileName << ".h264";
+	
+	string filePath;
+	
+	if (omxCameraSettings.recordingFilePath == "") 
+	{
+		filePath = ofToDataPath(fileName.str(), true);
+	}else
+	{
+		filePath = omxCameraSettings.recordingFilePath;
+	}
+	
+	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
+	if(didWriteFile)
+	{
+		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
+		if (omxCameraSettings.doConvertToMKV) 
+		{
+			ofFile mkvmerge("/usr/bin/mkvmerge");
+			if(mkvmerge.exists())
+			{
+				string mkvmergePath = ofToDataPath("/usr/bin/mkvmerge", true);
+				ofLogVerbose() << filePath << " SUCCESS";
+				stringstream commandString;
+				commandString << "/usr/bin/mkvmerge -o ";
+				commandString << ofToDataPath(mkvFilePath, true);
+				commandString << " " << filePath;
+				commandString << " &";
+				string commandName = commandString.str();
+				ofLogVerbose() << "commandName: " << commandName;
+				//ofSystem(commandName);
+				
+				int commandResult = system(commandName.c_str());
+				ofLogVerbose(__func__) << "commandResult: " << commandResult;
+			}else 
+			{
+				ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
+			}
+			
+		}
+		
+		
+	}else
+	{
+		ofLogVerbose(__func__) << filePath << " FAIL";
+	}
+}
+
 
 
 #pragma mark encoder callbacks
@@ -604,11 +758,11 @@ OMX_ERRORTYPE TextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCompo
 OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
-	//grabber->lock();
-	//ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
-	//grabber->bufferAvailable = true;
-	//grabber->frameCounter++;
-	//grabber->unlock();
+	grabber->lock();
+	ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
+	grabber->bufferAvailable = true;
+	grabber->frameCounter++;
+	grabber->unlock();
 	return OMX_ErrorNone;
 }
 

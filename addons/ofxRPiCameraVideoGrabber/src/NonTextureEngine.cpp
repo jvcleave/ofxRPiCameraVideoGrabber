@@ -186,12 +186,7 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		
 	}
 		
-	if (omxCameraSettings.doRecording) 
-	{
-		bool doThreadBlocking	= true;
-		bool threadVerboseMode	= false;
-		startThread(doThreadBlocking, threadVerboseMode);
-	}
+	
 
 	
 }
@@ -626,6 +621,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);		
 		}
+		bool doThreadBlocking	= true;
+		bool threadVerboseMode	= false;
+		startThread(doThreadBlocking, threadVerboseMode);
 		
 	}else 
 	{

@@ -13,10 +13,11 @@
 #include "OMXCameraSettings.h"
 #include "OMXCameraUtils.h"
 
-class TextureEngine
+class TextureEngine: public ofThread 
 {
 public:
 	TextureEngine();
+	~TextureEngine();
 	void setup(OMXCameraSettings omxCameraSettings);
 	OMXCameraSettings omxCameraSettings;
 	//OMXCameraUtils omxCameraUtils;
@@ -61,4 +62,19 @@ public:
 	int MEGABYTE_IN_BITS;
 	float numMBps;
 	
+	
+	bool isStopping;
+	int isKeyframeValid;
+	bool doFillBuffer;
+	bool bufferAvailable;
+	
+	void writeFile();
+	bool stopRequested;
+	
+	ofBuffer recordingFileBuffer;
+	
+	bool didWriteFile;
+	
+	void threadedFunction();
+	void stopRecording();
 };

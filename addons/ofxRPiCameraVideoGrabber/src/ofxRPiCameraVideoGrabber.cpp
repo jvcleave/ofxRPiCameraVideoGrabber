@@ -261,6 +261,10 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 	{
 		engine->stopRecording();
 	}
+	if (textureEngine) 
+	{
+		textureEngine->stopRecording();
+	}
 }
 void ofxRPiCameraVideoGrabber::draw()
 {

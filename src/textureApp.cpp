@@ -81,7 +81,12 @@ void textureApp::keyPressed  (int key)
 	{
 		//controlPanel.increaseContrast();
 	}
-	
+	if (key == 'q')
+	{
+		ofLogVerbose() << "SENDING QUIT";
+		//videoGrabber.engine->want_quit = true;
+		videoGrabber.stopRecording();
+	}
 }
 
 void textureApp::onCharacterReceived(SSHKeyListenerEventData& e)
