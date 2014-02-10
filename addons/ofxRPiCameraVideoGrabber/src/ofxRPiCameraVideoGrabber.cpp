@@ -96,9 +96,9 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 	{
 		system("gpio export 5 out");
 		LED_CURRENT_STATE = true;
-		setLEDStatus(LED_CURRENT_STATE);
+		setLEDState(LED_CURRENT_STATE);
 	}
-	//setLEDStatus(false);
+	//setLEDState(false);
 	/*
 	 OMX_COMMONFLICKERCANCEL_OFF,
 	 OMX_COMMONFLICKERCANCEL_AUTO,
@@ -496,9 +496,9 @@ void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, i
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
-	setLEDStatus(!LED_CURRENT_STATE);
+	setLEDState(!LED_CURRENT_STATE);
 }
-void ofxRPiCameraVideoGrabber::setLEDStatus(bool status)
+void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 {
 	//OMX doesn't work - using GPIO 
 	/*OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -511,7 +511,7 @@ void ofxRPiCameraVideoGrabber::setLEDStatus(bool status)
 	error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
 	if(error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera setLEDStatus FAIL error: 0x%08x", error);
+		ofLog(OF_LOG_ERROR, "camera setLEDState FAIL error: 0x%08x", error);
 	}*/
 	
 	LED_CURRENT_STATE = status;	

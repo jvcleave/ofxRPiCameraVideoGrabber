@@ -14,12 +14,12 @@ TextureEngine::TextureEngine()
 	isOpen		= false;
 	textureID	= 0;
 	eglBuffer	= NULL;
-	frameCounter = 0;
-	
+	renderedFrameCounter = 0;
+	recordedFrameCounter = 0;
 	
 	didWriteFile = false;
 	
-	MEGABYTE_IN_BITS = 8388608;
+
 	numMBps = 2.0;
 	
 	stopRequested = false;	 
@@ -231,7 +231,7 @@ OMX_ERRORTYPE TextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
-	grabber->frameCounter++;
+	grabber->renderedFrameCounter++;
 	OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
 	return error;
 }
@@ -693,7 +693,7 @@ void TextureEngine::writeFile()
 	
 	fileName << numMBps << "MBps_";
 	
-	fileName << frameCounter << "numFrames";
+	fileName << renderedFrameCounter << "numFrames";
 	
 	string mkvFilePath = fileName.str() + ".mkv";
 	
@@ -766,9 +766,9 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->lock();
-	//ofLogVerbose(__func__) << "frameCounter: " << grabber->frameCounter;
+	//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
 	grabber->bufferAvailable = true;
-	grabber->frameCounter++;
+	grabber->recordedFrameCounter++;
 	grabber->unlock();
 	return OMX_ErrorNone;
 }

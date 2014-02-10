@@ -2,6 +2,8 @@
 
 #include "ofMain.h"
 
+#define MEGABYTE_IN_BITS 8388608
+
 class OMXCameraSettings
 {
 public:

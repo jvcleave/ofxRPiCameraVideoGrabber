@@ -50,7 +50,7 @@ public:
 	
 	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
 	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
-	void setLEDStatus(bool status);
+	void setLEDState(bool status);
 	bool LED_CURRENT_STATE;
 	void toggleLED();
 	

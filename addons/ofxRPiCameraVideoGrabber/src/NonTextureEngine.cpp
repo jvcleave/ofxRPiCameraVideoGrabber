@@ -12,7 +12,6 @@ NonTextureEngine::NonTextureEngine()
 	
 	didWriteFile = false;
 	
-	MEGABYTE_IN_BITS = 8388608;
 	numMBps = 2.0;
 	
 	stopRequested = false;	 

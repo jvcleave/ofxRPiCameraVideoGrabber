@@ -58,7 +58,6 @@ public:
 	bool didWriteFile;
 	
 	int recordingBitRate;
-	int MEGABYTE_IN_BITS;
 	float numMBps;
 	
 	bool isStopping;
