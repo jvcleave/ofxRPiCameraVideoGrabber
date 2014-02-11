@@ -10,7 +10,7 @@
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	
+	OMX_Maps::getInstance();
 	updateFrameCounter = 0;
 	hasNewFrame = false;
 	textureEngine = NULL;

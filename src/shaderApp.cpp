@@ -31,7 +31,7 @@ void shaderApp::setup()
 	{
 		ofEnableAlphaBlending();
 		
-		filterCollection.setup(&videoGrabber.omxMaps);
+		filterCollection.setup();
 		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
 		bool useShaderExample = true;
 		if (useShaderExample) 

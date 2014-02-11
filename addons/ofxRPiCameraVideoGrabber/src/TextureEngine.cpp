@@ -110,7 +110,7 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
 	 "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 	 __func__, eEvent, nData1, nData2, pEventData);*/
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
-	//ofLogVerbose(__func__) << grabber->omxMaps.eventTypes[eEvent];
+	//ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
 	switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:

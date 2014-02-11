@@ -78,6 +78,31 @@ void BaseEngine::configureCameraResolution()
 		ofLog(OF_LOG_ERROR, "cameraOutputPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
 		
 	}
+	
+	//camera color spaces
+	/*
+	 OMX_COLOR_Format24bitRGB888
+	 OMX_COLOR_FormatYUV420PackedPlanar
+	 OMX_COLOR_FormatYUV422PackedPlanar
+	 OMX_COLOR_FormatYCbYCr
+	 OMX_COLOR_FormatYCrYCb
+	 OMX_COLOR_FormatCbYCrY
+	 OMX_COLOR_FormatCrYCbY
+	 OMX_COLOR_FormatYUV420PackedSemiPlanar
+	 */
+	
+	//egl_render color spaces
+	/*
+	 OMX_COLOR_Format18bitRGB666
+	 OMX_COLOR_FormatYUV420PackedPlanar
+	 OMX_COLOR_FormatYUV422PackedPlanar
+	 OMX_COLOR_Format32bitABGR8888
+	 */
+	/*
+	ofLogVerbose(__func__) << "CHECK: cameraOutputPortDefinition.format.video eCompressionFormat: " << OMX_Maps::getInstance().videoCodingTypes[cameraOutputPortDefinition.format.video.eCompressionFormat];
+
+	ofLogVerbose(__func__) << "CHECK: cameraOutputPortDefinition.format.video eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[cameraOutputPortDefinition.format.video.eColorFormat];
+	 */
 }
 
 void BaseEngine::configureEncoder()
@@ -109,8 +134,13 @@ void BaseEngine::configureEncoder()
 			  encoderOutputPortDefinition.nBufferCountActual, 
 			  encoderOutputPortDefinition.nBufferSize, 
 			  encoderOutputPortDefinition.nBufferAlignment);
+		
+		ofLogVerbose(__func__) << "encoderOutputPortDefinition.format.video.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
 	}
 	
+	
+	
+	//colorFormatTypes
 	recordingBitRate = MEGABYTE_IN_BITS * numMBps;
 	encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
 	error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
@@ -151,7 +181,13 @@ void BaseEngine::configureEncoder()
 		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
 		
 	}
-	
+	error = OMX_GetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
+	if(error == OMX_ErrorNone) 
+	{
+		ofLogVerbose(__func__) << "CHECK: encodingFormat.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encodingFormat.eColorFormat];
+
+	}
+
 }
 void BaseEngine::threadedFunction()
 {

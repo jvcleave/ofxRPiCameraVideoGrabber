@@ -21,28 +21,28 @@ void ControlPanel::onParameterGroupChanged(ofAbstractParameter & param)
 void ControlPanel::onWhiteBalanceToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
 	
-	rpiCameraVideoGrabber->setWhiteBalance(rpiCameraVideoGrabber->omxMaps.whiteBalanceControlTypes[eventData.selectedName]);
+	rpiCameraVideoGrabber->setWhiteBalance(OMX_Maps::getInstance().whiteBalanceControls[eventData.selectedName]);
 }
 
 
 void ControlPanel::onImageFilterToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
 	
-	rpiCameraVideoGrabber->applyImageFilter(rpiCameraVideoGrabber->omxMaps.imageFilterTypes[eventData.selectedName]);
+	rpiCameraVideoGrabber->applyImageFilter(OMX_Maps::getInstance().imageFilters[eventData.selectedName]);
 
 }
 
 
 void ControlPanel::onExposureControlToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	rpiCameraVideoGrabber->setExposureMode(rpiCameraVideoGrabber->omxMaps.exposureControlTypes[eventData.selectedName]);
+	rpiCameraVideoGrabber->setExposureMode(OMX_Maps::getInstance().exposureControls[eventData.selectedName]);
 	
 }
 
 
 void ControlPanel::onMeteringNamesToggleGroupChange(ToggleGroupListenerEventData & eventData)
 {
-	rpiCameraVideoGrabber->setMeteringMode(rpiCameraVideoGrabber->omxMaps.meteringTypes[eventData.selectedName]);
+	rpiCameraVideoGrabber->setMeteringMode(OMX_Maps::getInstance().metering[eventData.selectedName]);
 }
 
 
@@ -87,22 +87,22 @@ void ControlPanel::setup(ofxRPiCameraVideoGrabber* rpiCameraVideoGrabber, string
 	actionItem.addListener(this, &ControlPanel::onActionItemChanged);
 	ToggleGroup* exposureControlToggleGroup = createToggleGroup(&exposureControlNames, 
 																"exposureControlNames", 
-																&rpiCameraVideoGrabber->omxMaps.exposureControlNames,
+																&OMX_Maps::getInstance().exposureControlNames,
 																&ControlPanel::onExposureControlToggleGroupChange);
 	
 	ToggleGroup* meteringToggleGroup = createToggleGroup(&meteringNames, 
 																"meteringNames", 
-																&rpiCameraVideoGrabber->omxMaps.meteringNames,
+																&OMX_Maps::getInstance().meteringNames,
 																&ControlPanel::onMeteringNamesToggleGroupChange);
 	
 	ToggleGroup* whiteBalanceToggleGroup = createToggleGroup(&whiteBalanceNames, 
 														 "whiteBalanceNames", 
-														 &rpiCameraVideoGrabber->omxMaps.whiteBalanceNames,
+														 &OMX_Maps::getInstance().whiteBalanceNames,
 														 &ControlPanel::onWhiteBalanceToggleGroupChange);
 	
 	ToggleGroup* imageFilterToggleGroup = createToggleGroup(&imageFilterNames, 
 															 "imageFilterNames", 
-															 &rpiCameraVideoGrabber->omxMaps.imageFilterNames,
+															 &OMX_Maps::getInstance().imageFilterNames,
 															 &ControlPanel::onImageFilterToggleGroupChange);
 	parameters.add(frameStabilizationEnabled);
 	parameters.add(sharpness);

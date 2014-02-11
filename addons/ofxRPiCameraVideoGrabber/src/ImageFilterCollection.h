@@ -21,19 +21,19 @@ public:
 		
 	}
 	
-	void setup(OMX_Maps* omxMaps, string initialFilterName = "None")
+	void setup(string initialFilterName = "None")
 	{
-		this->omxMaps = omxMaps;
 		
-		map<string, OMX_IMAGEFILTERTYPE>::iterator imageFilterIterator = omxMaps->imageFilterTypes.begin();
+		
+		map<string, OMX_IMAGEFILTERTYPE>::iterator imageFilterIterator = OMX_Maps::getInstance().imageFilters.begin();
 		
 		size_t counter =0;
-		while (imageFilterIterator != omxMaps->imageFilterTypes.end()) 
+		while (imageFilterIterator != OMX_Maps::getInstance().imageFilters.end()) 
 		{
 			if ((*imageFilterIterator).first == initialFilterName) 
 			{
 				currentFilterName = initialFilterName; 
-				currentFilter = omxMaps->imageFilterTypes[currentFilterName];
+				currentFilter = OMX_Maps::getInstance().imageFilters[currentFilterName];
 				currentFilterIndex = counter;
 				break;
 			}else
@@ -51,8 +51,8 @@ public:
 		currentFilterIndex = index;
 		size_t counter =0;
 		
-		map<string, OMX_IMAGEFILTERTYPE>::iterator imageFilterIterator = omxMaps->imageFilterTypes.begin();
-		while (imageFilterIterator != omxMaps->imageFilterTypes.end()) 
+		map<string, OMX_IMAGEFILTERTYPE>::iterator imageFilterIterator = OMX_Maps::getInstance().imageFilters.begin();
+		while (imageFilterIterator != OMX_Maps::getInstance().imageFilters.end()) 
 		{
 			if(counter == currentFilterIndex)
 			{
@@ -70,7 +70,7 @@ public:
 	
 	OMX_IMAGEFILTERTYPE getNextFilter()
 	{
-		if (currentFilterIndex+1 < omxMaps->imageFilterTypes.size()) 
+		if (currentFilterIndex+1 < OMX_Maps::getInstance().imageFilters.size()) 
 		{
 			return setCurrentFilter(currentFilterIndex+1);
 		}else 
@@ -87,5 +87,4 @@ public:
 	OMX_IMAGEFILTERTYPE currentFilter;
 	string currentFilterName;
 	size_t currentFilterIndex;
-	OMX_Maps* omxMaps;
 };

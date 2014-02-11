@@ -17,7 +17,7 @@ void texturedRemoteApp::setup()
 	
 	
 	videoGrabber.setup(omxCameraSettings);
-	filterCollection.setup(&videoGrabber.omxMaps);
+	filterCollection.setup();
 	
 	ofx::HTTP::BasicServerSettings settings;
     settings.setPort(8998);
@@ -40,9 +40,6 @@ void texturedRemoteApp::update()
 void texturedRemoteApp::draw(){
 
 	videoGrabber.draw();
-
-	
-	
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";

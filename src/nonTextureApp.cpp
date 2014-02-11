@@ -25,7 +25,7 @@ void nonTextureApp::setup()
 	
 	
 	videoGrabber.setup(omxCameraSettings);
-	filterCollection.setup(&videoGrabber.omxMaps);
+	filterCollection.setup();
 	
 
 }

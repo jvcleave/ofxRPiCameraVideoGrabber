@@ -69,7 +69,7 @@ OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hCompo
 	 "NonTextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 	 __func__, eEvent, nData1, nData2, pEventData);
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	//ofLogVerbose(__func__) << grabber->omxMaps.eventTypes[eEvent];
+	//ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
 	switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:
@@ -218,7 +218,11 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		if (error != OMX_ErrorNone) 
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+		}else 
+		{
+			ofLogVerbose(__func__) << "VIDEO_ENCODE_OUTPUT_PORT eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
 		}
+
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{

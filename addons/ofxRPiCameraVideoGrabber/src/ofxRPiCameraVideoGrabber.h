@@ -17,7 +17,7 @@
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
 
-#include "OMX_Maps.h"
+
 #include "OMXCameraUtils.h"
 #include "OMXCameraSettings.h"
 
@@ -66,9 +66,7 @@ public:
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
-	
-	OMX_Maps omxMaps;
-	
+		
 	
 	void enableBurstMode();
 	
