@@ -17,10 +17,10 @@ void nonTextureApp::setup()
 	if (!omxCameraSettings.isUsingTexture) 
 	{
 		//some options available with direct-to-screen rendering
-		omxCameraSettings.doRecording			= false;		//default: false
-		//omxCameraSettings.enablePreview();
+		omxCameraSettings.doRecording			= true;		//default: false
+		omxCameraSettings.doRecordingPreview	= true;
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
-		omxCameraSettings.doConvertToMKV		= false;	//converts file to .mkv using mkvmerge(if present)
+		omxCameraSettings.doConvertToMKV		= true;		//converts file to .mkv using mkvmerge(if present)
 	}
 	
 	
@@ -64,7 +64,7 @@ void nonTextureApp::keyPressed  (int key)
 	}
 	if (key == 'q')
 	{
-		ofLogVerbose() << "SENDING QUIT";
+		ofLogVerbose(__func__) << "SENDING QUIT";
 		//videoGrabber.engine->want_quit = true;
 		videoGrabber.stopRecording();
 	}

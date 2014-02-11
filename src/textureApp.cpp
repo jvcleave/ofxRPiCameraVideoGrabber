@@ -15,7 +15,7 @@ void textureApp::setup()
 	omxCameraSettings.height = 720;
 	//omxCameraSettings.framerate = 25;
 	omxCameraSettings.isUsingTexture = true;
-	omxCameraSettings.doRecording = true;
+	omxCameraSettings.doRecording = false;
 	
 	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup(&videoGrabber.omxMaps);
@@ -91,7 +91,7 @@ void textureApp::keyPressed  (int key)
 	}
 	if (key == 'q')
 	{
-		ofLogVerbose() << "SENDING QUIT";
+		ofLogVerbose(__func__) << "SENDING QUIT";
 		//videoGrabber.engine->want_quit = true;
 		videoGrabber.stopRecording();
 	}

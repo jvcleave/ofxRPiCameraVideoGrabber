@@ -26,7 +26,6 @@ memset(&(a), 0, sizeof(a)); \
 
 #define CAMERA_PREVIEW_PORT		70
 #define CAMERA_OUTPUT_PORT		71
-#define CAMERA_INPUT_PORT		73
 
 #define VIDEO_ENCODE_INPUT_PORT 200
 #define VIDEO_ENCODE_OUTPUT_PORT 201

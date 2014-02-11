@@ -5,10 +5,10 @@
 class SSHKeyListenerEventData
 {
 public:
-	SSHKeyListenerEventData(char character_, void* listener_)
+	SSHKeyListenerEventData(char character, void* listener)
 	{
-		character = character_;
-		listener = listener_;
+		this->character = character;
+		this->listener = listener;
 	}
 	void* listener;
 	
@@ -35,7 +35,7 @@ public:
 	~ConsoleListener()
 	{
 		thread.tryJoin(50);
-		ofLogVerbose() << "~ConsoleListener END";
+		ofLogVerbose(__func__) << " END";
 	}
 	
 	void setup(SSHKeyListener* listener_)
@@ -99,7 +99,7 @@ consoleListener.setup(this);
  
 	 if (key == 'e') 
 	 {
-		ofLogVerbose() << "e pressed!";
+		ofLogVerbose(__func__) << "e pressed!";
 	 }
  }
 #endif

@@ -226,7 +226,7 @@ void ControlPanel::onActionItemChanged(bool &doAction)
 {
 	this->doActionItem = doActionItem;
 	//ofSleepMillis(2000);
-	ofLogVerbose() << "actionItem: " << actionItem;
+	ofLogVerbose(__func__) << "actionItem: " << actionItem;
 	actionItem = false;
 	this->doActionItem = actionItem;
 }

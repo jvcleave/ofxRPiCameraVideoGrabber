@@ -25,10 +25,6 @@ BaseEngine::~BaseEngine()
 		close();
 	}
 }
-void BaseEngine::setup(OMXCameraSettings omxCameraSettings)
-{
-	
-}
 
 void BaseEngine::configureCameraResolution()
 {
@@ -288,42 +284,6 @@ void BaseEngine::close()
 	isOpen = false;
 }
 
-#pragma mark encoder callbacks
-OMX_ERRORTYPE BaseEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose(__func__) << "encoderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-
-OMX_ERRORTYPE BaseEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose(__func__) << "encoderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
-#pragma mark render callbacks
-OMX_ERRORTYPE BaseEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose(__func__) << "renderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-
-OMX_ERRORTYPE BaseEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);s
-	ofLogVerbose(__func__) << "renderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
-OMX_ERRORTYPE BaseEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	return OMX_ErrorNone;
-}
 
 void BaseEngine::writeFile()
 {

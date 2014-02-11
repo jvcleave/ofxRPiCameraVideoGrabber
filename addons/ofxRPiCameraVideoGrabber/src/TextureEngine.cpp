@@ -27,9 +27,10 @@ TextureEngine::TextureEngine()
 	isKeyframeValid = false;
 	doFillBuffer = false;
 	bufferAvailable = false;
+	engineType = TEXTURE_ENGINE;
 }
 
-void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
+void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 {
 	this->omxCameraSettings = omxCameraSettings;
 	generateEGLImage();
@@ -49,9 +50,9 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	
 	configureCameraResolution();
 	
-	
-	
 }
+
+
 void TextureEngine::generateEGLImage()
 {
 	
@@ -125,18 +126,13 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
 	return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE TextureEngine::splitterEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	return OMX_ErrorNone;
-}
-
 
 
 OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->renderedFrameCounter++;
-	OMX_ERRORTYPE error = OMX_FillThisBuffer(grabber->render, grabber->eglBuffer);
+	OMX_ERRORTYPE error = OMX_FillThisBuffer(hComponent, pBuffer);
 	return error;
 }
 
@@ -161,16 +157,13 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	{
 		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
 	}
+	
 	if(omxCameraSettings.doRecording)
 	{
 		//Set up video splitter
 		OMX_CALLBACKTYPE splitterCallbacks;
-		splitterCallbacks.EventHandler    = &TextureEngine::splitterEventHandlerCallback;
-		//splitterCallbacks.EmptyBufferDone	= &TextureEngine::renderEmptyBufferDone;
-		//splitterCallbacks.FillBufferDone	= &TextureEngine::renderFillBufferDone;
-		
-		
-		
+		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
+
 		string splitterComponentName = "OMX.broadcom.video_splitter";
 		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
 		OMXCameraUtils::disableAllPortsForComponent(&splitter);
@@ -182,7 +175,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "splitter OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 		}else 
 		{
-			ofLogVerbose() << "splitter OMX_SendCommand OMX_StateIdle PASS";
+			ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_StateIdle PASS";
 		}
 	}
 
@@ -227,8 +220,6 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		configureEncoder();
 		
 	}
-	
-		
 	
 	//Create camera->splitter Tunnel
 	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
@@ -341,7 +332,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
 		}else 
 		{
-			ofLogVerbose() << "encoderOutputPortDefinition buffer info";
+			ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
 			ofLog(OF_LOG_VERBOSE, 
 				  "nBufferCountMin(%u)					\n \
 				  nBufferCountActual(%u)				\n \

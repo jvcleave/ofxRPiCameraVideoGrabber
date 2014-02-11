@@ -27,12 +27,12 @@ void OSCParameterSync::update(){
 		updatingParameter = true;
 		receiver.getParameter(*syncGroup);
 		updatingParameter = false;
-		ofLogVerbose() << "receiver.hasWaitingMessages()";
+		ofLogVerbose(__func__) << "receiver.hasWaitingMessages()";
 	}
 }
 
 void OSCParameterSync::parameterChanged( ofAbstractParameter & parameter ){
-	ofLogVerbose() << "parameterChanged updatingParameter: " << parameter.getName();
+	ofLogVerbose(__func__) << "updatingParameter: " << parameter.getName();
 	if(updatingParameter) return;
 	sender.sendParameter(parameter);
 }

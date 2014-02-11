@@ -7,15 +7,20 @@
 #include "NonTextureEngine.h"
 NonTextureEngine::NonTextureEngine()
 {
-
+	engineType = NON_TEXTURE_ENGINE;
 			
 }
 
-void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
+void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 {
 	
-	
 	this->omxCameraSettings = omxCameraSettings;
+	
+	if (omxCameraSettings.doRecordingPreview) 
+	{
+		//validate the settings
+		omxCameraSettings.enablePreview();
+	}
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
@@ -31,9 +36,6 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 	}
 	
 	configureCameraResolution();
-	
-	
-	
 	
 	if (omxCameraSettings.doRecording && omxCameraSettings.doRecordingPreview) 
 	{
@@ -57,9 +59,6 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		}
 		
 	}
-		
-	
-
 	
 }
 
@@ -91,15 +90,13 @@ OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hCompo
 OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 {
 
-	ofLogVerbose(__func__) << "onCameraEventParamOrConfigChanged";
+	ofLogVerbose(__func__) << "START";
 	
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 	}
-	
-
 	
 	//Enable Camera Output Port
 	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
@@ -120,27 +117,11 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		if (omxCameraSettings.doRecordingPreview) 
 		{
 			//Set up renderer
-			OMX_CALLBACKTYPE renderCallbacks;
-			renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
-			renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
-			renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
-			
-			string renderComponentName = "OMX.broadcom.video_render";
-			
-			OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-			OMXCameraUtils::disableAllPortsForComponent(&render);
-			
-			//Set renderer to Idle
-			error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-			if (error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-			}
+			setupRenderer();
 		} 
 		
-
 		
-		
+		//set up encoder
 		OMX_CALLBACKTYPE encoderCallbacks;
 		encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
 		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
@@ -167,8 +148,6 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			}
 		}
 
-		
-		
 		// Tunnel camera video output port and encoder input port
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, VIDEO_ENCODE_INPUT_PORT);
 		if(error != OMX_ErrorNone) 
@@ -190,7 +169,6 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
 		}
-		
 		
 		if (omxCameraSettings.doRecordingPreview)
 		{
@@ -231,8 +209,6 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			{
 				ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
 			}
-			
-			
 		}
 
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
@@ -249,8 +225,6 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
 			
 		}
-		
-		
 		
 
 		//Start camera
@@ -277,49 +251,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 				ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
 			}
 			
-			OMX_CONFIG_DISPLAYREGIONTYPE region;
-			
-			OMX_INIT_STRUCTURE(region);
-			region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
-			
-			region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
-			
-			region.fullscreen = OMX_TRUE;
-			region.noaspect = OMX_FALSE;
-			
-			region.dest_rect.x_offset = 0;
-			region.dest_rect.y_offset = 0;
-			region.dest_rect.width = omxCameraSettings.previewWidth;
-			region.dest_rect.height = omxCameraSettings.previewHeight;
-			
-			error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
-			
-			if(error == OMX_ErrorNone)
-			{
-				ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
-			}else 
-			{
-				ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
-			}
-			/*
-			 region.fullscreen = OMX_FALSE;
-			 region.noaspect = OMX_FALSE;
-			 
-			 region.dest_rect.x_offset = 0;
-			 region.dest_rect.y_offset = 0;
-			 //region.dest_rect.width = omxCameraSettings.previewWidth;
-			 //region.dest_rect.height = omxCameraSettings.previewHeight;
-			 region.dest_rect.width = ofGetWidth();
-			 region.dest_rect.height = ofGetHeight();
-			 error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
-			 
-			 if(error == OMX_ErrorNone)
-			 {
-			 ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
-			 }else 
-			 {
-			 ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
-			 }*/
+			setupDisplay();
 			
 		}
 		
@@ -330,29 +262,14 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);		
 		}
+		
 		bool doThreadBlocking	= true;
 		bool threadVerboseMode	= false;
 		startThread(doThreadBlocking, threadVerboseMode);
 		
 	}else 
 	{
-		//Set up renderer
-		OMX_CALLBACKTYPE renderCallbacks;
-		renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
-		renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
-		renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
-		
-		string renderComponentName = "OMX.broadcom.video_render";
-		
-		OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-		OMXCameraUtils::disableAllPortsForComponent(&render);
-		
-		//Set renderer to Idle
-		error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-		}
+		setupRenderer();
 		
 		
 		//Create camera->video_render Tunnel
@@ -391,38 +308,67 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "camera OMX_StateExecuting FAIL error: 0x%08x", error);
 		}
 		
-		OMX_CONFIG_DISPLAYREGIONTYPE region;
-		
-		OMX_INIT_STRUCTURE(region);
-		region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
-		
-		region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
-		
-		region.fullscreen = OMX_FALSE;
-		region.noaspect = OMX_TRUE;
-		
-		region.dest_rect.x_offset = 0;
-		region.dest_rect.y_offset = 0;
-		region.dest_rect.width	= omxCameraSettings.width;
-		region.dest_rect.height = omxCameraSettings.height;
-		
-		error = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
-		
-		if(error == OMX_ErrorNone)
-		{
-			ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
-		}else 
-		{
-			ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
-		}
-		
+		setupDisplay();
+				
 	}
 
 	isOpen = true;
 	return error;
 }
 
+OMX_ERRORTYPE NonTextureEngine::setupDisplay()
+{
 
+	OMX_CONFIG_DISPLAYREGIONTYPE region;
+	
+	OMX_INIT_STRUCTURE(region);
+	region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
+	
+	region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
+	
+	region.fullscreen = OMX_FALSE;
+	region.noaspect = OMX_TRUE;
+	
+	region.dest_rect.x_offset = 0;
+	region.dest_rect.y_offset = 0;
+	region.dest_rect.width	= omxCameraSettings.width;
+	region.dest_rect.height = omxCameraSettings.height;
+	
+	OMX_ERRORTYPE error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
+	
+	if(error == OMX_ErrorNone)
+	{
+		ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
+	}else 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
+	}
+	
+	return error;
+	
+}
+
+OMX_ERRORTYPE NonTextureEngine::setupRenderer()
+{
+	//Set up renderer
+	OMX_CALLBACKTYPE renderCallbacks;
+	renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
+	renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+	renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
+	
+	string renderComponentName = "OMX.broadcom.video_render";
+	
+	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+	OMXCameraUtils::disableAllPortsForComponent(&render);
+	
+	//Set renderer to Idle
+	OMX_ERRORTYPE error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	if (error != OMX_ErrorNone) 
+	{
+		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+	}
+	return error;
+}
 
 
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)

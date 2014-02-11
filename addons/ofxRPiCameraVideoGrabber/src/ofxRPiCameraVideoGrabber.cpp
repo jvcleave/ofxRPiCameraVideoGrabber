@@ -170,7 +170,7 @@ void ofxRPiCameraVideoGrabber::disableImageEffects()
 
 void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
-	ofLogVerbose() << "setFlickerCancellation";
+	ofLogVerbose(__func__) << "setFlickerCancellation";
 	OMX_CONFIG_FLICKERCANCELTYPE controlType;
 	OMX_INIT_STRUCTURE(controlType);
 	
@@ -184,22 +184,22 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 		{
 			case OMX_COMMONFLICKERCANCEL_OFF:
 			{
-				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_OFF";
+				ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_OFF";
 				break;
 			}
 			case OMX_COMMONFLICKERCANCEL_AUTO:
 			{
-				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_AUTO";
+				ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_AUTO";
 				break;
 			}
 			case OMX_COMMONFLICKERCANCEL_50:
 			{
-				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_50";
+				ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_50";
 				break;
 			}
 			case OMX_COMMONFLICKERCANCEL_60:
 			{
-				ofLogVerbose() << "OMX_COMMONFLICKERCANCEL_60";
+				ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_60";
 				break;
 			}
 			default:
@@ -242,7 +242,7 @@ int ofxRPiCameraVideoGrabber::getFrameRate()
 
 GLuint ofxRPiCameraVideoGrabber::getTextureID()
 {
-	if (!omxCameraSettings.isUsingTexture) 
+	if (!textureEngine) 
 	{
 		return 0;
 	}
@@ -273,7 +273,7 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 }
 void ofxRPiCameraVideoGrabber::draw()
 {
-	if (!omxCameraSettings.isUsingTexture)
+	if (!textureEngine)
 	{
 		return;
 	}
@@ -498,6 +498,7 @@ void ofxRPiCameraVideoGrabber::toggleLED()
 {
 	setLEDState(!LED_CURRENT_STATE);
 }
+
 void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 {
 	//OMX doesn't work - using GPIO 
@@ -517,7 +518,7 @@ void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 	LED_CURRENT_STATE = status;	
 	string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
 	int result = system(command.c_str());
-	ofLogVerbose() << "command: " << command << " result: " << result;
+	ofLogVerbose(__func__) << "command: " << command << " result: " << result;
 }
 
 void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
