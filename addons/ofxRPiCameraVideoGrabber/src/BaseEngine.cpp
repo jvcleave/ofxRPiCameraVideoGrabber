@@ -224,8 +224,8 @@ void BaseEngine::close()
 	ofLogVerbose(__func__) << "START";
 	if(omxCameraSettings.doRecording)
 	{
-		encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-		OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+		//encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+		//OMX_FillThisBuffer(encoder, encoderOutputBuffer);
 	}else 
 	{
 		//may have to revisit this if creating new instances of the videograbber
@@ -239,7 +239,10 @@ void BaseEngine::close()
 	if(omxCameraSettings.doRecording && !didWriteFile)
 	{
 		writeFile();
+		
 	}
+	isOpen = false;
+	return;
 	ofLogVerbose(__func__) << "OMX BREAKDOWN START";
 	
 	OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);

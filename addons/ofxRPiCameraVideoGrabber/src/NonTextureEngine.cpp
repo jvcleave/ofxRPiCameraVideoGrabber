@@ -142,9 +142,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		
 		OMX_CALLBACKTYPE encoderCallbacks;
-		encoderCallbacks.EventHandler    = &BaseEngine::encoderEventHandlerCallback;
+		encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
 		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
-		encoderCallbacks.FillBufferDone	= &NonTextureEngine::encoderFillBufferDone;
+		encoderCallbacks.FillBufferDone		= &NonTextureEngine::encoderFillBufferDone;
 		
 		
 		string encoderComponentName = "OMX.broadcom.video_encode";

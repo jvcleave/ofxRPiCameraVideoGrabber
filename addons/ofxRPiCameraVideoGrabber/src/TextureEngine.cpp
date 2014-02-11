@@ -47,92 +47,8 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings)
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
 	
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
+	configureCameraResolution();
 	
-	
-	OMX_VIDEO_PARAM_PORTFORMATTYPE portFormatType;
-	OMX_INIT_STRUCTURE(portFormatType);
-	portFormatType.nPortIndex = CAMERA_OUTPUT_PORT;
-	error = OMX_GetConfig(camera, OMX_IndexParamVideoPortFormat, &portFormatType);
-	
-	
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-	}else 
-	{
-		//camera color spaces
-		/*
-		 OMX_COLOR_Format24bitRGB888
-		 OMX_COLOR_FormatYUV420PackedPlanar
-		 OMX_COLOR_FormatYUV422PackedPlanar
-		 OMX_COLOR_FormatYCbYCr
-		 OMX_COLOR_FormatYCrYCb
-		 OMX_COLOR_FormatCbYCrY
-		 OMX_COLOR_FormatCrYCbY
-		 OMX_COLOR_FormatYUV420PackedSemiPlanar
-		 */
-		
-		//egl_render color spaces
-		/*
-		 OMX_COLOR_Format18bitRGB666
-		 OMX_COLOR_FormatYUV420PackedPlanar
-		 OMX_COLOR_FormatYUV422PackedPlanar
-		 OMX_COLOR_Format32bitABGR8888
-		 */
-		
-		//ofLogVerbose() << "OMX_COLOR_FORMATTYPE is " << omxMaps.colorFormats[portFormatType.eColorFormat]; //OMX_COLOR_FormatYUV420PackedPlanar
-		
-		//ofLogVerbose() << "OMX_VIDEO_CODINGTYPE is " << omxMaps.videoCodingTypes[portFormatType.eCompressionFormat]; //OMX_VIDEO_CodingUnused
-		ofLogVerbose() << "nIndex is " << portFormatType.nIndex;
-		ofLogVerbose() << "xFramerate is " << portFormatType.xFramerate;
-		
-		//OMX_U32 nIndex;
-		//OMX_VIDEO_CODINGTYPE eCompressionFormat; 
-		//OMX_COLOR_FORMATTYPE eColorFormat;
-		//OMX_U32 xFramerate;
-	}
-	
-	
-	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
-	OMX_INIT_STRUCTURE(cameraCallback);
-	cameraCallback.nPortIndex	=	OMX_ALL;
-	cameraCallback.nIndex		=	OMX_IndexParamCameraDeviceNumber;
-	cameraCallback.bEnable		=	OMX_TRUE;
-	
-	OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
-	
-	//Set the camera (always 0)
-	OMX_PARAM_U32TYPE device;
-	OMX_INIT_STRUCTURE(device);
-	device.nPortIndex	= OMX_ALL;
-	device.nU32			= 0;
-	
-	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
-	
-	//Set the resolution
-	OMX_PARAM_PORTDEFINITIONTYPE portdef;
-	OMX_INIT_STRUCTURE(portdef);
-	portdef.nPortIndex = CAMERA_OUTPUT_PORT;
-	
-	OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
-	
-	portdef.format.image.nFrameWidth = omxCameraSettings.width;
-	portdef.format.image.nFrameHeight = omxCameraSettings.height;
-	portdef.format.image.nStride = omxCameraSettings.width;
-	
-	OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &portdef);
-	
-	
-	
-	//Set the framerate 
-	OMX_CONFIG_FRAMERATETYPE framerateConfig;
-	OMX_INIT_STRUCTURE(framerateConfig);
-	framerateConfig.nPortIndex = CAMERA_OUTPUT_PORT;
-	framerateConfig.xEncodeFramerate = omxCameraSettings.framerate << 16; //Q16 format - 25fps
-	
-	OMX_SetConfig(camera, OMX_IndexConfigVideoFramerate, &framerateConfig);
 	
 	
 }
@@ -216,18 +132,6 @@ OMX_ERRORTYPE TextureEngine::splitterEventHandlerCallback(OMX_HANDLETYPE hCompon
 
 
 
-OMX_ERRORTYPE TextureEngine::renderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	return OMX_ErrorNone;
-}
-
-
-OMX_ERRORTYPE TextureEngine::renderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose(__func__) << "renderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
-
 OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
@@ -286,8 +190,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	
 	//Set up texture renderer
 	OMX_CALLBACKTYPE renderCallbacks;
-	renderCallbacks.EventHandler	= &TextureEngine::renderEventHandlerCallback;
-	renderCallbacks.EmptyBufferDone	= &TextureEngine::renderEmptyBufferDone;
+	renderCallbacks.EventHandler	= &BaseEngine::renderEventHandlerCallback;
+	renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
 	renderCallbacks.FillBufferDone	= &TextureEngine::renderFillBufferDone;
 	
 	string renderComponentName = "OMX.broadcom.egl_render";
@@ -307,8 +211,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		//Create encoder
 		
 		OMX_CALLBACKTYPE encoderCallbacks;
-		encoderCallbacks.EventHandler		= &TextureEngine::encoderEventHandlerCallback;
-		encoderCallbacks.EmptyBufferDone	= &TextureEngine::encoderEmptyBufferDone;
+		encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
+		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
 		encoderCallbacks.FillBufferDone		= &TextureEngine::encoderFillBufferDone;
 		
 		
@@ -319,76 +223,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
 		}
-		OMXCameraUtils::disableAllPortsForComponent(&encoder);
 		
-		// Configure video format emitted by encoder output port
-		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
-		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose() << "encoderOutputPortDefinition buffer info";
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  encoderOutputPortDefinition.nBufferCountMin, 
-				  encoderOutputPortDefinition.nBufferCountActual, 
-				  encoderOutputPortDefinition.nBufferSize, 
-				  encoderOutputPortDefinition.nBufferAlignment);
-			
-		}
-
-		
-		encoderOutputPortDefinition.format.video.nFrameWidth			= omxCameraSettings.width;
-		encoderOutputPortDefinition.format.video.nFrameHeight			= omxCameraSettings.height;
-		encoderOutputPortDefinition.format.video.xFramerate				= 0; //always 25
-		encoderOutputPortDefinition.format.video.nStride				= omxCameraSettings.width;
-	
-		
-		recordingBitRate = MEGABYTE_IN_BITS * numMBps;
-		encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
-		error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-			
-		}
-		
-		// Configure encoding bitrate
-		OMX_VIDEO_PARAM_BITRATETYPE encodingBitrate;
-		OMX_INIT_STRUCTURE(encodingBitrate);
-		encodingBitrate.eControlRate = OMX_Video_ControlRateVariable;
-		//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
-		
-		encodingBitrate.nTargetBitrate = recordingBitRate;
-		encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		
-		error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
-		
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoBitrate FAIL error: 0x%08x", error);
-			
-		}
-		// Configure encoding format
-		OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
-		OMX_INIT_STRUCTURE(encodingFormat);
-		encodingFormat.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-		encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
-		
-		error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-			
-		}
+		configureEncoder();
 		
 	}
 	
@@ -597,178 +433,20 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	return error;
 }
 
-void TextureEngine::threadedFunction()
-{
 
-	while (isThreadRunning()) 
-	{
 
-		if(bufferAvailable) 
-		{
-			// The user wants to quit, but don't exit
-			// the loop until we are certain that we have processed
-			// a full frame till end of the frame, i.e. we're at the end
-			// of the current key frame if processing one or until
-			// the next key frame is detected. This way we should always
-			// avoid corruption of the last encoded at the expense of
-			// small delay in exiting.
-			if(stopRequested && !isStopping) 
-			{
-				ofLogVerbose() << "Exit signal detected, waiting for next key frame boundry before exiting...";
-				isStopping = true;
-				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
-			}
-			if(isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
-			{
-				ofLogVerbose() << "Key frame boundry reached, exiting loop...";
-				writeFile();
-				
-				doFillBuffer = false;
-			}else 
-			{
-				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
-				//ofLogVerbose() << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
-				doFillBuffer = true;
-			}
-		}
-		// Buffer flushed, request a new buffer to be filled by the encoder component
-		if(doFillBuffer) 
-		{
-			//ofLogVerbose() << "filling buffer";
-			doFillBuffer	= false;
-			bufferAvailable = false;
-			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-			if(error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-				//close();
-				
-			}
-		}
-
-	}
-
-}
-
-void TextureEngine::stopRecording()
-{
-	
-	if(omxCameraSettings.doRecording)
-	{
-		lock();
-			stopRequested = true;
-			writeFile();
-		unlock();
-	}
-	
-}
-
-TextureEngine::~TextureEngine()
-{
-	ofLogVerbose(__func__) << " START";
-	if(isOpen)
-	{
-		stopRecording();
-		close();
-	}
-	ofLogVerbose(__func__) << " END";
-}
-
-void TextureEngine::writeFile()
-{
-	if (didWriteFile) 
-	{
-		return;
-	}
-	//format is raw H264 NAL Units
-	ofLogVerbose(__func__) << "START";
-	stopThread();
-	ofLogVerbose(__func__) << "THREAD STOPPED";
-	stringstream fileName;
-	fileName << ofGetTimestampString() << "_";
-	
-	fileName << omxCameraSettings.width << "x";
-	fileName << omxCameraSettings.height << "_";
-	fileName << omxCameraSettings.framerate << "fps_";
-	
-	fileName << numMBps << "MBps_";
-	
-	fileName << renderedFrameCounter << "numFrames";
-	
-	string mkvFilePath = fileName.str() + ".mkv";
-	
-	fileName << ".h264";
-	
-	string filePath;
-	
-	if (omxCameraSettings.recordingFilePath == "") 
-	{
-		filePath = ofToDataPath(fileName.str(), true);
-	}else
-	{
-		filePath = omxCameraSettings.recordingFilePath;
-	}
-	
-	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
-	if(didWriteFile)
-	{
-		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
-		if (omxCameraSettings.doConvertToMKV) 
-		{
-			ofFile mkvmerge("/usr/bin/mkvmerge");
-			if(mkvmerge.exists())
-			{
-				string mkvmergePath = ofToDataPath("/usr/bin/mkvmerge", true);
-				ofLogVerbose() << filePath << " SUCCESS";
-				stringstream commandString;
-				commandString << "/usr/bin/mkvmerge -o ";
-				commandString << ofToDataPath(mkvFilePath, true);
-				commandString << " " << filePath;
-				commandString << " &";
-				string commandName = commandString.str();
-				ofLogVerbose() << "commandName: " << commandName;
-				//ofSystem(commandName);
-				
-				int commandResult = system(commandName.c_str());
-				ofLogVerbose(__func__) << "commandResult: " << commandResult;
-			}else 
-			{
-				ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
-			}
-			
-		}
-		
-		
-	}else
-	{
-		ofLogVerbose(__func__) << filePath << " FAIL";
-	}
-}
 
 
 
 #pragma mark encoder callbacks
-OMX_ERRORTYPE TextureEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
-{
-	//NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	ofLogVerbose() << "encoderEventHandlerCallback";
-	return OMX_ErrorNone;
-}
-
-
-OMX_ERRORTYPE TextureEngine::encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{
-	ofLogVerbose() << "encoderEmptyBufferDone";
-	return OMX_ErrorNone;
-}
 
 OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->lock();
-	//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
-	grabber->bufferAvailable = true;
-	grabber->recordedFrameCounter++;
+		//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
+		grabber->bufferAvailable = true;
+		grabber->recordedFrameCounter++;
 	grabber->unlock();
 	return OMX_ErrorNone;
 }
@@ -776,7 +454,7 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 
 
 
-
+#if 0
 void TextureEngine::close()
 {
 	ofLogVerbose(__func__) << "START";
@@ -859,3 +537,4 @@ void TextureEngine::close()
 	isOpen = false;
 }
 
+#endif
