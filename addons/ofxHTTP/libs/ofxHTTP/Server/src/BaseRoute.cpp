@@ -38,6 +38,7 @@ BaseRoute::BaseRoute()
 //------------------------------------------------------------------------------
 BaseRoute::~BaseRoute()
 {
+	ofLogVerbose(__func__) << " START";
 }
 
 //------------------------------------------------------------------------------
@@ -52,7 +53,7 @@ bool BaseRoute::canHandleRequest(const Poco::Net::HTTPServerRequest& request,
 {
     // require a valid path
     std::string path = "/";
-
+	ofLogVerbose() << "request.getURI(): " << request.getURI();
     try
     {
         path = Poco::URI(request.getURI()).getPath();
