@@ -11,7 +11,8 @@ public:
 	int height;
 	int framerate;
 	bool doRecording;
-	bool doRecordingPreview;
+	bool doRecordingPreview; //TODO make private
+	
 	int previewWidth;
 	int previewHeight;
 	bool isUsingTexture;
@@ -19,8 +20,8 @@ public:
 	bool doConvertToMKV;
 	OMXCameraSettings()
 	{
-		width = 1920;
-		height = 1080;
+		width = 1280;
+		height = 720;
 		//currently limited to 30fps
 		//http://www.raspberrypi.org/forums/viewtopic.php?p=490143#p490143
 		framerate = 30;
@@ -45,8 +46,9 @@ public:
 			previewWidth = 0;
 			previewHeight = 0;
 		}
-
 		
 		doRecordingPreview = true;
 	}
+private:
+	//bool doRecordingPreview;
 };

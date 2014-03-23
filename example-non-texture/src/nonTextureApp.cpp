@@ -14,10 +14,9 @@ void nonTextureApp::setup()
 	omxCameraSettings.width					= 1280;
 	omxCameraSettings.height				= 720;
 	omxCameraSettings.isUsingTexture		= false;
-	if (!omxCameraSettings.isUsingTexture) 
-	{
-		//some options available with direct-to-screen rendering
-		omxCameraSettings.doRecording			= true;		//default: false
+	omxCameraSettings.doRecording			= false;		//default: false
+	if (omxCameraSettings.doRecording) 
+	{		
 		omxCameraSettings.doRecordingPreview	= true;
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
 		omxCameraSettings.doConvertToMKV		= true;		//converts file to .mkv using mkvmerge(if present)
@@ -40,11 +39,7 @@ void nonTextureApp::update()
 //--------------------------------------------------------------
 void nonTextureApp::draw(){
 
-
 	
-	
-
-	//
 }
 
 //--------------------------------------------------------------
@@ -65,7 +60,6 @@ void nonTextureApp::keyPressed  (int key)
 	if (key == 'q')
 	{
 		ofLogVerbose(__func__) << "SENDING QUIT";
-		//videoGrabber.engine->want_quit = true;
 		videoGrabber.stopRecording();
 	}
 	if (key == 't')

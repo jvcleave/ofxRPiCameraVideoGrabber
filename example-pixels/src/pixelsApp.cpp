@@ -1,11 +1,15 @@
-#include "shaderApp.h"
+#include "pixelsApp.h"
+
+//Pixel access is not implemented in the player
+//so here is how to do it yourself
+
+//it should be implemented along with an "isFrameNew" but that isn't working yet
 
 //--------------------------------------------------------------
-void shaderApp::setup()
+void pixelsApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetVerticalSync(false);
-	ofEnableAlphaBlending();
 	
 	doDrawInfo	= true;
 		
@@ -19,58 +23,58 @@ void shaderApp::setup()
 	videoGrabber.setup(omxCameraSettings);
 	filterCollection.setup();
 
-	doShader = true;
-	shader.load("shaderExample");
+	doPixels = true;
+	if (doPixels) 
+	{
+		videoPixels = new unsigned char[omxCameraSettings.width * omxCameraSettings.height *4];
+		videoTexture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	}
 	
 	fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
 	fbo.end();
 	
-	
 		
 }	
 
 //--------------------------------------------------------------
-void shaderApp::update()
+void pixelsApp::update()
 {
-	if (!doShader)
-	{
-		return;
-	}
+	if(!doPixels) return;
+	
+	
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
-		shader.begin();
-			shader.setUniformTexture("tex0", videoGrabber.getTextureReference(), videoGrabber.getTextureID());
-			shader.setUniform1f("time", ofGetElapsedTimef());
-			shader.setUniform2f("resolution", ofGetWidth(), ofGetHeight());
-			videoGrabber.draw();
-		shader.end();
+		videoGrabber.draw();
+		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, videoPixels);	
 	fbo.end();
+	
+	//load it back into a texture to prove it's working 
+	videoTexture.loadData(videoPixels, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
 
 }
 
 
 //--------------------------------------------------------------
-void shaderApp::draw(){
+void pixelsApp::draw(){
 	
-	if (doShader)
+	videoGrabber.draw();
+	if(doPixels)
 	{
-		fbo.draw(0, 0);		
-	}else 
-	{
-		videoGrabber.draw();
+		videoTexture.draw(0, 0, omxCameraSettings.width/2, omxCameraSettings.height/2);
 	}
 
 	stringstream info;
 	info << "APP FPS: " << ofGetFrameRate() << "\n";
 	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
 	info << "CURRENT FILTER: " << filterCollection.getCurrentFilterName() << "\n";
-	info << "SHADER ENABLED: " << doShader << "\n";
+	info << "PIXELS ENABLED: " << doPixels << "\n";
 	//info <<	filterCollection.filterList << "\n";
 	
 	info << "\n";
-	info << "Press e to increment filter" << "\n";
+	info << "Press e to Increment filter" << "\n";
+	info << "Press p to Toggle pixel processing" << "\n";
 	info << "Press g to Toggle info" << "\n";
 	
 	if (doDrawInfo) 
@@ -82,7 +86,7 @@ void shaderApp::draw(){
 }
 
 //--------------------------------------------------------------
-void shaderApp::keyPressed  (int key)
+void pixelsApp::keyPressed  (int key)
 {
 	ofLogVerbose(__func__) << key;
 	
@@ -90,20 +94,18 @@ void shaderApp::keyPressed  (int key)
 	{
 		videoGrabber.applyImageFilter(filterCollection.getNextFilter());
 	}
-	
 	if (key == 'g')
 	{
 		doDrawInfo = !doDrawInfo;
 	}
 	
-	if (key == 'd')
+	if (key == 'p')
 	{
-		doShader = !doShader;
+		doPixels = !doPixels;
 	}
-
 }
 
-void shaderApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void pixelsApp::onCharacterReceived(SSHKeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

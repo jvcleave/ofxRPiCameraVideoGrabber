@@ -6,7 +6,7 @@
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-class shaderApp : public ofBaseApp, public SSHKeyListener{
+class pixelsApp : public ofBaseApp, public SSHKeyListener{
 
 	public:
 
@@ -24,9 +24,10 @@ class shaderApp : public ofBaseApp, public SSHKeyListener{
 	bool doDrawInfo;
 	
 	ofFbo fbo;
-	ofShader shader;
-	bool doShader;
 		
+	unsigned char * videoPixels;
+	ofTexture videoTexture;
 	OMXCameraSettings omxCameraSettings;
+	bool doPixels;
 };
 
