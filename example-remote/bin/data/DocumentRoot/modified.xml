@@ -1,0 +1,73 @@
+<root>
+	<FrameStabilization type="bool">0</FrameStabilization>
+	<sharpness max="100" min="-100" type="int">-50</sharpness>
+	<brightness max="100" min="0" type="int">50</brightness>
+	<contrast max="100" min="-100" type="int">-10</contrast>
+	<saturation max="100" min="-100" type="int">0</saturation>
+	<ColorEnhancement type="bool">0</ColorEnhancement>
+	<LED type="bool">0</LED>
+	<drawGui type="bool">1</drawGui>
+	<actionItem type="bool">0</actionItem>
+	<exposureControlNames type="group">
+		<Antishake type="bool">0</Antishake>
+		<Auto type="bool">0</Auto>
+		<BackLight type="bool">0</BackLight>
+		<Beach type="bool">0</Beach>
+		<Fireworks type="bool">0</Fireworks>
+		<FixedFps type="bool">0</FixedFps>
+		<LargeAperture type="bool">0</LargeAperture>
+		<Night type="bool">0</Night>
+		<NightWithPreview type="bool">0</NightWithPreview>
+		<Off type="bool">0</Off>
+		<SmallAperture type="bool">0</SmallAperture>
+		<Snow type="bool">0</Snow>
+		<Sports type="bool">0</Sports>
+		<SpotLight type="bool">0</SpotLight>
+		<VeryLong type="bool">0</VeryLong>
+	</exposureControlNames>
+	<meteringNames type="group">
+		<Average type="bool">0</Average>
+		<Backlit type="bool">0</Backlit>
+		<Matrix type="bool">0</Matrix>
+		<Spot type="bool">0</Spot>
+	</meteringNames>
+	<whiteBalanceNames type="group">
+		<Auto type="bool">0</Auto>
+		<Cloudy type="bool">0</Cloudy>
+		<Flash type="bool">0</Flash>
+		<Fluorescent type="bool">0</Fluorescent>
+		<Horizon type="bool">0</Horizon>
+		<Incandescent type="bool">0</Incandescent>
+		<Off type="bool">0</Off>
+		<Shade type="bool">0</Shade>
+		<SunLight type="bool">0</SunLight>
+		<Tungsten type="bool">0</Tungsten>
+	</whiteBalanceNames>
+	<imageFilterNames type="group">
+		<Antialias type="bool">0</Antialias>
+		<Blur type="bool">0</Blur>
+		<Cartoon type="bool">0</Cartoon>
+		<ColourBalance type="bool">0</ColourBalance>
+		<ColourPoint type="bool">0</ColourPoint>
+		<ColourSwap type="bool">0</ColourSwap>
+		<DeInterlaceAdvanced type="bool">0</DeInterlaceAdvanced>
+		<DeInterlaceLineDouble type="bool">0</DeInterlaceLineDouble>
+		<DeRing type="bool">0</DeRing>
+		<Emboss type="bool">0</Emboss>
+		<Film type="bool">0</Film>
+		<Gpen type="bool">0</Gpen>
+		<Hatch type="bool">0</Hatch>
+		<Negative type="bool">0</Negative>
+		<Noise type="bool">0</Noise>
+		<None type="bool">0</None>
+		<OilPaint type="bool">0</OilPaint>
+		<Pastel type="bool">0</Pastel>
+		<Posterise type="bool">0</Posterise>
+		<Saturation type="bool">0</Saturation>
+		<Sharpen type="bool">0</Sharpen>
+		<Sketch type="bool">0</Sketch>
+		<Solarize type="bool">0</Solarize>
+		<WashedOut type="bool">0</WashedOut>
+		<Watercolor type="bool">0</Watercolor>
+	</imageFilterNames>
+</root>
