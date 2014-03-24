@@ -10,15 +10,18 @@
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
+	
 	OMX_Maps::getInstance();
 	updateFrameCounter = 0;
+	frameCounter = 0;
 	hasNewFrame = false;
 	textureEngine = NULL;
 	engine = NULL;
-	//ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
+	ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 	if(engine)
 	{
 		delete engine;
@@ -30,24 +33,36 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 		textureEngine = NULL;
 	}
 }
-#if 0
+
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
+	if(textureEngine)
+	{
+		frameCounter  = textureEngine->getFrameCounter();
+	}else
+	{
+		if (engine) 
+		{
+			frameCounter  = engine->getFrameCounter();
+		}
+	}
 	
 	if (frameCounter > updateFrameCounter) 
 	{
 		updateFrameCounter = frameCounter;
 		hasNewFrame = true;
+		
 	}else
 	{
 		hasNewFrame = false;
 	}
+	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
-#endif
+
 
 bool ofxRPiCameraVideoGrabber::isFrameNew()
 {
-	return true;
+	return hasNewFrame;
 }
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)

@@ -41,8 +41,10 @@ void pixelsApp::setup()
 //--------------------------------------------------------------
 void pixelsApp::update()
 {
-	if(!doPixels) return;
-	
+	if (!doPixels || !videoGrabber.isFrameNew())
+	{
+		return;
+	}
 	
 	fbo.begin();
 		ofClear(0, 0, 0, 0);

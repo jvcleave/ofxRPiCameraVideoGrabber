@@ -8,7 +8,42 @@
 NonTextureEngine::NonTextureEngine()
 {
 	engineType = NON_TEXTURE_ENGINE;
-			
+	frameCounter = 0;		
+}
+
+int NonTextureEngine::getFrameCounter()
+{
+	
+	if (!isOpen) 
+	{
+		return 0;
+	}
+	OMX_CONFIG_BRCMPORTSTATSTYPE stats;
+	
+	OMX_INIT_STRUCTURE(stats);
+	stats.nPortIndex = VIDEO_RENDER_INPUT_PORT;
+	OMX_ERRORTYPE error =OMX_GetParameter(render, OMX_IndexConfigBrcmPortStats, &stats);
+	if (error == OMX_ErrorNone)
+	{
+		/*OMX_U32 nImageCount;
+		 OMX_U32 nBufferCount;
+		 OMX_U32 nFrameCount;
+		 OMX_U32 nFrameSkips;
+		 OMX_U32 nDiscards;
+		 OMX_U32 nEOS;
+		 OMX_U32 nMaxFrameSize;
+		 
+		 OMX_TICKS nByteCount;
+		 OMX_TICKS nMaxTimeDelta;
+		 OMX_U32 nCorruptMBs;*/
+		//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
+		frameCounter = stats.nFrameCount;
+	}else
+	{		
+		ofLog(OF_LOG_ERROR, "error OMX_CONFIG_BRCMPORTSTATSTYPE FAIL error: 0x%08x", error);
+		//frameCounter = 0;
+	}
+	return frameCounter;
 }
 
 void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings)

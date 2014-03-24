@@ -100,6 +100,6 @@ private:
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
 	
-	
+	int frameCounter;
 	
 };

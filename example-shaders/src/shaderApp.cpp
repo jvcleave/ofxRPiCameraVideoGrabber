@@ -34,7 +34,7 @@ void shaderApp::setup()
 //--------------------------------------------------------------
 void shaderApp::update()
 {
-	if (!doShader)
+	if (!doShader || !videoGrabber.isFrameNew())
 	{
 		return;
 	}

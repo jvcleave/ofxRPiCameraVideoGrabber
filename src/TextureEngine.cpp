@@ -30,6 +30,12 @@ TextureEngine::TextureEngine()
 	engineType = TEXTURE_ENGINE;
 }
 
+int TextureEngine::getFrameCounter()
+{
+	return renderedFrameCounter;
+	
+}
+
 void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 {
 	this->omxCameraSettings = omxCameraSettings;

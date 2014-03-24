@@ -21,4 +21,7 @@ public:
 	
 	OMX_ERRORTYPE setupRenderer();
 	OMX_ERRORTYPE setupDisplay();
+	
+	int frameCounter;
+	int getFrameCounter();
 };

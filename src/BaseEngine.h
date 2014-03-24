@@ -38,7 +38,7 @@ public:
 	EngineType engineType;
 	
 	bool isOpen;
-	
+	virtual int getFrameCounter() = 0;
 protected:
 	OMXCameraSettings omxCameraSettings;
 
