@@ -29,10 +29,10 @@ uniform float       time;
 
 
 // just draw the texture to screen		
-void main()
+/*void main()
 {
     gl_FragColor = texture2D(tex0, texcoord0);
-}
+}*/
 
 
 
@@ -47,7 +47,7 @@ void main()
 
 
 // let's wobble the image channels around independently, a bit Fear and Loathing in Las Vegas style
-/*void main()
+void main()
 {
     mediump float newTime = time * 2.0;
 
@@ -70,7 +70,7 @@ void main()
     mediump vec4 outColor = vec4( colorR, colorG, colorB, colorA);
 
     gl_FragColor = outColor;
-}*/	
+}
 
 
 /*

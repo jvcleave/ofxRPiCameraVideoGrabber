@@ -72,6 +72,7 @@ void shaderApp::draw(){
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
+	info << "Press s to Toggle Shader" << "\n";
 	
 	if (doDrawInfo) 
 	{
@@ -96,7 +97,7 @@ void shaderApp::keyPressed  (int key)
 		doDrawInfo = !doDrawInfo;
 	}
 	
-	if (key == 'd')
+	if (key == 's')
 	{
 		doShader = !doShader;
 	}

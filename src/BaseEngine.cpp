@@ -323,6 +323,11 @@ void BaseEngine::close()
 
 void BaseEngine::writeFile()
 {
+	//TODO not currently setup to allow recording after setup
+	if (!omxCameraSettings.doRecording) 
+	{
+		return;
+	}
 	//format is raw H264 NAL Units
 	ofLogVerbose(__func__) << "START";
 	stopThread();

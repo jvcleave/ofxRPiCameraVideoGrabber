@@ -19,7 +19,7 @@ void nonTextureApp::setup()
 	{		
 		omxCameraSettings.doRecordingPreview	= true;
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
-		omxCameraSettings.doConvertToMKV		= true;		//converts file to .mkv using mkvmerge(if present)
+		omxCameraSettings.doConvertToMKV		= false;	//converts file to .mkv using mkvmerge(if present)
 	}
 	
 	
@@ -38,7 +38,7 @@ void nonTextureApp::update()
 
 //--------------------------------------------------------------
 void nonTextureApp::draw(){
-
+	//Nothing really to do here as the output is rendered directly to full screen
 	
 }
 

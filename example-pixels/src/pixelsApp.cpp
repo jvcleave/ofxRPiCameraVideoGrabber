@@ -29,7 +29,7 @@ void pixelsApp::setup()
 		videoPixels = new unsigned char[omxCameraSettings.width * omxCameraSettings.height *4];
 		videoTexture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
 	}
-	
+	//An Fbo must be used as OpenGL ES 2 doesn't allow ofTexture::readToPixels 
 	fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
 	fbo.begin();
 		ofClear(0, 0, 0, 0);

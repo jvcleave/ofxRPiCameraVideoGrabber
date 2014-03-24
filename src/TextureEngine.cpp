@@ -444,7 +444,7 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 
 
 
-
+//TODO Needed?
 #if 0
 void TextureEngine::close()
 {
