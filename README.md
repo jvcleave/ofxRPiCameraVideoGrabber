@@ -15,7 +15,7 @@ USAGE:
 Clone into your openFrameworks/addons folder
 Either copy one of the examples into /myApps or add ofxRPiCameraVideoGrabber to the addons.make file in your project
 
-This addon does not work with any of the still motion functionality.
+This addon does not work with any of the still camera functionality.
 
 The addon works in a few different modes:
 
