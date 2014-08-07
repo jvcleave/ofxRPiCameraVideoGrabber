@@ -78,6 +78,10 @@ public:
 	OMXCameraSettings omxCameraSettings;
 	
 	void stopRecording();
+	void enablePixels();
+	void disablePixels();
+	unsigned char * getPixels();
+	
 private:
 	
 	void onUpdate(ofEventArgs & args);
@@ -101,5 +105,7 @@ private:
 	NonTextureEngine* engine;
 	
 	int frameCounter;
+	
+	bool pixelsRequested;
 	
 };

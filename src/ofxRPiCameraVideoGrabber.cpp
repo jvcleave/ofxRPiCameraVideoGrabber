@@ -18,6 +18,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	hasNewFrame = false;
 	textureEngine = NULL;
 	engine = NULL;
+	pixelsRequested = false;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
@@ -34,12 +35,31 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 		textureEngine = NULL;
 	}
 }
+void ofxRPiCameraVideoGrabber::enablePixels()
+{
+	if(textureEngine)
+	{
+		textureEngine->enablePixels();
+		pixelsRequested = true;
+	}
+}
+
+void ofxRPiCameraVideoGrabber::disablePixels()
+{
+	if(textureEngine)
+	{
+		textureEngine->disablePixels();
+		pixelsRequested = false;
+	}
+}
+
 
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
 	if(textureEngine)
 	{
 		frameCounter  = textureEngine->getFrameCounter();
+		
 	}else
 	{
 		if (engine) 
@@ -57,9 +77,27 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 	{
 		hasNewFrame = false;
 	}
+	if (hasNewFrame) 
+	{
+		if (textureEngine) 
+		{
+			if (pixelsRequested) 
+			{
+				textureEngine->updatePixels();
+			}
+		}
+	}
 	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
 
+unsigned char * ofxRPiCameraVideoGrabber::getPixels()
+{
+	unsigned char * pixels = NULL;
+	if (textureEngine) {
+		pixels = textureEngine->getPixels();
+	}
+	return pixels;
+}
 
 bool ofxRPiCameraVideoGrabber::isFrameNew()
 {

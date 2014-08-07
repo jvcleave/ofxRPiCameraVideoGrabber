@@ -28,6 +28,8 @@ TextureEngine::TextureEngine()
 	doFillBuffer = false;
 	bufferAvailable = false;
 	engineType = TEXTURE_ENGINE;
+	pixels = NULL;
+	doPixels = false;
 }
 
 int TextureEngine::getFrameCounter()
@@ -56,6 +58,48 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 	
 	configureCameraResolution();
 	
+}
+
+
+void TextureEngine::enablePixels()
+{
+	doPixels = true;
+	
+}
+
+
+void TextureEngine::disablePixels()
+{
+	doPixels = false;
+}
+
+
+void TextureEngine::updatePixels()
+{
+	if (!doPixels) 
+	{
+		return;
+	}
+	
+	if (!fbo.isAllocated()) 
+	{
+		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	}
+	int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+	if (pixels == NULL)
+	{
+		pixels = new unsigned char[dataSize];
+	}
+	fbo.begin();
+		ofClear(0, 0, 0, 0);
+		tex.draw(0, 0);
+		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
+	fbo.end();
+}
+
+unsigned char * TextureEngine::getPixels()
+{
+	return pixels;
 }
 
 
@@ -423,8 +467,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
 		}
 		bool doThreadBlocking	= true;
-		bool threadVerboseMode	= false;
-		startThread(doThreadBlocking, threadVerboseMode);
+		startThread(doThreadBlocking);
 	}
 	isOpen = true;
 	return error;

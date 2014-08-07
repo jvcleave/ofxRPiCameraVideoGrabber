@@ -9,6 +9,7 @@
 void pixelsApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel("ofThread", OF_LOG_SILENT);
 	ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
@@ -21,19 +22,16 @@ void pixelsApp::setup()
 	omxCameraSettings.isUsingTexture = true;
 	
 	videoGrabber.setup(omxCameraSettings);
+	
 	filterCollection.setup();
 
 	doPixels = true;
 	if (doPixels) 
 	{
-		videoPixels = new unsigned char[omxCameraSettings.width * omxCameraSettings.height *4];
+		videoGrabber.enablePixels();
 		videoTexture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
 	}
-	//An Fbo must be used as OpenGL ES 2 doesn't allow ofTexture::readToPixels 
-	fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-	fbo.end();
+
 	
 		
 }	
@@ -41,19 +39,13 @@ void pixelsApp::setup()
 //--------------------------------------------------------------
 void pixelsApp::update()
 {
-	if (!doPixels || !videoGrabber.isFrameNew())
+	if (!doPixels)
 	{
 		return;
 	}
 	
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-		videoGrabber.draw();
-		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, videoPixels);	
-	fbo.end();
-	
-	//load it back into a texture to prove it's working 
-	videoTexture.loadData(videoPixels, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+
 
 }
 
@@ -104,6 +96,13 @@ void pixelsApp::keyPressed  (int key)
 	if (key == 'p')
 	{
 		doPixels = !doPixels;
+		if (!doPixels) 
+		{
+			videoGrabber.disablePixels();
+		}else
+		{
+			videoGrabber.enablePixels();
+		}
 	}
 }
 

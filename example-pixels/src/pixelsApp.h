@@ -22,10 +22,6 @@ class pixelsApp : public ofBaseApp, public SSHKeyListener{
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
-	
-	ofFbo fbo;
-		
-	unsigned char * videoPixels;
 	ofTexture videoTexture;
 	OMXCameraSettings omxCameraSettings;
 	bool doPixels;

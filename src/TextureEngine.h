@@ -31,4 +31,12 @@ public:
 	
 	int getFrameCounter();
 	
+	void enablePixels();
+	void disablePixels();
+	unsigned char * getPixels();
+	void updatePixels();
+	unsigned char * pixels;
+	bool doPixels;
+	ofFbo fbo;
+	
 };
