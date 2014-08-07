@@ -25,5 +25,6 @@ class pixelsApp : public ofBaseApp, public SSHKeyListener{
 	ofTexture videoTexture;
 	OMXCameraSettings omxCameraSettings;
 	bool doPixels;
+	bool doReloadPixels;
 };
 

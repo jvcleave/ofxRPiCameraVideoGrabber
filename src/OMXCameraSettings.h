@@ -16,6 +16,7 @@ public:
 	int previewWidth;
 	int previewHeight;
 	bool isUsingTexture;
+	bool enablePixels;
 	string recordingFilePath;
 	bool doConvertToMKV;
 	OMXCameraSettings()
@@ -26,6 +27,7 @@ public:
 		//http://www.raspberrypi.org/forums/viewtopic.php?p=490143#p490143
 		framerate = 30;
 		isUsingTexture = true;
+		enablePixels = false;
 		doRecording = false;
 		doRecordingPreview = false;
 		previewWidth = width;

@@ -4,7 +4,8 @@ ofxRPiCameraVideoGrabber
 STATUS: PERPETUAL DEVELOPMENT
 
 DESCRIPTION:   
-openFrameworks addon to control the Raspberry Pi Camera Module
+openFrameworks addon to control the Raspberry Pi Camera Module. This does provide still camera functionality.
+
 
 REQUIREMENTS:
 openFrameworks .8 or higher [Setup Guide](http://openframeworks.cc/setup/raspberrypi/)   
@@ -15,7 +16,9 @@ USAGE:
 Clone into your openFrameworks/addons folder
 Either copy one of the examples into /myApps or add ofxRPiCameraVideoGrabber to the addons.make file in your project
 
-This addon does not work with any of the still camera functionality.
+LED Toggling requires gpio program provided via wiringPi   
+https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+
 
 The addon works in a few different modes:
 
@@ -52,8 +55,7 @@ Press the "e" key to toggle through built in filters
 Press the "s" key to toggle shader   
 
 example-pixels:   
-The addon doesn't currently provide pixels internally but this example will show you how to do it yourself. 
-An Fbo must be used as OpenGL ES 2 doesn't allow ofTexture::readToPixels 
+Demonstrates how to get pixels (needed for OpenCv operations). 
 
 
 THANKS:

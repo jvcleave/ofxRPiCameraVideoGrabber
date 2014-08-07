@@ -121,6 +121,10 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 		textureEngine = new TextureEngine();
 		textureEngine->setup(omxCameraSettings);
 		camera = textureEngine->camera;
+		if (omxCameraSettings.enablePixels) 
+		{
+			enablePixels();
+		}
 	}else 
 	{
 		engine = new NonTextureEngine();
