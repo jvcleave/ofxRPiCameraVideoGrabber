@@ -8,6 +8,7 @@ class TextureEngine : public BaseEngine
 {
 public:
 	TextureEngine();
+	~TextureEngine();
 	void setup(OMXCameraSettings& omxCameraSettings);
 
 	int renderedFrameCounter;

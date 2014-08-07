@@ -493,88 +493,12 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 
 
 
-//TODO Needed?
-#if 0
-void TextureEngine::close()
-{
-	ofLogVerbose(__func__) << "START";
-	if(omxCameraSettings.doRecording)
-	{
-		//encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-		//OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-	}else 
-	{
-		//may have to revisit this if creating new instances of the videograbber
-		//otherwise OMX components seem smart enough to clean up themselves on destruction
-		ofLogVerbose(__func__) << "END - just exiting";
-		isOpen = false;
-		return;
-	}
-	
-	if(omxCameraSettings.doRecording && !didWriteFile)
-	{
-		writeFile();
-	}
-	isOpen = false;
-	ofLogVerbose(__func__) << "END";
-	return;
-	
-	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "camera OMX_StateIdle FAIL";
-	}
-	
-	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "render OMX_StateIdle FAIL";
-	}
-	
-	error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "camera OMX_CommandFlush FAIL";
-	}
-	
-	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "render OMX_CommandFlush FAIL";
-	}
-	
-	error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_OUTPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "render OMX_CommandFlush EGL_RENDER_OUTPUT_PORT FAIL";
-	}
-	
-	OMXCameraUtils::disableAllPortsForComponent(&render);
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
-	
-	error = OMX_FreeHandle(render);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "render OMX_FreeHandle FAIL";
-	}
-	
-	error = OMX_FreeHandle(camera);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "camera OMX_FreeHandle FAIL";
-	}
-	
-	error = OMX_Deinit(); 
-	if (error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << "OMX_Deinit FAIL";
-	}
-	
-	if (eglImage != NULL)  
-	{
-		eglDestroyImageKHR(display, eglImage);
-	}
-	isOpen = false;
-}
 
-#endif
+TextureEngine::~TextureEngine()
+{
+	if (pixels) 
+	{
+		delete[] pixels;
+		pixels = NULL;
+	}
+}

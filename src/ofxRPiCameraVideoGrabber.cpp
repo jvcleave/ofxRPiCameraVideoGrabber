@@ -11,7 +11,7 @@
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
 	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	appEGLWindow->setThreadTimeout(1000);
+	//appEGLWindow->setThreadTimeout(1000);
 	OMX_Maps::getInstance();
 	updateFrameCounter = 0;
 	frameCounter = 0;

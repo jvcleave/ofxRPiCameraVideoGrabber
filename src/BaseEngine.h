@@ -29,7 +29,7 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
-	~BaseEngine();
+	virtual ~BaseEngine();
 	
 	virtual void setup(OMXCameraSettings& omxCameraSettings) = 0;
 	void stopRecording();
