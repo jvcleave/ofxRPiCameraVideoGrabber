@@ -4,6 +4,7 @@
 void shaderApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
+	ofSetLogLevel("ofThread", OF_LOG_SILENT);
 	ofSetVerticalSync(false);
 	ofEnableAlphaBlending();
 	
