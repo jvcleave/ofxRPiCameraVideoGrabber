@@ -4,12 +4,12 @@
 void nonTextureApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_SILENT);
+	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	//ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
 		
-	//consoleListener.setup(this);
+	consoleListener.setup(this);
 	
 	OMXCameraSettings omxCameraSettings;
 	omxCameraSettings.width					= 1280;

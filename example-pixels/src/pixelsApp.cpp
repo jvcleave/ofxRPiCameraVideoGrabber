@@ -9,8 +9,7 @@
 void pixelsApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_SILENT);
-	//ofSetVerticalSync(false);
+	ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	
 	doDrawInfo	= true;
 		
