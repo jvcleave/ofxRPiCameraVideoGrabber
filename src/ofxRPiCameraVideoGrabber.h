@@ -32,7 +32,9 @@ public:
 	
 	
 	ofxRPiCameraVideoGrabber();
-	~ofxRPiCameraVideoGrabber();
+    ~ofxRPiCameraVideoGrabber();
+    void addExitHandler();
+	void close();
 	void setup(OMXCameraSettings omxCameraSettings);
 	void draw();
 	
@@ -85,6 +87,8 @@ public:
 private:
 	
 	void onUpdate(ofEventArgs & args);
+    void onUpdateDuringExit(ofEventArgs& args);
+
 	bool hasNewFrame;
 	
 	int updateFrameCounter;

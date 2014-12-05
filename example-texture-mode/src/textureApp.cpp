@@ -4,7 +4,7 @@
 void textureApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	
+    ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	doDrawInfo	= true;
 	
 	//allows keys to be entered via terminal remotely (ssh)

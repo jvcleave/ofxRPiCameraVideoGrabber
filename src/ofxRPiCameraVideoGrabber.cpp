@@ -8,6 +8,64 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
+bool doExit = false;
+void signal_handler(int signum)
+{
+    cout << "ofxRPiCameraVideoGrabber caught signal " << signum;
+    doExit = true;
+}
+
+void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
+{
+    if (doExit)
+    {
+        ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
+        close();
+        ofExit();
+    }
+}
+
+void ofxRPiCameraVideoGrabber::addExitHandler()
+{
+    
+    vector<int> signals;
+    signals.push_back(SIGINT);
+    signals.push_back(SIGQUIT);
+    
+    for (size_t i=0; i<signals.size(); i++)
+    {
+        int SIGNAL_TO_BLOCK = signals[i];
+        //http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
+        
+        //Struct for the new action associated to the SIGNAL_TO_BLOCK
+        struct sigaction new_action;
+        new_action.sa_handler = signal_handler;
+        
+        //Empty the sa_mask. This means that no signal is blocked while the signal_handler runs.
+        sigemptyset(&new_action.sa_mask);
+        
+        //Block the SEGTERM signal so while the signal_handler runs, the SIGTERM signal is ignored
+        sigaddset(&new_action.sa_mask, SIGTERM);
+        
+        //Remove any flag from sa_flag. See documentation for flags allowed
+        new_action.sa_flags = 0;
+        
+        struct sigaction old_action;
+        //Read the old signal associated to SIGNAL_TO_BLOCK
+        sigaction(SIGNAL_TO_BLOCK, NULL, &old_action);
+        
+        //If the old handler wasn't SIG_IGN it is a handler that just "ignores" the signal
+        if (old_action.sa_handler != SIG_IGN)
+        {
+            //Replace the signal handler of SIGNAL_TO_BLOCK with the one described by new_action
+            sigaction(SIGNAL_TO_BLOCK, &new_action, NULL);
+        }
+
+    }
+    
+    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdateDuringExit);
+}
+
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
 	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
@@ -20,12 +78,22 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	engine = NULL;
 	pixelsRequested = false;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    
 }
+
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
+    cout << "~ofxRPiCameraVideoGrabber" << endl;
+    close();
+}
+void ofxRPiCameraVideoGrabber::close()
+{
+    
+    cout << "ofxRPiCameraVideoGrabber::close" << endl;
 	ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 	if(engine)
 	{
+         cout << "~ofxRPiCameraVideoGrabber delete engine" << endl;
 		delete engine;
 		engine = NULL;
 	}
@@ -34,6 +102,8 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 		delete textureEngine;
 		textureEngine = NULL;
 	}
+    
+    cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
 }
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
@@ -107,6 +177,7 @@ bool ofxRPiCameraVideoGrabber::isFrameNew()
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 {
 	
+    addExitHandler();
 	OMX_ERRORTYPE error = OMX_Init();
 	if (error == OMX_ErrorNone) 
 	{
