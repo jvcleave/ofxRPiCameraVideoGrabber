@@ -303,8 +303,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		}
 		
 		bool doThreadBlocking	= true;
-		bool threadVerboseMode	= false;
-		startThread(doThreadBlocking, threadVerboseMode);
+		startThread(doThreadBlocking);
 		
 	}else 
 	{
