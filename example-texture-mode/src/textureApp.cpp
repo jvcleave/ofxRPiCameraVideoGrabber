@@ -94,7 +94,7 @@ void textureApp::draw(){
 //--------------------------------------------------------------
 void textureApp::keyPressed  (int key)
 {
-	ofLogVerbose(__func__) << key;
+	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
 	
 	if (key == 'e')
@@ -119,7 +119,7 @@ void textureApp::keyPressed  (int key)
 	}
 }
 
-void textureApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void textureApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

@@ -46,7 +46,7 @@ void nonTextureApp::draw(){
 //--------------------------------------------------------------
 void nonTextureApp::keyPressed  (int key)
 {
-	ofLogVerbose(__func__) << key;
+	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
 	
 	if (key == 'e')
@@ -69,7 +69,7 @@ void nonTextureApp::keyPressed  (int key)
 	}
 }
 
-void nonTextureApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void nonTextureApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

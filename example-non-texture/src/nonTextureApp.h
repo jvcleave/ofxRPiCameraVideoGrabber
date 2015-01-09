@@ -2,12 +2,12 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
-#include "ConsoleListener.h"
+#include "TerminalListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
 
-class nonTextureApp : public ofBaseApp, public SSHKeyListener{
+class nonTextureApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -16,8 +16,8 @@ class nonTextureApp : public ofBaseApp, public SSHKeyListener{
 		void draw();
 		void keyPressed(int key);
 
-	void onCharacterReceived(SSHKeyListenerEventData& e);
-	ConsoleListener consoleListener;
+	void onCharacterReceived(KeyListenerEventData& e);
+	TerminalListener consoleListener;
 	ofxRPiCameraVideoGrabber videoGrabber;
 	
 	ImageFilterCollection filterCollection;

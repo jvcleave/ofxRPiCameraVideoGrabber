@@ -2,11 +2,11 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
-#include "ConsoleListener.h"
+#include "TerminalListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-class shaderApp : public ofBaseApp, public SSHKeyListener{
+class shaderApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -15,8 +15,8 @@ class shaderApp : public ofBaseApp, public SSHKeyListener{
 		void draw();
 		void keyPressed(int key);
 
-	void onCharacterReceived(SSHKeyListenerEventData& e);
-	ConsoleListener consoleListener;
+	void onCharacterReceived(KeyListenerEventData& e);
+	TerminalListener consoleListener;
 	ofxRPiCameraVideoGrabber videoGrabber;
 	
 	ImageFilterCollection filterCollection;

@@ -87,7 +87,7 @@ void pixelsApp::draw(){
 //--------------------------------------------------------------
 void pixelsApp::keyPressed  (int key)
 {
-	ofLogVerbose(__func__) << key;
+	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
 	if (key == 'e')
 	{
@@ -114,7 +114,7 @@ void pixelsApp::keyPressed  (int key)
 	}
 }
 
-void pixelsApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void pixelsApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

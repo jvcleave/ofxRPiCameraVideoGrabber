@@ -86,7 +86,7 @@ void shaderApp::draw(){
 //--------------------------------------------------------------
 void shaderApp::keyPressed  (int key)
 {
-	ofLogVerbose(__func__) << key;
+	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
 	if (key == 'e')
 	{
@@ -105,7 +105,7 @@ void shaderApp::keyPressed  (int key)
 
 }
 
-void shaderApp::onCharacterReceived(SSHKeyListenerEventData& e)
+void shaderApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
