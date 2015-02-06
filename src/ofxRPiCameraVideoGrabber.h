@@ -24,6 +24,32 @@
 #include "TextureEngine.h"
 #include "NonTextureEngine.h"
 
+
+struct CameraMeteringMode
+{
+    OMX_METERINGTYPE meteringType;
+    int evCompensation;
+    int sensitivity;
+    int shutterSpeedMS;
+    bool autoShutter;
+    bool autoSensitivity;
+    bool autoAperture;
+    int aperture;
+    CameraMeteringMode()
+    {
+        meteringType = OMX_MeteringModeMatrix;
+        evCompensation=0; //-10 to +10
+        sensitivity = 800;
+        shutterSpeedMS = 5000; //default 1000
+        autoShutter = true;
+        autoSensitivity = true;
+        autoAperture = true;
+        aperture = 2;
+    };
+    
+    
+};
+
 class ofxRPiCameraVideoGrabber
 {
 
@@ -47,11 +73,24 @@ public:
 	void setSaturation(int saturation_);
 	
 	void setFrameStabilization(bool doStabilization);
-	void setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation=0, int sensitivity = 100, bool autoSensitivity = false);
+    
+    void setMeteringMode(CameraMeteringMode);
+	void setMeteringMode(OMX_METERINGTYPE meteringType, 
+                         int evCompensation=0, 
+                         int sensitivity = 100,
+                         int shutterSpeedMS = 1000,
+                         bool autoShutter = false,
+                         bool autoSensitivity = false,
+                         bool autoAperture = true,
+                         int aperture = 2);
+    
 	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
 	
 	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
-	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
+    
+	void setColorEnhancement(bool doColorEnhance, 
+                             int U=128, 
+                             int V=128);
 	void setLEDState(bool status);
 	bool LED_CURRENT_STATE;
 	void toggleLED();
@@ -83,6 +122,9 @@ public:
 	void enablePixels();
 	void disablePixels();
 	unsigned char * getPixels();
+    
+    CameraMeteringMode currentMeteringMode;
+    void printMeteringMode();
 	
 private:
 	

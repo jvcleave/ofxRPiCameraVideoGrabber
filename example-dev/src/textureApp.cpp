@@ -117,12 +117,6 @@ void textureApp::keyPressed  (int key)
 	{
 		videoGrabber.toggleLED();
 	}
-    
-    if(key == 'm')
-    {
-        videoGrabber.printMeteringMode();
-    }
-    
 }
 
 void textureApp::onCharacterReceived(KeyListenerEventData& e)
