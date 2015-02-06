@@ -8,6 +8,42 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
+OMX_BOOL toOMXBool(bool boolean)
+{
+    OMX_BOOL result;
+    if(boolean)
+    {
+        result = OMX_TRUE;
+    }else
+    {
+        result = OMX_FALSE;
+    }
+    return result;
+}
+
+bool fromOMXBool(OMX_BOOL omxBool)
+{
+    bool result;
+    if(omxBool)
+    {
+        result = true;
+    }else
+    {
+        result = false;
+    }
+    return result;
+}
+
+float fromQ16(float n)
+{
+    return n* 65536;
+}
+
+float toQ16(float n)
+{
+    return n*(1/65536.0);
+}
+
 bool doExit = false;
 void signal_handler(int signum)
 {
@@ -68,7 +104,7 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+	//ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
 	//appEGLWindow->setThreadTimeout(1000);
 	OMX_Maps::getInstance();
 	updateFrameCounter = 0;
@@ -174,7 +210,7 @@ bool ofxRPiCameraVideoGrabber::isFrameNew()
 	return hasNewFrame;
 }
 
-void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
+void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
 	
     addExitHandler();
@@ -183,10 +219,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 	{
 		ofLogVerbose(__func__) << "OMX_Init PASS";
 	}
-	
-	
-	
-	this->omxCameraSettings = omxCameraSettings;
+	omxCameraSettings = omxCameraSettings_;
 	if (omxCameraSettings.isUsingTexture) 
 	{
 		textureEngine = new TextureEngine();
@@ -206,11 +239,22 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 	
 	
 	setExposureMode(OMX_ExposureControlAuto);
-    currentMeteringMode.autoShutter = false;
-    currentMeteringMode.autoAperture = false;
-    currentMeteringMode.autoSensitivity = false;
-    currentMeteringMode.evCompensation = 6;
-    setMeteringMode(currentMeteringMode);
+    //currentMeteringMode.autoShutter = false;
+    //currentMeteringMode.autoAperture = false;
+    //currentMeteringMode.autoSensitivity = false;
+    //currentMeteringMode.evCompensation = 6;
+    if(!omxCameraSettings.doManualExposure)
+    {
+        setMeteringMode(currentMeteringMode);
+    }else
+    {
+        currentMeteringMode.autoShutter = false;
+        currentMeteringMode.autoAperture = false;
+        currentMeteringMode.autoSensitivity = false;
+        //currentMeteringMode.evCompensation = 6;
+        setMeteringMode(currentMeteringMode);
+    }
+    
 	//setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
 	setSharpness(-50);
 	setContrast(-10);
@@ -269,12 +313,8 @@ void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
 	OMX_INIT_STRUCTURE(controlType);
 	controlType.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
-	if (doDisable) {
-		controlType.bDisabled = OMX_TRUE;
-	}else 
-	{
-		controlType.bDisabled = OMX_FALSE;
-	}
+    
+	controlType.bDisabled = toOMXBool(doDisable);
 
 	
 	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
@@ -465,7 +505,21 @@ int ofxRPiCameraVideoGrabber::getMeteringEvCompensation()
 }
  */
 
-void ofxRPiCameraVideoGrabber::printMeteringMode()
+
+void ofxRPiCameraVideoGrabber::printMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue)
+{
+    stringstream ss;
+    ss << "xEVCompensation: "   << fromQ16(exposurevalue.xEVCompensation)   << "\n";
+    ss << "nApertureFNumber: "  << fromQ16(exposurevalue.nApertureFNumber)  << "\n";
+    ss << "bAutoAperture: "     << exposurevalue.bAutoAperture              << "\n";
+    ss << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec          << "\n";
+    ss << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed          << "\n";
+    ss << "nSensitivity: "      << exposurevalue.nSensitivity               << "\n";
+    ss << "bAutoSensitivity: "  << exposurevalue.bAutoSensitivity           << "\n";
+    ofLogVerbose() << ss.str();
+}
+
+void ofxRPiCameraVideoGrabber::printCurrentMeteringMode()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -479,16 +533,7 @@ void ofxRPiCameraVideoGrabber::printMeteringMode()
         ofLog(OF_LOG_ERROR,	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
     }else
     {
-        stringstream ss;
-        ss << "xEVCompensation: " << (((float)exposurevalue.xEVCompensation) * 65536) << "\n";
-        ss << "nApertureFNumber: " << (((float)exposurevalue.nApertureFNumber) * 65536)<< "\n";
-        ss << "bAutoAperture: " << exposurevalue.bAutoAperture << "\n";
-        ss << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec << "\n";
-        ss << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed << "\n";
-        ss << "nSensitivity: " << exposurevalue.nSensitivity << "\n";
-        ss << "bAutoSensitivity: " << exposurevalue.bAutoSensitivity << "\n";
-        
-        ofLogVerbose() << ss.str();
+        printMeteringMode(exposurevalue);
     }
 
 }
@@ -511,8 +556,7 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType,
                                                bool autoShutter, //default false
 											   bool autoSensitivity, //default false
                                                bool autoAperture, //default true
-                                               int aperture
-                                               )
+                                               int aperture)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
@@ -527,66 +571,26 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType,
 		ofLog(OF_LOG_ERROR,	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
 	}else
     {
-        stringstream ss;
-        ss << "xEVCompensation: " << (((float)exposurevalue.xEVCompensation) * 65536) << "\n";
-        ss << "nApertureFNumber: " << exposurevalue.nApertureFNumber << "\n";
-        ss << "bAutoAperture: " << exposurevalue.bAutoAperture << "\n";
-        ss << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec << "\n";
-        ss << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed << "\n";
-        ss << "nSensitivity: " << exposurevalue.nSensitivity << "\n";
-        ss << "bAutoSensitivity: " << exposurevalue.bAutoSensitivity << "\n";
-        
-        ofLogVerbose() << ss.str();
-        //_Exit(0);
-        //ss << "xEVCompensation: " << xEVCompensation << "\n";
-#if 0       
-        
-    defaults:
-    xEVCompensation: 0
-    nApertureFNumber: 0
-    bAutoAperture: 0
-    nShutterSpeedMsec: 0
-    bAutoShutterSpeed: 1
-    nSensitivity: 0
-    bAutoSensitivity: 1
-        
-        OMX_METERINGTYPE eMetering;
-        OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
-        OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
-        OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
-        OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
-        OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
-        OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
-        OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
-        
-#endif
+        printMeteringMode(exposurevalue);
+
     }
 		
-	exposurevalue.xEVCompensation = evCompensation*(1/65536.0);	//Fixed point value stored as Q16 
+	exposurevalue.xEVCompensation = toQ16(evCompensation);	//Fixed point value stored as Q16 
 	exposurevalue.nSensitivity = sensitivity;		//< e.g. nSensitivity = 100 implies "ISO 100" 
-    if(autoAperture)
+    
+    exposurevalue.bAutoAperture =toOMXBool(autoAperture);
+    if(!autoAperture)
     {
-        exposurevalue.bAutoAperture = OMX_TRUE;
-    }else
-    {
-        exposurevalue.bAutoAperture = OMX_FALSE;
-        exposurevalue.nApertureFNumber = aperture*(1/65536.0);
+        exposurevalue.nApertureFNumber = toQ16(aperture);
     }
 	
 	//
-	if (autoSensitivity)
-	{
-		exposurevalue.bAutoSensitivity	= OMX_TRUE;
-	}else 
-	{
-		exposurevalue.bAutoSensitivity	= OMX_FALSE;
-	}
-	if(autoShutter)
+    
+    exposurevalue.bAutoSensitivity = toOMXBool(autoSensitivity);
+	
+    exposurevalue.bAutoShutterSpeed = toOMXBool(autoShutter);
+	if(!autoShutter)
     {
-        exposurevalue.bAutoShutterSpeed	= OMX_TRUE;
-    }else 
-    {
-        exposurevalue.bAutoShutterSpeed	= OMX_FALSE;
         exposurevalue.nShutterSpeedMsec = shutterSpeedMS;
     }
     
@@ -598,13 +602,113 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType,
 		ofLog(OF_LOG_ERROR,	"camera setMeteringMode FAIL error: 0x%08x", error);
 	}else
     {
-        currentMeteringMode.meteringType = meteringType;
-        currentMeteringMode.evCompensation = evCompensation;
-        currentMeteringMode.sensitivity = sensitivity;
-        currentMeteringMode.autoSensitivity = autoSensitivity;
+        setCurrentMeteringMode(exposurevalue);
+        
     }
+}
+
+void ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
+{
+    currentMeteringMode.exposurevalue = omxExposureValue;
+    
+    currentMeteringMode.meteringType = omxExposureValue.eMetering;
+    currentMeteringMode.evCompensation = fromQ16(omxExposureValue.xEVCompensation);
+    
+    currentMeteringMode.aperture = fromQ16(omxExposureValue.nApertureFNumber);
+    currentMeteringMode.autoAperture = fromOMXBool(omxExposureValue.bAutoAperture);
+    
+    currentMeteringMode.shutterSpeedMS = omxExposureValue.nShutterSpeedMsec; 
+    currentMeteringMode.autoShutter = fromOMXBool(omxExposureValue.bAutoShutterSpeed);
+    
+    currentMeteringMode.sensitivity = omxExposureValue.nSensitivity;
+    currentMeteringMode.autoSensitivity = fromOMXBool(omxExposureValue.bAutoSensitivity);
+    
     
 }
+
+void ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    OMX_INIT_STRUCTURE(exposurevalue);
+    exposurevalue.nPortIndex = OMX_ALL;
+    
+    error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+    if(error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR,	"setAutoAperture, camera OMX_GetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+    }else
+    {
+        
+        exposurevalue.bAutoAperture	= toOMXBool(doAutoAperture);
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+        if(error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR,	"setAutoAperture, camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+        }else{
+            
+            setCurrentMeteringMode(exposurevalue);
+        }
+    }
+}
+
+
+void ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    OMX_INIT_STRUCTURE(exposurevalue);
+    exposurevalue.nPortIndex = OMX_ALL;
+    
+    error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+    if(error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR,	"setAutoSensitivity, camera OMX_GetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+    }else
+    {
+        
+        exposurevalue.bAutoSensitivity	= toOMXBool(doAutoSensitivity);
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+        if(error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR,	"setAutoSensitivity, camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+        }else{
+            
+            setCurrentMeteringMode(exposurevalue);
+        }
+    }
+}
+
+
+void ofxRPiCameraVideoGrabber::setAutoShutter(bool doAutoShutter)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    OMX_INIT_STRUCTURE(exposurevalue);
+    exposurevalue.nPortIndex = OMX_ALL;
+    
+    error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+    if(error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR,	"setAutoExposure, camera OMX_GetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+    }else
+    {
+        
+        exposurevalue.bAutoShutterSpeed	= toOMXBool(doAutoShutter);
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
+        if(error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR,	"setAutoExposure, camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
+        }else{
+        
+            setCurrentMeteringMode(exposurevalue);
+        }
+    }
+}
+
 
 void ofxRPiCameraVideoGrabber::setSharpness(int sharpness_) //-100 to 100
 {
@@ -631,15 +735,8 @@ void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
 	OMX_CONFIG_FRAMESTABTYPE framestabilizationConfig;
 	OMX_INIT_STRUCTURE(framestabilizationConfig);
 	framestabilizationConfig.nPortIndex = OMX_ALL;
-	
-	if (doStabilization) 
-	{
-		framestabilizationConfig.bStab = OMX_TRUE;
-	}else 
-	{
-		framestabilizationConfig.bStab = OMX_FALSE;
-	}
-
+    framestabilizationConfig.bStab = toOMXBool(doStabilization);
+    
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
 	if(error != OMX_ErrorNone) 
 	{
@@ -724,15 +821,8 @@ void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, i
 	OMX_CONFIG_COLORENHANCEMENTTYPE color;
 	OMX_INIT_STRUCTURE(color);
 	color.nPortIndex = OMX_ALL;
-	
-	if (doColorEnhance) 
-	{
-		color.bColorEnhancement = OMX_TRUE;
-	}else
-	{
-		color.bColorEnhancement = OMX_FALSE;
-	}
-	
+
+    color.bColorEnhancement = toOMXBool(doColorEnhance);
 	color.nCustomizedU = U;
 	color.nCustomizedV = V;
 	

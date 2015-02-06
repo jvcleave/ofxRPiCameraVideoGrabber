@@ -35,18 +35,48 @@ struct CameraMeteringMode
     bool autoSensitivity;
     bool autoAperture;
     int aperture;
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
     CameraMeteringMode()
     {
+        OMX_INIT_STRUCTURE(exposurevalue);
+        exposurevalue.nPortIndex = OMX_ALL;
+        
         meteringType = OMX_MeteringModeMatrix;
         evCompensation=0; //-10 to +10
-        sensitivity = 800;
-        shutterSpeedMS = 5000; //default 1000
-        autoShutter = true;
-        autoSensitivity = true;
+        
+        aperture = 0;
         autoAperture = true;
-        aperture = 2;
+        
+        shutterSpeedMS = 9977; //default 1000
+        autoShutter = true;
+        
+        sensitivity = 0;
+        autoSensitivity = true;
+        
+        
+        
     };
+#if 0       
     
+defaults:
+xEVCompensation: 0
+nApertureFNumber: 0
+bAutoAperture: 0
+nShutterSpeedMsec: 0
+bAutoShutterSpeed: 1
+nSensitivity: 0
+bAutoSensitivity: 1
+    
+    OMX_METERINGTYPE eMetering;
+    OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
+    OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
+    OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
+    OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
+    OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
+    OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
+    OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
+    
+#endif
     
 };
 
@@ -61,7 +91,7 @@ public:
     ~ofxRPiCameraVideoGrabber();
     void addExitHandler();
 	void close();
-	void setup(OMXCameraSettings omxCameraSettings);
+	void setup(OMXCameraSettings);
 	void draw();
 	
 	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
@@ -76,13 +106,13 @@ public:
     
     void setMeteringMode(CameraMeteringMode);
 	void setMeteringMode(OMX_METERINGTYPE meteringType, 
-                         int evCompensation=0, 
-                         int sensitivity = 100,
-                         int shutterSpeedMS = 1000,
-                         bool autoShutter = false,
-                         bool autoSensitivity = false,
-                         bool autoAperture = true,
-                         int aperture = 2);
+                         int evCompensation, 
+                         int sensitivity,
+                         int shutterSpeedMS,
+                         bool autoShutter,
+                         bool autoSensitivity,
+                         bool autoAperture,
+                         int aperture);
     
 	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
 	
@@ -124,7 +154,14 @@ public:
 	unsigned char * getPixels();
     
     CameraMeteringMode currentMeteringMode;
-    void printMeteringMode();
+    void printMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE);
+    void printCurrentMeteringMode();
+    
+    //
+    void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
+    void setAutoAperture(bool);
+    void setAutoShutter(bool);
+    void setAutoSensitivity(bool);
 	
 private:
 	
