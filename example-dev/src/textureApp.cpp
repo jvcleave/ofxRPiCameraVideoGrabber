@@ -15,7 +15,7 @@ void textureApp::setup()
 	omxCameraSettings.height = 720; //default 720
 	omxCameraSettings.isUsingTexture = true; //default true
 	omxCameraSettings.doRecording = false;   //default false
-	
+    omxCameraSettings.doManualExposure = false;
 	if (omxCameraSettings.doRecording) 
 	{
 		/*
@@ -44,10 +44,11 @@ void textureApp::setup()
 	
 	//ImageFilterCollection (filterCollection here) is helper class to iterate through available OpenMax filters
 	filterCollection.setup();
-
-
+    currentExposureName = "";
+    exposureNames = OMX_Maps::getInstance().getExposureControlNames();
 }
 
+int exposureControlIndex;
 //--------------------------------------------------------------
 void textureApp::update()
 {
@@ -56,7 +57,21 @@ void textureApp::update()
 	{
 		
 	}*/
-
+    if (ofGetFrameNum() % 100 == 0) 
+    {
+        if(exposureControlIndex+1<exposureNames.size())
+        {
+            exposureControlIndex++;
+        }else
+        {
+            exposureControlIndex = 0;
+        }
+        currentExposureName = exposureNames[exposureControlIndex];
+        
+        videoGrabber.setExposureMode(OMX_Maps::getInstance().exposureControls[currentExposureName]);
+        videoGrabber.printCurrentMeteringMode();
+        //ofLogVerbose() << "currentExposureName: " << currentExposureName;
+    }
 }
 
 
@@ -73,13 +88,20 @@ void textureApp::draw(){
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
-	info << "Camera Resolution: " << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
-	info << "CURRENT FILTER: " << filterCollection.getCurrentFilterName() << "\n";	
+	info << "Camera Resolution: "   << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
+	info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
+    info << "getSharpness(): "      << videoGrabber.getSharpness()              << "\n";
+    info << "getContrast(): "       << videoGrabber.getContrast()               << "\n";
+    info << "getBrightness(): "     << videoGrabber.getBrightness()             << "\n";
+    info << "getSaturation(): "      << videoGrabber.getSaturation()             << "\n";
+    
 	//info <<	filterCollection.filterList << "\n";
 	
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
+    info << "currentExposureName: " << currentExposureName << "\n";
+    
 	if (omxCameraSettings.doRecording) 
 	{
 		info << "Press q to stop recording" << "\n";
@@ -96,7 +118,38 @@ void textureApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
+    if(key == 'a')
+    {
+        videoGrabber.setAutoShutter(true);
+    }
+    if(key == 's')
+    {
+        videoGrabber.setAutoShutter(false);
+    }
+    if(key == 'd')
+    {
+        videoGrabber.setAutoSensitivity(true);
+    }
+    if(key == 'f')
+    {
+        videoGrabber.setAutoSensitivity(false);
+    }
+    if(key == 'g')
+    {
+        videoGrabber.setAutoAperture(true);
+    }
+    if(key == 'h')
+    {
+        videoGrabber.setAutoAperture(false);
+    }
+    
+    
+    if(key == ' ')
+    {
+        videoGrabber.printCurrentMeteringMode();
+    }
 	
+#if 0
 	if (key == 'e')
 	{
 		videoGrabber.applyImageFilter(filterCollection.getNextFilter());
@@ -117,6 +170,11 @@ void textureApp::keyPressed  (int key)
 	{
 		videoGrabber.toggleLED();
 	}
+#endif    
+    
+   
+    
+    
 }
 
 void textureApp::onCharacterReceived(KeyListenerEventData& e)

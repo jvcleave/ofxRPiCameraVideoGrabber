@@ -23,6 +23,7 @@ class textureApp : public ofBaseApp, public KeyListener{
 	
 	OMXCameraSettings omxCameraSettings;
 	bool doDrawInfo;
-		
+    string currentExposureName;	
+    vector<string> exposureNames;
 };
 
