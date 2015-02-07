@@ -8,9 +8,6 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
-
-
-
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
     OMX_Maps::getInstance();
@@ -24,15 +21,13 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     
 }
-
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
     cout << "~ofxRPiCameraVideoGrabber" << endl;
     close();
 }
 
-void
-ofxRPiCameraVideoGrabber::close()
+void ofxRPiCameraVideoGrabber::close()
 {
     
     cout << "ofxRPiCameraVideoGrabber::close" << endl;
@@ -52,8 +47,7 @@ ofxRPiCameraVideoGrabber::close()
     cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
 }
 
-void
-ofxRPiCameraVideoGrabber::enablePixels()
+void ofxRPiCameraVideoGrabber::enablePixels()
 {
     if(textureEngine)
     {
@@ -62,8 +56,7 @@ ofxRPiCameraVideoGrabber::enablePixels()
     }
 }
 
-void
-ofxRPiCameraVideoGrabber::disablePixels()
+void ofxRPiCameraVideoGrabber::disablePixels()
 {
     if(textureEngine)
     {
@@ -73,8 +66,7 @@ ofxRPiCameraVideoGrabber::disablePixels()
 }
 
 
-void
-ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
+void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
     if(textureEngine)
     {
@@ -110,8 +102,7 @@ ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
 
-unsigned char *
-ofxRPiCameraVideoGrabber::getPixels()
+unsigned char * ofxRPiCameraVideoGrabber::getPixels()
 {
     unsigned char * pixels = NULL;
     if (textureEngine) {
@@ -120,14 +111,12 @@ ofxRPiCameraVideoGrabber::getPixels()
     return pixels;
 }
 
-bool
-ofxRPiCameraVideoGrabber::isFrameNew()
+bool ofxRPiCameraVideoGrabber::isFrameNew()
 {
     return hasNewFrame;
 }
 
-void
-ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
+void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     
     addExitHandler();
@@ -156,8 +145,7 @@ ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     setDefaultValues();
 }
 
-void
-ofxRPiCameraVideoGrabber::setDefaultValues()
+void ofxRPiCameraVideoGrabber::setDefaultValues()
 {
     
     setExposurePreset(OMX_ExposureControlAuto); 
@@ -197,15 +185,13 @@ ofxRPiCameraVideoGrabber::setDefaultValues()
     }    
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::enableBurstMode()
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
 {
     burstModeConfig.bEnabled = OMX_TRUE;
     return OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
     cameraDisableAlgorithmConfig.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
     
@@ -214,20 +200,17 @@ ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
     return OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &cameraDisableAlgorithmConfig);	
 }
 
-void
-ofxRPiCameraVideoGrabber::enableImageEffects()
+void ofxRPiCameraVideoGrabber::enableImageEffects()
 {
     toggleImageEffects(true);
 }
 
-void
-ofxRPiCameraVideoGrabber::disableImageEffects()
+void ofxRPiCameraVideoGrabber::disableImageEffects()
 {
     toggleImageEffects(false);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
     
     
@@ -269,26 +252,22 @@ ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFl
     return error;
 }
 
-int
-ofxRPiCameraVideoGrabber::getWidth()
+int ofxRPiCameraVideoGrabber::getWidth()
 {
     return omxCameraSettings.width;
 }
 
-int
-ofxRPiCameraVideoGrabber::getHeight()
+int ofxRPiCameraVideoGrabber::getHeight()
 {
     return omxCameraSettings.height;
 }
 
-int
-ofxRPiCameraVideoGrabber::getFrameRate()
+int ofxRPiCameraVideoGrabber::getFrameRate()
 {
     return omxCameraSettings.framerate;
 }
 
-GLuint
-ofxRPiCameraVideoGrabber::getTextureID()
+GLuint ofxRPiCameraVideoGrabber::getTextureID()
 {
     if (!textureEngine) 
     {
@@ -297,8 +276,7 @@ ofxRPiCameraVideoGrabber::getTextureID()
     return textureEngine->textureID;
 }
 
-ofTexture&
-ofxRPiCameraVideoGrabber::getTextureReference()
+ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
     if (!textureEngine) 
     {
@@ -309,8 +287,7 @@ ofxRPiCameraVideoGrabber::getTextureReference()
 }
 
 
-void
-ofxRPiCameraVideoGrabber::stopRecording()
+void ofxRPiCameraVideoGrabber::stopRecording()
 {
     if (engine) 
     {
@@ -322,8 +299,7 @@ ofxRPiCameraVideoGrabber::stopRecording()
     }
 }
 
-void
-ofxRPiCameraVideoGrabber::draw()
+void ofxRPiCameraVideoGrabber::draw()
 {
     if (!textureEngine)
     {
@@ -332,8 +308,7 @@ ofxRPiCameraVideoGrabber::draw()
     textureEngine->tex.draw(0, 0);
 }
 
-bool
-ofxRPiCameraVideoGrabber::isReady()
+bool ofxRPiCameraVideoGrabber::isReady()
 {
     
     if (engine) 
@@ -349,8 +324,7 @@ ofxRPiCameraVideoGrabber::isReady()
     return false;
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode)
 {
     exposurePresetConfig.eExposureControl = exposureMode;
     
@@ -374,8 +348,7 @@ ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode
  */
 
 
-string
-ofxRPiCameraVideoGrabber::meteringModetoString()
+string ofxRPiCameraVideoGrabber::meteringModetoString()
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     if(error != OMX_ErrorNone)
@@ -393,14 +366,12 @@ ofxRPiCameraVideoGrabber::meteringModetoString()
     return ss.str();
 }
 
-void
-ofxRPiCameraVideoGrabber::printMeteringMode()
+void ofxRPiCameraVideoGrabber::printMeteringMode()
 {
     ofLogVerbose() << meteringModetoString();
 }
 
-void
-ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMeteringMode)
+void ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMeteringMode)
 {
     setMeteringMode(cameraMeteringMode.meteringType,
                     cameraMeteringMode.evCompensation, 
@@ -412,15 +383,14 @@ ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMeteringMode)
                     cameraMeteringMode.aperture);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
-                                          int evCompensation,         //default 0
-                                          int sensitivity,            //default 100
-                                          int shutterSpeedMS,
-                                          bool autoShutter,           //default false
-                                          bool autoSensitivity,       //default false
-                                          bool autoAperture,          //default true
-                                          int aperture)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
+                                                        int evCompensation,         //default 0
+                                                        int sensitivity,            //default 100
+                                                        int shutterSpeedMS,
+                                                        bool autoShutter,           //default false
+                                                        bool autoSensitivity,       //default false
+                                                        bool autoAperture,          //default true
+                                                        int aperture)
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -463,8 +433,7 @@ ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType,
     return error;
 }
 
-void
-ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
+void ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
 {
     currentMeteringMode.exposurevalue = omxExposureValue;
     
@@ -482,8 +451,7 @@ ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE om
     
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     if(error == OMX_ErrorNone) 
@@ -499,8 +467,7 @@ ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
 }
 
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     if(error == OMX_ErrorNone) 
@@ -516,8 +483,7 @@ ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
 }
 
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setAutoShutter(bool doAutoShutter)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoShutter(bool doAutoShutter)
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     if(error == OMX_ErrorNone) 
@@ -533,44 +499,38 @@ ofxRPiCameraVideoGrabber::setAutoShutter(bool doAutoShutter)
 }
 
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
 {
     framestabilizationConfig.bStab = toOMXBool(doStabilization);
     
     return OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setSharpness(int sharpness) //-100 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpness(int sharpness) //-100 to 100
 {
     sharpnessConfig.nSharpness = sharpness; 
     
     return OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpnessConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setSharpnessNormalized(int sharpnessNormalized)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpnessNormalized(int sharpnessNormalized)
 {
     return setSharpness(ofMap(sharpnessNormalized, 0, 1, -100, 100)); 
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setContrast(int contrast ) //-100 to 100 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrast(int contrast ) //-100 to 100 
 {
     contrastConfig.nContrast = contrast; 
     
     return OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrastConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setContrastNormalized(int contrastNormalized )
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrastNormalized(int contrastNormalized )
 {
     return setContrast(ofMap(contrastNormalized, 0, 1, -100, 100)); 
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 100
 {
     
     brightnessConfig.nBrightness = brightness;
@@ -578,14 +538,12 @@ ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 100
     return OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightnessConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setBrightnessNormalized(int brightnessNormalized ) //0 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightnessNormalized(int brightnessNormalized ) //0 to 100
 {
     return setBrightness(ofMap(brightnessNormalized, 0, 1, 0, 100));
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 100
 {
     
     saturationConfig.nSaturation = saturation; 
@@ -593,23 +551,20 @@ ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 100
     return OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturationConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setSaturationNormalized(int saturationNormalized)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturationNormalized(int saturationNormalized)
 {
     
     return setSaturation(ofMap(saturationNormalized, 0, 1, -100, 100));
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
 {	
     whiteBalanceConfig.eWhiteBalControl = controlType;
     
     return OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &whiteBalanceConfig);
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
     colorEnhancementConfig.bColorEnhancement = toOMXBool(doColorEnhance);
     colorEnhancementConfig.nCustomizedU = U;
@@ -618,14 +573,12 @@ ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
     return OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colorEnhancementConfig);
 }
 
-void
-ofxRPiCameraVideoGrabber::toggleLED()
+void ofxRPiCameraVideoGrabber::toggleLED()
 {
     setLEDState(!LED_CURRENT_STATE);
 }
 
-void
-ofxRPiCameraVideoGrabber::setLEDState(bool status)
+void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 {
     //OMX doesn't work - using GPIO 
     /*OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -647,8 +600,7 @@ ofxRPiCameraVideoGrabber::setLEDState(bool status)
     
 }
 
-OMX_ERRORTYPE
-ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
     
     imagefilterConfig.eImageFilter = imageFilter;
@@ -665,8 +617,7 @@ void signal_handler(int signum)
     doExit = true;
 }
 
-void
-ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
+void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
 {
     if (doExit)
     {
@@ -676,8 +627,7 @@ ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
     }
 }
 
-void
-ofxRPiCameraVideoGrabber::addExitHandler()
+void ofxRPiCameraVideoGrabber::addExitHandler()
 {
     
     vector<int> signals;
