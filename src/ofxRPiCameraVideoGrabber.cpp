@@ -8,41 +8,7 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
-OMX_BOOL toOMXBool(bool boolean)
-{
-    OMX_BOOL result;
-    if(boolean)
-    {
-        result = OMX_TRUE;
-    }else
-    {
-        result = OMX_FALSE;
-    }
-    return result;
-}
 
-bool fromOMXBool(OMX_BOOL omxBool)
-{
-    bool result;
-    if(omxBool)
-    {
-        result = true;
-    }else
-    {
-        result = false;
-    }
-    return result;
-}
-
-float fromQ16(float n)
-{
-    return n* 65536;
-}
-
-float toQ16(float n)
-{
-    return n*(1/65536.0);
-}
 
 bool doExit = false;
 void signal_handler(int signum)
@@ -104,9 +70,8 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	//ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	//appEGLWindow->setThreadTimeout(1000);
 	OMX_Maps::getInstance();
+    initStructures();
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -307,22 +272,17 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 }
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
 {
-	OMX_CONFIG_BOOLEANTYPE doBurstMode;
-	OMX_INIT_STRUCTURE(doBurstMode);
-	doBurstMode.bEnabled = OMX_TRUE;
-	return OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &doBurstMode);
+	burstModeConfig.bEnabled = OMX_TRUE;
+	return OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
-	OMX_PARAM_CAMERADISABLEALGORITHMTYPE controlType;
-	OMX_INIT_STRUCTURE(controlType);
-	controlType.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
-    
-	controlType.bDisabled = toOMXBool(doDisable);
+	cameraDisableAlgorithmConfig.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
 
-	return OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-	
+	cameraDisableAlgorithmConfig.bDisabled = toOMXBool(doDisable);
+
+	return OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &cameraDisableAlgorithmConfig);	
 }
 
 void ofxRPiCameraVideoGrabber::enableImageEffects()
@@ -337,16 +297,15 @@ void ofxRPiCameraVideoGrabber::disableImageEffects()
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
-	OMX_CONFIG_FLICKERCANCELTYPE controlType;
-	OMX_INIT_STRUCTURE(controlType);
+
 	
-	controlType.nPortIndex = OMX_ALL;
+	flickerCancelConfig.nPortIndex = OMX_ALL;
 	
-	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
+	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
 	if(error == OMX_ErrorNone) 
 	{
 		ofLogVerbose(__func__) << "camera OMX_GetConfig OMX_IndexConfigCommonFlickerCancellation PASS ";
-		switch (controlType.eFlickerCancel) 
+		switch (flickerCancelConfig.eFlickerCancel) 
 		{
 			case OMX_COMMONFLICKERCANCEL_OFF:
 			{
@@ -371,8 +330,8 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKER
 			default:
 				break;
 		}
-        controlType.eFlickerCancel = eFlickerCancel;
-        error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
+        flickerCancelConfig.eFlickerCancel = eFlickerCancel;
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
 	}
     
     return error;
@@ -451,14 +410,9 @@ bool ofxRPiCameraVideoGrabber::isReady()
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
 {
+	exposureControlConfig.eExposureControl = exposureMode;
 	
-	//Set exposure mode
-	OMX_CONFIG_EXPOSURECONTROLTYPE exposure;
-	OMX_INIT_STRUCTURE(exposure);
-	exposure.nPortIndex = OMX_ALL;
-	exposure.eExposureControl = exposureMode;
-	
-	return OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposure);
+	return OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposureControlConfig);
 }
 
 /*
@@ -535,8 +489,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meterin
         currentMeteringMode.exposurevalue.nApertureFNumber = toQ16(aperture);
     }
 	
-	//
-    
     currentMeteringMode.exposurevalue.bAutoSensitivity = toOMXBool(autoSensitivity);
 	
     currentMeteringMode.exposurevalue.bAutoShutterSpeed = toOMXBool(autoShutter);
@@ -568,7 +520,6 @@ void ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETY
     
     currentMeteringMode.sensitivity = omxExposureValue.nSensitivity;
     currentMeteringMode.autoSensitivity = fromOMXBool(omxExposureValue.bAutoSensitivity);
-    
     
 }
 
@@ -616,16 +567,12 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoShutter(bool doAutoShutter)
             setCurrentMeteringMode(currentMeteringMode.exposurevalue);
         }
     }
+    return error;
 }
 
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpness(int sharpness_) //-100 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpness(int sharpness) //-100 to 100
 {
-	sharpness = sharpness_;
-		
-	OMX_CONFIG_SHARPNESSTYPE sharpnessConfig;
-	OMX_INIT_STRUCTURE(sharpnessConfig);
-	sharpnessConfig.nPortIndex = OMX_ALL;
 	sharpnessConfig.nSharpness = sharpness; 
 	
 	return OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpnessConfig);
@@ -633,75 +580,48 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpness(int sharpness_) //-100 to 1
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
 {
-	
-	OMX_CONFIG_FRAMESTABTYPE framestabilizationConfig;
-	OMX_INIT_STRUCTURE(framestabilizationConfig);
-	framestabilizationConfig.nPortIndex = OMX_ALL;
     framestabilizationConfig.bStab = toOMXBool(doStabilization);
-    
-	return OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
+	
+    return OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrast(int contrast_ ) //-100 to 100 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrast(int contrast ) //-100 to 100 
 {
-	contrast = contrast_;
-		
-	OMX_CONFIG_CONTRASTTYPE contrastConfig;
-	OMX_INIT_STRUCTURE(contrastConfig);
-	contrastConfig.nPortIndex = OMX_ALL;
 	contrastConfig.nContrast = contrast; 
 	
 	return OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrastConfig);
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightness(int brightness_ ) //0 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 100
 {
-	brightness = brightness_;
-	
-	OMX_CONFIG_BRIGHTNESSTYPE brightnessConfig;
-	OMX_INIT_STRUCTURE(brightnessConfig);
-	brightnessConfig.nPortIndex = OMX_ALL;
+    
 	brightnessConfig.nBrightness = brightness;
 	
 	return OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightnessConfig);
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturation(int saturation_) //-100 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 100
 {
-	saturation = saturation_;
 	
-	
-	OMX_CONFIG_SATURATIONTYPE saturationConfig;
-	OMX_INIT_STRUCTURE(saturationConfig);
-	saturationConfig.nPortIndex		= OMX_ALL;
-	saturationConfig.nSaturation	= saturation_; 
+	saturationConfig.nSaturation = saturation; 
 	
 	return OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturationConfig);
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
 {	
-	OMX_CONFIG_WHITEBALCONTROLTYPE awb;
-	OMX_INIT_STRUCTURE(awb);
-	awb.nPortIndex = OMX_ALL;
-	awb.eWhiteBalControl = controlType;
+	whiteBalanceConfig.eWhiteBalControl = controlType;
 	
-	return OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &awb);
+    return OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &whiteBalanceConfig);
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
+    colorEnhancementConfig.bColorEnhancement = toOMXBool(doColorEnhance);
+	colorEnhancementConfig.nCustomizedU = U;
+	colorEnhancementConfig.nCustomizedV = V;
 	
-	OMX_CONFIG_COLORENHANCEMENTTYPE color;
-	OMX_INIT_STRUCTURE(color);
-	color.nPortIndex = OMX_ALL;
-
-    color.bColorEnhancement = toOMXBool(doColorEnhance);
-	color.nCustomizedU = U;
-	color.nCustomizedV = V;
-	
-	return OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &color);
-    
+	return OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colorEnhancementConfig);
 }
 
 void ofxRPiCameraVideoGrabber::toggleLED()
@@ -727,15 +647,13 @@ void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 	
 	LED_CURRENT_STATE = status;	
 	string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
-	int result = system(command.c_str());
-	ofLogVerbose(__func__) << "command: " << command << " result: " << result;
+    system(command.c_str());
+    
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
-	OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
-	OMX_INIT_STRUCTURE(imagefilterConfig);
-	imagefilterConfig.nPortIndex = OMX_ALL;
+
 	imagefilterConfig.eImageFilter = imageFilter;
 	
 	return OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);

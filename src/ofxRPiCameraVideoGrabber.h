@@ -144,10 +144,10 @@ public:
 	
 	OMX_ERRORTYPE enableBurstMode();
 	
-	int getSharpness()		{ return sharpness; }
-	int getContrast()		{ return contrast;	}
-	int getBrightness()		{ return brightness; }
-	int getSaturation()		{ return saturation; }
+	int getSharpness()		{ return sharpnessConfig.nSharpness; }
+	int getContrast()		{ return contrastConfig.nContrast;	}
+	int getBrightness()		{ return brightnessConfig.nBrightness; }
+	int getSaturation()		{ return saturationConfig.nSaturation; }
 	
 	OMXCameraSettings omxCameraSettings;
 	
@@ -167,6 +167,19 @@ public:
     OMX_ERRORTYPE setAutoSensitivity(bool);
 	
 private:
+    OMX_BOOL toOMXBool(bool boolean)
+    {
+        if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
+    }
+    
+    bool fromOMXBool(OMX_BOOL omxBool)
+    {
+        if(omxBool == OMX_TRUE) { return true; } else { return false; } 
+    }
+    
+    float fromQ16(float n) { return n* 65536; }
+    float toQ16(float n) { return n*(1/65536.0); }
+    
 	void addExitHandler();
 	void onUpdate(ofEventArgs & args);
     void onUpdateDuringExit(ofEventArgs& args);
@@ -176,10 +189,11 @@ private:
 	int updateFrameCounter;
 	OMX_HANDLETYPE camera;
 	
+    /*
 	int sharpness;	//	-100 to 100
 	int contrast;	//  -100 to 100 
 	int brightness; //     0 to 100
-	int saturation; //  -100 to 100 
+	int saturation; //  -100 to 100 */
 	
 	//void close();
 	
@@ -193,5 +207,61 @@ private:
 	int frameCounter;
 	
 	bool pixelsRequested;
+    
+    OMX_CONFIG_EXPOSURECONTROLTYPE exposureControlConfig;
+    
+    OMX_CONFIG_SHARPNESSTYPE sharpnessConfig;
+    OMX_CONFIG_FRAMESTABTYPE framestabilizationConfig;
+    OMX_CONFIG_CONTRASTTYPE contrastConfig;
+    OMX_CONFIG_BRIGHTNESSTYPE brightnessConfig;
+    OMX_CONFIG_SATURATIONTYPE saturationConfig;
+    OMX_CONFIG_WHITEBALCONTROLTYPE whiteBalanceConfig;
+    OMX_CONFIG_COLORENHANCEMENTTYPE colorEnhancementConfig;
+    OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+    
+    OMX_CONFIG_BOOLEANTYPE burstModeConfig;
+    OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
+    OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
+    //Set exposure mode
+    
+    void initStructures()
+    {
+        OMX_INIT_STRUCTURE(exposureControlConfig);
+        exposureControlConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(sharpnessConfig);
+        sharpnessConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(framestabilizationConfig);
+        framestabilizationConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(contrastConfig);
+        contrastConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(brightnessConfig);
+        brightnessConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(saturationConfig);
+        saturationConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(whiteBalanceConfig);
+        whiteBalanceConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(colorEnhancementConfig);
+        colorEnhancementConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(imagefilterConfig);
+        imagefilterConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(burstModeConfig);
+        
+        OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
+        
+        OMX_INIT_STRUCTURE(flickerCancelConfig);
+
+        
+    };
+    
+    
 	
 };
