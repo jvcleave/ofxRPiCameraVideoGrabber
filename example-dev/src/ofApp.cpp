@@ -46,14 +46,23 @@ void ofApp::setup()
 	
     DemoCycleExposurePresets* demo1 = new DemoCycleExposurePresets();
     demo1->setup(omxCameraSettings, &videoGrabber);
+    demo1->name = "CYCLE EXPOSURE DEMO";
     demos.push_back(demo1);
     
     
     
     DemoCycleFilters* demo2 = new DemoCycleFilters();
     demo2->setup(omxCameraSettings, &videoGrabber);
+    demo2->name = "CYCLE FILTER DEMO";
     demos.push_back(demo2);
     
+    DemoManualMode* demo3 = new DemoManualMode();
+    demo3->setup(omxCameraSettings, &videoGrabber);
+    demo3->name = "MANUAL MODE DEMO";
+    demos.push_back(demo3);
+    
+    
+    doNextDemo = false;
     currentDemoID =0;
     currentDemo = demos[currentDemoID];
 }
@@ -62,8 +71,9 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    if (ofGetFrameNum() % 500 == 0)
+    if (ofGetFrameNum() % 500 == 0 || doNextDemo)
     {
+        doNextDemo = false;
         if((unsigned int) currentDemoID+1 < demos.size())
         {
             currentDemoID++;
@@ -90,14 +100,19 @@ void ofApp::update()
 void ofApp::draw(){
     
     currentDemo->draw();
-    ofDrawBitmapStringHighlight("DEMO ID: "+ ofToString(currentDemoID), ofGetWidth()-200, ofGetHeight()-100, ofColor::black, ofColor::red);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key)
 {
+	if(key == ' ')
+    {
+        doNextDemo = true;
+    }else
+    {
+        currentDemo->onKey(key);
+    }
 	
-	currentDemo->onKey(key);
        
     
     

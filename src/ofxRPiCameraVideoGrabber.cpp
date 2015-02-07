@@ -430,26 +430,30 @@ int ofxRPiCameraVideoGrabber::getMeteringEvCompensation()
 }
  */
 
-
-void ofxRPiCameraVideoGrabber::printMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue)
-{
-    stringstream ss;
-    ss << "xEVCompensation: "   << fromQ16(exposurevalue.xEVCompensation)   << "\n";
-    ss << "nApertureFNumber: "  << fromQ16(exposurevalue.nApertureFNumber)  << "\n";
-    ss << "bAutoAperture: "     << exposurevalue.bAutoAperture              << "\n";
-    ss << "nShutterSpeedMsec: " << exposurevalue.nShutterSpeedMsec          << "\n";
-    ss << "bAutoShutterSpeed: " << exposurevalue.bAutoShutterSpeed          << "\n";
-    ss << "nSensitivity: "      << exposurevalue.nSensitivity               << "\n";
-    ss << "bAutoSensitivity: "  << exposurevalue.bAutoSensitivity           << "\n";
-    ofLogVerbose() << ss.str();
-}
-
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::printCurrentMeteringMode()
+string ofxRPiCameraVideoGrabber::meteringModetoString()
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
-    printMeteringMode(currentMeteringMode.exposurevalue);
-    return error;
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError() << "COULD NOT UPDATE METERING MODE" << error;
+    }
+    stringstream ss;
+    ss << "xEVCompensation: "   << fromQ16(currentMeteringMode.exposurevalue.xEVCompensation)   << "\n";
+    ss << "nApertureFNumber: "  << fromQ16(currentMeteringMode.exposurevalue.nApertureFNumber)  << "\n";
+    ss << "bAutoAperture: "     << currentMeteringMode.exposurevalue.bAutoAperture              << "\n";
+    ss << "nShutterSpeedMsec: " << currentMeteringMode.exposurevalue.nShutterSpeedMsec          << "\n";
+    ss << "bAutoShutterSpeed: " << currentMeteringMode.exposurevalue.bAutoShutterSpeed          << "\n";
+    ss << "nSensitivity: "      << currentMeteringMode.exposurevalue.nSensitivity               << "\n";
+    ss << "bAutoSensitivity: "  << currentMeteringMode.exposurevalue.bAutoSensitivity           << "\n";
+    return ss.str();
 }
+
+
+void ofxRPiCameraVideoGrabber::printMeteringMode()
+{
+    ofLogVerbose() << meteringModetoString();
+}
+
 
 void ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMeteringMode)
 {
@@ -506,7 +510,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meterin
     }else
     {
         ofLogError(__func__) << "FAILED TO SET METERING MODE " ;
-        printMeteringMode(currentMeteringMode.exposurevalue);
+        printMeteringMode();
         ofLogError(__func__) << "^^^ FAILED VALUES ^^^ " ;
     }
     

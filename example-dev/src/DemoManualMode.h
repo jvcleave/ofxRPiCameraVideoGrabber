@@ -2,25 +2,29 @@
 #include "CameraDemo.h"
 
 
-class DemoCycleFilters  : public CameraDemo
+class DemoManualMode  : public CameraDemo
 {
     
 public:
     
     
     bool doDrawInfo;
-    
+    bool doAutoMode = false;
     void setup(OMXCameraSettings omxCameraSettings_, ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup(omxCameraSettings_, videoGrabber_);
         doDrawInfo	= true;
+        
     };
     
     void update()
     {
-        if (ofGetFrameNum() % 100 == 0) 
+        if (ofGetFrameNum() % 60 == 0) 
         {
-            videoGrabber->applyImageFilter(filterCollection.getNextFilter());
+            doAutoMode = !doAutoMode;
+            videoGrabber->setAutoAperture(doAutoMode);
+            videoGrabber->setAutoShutter(doAutoMode);
+            videoGrabber->setAutoSensitivity(doAutoMode);
         }
     };
     
@@ -38,7 +42,7 @@ public:
         info << name << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
-        info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
+        info << videoGrabber->meteringModetoString() << "\n";
         info << "Press e to increment filter" << "\n";
         info << "Press g to Toggle info" << "\n";
         

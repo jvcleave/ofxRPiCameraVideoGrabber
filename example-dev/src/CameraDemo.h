@@ -13,8 +13,10 @@ public:
     OMXCameraSettings omxCameraSettings;
     ImageFilterCollection filterCollection;
     
+    string name;
     CameraDemo()
     {
+        name = "";
         filterCollection.setup();
     }
     

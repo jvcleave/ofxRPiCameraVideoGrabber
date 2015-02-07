@@ -38,7 +38,7 @@ public:
             currentExposureName = exposurePresetNames[exposurePresetIndex];
             
             videoGrabber->setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
-            videoGrabber->printCurrentMeteringMode();
+            videoGrabber->printMeteringMode();
             //ofLogVerbose() << "currentExposureName: " << currentExposureName;
         }
     };
@@ -54,6 +54,7 @@ public:
         videoGrabber->getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
         
         stringstream info;
+        info << name << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
         info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
@@ -110,10 +111,10 @@ public:
         }
         
         
-        if(key == ' ')
+       /* if(key == ' ')
         {
-            videoGrabber->printCurrentMeteringMode();
-        }
+            videoGrabber->printMeteringMode();
+        }*/
         
 #if 0
         if (key == 'e')

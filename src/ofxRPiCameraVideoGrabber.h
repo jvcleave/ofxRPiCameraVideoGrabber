@@ -159,8 +159,8 @@ public:
 	unsigned char * getPixels();
     
     CameraMeteringMode currentMeteringMode;
-    void printMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE);
-    OMX_ERRORTYPE printCurrentMeteringMode();
+    string meteringModetoString();
+    void printMeteringMode();
     
     //
     void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
