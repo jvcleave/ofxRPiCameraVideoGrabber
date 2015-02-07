@@ -117,7 +117,9 @@ public:
                          bool autoAperture,
                          int aperture);
     
-	OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
+    //setExposureMode is now setExposurePreset - sorry :(
+    //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
+	OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
 	
 	OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
     
@@ -208,7 +210,7 @@ private:
 	
 	bool pixelsRequested;
     
-    OMX_CONFIG_EXPOSURECONTROLTYPE exposureControlConfig;
+    OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;
     
     OMX_CONFIG_SHARPNESSTYPE sharpnessConfig;
     OMX_CONFIG_FRAMESTABTYPE framestabilizationConfig;
@@ -226,8 +228,8 @@ private:
     
     void initStructures()
     {
-        OMX_INIT_STRUCTURE(exposureControlConfig);
-        exposureControlConfig.nPortIndex = OMX_ALL;
+        OMX_INIT_STRUCTURE(exposurePresetConfig);
+        exposurePresetConfig.nPortIndex = OMX_ALL;
         
         OMX_INIT_STRUCTURE(sharpnessConfig);
         sharpnessConfig.nPortIndex = OMX_ALL;

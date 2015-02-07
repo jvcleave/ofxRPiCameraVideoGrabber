@@ -1,7 +1,7 @@
-#include "textureApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void textureApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -45,12 +45,13 @@ void textureApp::setup()
 	//ImageFilterCollection (filterCollection here) is helper class to iterate through available OpenMax filters
 	filterCollection.setup();
     currentExposureName = "";
-    exposureNames = OMX_Maps::getInstance().getExposureControlNames();
+    //set local alias to silly static map
+    exposurePresetNames = OMX_Maps::getInstance().getExposurePresetNames();
 }
 
-int exposureControlIndex;
+int exposurePresetIndex;
 //--------------------------------------------------------------
-void textureApp::update()
+void ofApp::update()
 {
 	//not working yet
 	/*if (videoGrabber.isFrameNew())
@@ -59,16 +60,16 @@ void textureApp::update()
 	}*/
     if (ofGetFrameNum() % 100 == 0) 
     {
-        if(exposureControlIndex+1<exposureNames.size())
+        if(exposurePresetIndex+1<exposurePresetNames.size())
         {
-            exposureControlIndex++;
+            exposurePresetIndex++;
         }else
         {
-            exposureControlIndex = 0;
+            exposurePresetIndex = 0;
         }
-        currentExposureName = exposureNames[exposureControlIndex];
+        currentExposureName = exposurePresetNames[exposurePresetIndex];
         
-        videoGrabber.setExposureMode(OMX_Maps::getInstance().exposureControls[currentExposureName]);
+        videoGrabber.setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
         videoGrabber.printCurrentMeteringMode();
         //ofLogVerbose() << "currentExposureName: " << currentExposureName;
     }
@@ -76,7 +77,7 @@ void textureApp::update()
 
 
 //--------------------------------------------------------------
-void textureApp::draw(){
+void ofApp::draw(){
 
 	//draws at camera resolution
 	videoGrabber.draw();
@@ -114,7 +115,7 @@ void textureApp::draw(){
 }
 
 //--------------------------------------------------------------
-void textureApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
@@ -177,7 +178,7 @@ void textureApp::keyPressed  (int key)
     
 }
 
-void textureApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

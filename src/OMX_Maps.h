@@ -36,12 +36,12 @@ public:
 	vector<string> meteringNames;
 	map<string, OMX_METERINGTYPE> metering;
 	
-	vector<string> exposureControlNames;
-	map<string, OMX_EXPOSURECONTROLTYPE> exposureControls;
+	vector<string> exposurePresetNames;
+	map<string, OMX_EXPOSURECONTROLTYPE> exposurePresets;
 	
-    vector<string>& getExposureControlNames()
+    vector<string>& getExposurePresetNames()
     {
-        return exposureControlNames;
+        return exposurePresetNames;
     }
     
     
@@ -113,23 +113,23 @@ private:
 		
 		collectNames<OMX_METERINGTYPE>(metering, meteringNames);
 		
-		exposureControls["Off"] = OMX_ExposureControlOff;
-		exposureControls["Auto"] = OMX_ExposureControlAuto;
-		exposureControls["Night"] = OMX_ExposureControlNight;
-		exposureControls["BackLight"] = OMX_ExposureControlBackLight;
-		exposureControls["SpotLight"] = OMX_ExposureControlSpotLight;
-		exposureControls["Sports"] = OMX_ExposureControlSports;
-		exposureControls["Snow"] = OMX_ExposureControlSnow;
-		exposureControls["Beach"] = OMX_ExposureControlBeach;
-		exposureControls["LargeAperture"] = OMX_ExposureControlLargeAperture;
-		exposureControls["SmallAperture"] = OMX_ExposureControlSmallAperture;
-		exposureControls["VeryLong"] = OMX_ExposureControlVeryLong;
-		exposureControls["FixedFps"] = OMX_ExposureControlFixedFps;
-		exposureControls["NightWithPreview"] = OMX_ExposureControlNightWithPreview;
-		exposureControls["Antishake"] = OMX_ExposureControlAntishake;
-		exposureControls["Fireworks"] = OMX_ExposureControlFireworks;
+		exposurePresets["Off"] = OMX_ExposureControlOff;
+		exposurePresets["Auto"] = OMX_ExposureControlAuto;
+		exposurePresets["Night"] = OMX_ExposureControlNight;
+		exposurePresets["BackLight"] = OMX_ExposureControlBackLight;
+		exposurePresets["SpotLight"] = OMX_ExposureControlSpotLight;
+		exposurePresets["Sports"] = OMX_ExposureControlSports;
+		exposurePresets["Snow"] = OMX_ExposureControlSnow;
+		exposurePresets["Beach"] = OMX_ExposureControlBeach;
+		exposurePresets["LargeAperture"] = OMX_ExposureControlLargeAperture;
+		exposurePresets["SmallAperture"] = OMX_ExposureControlSmallAperture;
+		exposurePresets["VeryLong"] = OMX_ExposureControlVeryLong;
+		exposurePresets["FixedFps"] = OMX_ExposureControlFixedFps;
+		exposurePresets["NightWithPreview"] = OMX_ExposureControlNightWithPreview;
+		exposurePresets["Antishake"] = OMX_ExposureControlAntishake;
+		exposurePresets["Fireworks"] = OMX_ExposureControlFireworks;
 		
-		collectNames<OMX_EXPOSURECONTROLTYPE>(exposureControls, exposureControlNames);
+		collectNames<OMX_EXPOSURECONTROLTYPE>(exposurePresets, exposurePresetNames);
 
 		colorFormatTypes[OMX_COLOR_FormatUnused] = "OMX_COLOR_FormatUnused";
 		colorFormatTypes[OMX_COLOR_FormatMonochrome] = "OMX_COLOR_FormatMonochrome";

@@ -6,7 +6,7 @@
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-class textureApp : public ofBaseApp, public KeyListener{
+class ofApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -24,6 +24,6 @@ class textureApp : public ofBaseApp, public KeyListener{
 	OMXCameraSettings omxCameraSettings;
 	bool doDrawInfo;
     string currentExposureName;	
-    vector<string> exposureNames;
+    vector<string> exposurePresetNames;
 };
 

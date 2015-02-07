@@ -1,11 +1,11 @@
 #include "ofMain.h"
 #include "ofGLProgrammableRenderer.h"
 
-#include "textureApp.h"
+#include "ofApp.h"
 int main()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetCurrentRenderer(ofGLProgrammableRenderer::TYPE);
 	ofSetupOpenGL(1280, 720, OF_WINDOW);
-	ofRunApp( new textureApp());
+	ofRunApp( new ofApp());
 }

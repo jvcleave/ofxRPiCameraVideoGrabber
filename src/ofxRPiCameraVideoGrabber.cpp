@@ -203,7 +203,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 
 	
 	
-	setExposureMode(OMX_ExposureControlLargeAperture); 
+	setExposurePreset(OMX_ExposureControlLargeAperture); 
                                                 //    OMX_ExposureControlOff,
                                                 //    OMX_ExposureControlAuto,
                                                 //    OMX_ExposureControlNight,
@@ -408,11 +408,11 @@ bool ofxRPiCameraVideoGrabber::isReady()
 	return false;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode)
 {
-	exposureControlConfig.eExposureControl = exposureMode;
+	exposurePresetConfig.eExposureControl = exposureMode;
 	
-	return OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposureControlConfig);
+	return OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposurePresetConfig);
 }
 
 /*
@@ -464,13 +464,13 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMetering
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
-											   int evCompensation,	//default 0
-											   int sensitivity,		//default 100
-                                               int shutterSpeedMS,
-                                               bool autoShutter, //default false
-											   bool autoSensitivity, //default false
-                                               bool autoAperture, //default true
-                                               int aperture)
+                                                        int evCompensation,         //default 0
+                                                        int sensitivity,            //default 100
+                                                        int shutterSpeedMS,
+                                                        bool autoShutter,           //default false
+                                                        bool autoSensitivity,       //default false
+                                                        bool autoAperture,          //default true
+                                                        int aperture)
 {
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
@@ -500,8 +500,16 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meterin
 	currentMeteringMode.exposurevalue.eMetering = meteringType; 
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
-
-    setCurrentMeteringMode(currentMeteringMode.exposurevalue);
+    if(error == OMX_ErrorNone)
+    {
+       setCurrentMeteringMode(currentMeteringMode.exposurevalue); 
+    }else
+    {
+        ofLogError(__func__) << "FAILED TO SET METERING MODE " ;
+        printMeteringMode(currentMeteringMode.exposurevalue);
+        ofLogError(__func__) << "^^^ FAILED VALUES ^^^ " ;
+    }
+    
     return error;
 }
 
