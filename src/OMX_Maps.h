@@ -29,16 +29,28 @@ public:
     
 	vector<string> imageFilterNames;
 	map<string, OMX_IMAGEFILTERTYPE> imageFilters;
-	
+    vector<string>& getImageFilterNames()
+    {
+        return imageFilterNames;
+    }
+    
 	vector<string> whiteBalanceNames;
 	map<string, OMX_WHITEBALCONTROLTYPE> whiteBalanceControls;
+    vector<string>& getWhiteBalanceNames()
+    {
+        return whiteBalanceNames;
+    }
+    
 	
 	vector<string> meteringNames;
 	map<string, OMX_METERINGTYPE> metering;
-	
+    vector<string>& getMeteringNames()
+    {
+        return meteringNames;
+    }
+    
 	vector<string> exposurePresetNames;
 	map<string, OMX_EXPOSURECONTROLTYPE> exposurePresets;
-	
     vector<string>& getExposurePresetNames()
     {
         return exposurePresetNames;
@@ -47,17 +59,30 @@ public:
     
 	vector<string> videoCodingNames;
 	map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
+    vector<string>& getVideoCodingNames()
+    {
+        return videoCodingNames;
+    }
+    
 	
 	vector<string> colorFormatNames;
 	map<string, OMX_COLOR_FORMATTYPE> colorFormats;
-	
-	
-	map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
+    vector<string>& getColorFormatNames()
+    {
+        return colorFormatNames;
+    }
 	
 	
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
-	
+    
+    vector<string>& getAlgorithmNames()
+    {
+        return algorithmNames;
+    }
+    
+    map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
+    
 	map<OMX_EVENTTYPE, string> eventTypes;
 	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
 private:	

@@ -5,6 +5,9 @@
 #include "TerminalListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
+#include "CameraDemo.h"
+#include "DemoCycleExposurePresets.h"
+#include "DemoCycleFilters.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
 
@@ -17,13 +20,12 @@ class ofApp : public ofBaseApp, public KeyListener{
 
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
+    
+    OMXCameraSettings omxCameraSettings;
 	ofxRPiCameraVideoGrabber videoGrabber;
 	
-	ImageFilterCollection filterCollection;
-	
-	OMXCameraSettings omxCameraSettings;
-	bool doDrawInfo;
-    string currentExposureName;	
-    vector<string> exposurePresetNames;
+    vector<CameraDemo*> demos;
+    int currentDemoID;
+    CameraDemo* currentDemo;
 };
 
