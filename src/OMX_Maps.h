@@ -25,6 +25,8 @@ public:
 		static OMX_Maps    instance;
 		return instance;
 	}
+    
+    
 	vector<string> imageFilterNames;
 	map<string, OMX_IMAGEFILTERTYPE> imageFilters;
 	
@@ -37,6 +39,12 @@ public:
 	vector<string> exposureControlNames;
 	map<string, OMX_EXPOSURECONTROLTYPE> exposureControls;
 	
+    vector<string>& getExposureControlNames()
+    {
+        return exposureControlNames;
+    }
+    
+    
 	vector<string> videoCodingNames;
 	map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
 	
