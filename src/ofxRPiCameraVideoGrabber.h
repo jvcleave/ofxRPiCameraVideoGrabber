@@ -92,8 +92,10 @@ public:
     
 	void close();
 	void setup(OMXCameraSettings);
-	void draw();
-	
+    void setDefaultValues();
+    
+    void draw();
+    
 	
 	ofTexture& getTextureReference();
     

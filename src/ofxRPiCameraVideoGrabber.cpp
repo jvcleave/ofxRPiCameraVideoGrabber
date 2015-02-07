@@ -201,24 +201,30 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 		camera = engine->camera;
 	}
 
+    setDefaultValues();
+		
 	
-	
-	setExposurePreset(OMX_ExposureControlLargeAperture); 
-                                                //    OMX_ExposureControlOff,
-                                                //    OMX_ExposureControlAuto,
-                                                //    OMX_ExposureControlNight,
-                                                //    OMX_ExposureControlBackLight,
-                                                //    OMX_ExposureControlSpotLight,
-                                                //    OMX_ExposureControlSports,
-                                                //    OMX_ExposureControlSnow,
-                                                //    OMX_ExposureControlBeach,
-                                                //    OMX_ExposureControlLargeAperture,
-                                                //    OMX_ExposureControlSmallAperture,
-                                                //    OMX_ExposureControlVeryLong,
-                                                //    OMX_ExposureControlFixedFps,
-                                                //    OMX_ExposureControlNightWithPreview,
-                                                //    OMX_ExposureControlAntishake,
-                                                //    OMX_ExposureControlFireworks,
+}
+
+void ofxRPiCameraVideoGrabber::setDefaultValues()
+{
+    
+    setExposurePreset(OMX_ExposureControlLargeAperture); 
+    //    OMX_ExposureControlOff,
+    //    OMX_ExposureControlAuto,
+    //    OMX_ExposureControlNight,
+    //    OMX_ExposureControlBackLight,
+    //    OMX_ExposureControlSpotLight,
+    //    OMX_ExposureControlSports,
+    //    OMX_ExposureControlSnow,
+    //    OMX_ExposureControlBeach,
+    //    OMX_ExposureControlLargeAperture,
+    //    OMX_ExposureControlSmallAperture,
+    //    OMX_ExposureControlVeryLong,
+    //    OMX_ExposureControlFixedFps,
+    //    OMX_ExposureControlNightWithPreview,
+    //    OMX_ExposureControlAntishake,
+    //    OMX_ExposureControlFireworks,
     //currentMeteringMode.autoShutter = false;
     //currentMeteringMode.autoAperture = false;
     //currentMeteringMode.autoSensitivity = false;
@@ -235,40 +241,39 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         setMeteringMode(currentMeteringMode);
     }
     
-	//setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
-	setSharpness(-50);
-	setContrast(-10);
-	setBrightness(50);
-	setSaturation(0);
-	setFrameStabilization(false);
-	setWhiteBalance(OMX_WhiteBalControlAuto);
-	applyImageFilter(OMX_ImageFilterNone);
-	setColorEnhancement(false);	 
-	
-	
-	//Requires gpio program provided via wiringPi
-	//https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
-	
-	ofFile gpioProgram("/usr/local/bin/gpio");
-	if(gpioProgram.exists())
-	{
-		system("gpio export 5 out");
-		LED_CURRENT_STATE = true;
-		setLEDState(LED_CURRENT_STATE);
-	}
-	//setLEDState(false);
-	/*
-	 OMX_COMMONFLICKERCANCEL_OFF,
-	 OMX_COMMONFLICKERCANCEL_AUTO,
-	 OMX_COMMONFLICKERCANCEL_50,
-	 OMX_COMMONFLICKERCANCEL_60
-	 */
-	//setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
-	//
-	//enableFaceTracking();
-	//disableImageEffects();
-	
-	
+    //setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
+    setSharpness(-50);
+    setContrast(-10);
+    setBrightness(50);
+    setSaturation(0);
+    setFrameStabilization(false);
+    setWhiteBalance(OMX_WhiteBalControlAuto);
+    applyImageFilter(OMX_ImageFilterNone);
+    setColorEnhancement(false);	 
+    
+    
+    //Requires gpio program provided via wiringPi
+    //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+    
+    ofFile gpioProgram("/usr/local/bin/gpio");
+    if(gpioProgram.exists())
+    {
+        system("gpio export 5 out");
+        LED_CURRENT_STATE = true;
+        setLEDState(LED_CURRENT_STATE);
+    }
+    //setLEDState(false);
+    /*
+     OMX_COMMONFLICKERCANCEL_OFF,
+     OMX_COMMONFLICKERCANCEL_AUTO,
+     OMX_COMMONFLICKERCANCEL_50,
+     OMX_COMMONFLICKERCANCEL_60
+     */
+    //setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO);
+    //
+    //enableFaceTracking();
+    //disableImageEffects();
+
 }
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
 {

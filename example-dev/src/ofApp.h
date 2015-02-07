@@ -8,6 +8,7 @@
 #include "DemoCycleExposurePresets.h"
 #include "DemoCycleFilters.h"
 #include "DemoManualMode.h"
+#include "DemoBCS.h"
 
 
 class ofApp : public ofBaseApp, public KeyListener{

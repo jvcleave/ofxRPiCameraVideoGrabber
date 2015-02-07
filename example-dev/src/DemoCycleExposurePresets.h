@@ -57,7 +57,6 @@ public:
         info << name << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
-        info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
         info << "getSharpness(): "      << videoGrabber->getSharpness()              << "\n";
         info << "getContrast(): "       << videoGrabber->getContrast()               << "\n";
         info << "getBrightness(): "     << videoGrabber->getBrightness()             << "\n";

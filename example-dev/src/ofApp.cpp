@@ -61,6 +61,11 @@ void ofApp::setup()
     demo3->name = "MANUAL MODE DEMO";
     demos.push_back(demo3);
     
+    DemoBCS* demo4 = new DemoBCS();
+    demo4->setup(omxCameraSettings, &videoGrabber);
+    demo4->name = "SHARP/BRIGHT/CONTRAST/SATURATION DEMO";
+    demos.push_back(demo4);
+    
     
     doNextDemo = false;
     currentDemoID =0;
@@ -71,9 +76,8 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    if (ofGetFrameNum() % 500 == 0 || doNextDemo)
+    if (doNextDemo)
     {
-        doNextDemo = false;
         if((unsigned int) currentDemoID+1 < demos.size())
         {
             currentDemoID++;
@@ -82,16 +86,13 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
+        videoGrabber.setDefaultValues();
+        doNextDemo = false;
     }else
     {
          currentDemo->update();
     }
    
-	//not working yet
-	/*if (videoGrabber.isFrameNew())
-	{
-		
-	}*/
     
 }
 
