@@ -19,7 +19,7 @@ public:
     
     void update()
     {
-        if (ofGetFrameNum() % 60 == 0) 
+        if (ofGetFrameNum() % 100 == 0) 
         {
             doAutoMode = !doAutoMode;
             videoGrabber->setAutoAperture(doAutoMode);

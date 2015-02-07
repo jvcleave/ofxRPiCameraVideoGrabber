@@ -84,92 +84,93 @@ class ofxRPiCameraVideoGrabber
 {
 
 public:
-	
-	
-	
+
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
     
-	void close();
+    OMXCameraSettings omxCameraSettings;
+	
 	void setup(OMXCameraSettings);
+    
     void setDefaultValues();
-    
     void draw();
-    
+	void close();
 	
-	ofTexture& getTextureReference();
+    ofTexture& getTextureReference();
+    GLuint getTextureID();
     
-    
-    OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
-    
-	OMX_ERRORTYPE setSharpness(int sharpness_);
-	OMX_ERRORTYPE setContrast(int contrast_);
-	OMX_ERRORTYPE setBrightness(int brightness_);
-	OMX_ERRORTYPE setSaturation(int saturation_);
-	
-	OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
-    
-    void setMeteringMode(CameraMeteringMode);
-	OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
-                         int evCompensation, 
-                         int sensitivity,
-                         int shutterSpeedMS,
-                         bool autoShutter,
-                         bool autoSensitivity,
-                         bool autoAperture,
-                         int aperture);
-    
-    //setExposureMode is now setExposurePreset - sorry :(
-    //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
-	OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
-	
-	OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
-    
-	OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
-                             int U=128, 
-                             int V=128);
-	void setLEDState(bool status);
-	bool LED_CURRENT_STATE;
-	void toggleLED();
-	
-	GLuint getTextureID();
-	
+    bool isReady();
+    bool isFrameNew();
+
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
-	bool isReady();
-	
-	
-	OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+    
+    int getSharpness()  { return sharpnessConfig.nSharpness; }
+    int getContrast()   { return contrastConfig.nContrast;	}
+    int getBrightness() { return brightnessConfig.nBrightness; }
+    int getSaturation() { return saturationConfig.nSaturation; }
+    
+    void stopRecording();
+    void enablePixels();
+    void disablePixels();
+    unsigned char * getPixels();
 	void disableImageEffects();
 	void enableImageEffects();
-	bool isFrameNew();
-		
 	
-	OMX_ERRORTYPE enableBurstMode();
 	
-	int getSharpness()		{ return sharpnessConfig.nSharpness; }
-	int getContrast()		{ return contrastConfig.nContrast;	}
-	int getBrightness()		{ return brightnessConfig.nBrightness; }
-	int getSaturation()		{ return saturationConfig.nSaturation; }
-	
-	OMXCameraSettings omxCameraSettings;
-	
-	void stopRecording();
-	void enablePixels();
-	void disablePixels();
-	unsigned char * getPixels();
-    
-    CameraMeteringMode currentMeteringMode;
+    void toggleLED();
+    void setLEDState(bool status);
+
     string meteringModetoString();
     void printMeteringMode();
     
-    //
-    void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
+    
     OMX_ERRORTYPE setAutoAperture(bool);
     OMX_ERRORTYPE setAutoShutter(bool);
     OMX_ERRORTYPE setAutoSensitivity(bool);
-	
+    
+    OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
+    
+    
+    OMX_ERRORTYPE setSharpness(int sharpness); //-100 to 100
+    OMX_ERRORTYPE setSharpnessNormalized(int sharpnessNormalized);
+    
+    OMX_ERRORTYPE setContrast(int contrast); //-100 to 100
+    OMX_ERRORTYPE setContrastNormalized(int contrastNormalized);
+    
+    OMX_ERRORTYPE setBrightness(int brightness); //0 to 100
+    OMX_ERRORTYPE setBrightnessNormalized(int brightnessNormalized);
+    
+    OMX_ERRORTYPE setSaturation(int saturation); //-100 to 100
+    OMX_ERRORTYPE setSaturationNormalized(int saturationNormalized);
+    
+    OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
+    
+    void setMeteringMode(CameraMeteringMode);
+    OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
+                                  int evCompensation, 
+                                  int sensitivity,
+                                  int shutterSpeedMS,
+                                  bool autoShutter,
+                                  bool autoSensitivity,
+                                  bool autoAperture,
+                                  int aperture);
+    
+    //setExposureMode is now setExposurePreset - sorry :(
+    //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
+    OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
+    
+    OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+    
+    OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
+                                      int U=128, 
+                                      int V=128);
+    
+    //not sure if functional
+    OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+    OMX_ERRORTYPE enableBurstMode();
+    
 private:
     OMX_BOOL toOMXBool(bool boolean)
     {
@@ -192,12 +193,8 @@ private:
 	
 	int updateFrameCounter;
 	OMX_HANDLETYPE camera;
-	
-    /*
-	int sharpness;	//	-100 to 100
-	int contrast;	//  -100 to 100 
-	int brightness; //     0 to 100
-	int saturation; //  -100 to 100 */
+	bool LED_CURRENT_STATE;
+  
 	
 	//void close();
 	
@@ -211,6 +208,10 @@ private:
 	int frameCounter;
 	
 	bool pixelsRequested;
+    
+    
+    CameraMeteringMode currentMeteringMode;
+    void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
     
     OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;
     

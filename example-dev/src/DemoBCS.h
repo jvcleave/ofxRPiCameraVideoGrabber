@@ -10,6 +10,7 @@ public:
     
     bool doDrawInfo;
     bool doValueReset = false;
+    bool doValueResetToZero = false;
     
     int sharpness;
     int contrast;
@@ -35,13 +36,16 @@ public:
         videoGrabber->setAutoAperture(doAutoMode);
         videoGrabber->setAutoShutter(doAutoMode);
         videoGrabber->setAutoSensitivity(doAutoMode);
-        
-        if(doValueReset)
+        if(doValueResetToZero)
         {
-            /*videoGrabber->setSharpness(0);
+            videoGrabber->setSharpness(0);
             videoGrabber->setContrast(0);
             videoGrabber->setBrightness(0);
-            videoGrabber->setSaturation(0);*/
+            videoGrabber->setSaturation(0);
+            doValueResetToZero = false;
+        }
+        if(doValueReset)
+        {
             videoGrabber->setDefaultValues();
             doValueReset = false;
             doAutoMode = true;
@@ -68,7 +72,7 @@ public:
                     contrast++;
                 }else
                 {
-                    contrast = -50;
+                    contrast = -100;
                 }
                 videoGrabber->setContrast(contrast);
                 
@@ -132,7 +136,8 @@ public:
         info << "Press 2 to cycle contrast" << "\n";
         info << "Press 3 to cycle brightness" << "\n";
         info << "Press 4 to cycle saturation" << "\n";
-        info << "Press r to reset values to 0" << "\n";
+        info << "Press r to reset values to defaults" << "\n";
+        info << "Press 0 to set values to 0" << "\n";
         info << "Press m to toggle auto exposure" << "\n";
         
         info << "Press g to Toggle info" << "\n";
@@ -174,7 +179,10 @@ public:
         {
             doValueReset = true;
         }
-        
+        if (key == '0')
+        {
+            doValueResetToZero = true;
+        }
         if (key == 'g')
         {
             doDrawInfo = !doDrawInfo;

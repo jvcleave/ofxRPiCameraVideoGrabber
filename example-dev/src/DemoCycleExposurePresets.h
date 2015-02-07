@@ -38,7 +38,7 @@ public:
             currentExposureName = exposurePresetNames[exposurePresetIndex];
             
             videoGrabber->setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
-            videoGrabber->printMeteringMode();
+            //videoGrabber->printMeteringMode();
             //ofLogVerbose() << "currentExposureName: " << currentExposureName;
         }
     };
