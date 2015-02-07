@@ -89,23 +89,26 @@ public:
 	
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
-    void addExitHandler();
+    
 	void close();
 	void setup(OMXCameraSettings);
 	void draw();
 	
-	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
-	ofTexture& getTextureReference();
-
-	void setSharpness(int sharpness_);
-	void setContrast(int contrast_);
-	void setBrightness(int brightness_);
-	void setSaturation(int saturation_);
 	
-	void setFrameStabilization(bool doStabilization);
+	ofTexture& getTextureReference();
+    
+    
+    OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
+    
+	OMX_ERRORTYPE setSharpness(int sharpness_);
+	OMX_ERRORTYPE setContrast(int contrast_);
+	OMX_ERRORTYPE setBrightness(int brightness_);
+	OMX_ERRORTYPE setSaturation(int saturation_);
+	
+	OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
     void setMeteringMode(CameraMeteringMode);
-	void setMeteringMode(OMX_METERINGTYPE meteringType, 
+	OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
                          int evCompensation, 
                          int sensitivity,
                          int shutterSpeedMS,
@@ -114,11 +117,11 @@ public:
                          bool autoAperture,
                          int aperture);
     
-	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
+	OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
 	
-	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+	OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
     
-	void setColorEnhancement(bool doColorEnhance, 
+	OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
                              int U=128, 
                              int V=128);
 	void setLEDState(bool status);
@@ -133,13 +136,13 @@ public:
 	bool isReady();
 	
 	
-	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+	OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
 		
 	
-	void enableBurstMode();
+	OMX_ERRORTYPE enableBurstMode();
 	
 	int getSharpness()		{ return sharpness; }
 	int getContrast()		{ return contrast;	}
@@ -155,16 +158,16 @@ public:
     
     CameraMeteringMode currentMeteringMode;
     void printMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE);
-    void printCurrentMeteringMode();
+    OMX_ERRORTYPE printCurrentMeteringMode();
     
     //
     void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
-    void setAutoAperture(bool);
-    void setAutoShutter(bool);
-    void setAutoSensitivity(bool);
+    OMX_ERRORTYPE setAutoAperture(bool);
+    OMX_ERRORTYPE setAutoShutter(bool);
+    OMX_ERRORTYPE setAutoSensitivity(bool);
 	
 private:
-	
+	void addExitHandler();
 	void onUpdate(ofEventArgs & args);
     void onUpdateDuringExit(ofEventArgs& args);
 
@@ -180,7 +183,7 @@ private:
 	
 	//void close();
 	
-	void toggleImageEffects(bool doDisable);
+	OMX_ERRORTYPE toggleImageEffects(bool doDisable);
 	
 	OMXCameraUtils omxCameraUtils;
 	
