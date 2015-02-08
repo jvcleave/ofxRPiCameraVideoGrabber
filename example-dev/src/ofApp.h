@@ -9,6 +9,8 @@
 #include "DemoCycleFilters.h"
 #include "DemoManualMode.h"
 #include "DemoBCS.h"
+#include "DemoMeteringModes.h"
+#include "DemoFeatureTest.h"
 
 
 class ofApp : public ofBaseApp, public KeyListener{

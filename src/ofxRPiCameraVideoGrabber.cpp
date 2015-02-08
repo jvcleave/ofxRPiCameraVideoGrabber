@@ -171,7 +171,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     setWhiteBalance(OMX_WhiteBalControlAuto);
     applyImageFilter(OMX_ImageFilterNone);
     setColorEnhancement(false);	 
-    
+    setDRC(0);
     
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
@@ -355,8 +355,27 @@ string ofxRPiCameraVideoGrabber::meteringModetoString()
     {
         ofLogError() << "COULD NOT UPDATE METERING MODE" << error;
     }
+
     stringstream ss;
-    ss << "xEVCompensation: "   << fromQ16(currentMeteringMode.exposurevalue.xEVCompensation)   << "\n";
+
+    if(currentMeteringMode.meteringType == OMX_MeteringModeAverage)
+    {
+        ss << "OMX_MeteringModeAverage" << "\n";
+    }
+    if(currentMeteringMode.meteringType == OMX_MeteringModeSpot)
+    {
+        ss << "OMX_MeteringModeSpot" << "\n";
+    }
+    if(currentMeteringMode.meteringType == OMX_MeteringModeMatrix)
+    {
+        ss << "OMX_MeteringModeMatrix" << "\n";
+    }
+    if(currentMeteringMode.meteringType == OMX_MeteringModeBacklit)
+    {
+        ss << "OMX_MeteringModeBacklit" << "\n";
+    }
+    
+    ss << "xEVCompensation: "   << toQ16(currentMeteringMode.exposurevalue.xEVCompensation)   << "\n";
     ss << "nApertureFNumber: "  << fromQ16(currentMeteringMode.exposurevalue.nApertureFNumber)  << "\n";
     ss << "bAutoAperture: "     << currentMeteringMode.exposurevalue.bAutoAperture              << "\n";
     ss << "nShutterSpeedMsec: " << currentMeteringMode.exposurevalue.nShutterSpeedMsec          << "\n";
@@ -396,30 +415,74 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meterin
     
     
     error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
-    //printMeteringMode(currentMeteringMode.exposurevalue);
+
     
-    currentMeteringMode.exposurevalue.xEVCompensation = toQ16(evCompensation);	//-10 to +10
-    currentMeteringMode.exposurevalue.nSensitivity = sensitivity;               //< e.g. nSensitivity = 100 implies "ISO 100" 
+    /*
+     
+     weird this is backwards from what is expected
+     
+     from : http://www.raspberrypi.org/forums/viewtopic.php?t=71915&p=519003
+     "EV has a range of +/- 4 in steps of 1/6ths (because some people want steps of 1/3s, and others 1/2s). 
+     It's MMAL that is awkward as it hasn't taken that into account and just uses an index counting in 1/6ths (ie 10 = 10/6 = +1 2/3).
+     Do bear in mind that it the values will be clipped by the exposure mode and max analogue gain,
+     so if you have a dark scene where the AGC algo has already turned everything up to max, 
+     then selecting EV +4 isn't going to give you any further gain as there isn't any available."
+     
+     "For genuine EV +1, MMAL would take 6 (yuck! Really should fix that), and IL will take 65536.
+     MMAL = Genuine * 6
+     IL = Genuine * 65536
+     
+     In the GPU MMAL/RIL wrapper, we have param.xEVCompensation = (mmal_param->value << 16) / 6;
+     Just watch out for rounding errors on your conversions - those 1/6ths don't always go the way you want."
+     
+    */
+    currentMeteringMode.exposurevalue.xEVCompensation =fromQ16(evCompensation); 
+    
     
     currentMeteringMode.exposurevalue.bAutoAperture =toOMXBool(autoAperture);
-    
-    if(!autoAperture) //TODO set anyway? likely overridden by autoAperture
+    if(autoAperture)
     {
+        if(aperture != 0)
+        {
+            ofLogWarning(__func__) << "aperture will be set to 0 because autoAperture is enabled";
+        }
+        currentMeteringMode.exposurevalue.nApertureFNumber = 0;
         
+    }else
+    {
         currentMeteringMode.exposurevalue.nApertureFNumber = toQ16(aperture);
     }
     
     currentMeteringMode.exposurevalue.bAutoSensitivity = toOMXBool(autoSensitivity);
+    if(autoSensitivity)
+    {
+        if(sensitivity != 0)
+        {
+            ofLogWarning(__func__) << "sensitivity (ISO) will be set to 0 because autoSensitivity is enabled";
+        }
+        currentMeteringMode.exposurevalue.nSensitivity = 0;
+    }else
+    {
+        currentMeteringMode.exposurevalue.nSensitivity = sensitivity; 
+    }
     
     currentMeteringMode.exposurevalue.bAutoShutterSpeed = toOMXBool(autoShutter);
-    if(!autoShutter)
+    
+    if(autoShutter)
+    {
+        if(shutterSpeedMS != 0)
+        {
+            ofLogWarning(__func__) << "shutterSpeedMS will be set to 0 because autoShutter is enabled";
+        }
+        currentMeteringMode.exposurevalue.nShutterSpeedMsec = 0;
+    }else
     {
         currentMeteringMode.exposurevalue.nShutterSpeedMsec = shutterSpeedMS;
     }
-    
     currentMeteringMode.exposurevalue.eMetering = meteringType; 
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    
     if(error == OMX_ErrorNone)
     {
         setCurrentMeteringMode(currentMeteringMode.exposurevalue); 
@@ -608,7 +671,92 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE ima
     return OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRC(int level)
+{
+    OMX_DYNAMICRANGEEXPANSIONMODETYPE type = OMX_DynRangeExpOff;
+    switch (level) 
+    {
+        case 0:
+        {
+            type = OMX_DynRangeExpOff;
+            break;
+        }
+        case 1:
+        {
+            type = OMX_DynRangeExpLow;
+            break;
+        }
+        case 2:
+        {
+            type = OMX_DynRangeExpMedium;
+            break;
+        }
+        case 3:
+        {
+            type = OMX_DynRangeExpHigh;
+            break;
+        }
+        default:
+        {
+            type = OMX_DynRangeExpOff;
+            break;
+        }
+        
+    }
+    
+    drcConfig.eMode = type;
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &drcConfig);
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << "FAIL " << level;
+    }else{
+    
+        ofLogVerbose(__func__) << "SUCCESS " << level;
+    }
+    
+    return error;
+}
 
+
+#if 0
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilterWithParams(OMX_CONFIG_IMAGEFILTERPARAMSTYPE imageFilter)
+{
+    OMX_INIT_STRUCTURE(imageFilter);
+    imageFilter.nPortIndex = OMX_ALL;
+    imageFilter.nNumParams = 1;
+    imageFilter.eImageFilter = OMX_ImageFilterBlur;
+    
+    return OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilterParameters, &imageFilter);
+}
+
+
+OMX_CONFIG_IMAGEFILTERPARAMSTYPE image_filter;
+OMX_INIT_STRUCTURE(image_filter);
+
+image_filter.nPortIndex = m_omx_image_fx.GetOutputPort();
+if (m_anaglyph != OMX_ImageFilterAnaglyphNone)
+{
+    image_filter.nNumParams = 1;
+    image_filter.nParams[0] = m_anaglyph;
+    image_filter.eImageFilter = OMX_ImageFilterAnaglyph;
+}
+else
+{
+    image_filter.nNumParams = 1;
+    image_filter.nParams[0] = 3;
+    if (!advanced_deinterlace)
+        image_filter.eImageFilter = OMX_ImageFilterDeInterlaceFast;
+        else
+            image_filter.eImageFilter = OMX_ImageFilterDeInterlaceAdvanced;
+            }
+omx_err = m_omx_image_fx.SetConfig(OMX_IndexConfigCommonImageFilterParameters, &image_filter);
+if(omx_err != OMX_ErrorNone)
+{
+    CLog::Log(LOGERROR, "%s::%s - OMX_IndexConfigCommonImageFilterParameters omx_err(0x%08x)", CLASSNAME, __func__, omx_err);
+    return false;
+}
+
+#endif
 
 bool doExit = false;
 void signal_handler(int signum)

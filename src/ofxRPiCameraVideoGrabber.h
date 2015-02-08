@@ -47,37 +47,13 @@ struct CameraMeteringMode
         aperture = 0;
         autoAperture = true;
         
-        shutterSpeedMS = 9977; //default 1000
+        shutterSpeedMS = 0; //default 1000?
         autoShutter = true;
         
         sensitivity = 0;
         autoSensitivity = true;
-        
-        
-        
     };
-#if 0       
-    
-defaults:
-xEVCompensation: 0
-nApertureFNumber: 0
-bAutoAperture: 0
-nShutterSpeedMsec: 0
-bAutoShutterSpeed: 1
-nSensitivity: 0
-bAutoSensitivity: 1
-    
-    OMX_METERINGTYPE eMetering;
-    OMX_S32 xEVCompensation;      /**< Fixed point value stored as Q16 */
-    OMX_U32 nApertureFNumber;     /**< e.g. nApertureFNumber = 2 implies "f/2" - Q16 format */
-    OMX_BOOL bAutoAperture;		/**< Whether aperture number is defined automatically */
-    OMX_U32 nShutterSpeedMsec;    /**< Shutterspeed in milliseconds */ 
-    OMX_BOOL bAutoShutterSpeed;	/**< Whether shutter speed is defined automatically */ 
-    OMX_U32 nSensitivity;         /**< e.g. nSensitivity = 100 implies "ISO 100" */
-    OMX_BOOL bAutoSensitivity;	/**< Whether sensitivity is defined automatically */
-    
-#endif
-    
+  
 };
 
 class ofxRPiCameraVideoGrabber
@@ -125,7 +101,7 @@ public:
     string meteringModetoString();
     void printMeteringMode();
     
-    
+    OMX_ERRORTYPE setDRC(int level);
     OMX_ERRORTYPE setAutoAperture(bool);
     OMX_ERRORTYPE setAutoShutter(bool);
     OMX_ERRORTYPE setAutoSensitivity(bool);
@@ -190,14 +166,12 @@ private:
     void onUpdateDuringExit(ofEventArgs& args);
 
 	bool hasNewFrame;
-	
 	int updateFrameCounter;
+    int frameCounter;
+    
 	OMX_HANDLETYPE camera;
 	bool LED_CURRENT_STATE;
   
-	
-	//void close();
-	
 	OMX_ERRORTYPE toggleImageEffects(bool doDisable);
 	
 	OMXCameraUtils omxCameraUtils;
@@ -205,7 +179,7 @@ private:
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
 	
-	int frameCounter;
+	
 	
 	bool pixelsRequested;
     
@@ -227,7 +201,13 @@ private:
     OMX_CONFIG_BOOLEANTYPE burstModeConfig;
     OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
     OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
-    //Set exposure mode
+    OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drcConfig;
+    
+    //OMX_CameraDisableAlgorithmDynamicRangeExpansion
+    //OMX_CameraDisableAlgorithmHighDynamicRange
+    //https://gist.github.com/jvcleave/83bbef779c0cde9589ab
+    //https://github.com/raspberrypi/userland/blob/master/interface/mmal/openmaxil/
+    
     
     void initStructures()
     {
@@ -263,7 +243,7 @@ private:
         OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
         
         OMX_INIT_STRUCTURE(flickerCancelConfig);
-
+        OMX_INIT_STRUCTURE(drcConfig);
         
     };
     

@@ -49,8 +49,6 @@ void ofApp::setup()
     demo1->name = "CYCLE EXPOSURE DEMO";
     demos.push_back(demo1);
     
-    
-    
     DemoCycleFilters* demo2 = new DemoCycleFilters();
     demo2->setup(omxCameraSettings, &videoGrabber);
     demo2->name = "CYCLE FILTER DEMO";
@@ -65,6 +63,17 @@ void ofApp::setup()
     demo4->setup(omxCameraSettings, &videoGrabber);
     demo4->name = "SHARP/BRIGHT/CONTRAST/SATURATION DEMO";
     demos.push_back(demo4);
+    
+    
+    DemoMeteringModes* demo5 = new DemoMeteringModes();
+    demo5->setup(omxCameraSettings, &videoGrabber);
+    demo5->name = "METERING MODES";
+    demos.push_back(demo5);
+    
+    DemoFeatureTest* demo6 = new DemoFeatureTest();
+    demo6->setup(omxCameraSettings, &videoGrabber);
+    demo6->name = "DRC";
+    demos.push_back(demo6);
     
     
     doNextDemo = false;
