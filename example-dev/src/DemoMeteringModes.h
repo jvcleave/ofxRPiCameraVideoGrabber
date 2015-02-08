@@ -152,10 +152,15 @@ public:
         stringstream info;
         info << name << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
-        info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n\n";
+        info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
+        
+        info << "\n";
         info << videoGrabber->meteringModetoString() << "\n";
+        
+        info << "\n";
         info << "Press c to increment Metering Mode: " << currentMeteringMode << "\n";
         info << "Press g to Toggle info" << "\n";
+        info << "Press SPACE for next Demo" << "\n";
         
         if (doDrawInfo) 
         {

@@ -72,7 +72,7 @@ void ofApp::setup()
     
     DemoFeatureTest* demo6 = new DemoFeatureTest();
     demo6->setup(omxCameraSettings, &videoGrabber);
-    demo6->name = "DRC";
+    demo6->name = "FEATURE TEST";
     demos.push_back(demo6);
     
     

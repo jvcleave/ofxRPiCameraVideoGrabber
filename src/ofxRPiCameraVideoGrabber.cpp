@@ -8,6 +8,7 @@
 
 #include "ofxRPiCameraVideoGrabber.h"
 
+
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
     OMX_Maps::getInstance();
@@ -172,8 +173,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     applyImageFilter(OMX_ImageFilterNone);
     setColorEnhancement(false);	 
     setDRC(0);
-    roiTriangle.set(0, 0, 100, 100);
-    setROI(roiTriangle);
+    cropRectangle.set(0, 0, 100, 100);
+    setSensorCrop(cropRectangle);
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -186,11 +187,9 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     }    
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
-{
-    burstModeConfig.bEnabled = OMX_TRUE;
-    return OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
-}
+
+
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 {
@@ -209,48 +208,6 @@ void ofxRPiCameraVideoGrabber::enableImageEffects()
 void ofxRPiCameraVideoGrabber::disableImageEffects()
 {
     toggleImageEffects(false);
-}
-
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
-{
-    
-    
-    flickerCancelConfig.nPortIndex = OMX_ALL;
-    
-    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
-    if(error == OMX_ErrorNone) 
-    {
-        ofLogVerbose(__func__) << "camera OMX_GetConfig OMX_IndexConfigCommonFlickerCancellation PASS ";
-        switch (flickerCancelConfig.eFlickerCancel) 
-        {
-            case OMX_COMMONFLICKERCANCEL_OFF:
-            {
-                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_OFF";
-                break;
-            }
-            case OMX_COMMONFLICKERCANCEL_AUTO:
-            {
-                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_AUTO";
-                break;
-            }
-            case OMX_COMMONFLICKERCANCEL_50:
-            {
-                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_50";
-                break;
-            }
-            case OMX_COMMONFLICKERCANCEL_60:
-            {
-                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_60";
-                break;
-            }
-            default:
-                break;
-        }
-        flickerCancelConfig.eFlickerCancel = eFlickerCancel;
-        error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
-    }
-    
-    return error;
 }
 
 int ofxRPiCameraVideoGrabber::getWidth()
@@ -637,37 +594,37 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance,
     return OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colorEnhancementConfig);
 }
 
-ofRectangle& ofxRPiCameraVideoGrabber::getROIRectangle()
+ofRectangle& ofxRPiCameraVideoGrabber::getCropRectangle()
 {
-    return roiTriangle;
+    return cropRectangle;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::updateROI()
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::updateSensorCrop()
 {
-    return setROI(roiTriangle);
+    return setSensorCrop(cropRectangle);
 }
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setROI(int left, int top, int width, int height)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSensorCrop(int left, int top, int width, int height)
 {
-    roiTriangle.set(left, top, width, height);
-    return updateROI();
+    cropRectangle.set(left, top, width, height);
+    return updateSensorCrop();
 }
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setROI(ofRectangle& rectangle)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSensorCrop(ofRectangle& rectangle)
 {
    
-    roiConfig.xLeft   = ((uint32_t)rectangle.getLeft()   << 16)/100;
-    roiConfig.xTop    = ((uint32_t)rectangle.getTop()    << 16)/100;
-    roiConfig.xWidth  = ((uint32_t)rectangle.getWidth()  << 16)/100;
-    roiConfig.xHeight = ((uint32_t)rectangle.getHeight() << 16)/100;
+    sensorCropConfig.xLeft   = ((uint32_t)rectangle.getLeft()   << 16)/100;
+    sensorCropConfig.xTop    = ((uint32_t)rectangle.getTop()    << 16)/100;
+    sensorCropConfig.xWidth  = ((uint32_t)rectangle.getWidth()  << 16)/100;
+    sensorCropConfig.xHeight = ((uint32_t)rectangle.getHeight() << 16)/100;
     
-    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigInputCropPercentages, &roiConfig);
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigInputCropPercentages, &sensorCropConfig);
     if(error != OMX_ErrorNone)
     {
-        ofLogError(__func__) << OMX_Maps::getInstance().omxErrors[error];
+        ofLogError(__func__) << printError(error);
         if(error == OMX_ErrorBadParameter)
         {
-            ofLogWarning(__func__) << "resetting ROI to known good params (0, 0, 100, 100)";
-            roiTriangle.set(0, 0, 100, 100);
-            return updateROI(); 
+            ofLogWarning(__func__) << "resetting cropRectangle to known good params (0, 0, 100, 100)";
+            cropRectangle.set(0, 0, 100, 100);
+            return updateSensorCrop(); 
         }
         
     }
@@ -675,6 +632,19 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setROI(ofRectangle& rectangle)
 
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDigitalZoom(int step)
+{
+    digitalZoomConfig.xWidth  = step;
+    digitalZoomConfig.xHeight = step;
+       
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonDigitalZoom, &digitalZoomConfig);
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << printError(error);
+    }
+    return OMX_ErrorNone;
+    
+}
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
     setLEDState(!LED_CURRENT_STATE);
@@ -750,7 +720,70 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRC(int level)
         ofLogError(__func__) << "FAIL " << level;
     }else{
     
-        ofLogVerbose(__func__) << "SUCCESS " << level;
+        //ofLogVerbose(__func__) << "SUCCESS " << level;
+    }
+    
+    return error;
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setHDR(bool doHDR)
+{
+    hdrConfig.bEnabled = toOMXBool(doHDR);
+    
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &hdrConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << " PASS";
+    }else{
+        ofLogError(__func__) << "FAIL" << printError(error);
+    }
+    return error;
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
+{
+    burstModeConfig.bEnabled = OMX_TRUE;
+    return OMX_SetConfig(camera, OMX_IndexConfigBrcmHighDynamicRange, &burstModeConfig);
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
+{
+    
+    
+    flickerCancelConfig.nPortIndex = OMX_ALL;
+    
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << "camera OMX_GetConfig OMX_IndexConfigCommonFlickerCancellation PASS ";
+        switch (flickerCancelConfig.eFlickerCancel) 
+        {
+            case OMX_COMMONFLICKERCANCEL_OFF:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_OFF";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_AUTO:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_AUTO";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_50:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_50";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_60:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_60";
+                break;
+            }
+            default:
+                break;
+        }
+        flickerCancelConfig.eFlickerCancel = eFlickerCancel;
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
     }
     
     return error;

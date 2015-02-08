@@ -62,12 +62,13 @@ public:
         info << "getBrightness(): "     << videoGrabber->getBrightness()             << "\n";
         info << "getSaturation(): "      << videoGrabber->getSaturation()             << "\n";
         
-        //info <<	filterCollection.filterList << "\n";
+        info << "\n";
+        info << "currentExposureName: " << currentExposureName << "\n";
         
         info << "\n";
         info << "Press e to increment filter" << "\n";
         info << "Press g to Toggle info" << "\n";
-        info << "currentExposureName: " << currentExposureName << "\n";
+        info << "Press SPACE for next Demo" << "\n";
         
         if (omxCameraSettings.doRecording) 
         {

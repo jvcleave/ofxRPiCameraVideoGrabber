@@ -124,6 +124,8 @@ public:
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
         info << videoGrabber->meteringModetoString() << "\n";
+        
+        info << "\n";
         info << "sharpness: "   << videoGrabber->getSharpness()    << "\n";
         info << "contrast: "    << videoGrabber->getContrast()     << "\n";
         info << "brightness: "  << videoGrabber->getBrightness()   << "\n";
@@ -131,7 +133,7 @@ public:
         
         info << "doAutoMode: "  << doAutoMode   << "\n";
         
-
+        info << "\n";
         info << "Press 1 to cycle sharpness" << "\n";
         info << "Press 2 to cycle contrast" << "\n";
         info << "Press 3 to cycle brightness" << "\n";
@@ -141,6 +143,7 @@ public:
         info << "Press m to toggle auto exposure" << "\n";
         
         info << "Press g to Toggle info" << "\n";
+        info << "Press SPACE for next Demo" << "\n";
         
         if (doDrawInfo) 
         {

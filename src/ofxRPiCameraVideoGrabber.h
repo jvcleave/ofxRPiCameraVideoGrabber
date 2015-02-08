@@ -144,12 +144,16 @@ public:
                                       int V=128);
     
     OMX_ERRORTYPE setDRC(int level);
+    OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
     
-    ofRectangle roiTriangle;
-    OMX_ERRORTYPE setROI(ofRectangle& rectangle);
-    OMX_ERRORTYPE setROI(int left, int top, int width, int height);
-    ofRectangle& getROIRectangle();
-    OMX_ERRORTYPE updateROI();
+    ofRectangle cropRectangle;
+    OMX_ERRORTYPE setSensorCrop(ofRectangle& rectangle);
+    OMX_ERRORTYPE setSensorCrop(int left, int top, int width, int height);
+    ofRectangle& getCropRectangle();
+    OMX_ERRORTYPE updateSensorCrop();
+    
+    OMX_ERRORTYPE setDigitalZoom(int step);
+
     
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
@@ -166,6 +170,10 @@ private:
         if(omxBool == OMX_TRUE) { return true; } else { return false; } 
     }
     
+    string printError(OMX_ERRORTYPE& error)
+    {
+        return OMX_Maps::getInstance().omxErrors[error];
+    }
     float fromQ16(float n) { return n* 65536; }
     float toQ16(float n) { return n*(1/65536.0); }
     
@@ -207,10 +215,64 @@ private:
     OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
     
     OMX_CONFIG_BOOLEANTYPE burstModeConfig;
+    OMX_CONFIG_BOOLEANTYPE hdrConfig;
+    OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
+
     OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
     OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
     OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drcConfig;
-    OMX_CONFIG_INPUTCROPTYPE roiConfig;
+    OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
+
+    
+    
+    
+    
+    
+#if 0
+    
+    /** 
+     * Structure defining percent to scale each frame dimension.  For example:  
+     * To make the width 50% larger, use fWidth = 1.5 and to make the width
+     * 1/2 the original size, use fWidth = 0.5
+     */
+    typedef struct OMX_CONFIG_SCALEFACTORTYPE {
+        OMX_U32 nSize;            /**< Size of the structure in bytes */
+        OMX_VERSIONTYPE nVersion; /**< OMX specification version info */ 
+        OMX_U32 nPortIndex;       /**< Port that this struct applies to */
+        OMX_S32 xWidth;           /**< Fixed point value stored as Q16 */
+        OMX_S32 xHeight;          /**< Fixed point value stored as Q16 */
+    }OMX_CONFIG_SCALEFACTORTYPE;
+    
+    OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
+    OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
+    
+    OMX_PARAM_U32TYPE OMX_IndexConfigCameraIsoReferenceValue
+    OMX_CONFIG_ZEROSHUTTERLAGTYPE OMX_IndexParamCameraZeroShutterLag
+    OMX_CONFIG_BRCMFOVTYPE OMX_IndexConfigFieldOfView
+    OMX_CONFIG_CAMERAINFOTYPE OMX_IndexConfigCameraInfo
+    
+    OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE OMX_IndexConfigFocusControl
+    OMX_CONFIG_REDEYEREMOVALTYPE OMX_IndexConfigCommonRedEyeRemoval
+    
+    OMX_PARAM_CAPTURESTATETYPE OMX_IndexParamCaptureStatus
+    OMX_CONFIG_FACEDETECTIONCONTROLTYPE OMX_IndexConfigCommonFaceDetectionControl
+    OMX_CONFIG_BOOLEANTYPE OMX_IndexConfigDrawBoxAroundFaces
+    OMX_IMAGE_PARAM_QFACTORTYPE OMX_IndexParamQFactor
+    OMX_PARAM_BRCMTHUMBNAILTYPE OMX_IndexParamBrcmThumbnail
+    OMX_PARAM_TIMESTAMPMODETYPE OMX_IndexParamCommonUseStcTimestamps
+    
+    OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
+    OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
+    OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
+    OMX_PARAM_BRCMCONFIGFILETYPE OMX_IndexParamBrcmConfigFileRegisters
+    OMX_PARAM_BRCMCONFIGFILECHUNKTYPE OMX_IndexParamBrcmConfigFileChunkRegisters
+    
+    OMX_PARAM_BRCMFRAMERATERANGETYPE OMX_IndexParamBrcmFpsRange
+    OMX_PARAM_S32TYPE OMX_IndexParamCaptureExposureCompensation
+    OMX_IndexParamSWSharpenDisable
+    OMX_IndexParamSWSaturationDisable
+ 
+#endif
     //OMX_CameraDisableAlgorithmDynamicRangeExpansion
     //OMX_CameraDisableAlgorithmHighDynamicRange
     //https://gist.github.com/jvcleave/83bbef779c0cde9589ab
@@ -246,15 +308,23 @@ private:
         OMX_INIT_STRUCTURE(imagefilterConfig);
         imagefilterConfig.nPortIndex = OMX_ALL;
         
-        OMX_INIT_STRUCTURE(roiConfig);
-        roiConfig.nPortIndex = OMX_ALL;
+        OMX_INIT_STRUCTURE(sensorCropConfig);
+        sensorCropConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(digitalZoomConfig);
+        digitalZoomConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(drcConfig);
+        
+        OMX_INIT_STRUCTURE(hdrConfig);
         
         OMX_INIT_STRUCTURE(burstModeConfig);
         
         OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
         
         OMX_INIT_STRUCTURE(flickerCancelConfig);
-        OMX_INIT_STRUCTURE(drcConfig);
+        
+        
         
         
     };
