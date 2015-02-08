@@ -10,12 +10,16 @@ public:
     
     bool doDrawInfo;
     bool doDRC;
+    bool doROI;
+    
     int drcLevel;
+    
     void setup(OMXCameraSettings omxCameraSettings_, ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup(omxCameraSettings_, videoGrabber_);
         doDrawInfo	= true;
         doDRC = false;
+        doROI = false;
         drcLevel = 0;
         
     };
@@ -35,6 +39,17 @@ public:
             videoGrabber->setDRC(drcLevel);
             doDRC = false;
         }
+        if (doROI) 
+        {
+            
+            int randomPercentage = ofRandom(25, 100);
+            
+            //int randomHeight = ofRandom(videoGrabber->getHeight()/2, videoGrabber->getHeight());
+            //int randomHeightPercentage = ofMap(randomHeight, 0, videoGrabber->getHeight(), 0, 100);
+            
+            videoGrabber->setROI(0, 0,  randomPercentage, randomPercentage);
+            //doROI = false;
+        }
     };
     
     void draw()
@@ -52,14 +67,18 @@ public:
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n\n";
 
-        info << "Press a to increment DRC: " << drcLevel << "\n";
+        info << "Press a to increment DRC: "    << drcLevel << "\n";
+        info << "Press r to randomize ROI" <<  "\n";
+        info << "ROI LEFT %: "      << videoGrabber->getROIRectangle().getLeft()    <<  "\n";
+        info << "ROI TOP %: "       << videoGrabber->getROIRectangle().getTop()     <<  "\n";
+        info << "ROI WIDTH %: "     << videoGrabber->getROIRectangle().getWidth()   <<  "\n";
+        info << "ROI HEIGHT %: "    << videoGrabber->getROIRectangle().getHeight()  <<  "\n";
         info << "Press g to Toggle info" << "\n";
         
         if (doDrawInfo) 
         {
             ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
         }
-        
     };
     
     void onKey(int key)
@@ -69,7 +88,10 @@ public:
         {
             doDRC = true;
         }
-        
+        if (key == 'r')
+        {
+            doROI = !doROI;
+        }
         if (key == 'g')
         {
             doDrawInfo = !doDrawInfo;

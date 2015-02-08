@@ -172,7 +172,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     applyImageFilter(OMX_ImageFilterNone);
     setColorEnhancement(false);	 
     setDRC(0);
-    
+    roiTriangle.set(0, 0, 100, 100);
+    setROI(roiTriangle);
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -395,7 +396,7 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMetering
     setMeteringMode(cameraMeteringMode.meteringType,
                     cameraMeteringMode.evCompensation, 
                     cameraMeteringMode.sensitivity,
-                    cameraMeteringMode.shutterSpeedMS,
+                    cameraMeteringMode.shutterSpeedMicroSeconds,
                     cameraMeteringMode.autoShutter,
                     cameraMeteringMode.autoSensitivity, 
                     cameraMeteringMode.autoAperture,
@@ -405,7 +406,7 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMetering
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
                                                         int evCompensation,         //default 0
                                                         int sensitivity,            //default 100
-                                                        int shutterSpeedMS,
+                                                        int shutterSpeedMicroSeconds,
                                                         bool autoShutter,           //default false
                                                         bool autoSensitivity,       //default false
                                                         bool autoAperture,          //default true
@@ -470,14 +471,14 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meterin
     
     if(autoShutter)
     {
-        if(shutterSpeedMS != 0)
+        if(shutterSpeedMicroSeconds != 0)
         {
-            ofLogWarning(__func__) << "shutterSpeedMS will be set to 0 because autoShutter is enabled";
+            ofLogWarning(__func__) << "shutterSpeedMicroSeconds will be set to 0 because autoShutter is enabled";
         }
         currentMeteringMode.exposurevalue.nShutterSpeedMsec = 0;
     }else
     {
-        currentMeteringMode.exposurevalue.nShutterSpeedMsec = shutterSpeedMS;
+        currentMeteringMode.exposurevalue.nShutterSpeedMsec = shutterSpeedMicroSeconds;
     }
     currentMeteringMode.exposurevalue.eMetering = meteringType; 
     
@@ -506,7 +507,7 @@ void ofxRPiCameraVideoGrabber::setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETY
     currentMeteringMode.aperture = fromQ16(omxExposureValue.nApertureFNumber);
     currentMeteringMode.autoAperture = fromOMXBool(omxExposureValue.bAutoAperture);
     
-    currentMeteringMode.shutterSpeedMS = omxExposureValue.nShutterSpeedMsec; 
+    currentMeteringMode.shutterSpeedMicroSeconds = omxExposureValue.nShutterSpeedMsec; 
     currentMeteringMode.autoShutter = fromOMXBool(omxExposureValue.bAutoShutterSpeed);
     
     currentMeteringMode.sensitivity = omxExposureValue.nSensitivity;
@@ -634,6 +635,44 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance,
     colorEnhancementConfig.nCustomizedV = V;
     
     return OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &colorEnhancementConfig);
+}
+
+ofRectangle& ofxRPiCameraVideoGrabber::getROIRectangle()
+{
+    return roiTriangle;
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::updateROI()
+{
+    return setROI(roiTriangle);
+}
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setROI(int left, int top, int width, int height)
+{
+    roiTriangle.set(left, top, width, height);
+    return updateROI();
+}
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setROI(ofRectangle& rectangle)
+{
+   
+    roiConfig.xLeft   = ((uint32_t)rectangle.getLeft()   << 16)/100;
+    roiConfig.xTop    = ((uint32_t)rectangle.getTop()    << 16)/100;
+    roiConfig.xWidth  = ((uint32_t)rectangle.getWidth()  << 16)/100;
+    roiConfig.xHeight = ((uint32_t)rectangle.getHeight() << 16)/100;
+    
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigInputCropPercentages, &roiConfig);
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << OMX_Maps::getInstance().omxErrors[error];
+        if(error == OMX_ErrorBadParameter)
+        {
+            ofLogWarning(__func__) << "resetting ROI to known good params (0, 0, 100, 100)";
+            roiTriangle.set(0, 0, 100, 100);
+            return updateROI(); 
+        }
+        
+    }
+    return error;
+
 }
 
 void ofxRPiCameraVideoGrabber::toggleLED()

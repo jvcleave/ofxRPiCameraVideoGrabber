@@ -35,7 +35,7 @@ public:
          aperture = 0;
          autoAperture = true;
          
-         shutterSpeedMS = 9977; //default 1000
+         shutterSpeedMicroSeconds = 9977; //default 1000
          autoShutter = true;
          
          sensitivity = 0;
@@ -68,19 +68,19 @@ public:
         meteringModes.push_back(manualMode);
         
         CameraMeteringMode mode6 = manualMode;
-        mode6.shutterSpeedMS = 1000;
+        mode6.shutterSpeedMicroSeconds = 1000;
         meteringModes.push_back(mode6);
         
         CameraMeteringMode mode7 = manualMode;
-        mode7.shutterSpeedMS = 100000; //33158 highest (shutterSpeedMS = 33900 will max out - tied to framerate?)
+        mode7.shutterSpeedMicroSeconds = 100000; //33158 highest (shutterSpeedMicroSeconds = 33900 will max out - tied to framerate?)
         meteringModes.push_back(mode7);
         
         CameraMeteringMode mode8 = manualMode;
-        mode8.shutterSpeedMS = 32000;
+        mode8.shutterSpeedMicroSeconds = 32000;
         meteringModes.push_back(mode8);
         
         CameraMeteringMode mode9 = manualMode;
-        mode9.shutterSpeedMS = 33900;
+        mode9.shutterSpeedMicroSeconds = 33900;
         mode9.sensitivity = 800;
         meteringModes.push_back(mode9);
         
@@ -89,18 +89,18 @@ public:
         meteringModes.push_back(mode10);
         
         CameraMeteringMode mode11 = manualMode;
-        mode11.shutterSpeedMS = 1000;
+        mode11.shutterSpeedMicroSeconds = 1000;
         mode11.sensitivity = 3200;
         meteringModes.push_back(mode11);
         
         
         CameraMeteringMode mode12 = manualMode;
-        mode12.shutterSpeedMS = 33900;
+        mode12.shutterSpeedMicroSeconds = 33900;
         mode12.sensitivity = 6400;
         meteringModes.push_back(mode12);
         
         CameraMeteringMode mode13 = manualMode;
-        mode13.shutterSpeedMS = 33300;
+        mode13.shutterSpeedMicroSeconds = 33300;
         mode13.sensitivity = 12800;
         meteringModes.push_back(mode13);
         

@@ -30,7 +30,7 @@ struct CameraMeteringMode
     OMX_METERINGTYPE meteringType;
     int evCompensation;
     int sensitivity;
-    int shutterSpeedMS;
+    int shutterSpeedMicroSeconds;
     bool autoShutter;
     bool autoSensitivity;
     bool autoAperture;
@@ -47,7 +47,7 @@ struct CameraMeteringMode
         aperture = 0;
         autoAperture = true;
         
-        shutterSpeedMS = 0; //default 1000?
+        shutterSpeedMicroSeconds = 0; //default 1000?
         autoShutter = true;
         
         sensitivity = 0;
@@ -101,7 +101,7 @@ public:
     string meteringModetoString();
     void printMeteringMode();
     
-    OMX_ERRORTYPE setDRC(int level);
+    
     OMX_ERRORTYPE setAutoAperture(bool);
     OMX_ERRORTYPE setAutoShutter(bool);
     OMX_ERRORTYPE setAutoSensitivity(bool);
@@ -127,7 +127,7 @@ public:
     OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
                                   int evCompensation, 
                                   int sensitivity,
-                                  int shutterSpeedMS,
+                                  int shutterSpeedMicroSeconds,
                                   bool autoShutter,
                                   bool autoSensitivity,
                                   bool autoAperture,
@@ -142,6 +142,14 @@ public:
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
                                       int U=128, 
                                       int V=128);
+    
+    OMX_ERRORTYPE setDRC(int level);
+    
+    ofRectangle roiTriangle;
+    OMX_ERRORTYPE setROI(ofRectangle& rectangle);
+    OMX_ERRORTYPE setROI(int left, int top, int width, int height);
+    ofRectangle& getROIRectangle();
+    OMX_ERRORTYPE updateROI();
     
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
@@ -202,7 +210,7 @@ private:
     OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
     OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
     OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drcConfig;
-    
+    OMX_CONFIG_INPUTCROPTYPE roiConfig;
     //OMX_CameraDisableAlgorithmDynamicRangeExpansion
     //OMX_CameraDisableAlgorithmHighDynamicRange
     //https://gist.github.com/jvcleave/83bbef779c0cde9589ab
@@ -238,12 +246,16 @@ private:
         OMX_INIT_STRUCTURE(imagefilterConfig);
         imagefilterConfig.nPortIndex = OMX_ALL;
         
+        OMX_INIT_STRUCTURE(roiConfig);
+        roiConfig.nPortIndex = OMX_ALL;
+        
         OMX_INIT_STRUCTURE(burstModeConfig);
         
         OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
         
         OMX_INIT_STRUCTURE(flickerCancelConfig);
         OMX_INIT_STRUCTURE(drcConfig);
+        
         
     };
     
