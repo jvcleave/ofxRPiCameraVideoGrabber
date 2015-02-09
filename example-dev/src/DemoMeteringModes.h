@@ -11,6 +11,7 @@ public:
     bool doDrawInfo;
     bool doChangeMeteringMode = false;
     bool doShutterSpeed;
+    bool doAperture;
     vector<CameraMeteringMode> meteringModes;
     int currentMeteringMode;
    
@@ -64,7 +65,7 @@ public:
         CameraMeteringMode manualMode;
         manualMode.autoAperture = false;
         manualMode.autoShutter = false;
-        manualMode.autoSensitivity = false;
+        manualMode.autoISO = false;
         meteringModes.push_back(manualMode);
         
         CameraMeteringMode mode6 = manualMode;
@@ -149,6 +150,19 @@ public:
             }
             videoGrabber->setShutterSpeed(currentShutterSpeed);
         }
+        if(doAperture)
+        {
+            int currentAperture = videoGrabber->getAperture();
+            if(currentAperture<32)
+            {
+                currentAperture++;
+            }else
+            {
+                currentAperture = 0;
+            }
+            videoGrabber->setAperture(currentAperture);
+        }
+        
     };
     
     void draw()
@@ -172,6 +186,8 @@ public:
         info << "\n";
         info << "Press c to increment Metering Mode: " << currentMeteringMode << "\n";
         info << "Press s to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
+        info << "Press a to increment aperture: " << videoGrabber->getAperture() << "\n";
+        
         
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
@@ -198,6 +214,10 @@ public:
         if (key == 's')
         {
             doShutterSpeed = !doShutterSpeed;
+        }
+        if (key == 'a')
+        {
+            doAperture = !doAperture;
         }
         if (key == 'c')
         {

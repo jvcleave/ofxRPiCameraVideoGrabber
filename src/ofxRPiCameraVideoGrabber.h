@@ -27,42 +27,78 @@
 
 struct CameraMeteringMode
 {
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    
     OMX_METERINGTYPE meteringType;
     int evCompensation;
-    int ISO;
-    int shutterSpeedMicroSeconds;
+    
+    
     bool autoShutter;
-    bool autoSensitivity;
+    int shutterSpeedMicroSeconds;
+    
     bool autoAperture;
     int aperture;
-    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    
+    bool autoISO;
+    int ISO;
+
     CameraMeteringMode()
     {
         OMX_INIT_STRUCTURE(exposurevalue);
         exposurevalue.nPortIndex = OMX_ALL;
+        meteringType = OMX_MeteringModeAverage;
         
-        meteringType = OMX_MeteringModeMatrix;
+        
         evCompensation=0; //-10 to +10
         
-        aperture = 1;
-        autoAperture = true;
-        
-        shutterSpeedMicroSeconds = 0; //default 1000?
         autoShutter = true;
+        shutterSpeedMicroSeconds = 0;
         
-        ISO =800;
-        autoSensitivity = true;
+        autoAperture = true;
+        aperture = 0;
+        
+        autoISO = true;
+        ISO=0;
     };
+    
+    string getMeteringTypeString()
+    {
+        stringstream ss;
+        
+        if(meteringType == OMX_MeteringModeAverage)
+        {
+            ss << "OMX_MeteringModeAverage" << "\n";
+        }
+        if(meteringType == OMX_MeteringModeSpot)
+        {
+            ss << "OMX_MeteringModeSpot" << "\n";
+        }
+        if(meteringType == OMX_MeteringModeMatrix)
+        {
+            ss << "OMX_MeteringModeMatrix" << "\n";
+        }
+        if(meteringType == OMX_MeteringModeBacklit)
+        {
+            ss << "OMX_MeteringModeBacklit" << "\n";
+        }
+        return ss.str();
+    };
+    
     string toString()
     {
         stringstream ss;
+        
+        ss << getMeteringTypeString() << "\n";
         ss << "evCompensation: " << evCompensation << "\n";
-        ss << "aperture: " << aperture << "\n";
-        ss << "autoAperture: " << autoAperture << "\n";
-        ss << "shutterSpeedMicroSeconds: " << shutterSpeedMicroSeconds << "\n";
+        
         ss << "autoShutter: " << autoShutter << "\n";
+        ss << "shutterSpeedMicroSeconds: " << shutterSpeedMicroSeconds << "\n";
+        
+        ss << "autoAperture: " << autoAperture << "\n";
+        ss << "aperture: " << aperture << "\n";
+        
+        ss << "autoISO: " << autoISO << "\n";
         ss << "ISO: " << ISO << "\n";
-        ss << "autoSensitivity: " << autoSensitivity << "\n";
         return ss.str();
         
     }
@@ -114,12 +150,14 @@ public:
     string meteringModetoString();
     void printMeteringMode();
     
-    int getShutterSpeed()
-    {
-        return currentMeteringMode.shutterSpeedMicroSeconds;
-    }
+    
     OMX_ERRORTYPE setAutoAperture(bool);
+    int getAperture();
+    OMX_ERRORTYPE setAperture(int aperture);
+    
     OMX_ERRORTYPE setAutoShutter(bool);
+                    
+    int getShutterSpeed();
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeed);
     OMX_ERRORTYPE setAutoSensitivity(bool);
     
@@ -141,15 +179,6 @@ public:
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
     OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
-    OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
-                                  int evCompensation, 
-                                  int ISO,
-                                  int shutterSpeedMicroSeconds,
-                                  bool autoShutter,
-                                  bool autoSensitivity,
-                                  bool autoAperture,
-                                  int aperture);
-    
     //setExposureMode is now setExposurePreset - sorry :(
     //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
@@ -181,7 +210,8 @@ public:
     
     
 private:
-    
+    OMX_ERRORTYPE applyCurrentMeteringMode();
+
     int zoomLevel;
     vector<int> zoomLevels;
     OMX_ERRORTYPE setDigitalZoom();
@@ -200,8 +230,8 @@ private:
     {
         return OMX_Maps::getInstance().omxErrors[error];
     }
-    float fromQ16(float n) { return n* 65536; }
-    float toQ16(float n) { return n*(1/65536.0); }
+    float toQ16(float n) { return n* 65536; }
+    float fromQ16(float n) { return n*(1/65536.0); }
     
 	void addExitHandler();
 	void onUpdate(ofEventArgs & args);
@@ -228,7 +258,7 @@ private:
 
     
     CameraMeteringMode currentMeteringMode;
-    void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
+    void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
     
     OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;
     
@@ -250,7 +280,7 @@ private:
     OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drcConfig;
     OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
 
-    
+
     
     
     
