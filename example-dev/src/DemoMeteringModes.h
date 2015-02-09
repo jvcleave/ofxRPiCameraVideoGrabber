@@ -10,7 +10,7 @@ public:
     
     bool doDrawInfo;
     bool doChangeMeteringMode = false;
-    
+    bool doShutterSpeed;
     vector<CameraMeteringMode> meteringModes;
     int currentMeteringMode;
    
@@ -19,7 +19,7 @@ public:
  
         CameraDemo::setup(omxCameraSettings_, videoGrabber_);
         doDrawInfo	= true;
-        
+        doShutterSpeed = false;
         
 #if 0
         OMX_MeteringModeAverage,     /**< Center-weighted average metering. */
@@ -38,7 +38,7 @@ public:
          shutterSpeedMicroSeconds = 9977; //default 1000
          autoShutter = true;
          
-         sensitivity = 0;
+         ISO = 0;
          autoSensitivity = true;
 #endif
         
@@ -81,27 +81,27 @@ public:
         
         CameraMeteringMode mode9 = manualMode;
         mode9.shutterSpeedMicroSeconds = 33900;
-        mode9.sensitivity = 800;
+        mode9.ISO = 100;
         meteringModes.push_back(mode9);
         
         CameraMeteringMode mode10 = mode9;
-        mode10.sensitivity = 1600;
+        mode10.ISO = 200;
         meteringModes.push_back(mode10);
         
         CameraMeteringMode mode11 = manualMode;
         mode11.shutterSpeedMicroSeconds = 1000;
-        mode11.sensitivity = 3200;
+        mode11.ISO = 400;
         meteringModes.push_back(mode11);
         
         
         CameraMeteringMode mode12 = manualMode;
         mode12.shutterSpeedMicroSeconds = 33900;
-        mode12.sensitivity = 6400;
+        mode12.ISO = 800;
         meteringModes.push_back(mode12);
         
         CameraMeteringMode mode13 = manualMode;
         mode13.shutterSpeedMicroSeconds = 33300;
-        mode13.sensitivity = 12800;
+        mode13.ISO = 1600;
         meteringModes.push_back(mode13);
         
         CameraMeteringMode mode14 = manualMode;
@@ -137,6 +137,18 @@ public:
             doChangeMeteringMode = false;
             videoGrabber->setMeteringMode(meteringModes[currentMeteringMode]);
         }
+        if(doShutterSpeed)
+        {
+            int currentShutterSpeed = videoGrabber->getShutterSpeed();
+            if(currentShutterSpeed+1000 < 33300)
+            {
+                currentShutterSpeed+=1000;
+            }else
+            {
+                currentShutterSpeed = 0;
+            }
+            videoGrabber->setShutterSpeed(currentShutterSpeed);
+        }
     };
     
     void draw()
@@ -159,6 +171,8 @@ public:
         
         info << "\n";
         info << "Press c to increment Metering Mode: " << currentMeteringMode << "\n";
+        info << "Press s to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
+        
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
         
@@ -181,7 +195,10 @@ public:
         {
             doDrawInfo = !doDrawInfo;
         }
-        
+        if (key == 's')
+        {
+            doShutterSpeed = !doShutterSpeed;
+        }
         if (key == 'c')
         {
             doChangeMeteringMode = true;

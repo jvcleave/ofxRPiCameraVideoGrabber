@@ -29,7 +29,7 @@ struct CameraMeteringMode
 {
     OMX_METERINGTYPE meteringType;
     int evCompensation;
-    int sensitivity;
+    int ISO;
     int shutterSpeedMicroSeconds;
     bool autoShutter;
     bool autoSensitivity;
@@ -44,15 +44,28 @@ struct CameraMeteringMode
         meteringType = OMX_MeteringModeMatrix;
         evCompensation=0; //-10 to +10
         
-        aperture = 0;
+        aperture = 1;
         autoAperture = true;
         
         shutterSpeedMicroSeconds = 0; //default 1000?
         autoShutter = true;
         
-        sensitivity = 0;
+        ISO =800;
         autoSensitivity = true;
     };
+    string toString()
+    {
+        stringstream ss;
+        ss << "evCompensation: " << evCompensation << "\n";
+        ss << "aperture: " << aperture << "\n";
+        ss << "autoAperture: " << autoAperture << "\n";
+        ss << "shutterSpeedMicroSeconds: " << shutterSpeedMicroSeconds << "\n";
+        ss << "autoShutter: " << autoShutter << "\n";
+        ss << "ISO: " << ISO << "\n";
+        ss << "autoSensitivity: " << autoSensitivity << "\n";
+        return ss.str();
+        
+    }
   
 };
 
@@ -101,9 +114,13 @@ public:
     string meteringModetoString();
     void printMeteringMode();
     
-    
+    int getShutterSpeed()
+    {
+        return currentMeteringMode.shutterSpeedMicroSeconds;
+    }
     OMX_ERRORTYPE setAutoAperture(bool);
     OMX_ERRORTYPE setAutoShutter(bool);
+    OMX_ERRORTYPE setShutterSpeed(int shutterSpeed);
     OMX_ERRORTYPE setAutoSensitivity(bool);
     
     OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
@@ -123,10 +140,10 @@ public:
     
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
-    void setMeteringMode(CameraMeteringMode);
+    OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
     OMX_ERRORTYPE setMeteringMode(OMX_METERINGTYPE meteringType, 
                                   int evCompensation, 
-                                  int sensitivity,
+                                  int ISO,
                                   int shutterSpeedMicroSeconds,
                                   bool autoShutter,
                                   bool autoSensitivity,
@@ -152,14 +169,23 @@ public:
     ofRectangle& getCropRectangle();
     OMX_ERRORTYPE updateSensorCrop();
     
-    OMX_ERRORTYPE setDigitalZoom(int step);
-
-    
+ 
+    OMX_ERRORTYPE zoomIn();
+    OMX_ERRORTYPE zoomOut();
+    OMX_ERRORTYPE resetZoom();
+    float getZoomLevelNormalized();
+    OMX_ERRORTYPE setZoomLevelNormalized(float);
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
     OMX_ERRORTYPE enableBurstMode();
     
+    
 private:
+    
+    int zoomLevel;
+    vector<int> zoomLevels;
+    OMX_ERRORTYPE setDigitalZoom();
+    
     OMX_BOOL toOMXBool(bool boolean)
     {
         if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
@@ -199,6 +225,7 @@ private:
 	
 	bool pixelsRequested;
     
+
     
     CameraMeteringMode currentMeteringMode;
     void setCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
