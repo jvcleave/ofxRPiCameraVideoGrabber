@@ -151,15 +151,24 @@ public:
     void printMeteringMode();
     
     
+    OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
+    
+    //fixed aperture - no effect
     OMX_ERRORTYPE setAutoAperture(bool);
     int getAperture();
     OMX_ERRORTYPE setAperture(int aperture);
     
+    
     OMX_ERRORTYPE setAutoShutter(bool);
-                    
     int getShutterSpeed();
-    OMX_ERRORTYPE setShutterSpeed(int shutterSpeed);
-    OMX_ERRORTYPE setAutoSensitivity(bool);
+    OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
+    
+    
+    
+    int getISO();
+    OMX_ERRORTYPE setISO(int ISO);
+    OMX_ERRORTYPE setAutoSensitivity(bool); //alias to setAutoISO
+    OMX_ERRORTYPE setAutoISO(bool);
     
     OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
     
@@ -178,7 +187,7 @@ public:
     
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
-    OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
+    
     //setExposureMode is now setExposurePreset - sorry :(
     //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
@@ -208,6 +217,7 @@ public:
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
     OMX_ERRORTYPE enableBurstMode();
     
+    void printCameraInfo();
     
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
@@ -281,7 +291,8 @@ private:
     OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
 
 
-    
+    OMX_CONFIG_CAMERAINFOTYPE cameraInfoConfig;
+
     
     
     
@@ -370,6 +381,8 @@ private:
         
         OMX_INIT_STRUCTURE(digitalZoomConfig);
         digitalZoomConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(cameraInfoConfig);
         
         OMX_INIT_STRUCTURE(drcConfig);
         

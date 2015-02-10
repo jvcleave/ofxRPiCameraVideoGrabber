@@ -117,6 +117,7 @@ void ofApp::keyPressed  (int key)
 {
 	if(key == ' ')
     {
+        videoGrabber.printCameraInfo();
         doNextDemo = true;
     }else
     {

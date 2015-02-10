@@ -118,6 +118,99 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     }    
 }
 
+
+void ofxRPiCameraVideoGrabber::printCameraInfo()
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCameraInfo, &cameraInfoConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        stringstream ss;
+        ss << endl;
+        ss << "cameraname: "        << cameraInfoConfig.cameraname                  << endl;
+        ss << "lensname: "          << cameraInfoConfig.lensname                    << endl;
+        ss << "nModelId: "          << fromQ16(cameraInfoConfig.nModelId)           << endl;
+        ss << "nManufacturerId: "   << fromQ16(cameraInfoConfig.nManufacturerId)    << endl;
+        ss << "nRevNum: "           << cameraInfoConfig.nRevNum                     << endl;
+        ss << "sSerialNumber: "     << cameraInfoConfig.sSerialNumber               << endl;
+        ss << "sEpromVersion: "     << cameraInfoConfig.sEpromVersion               << endl;
+        
+        ss << "xFNumber: "          << cameraInfoConfig.xFNumber                    << endl;
+        ss << "xFNumber fromQ16: "  << fromQ16(cameraInfoConfig.xFNumber)           << endl;
+        
+        ss << "xFocalLength: "      << cameraInfoConfig.xFocalLength                << endl;
+        ss << "xFocalLength fromQ16: "  << fromQ16(cameraInfoConfig.xFocalLength)   << endl;
+        ss << "nShutterDelayTime fromQ16: "     << fromQ16(cameraInfoConfig.sLensCalibration.nShutterDelayTime)     << endl;
+        ofLogVerbose(__func__) << ss.str();
+    }
+   
+    
+    
+
+#if 0
+    
+    
+    OMX_U16  nShutterDelayTime;
+    OMX_U16  nNdTransparency;
+    OMX_U16  nPwmPulseNearEnd;  /**< Num pulses to move lens 1um at near end */
+    OMX_U16  nPwmPulseFarEnd;   /**< Num pulses to move lens 1um at far end */
+    short unsigned int  nVoltagePIOutNearEnd[3];
+    short unsigned int  nVoltagePIOut10cm[3];
+    short unsigned int  nVoltagePIOutInfinity[3];
+    OMX_U16  nVoltagePIOutFarEnd[3];
+    OMX_U32  nAdcConversionNearEnd;
+    OMX_U32  nAdcConversionFarEnd;
+        /*ss << "nShutterDelayTime fromQ16: "     << fromQ16(cameraInfoConfig.sLensCalibration.nShutterDelayTime)     << endl;
+         ss << "nNdTransparency fromQ16: "       << fromQ16(cameraInfoConfig.sLensCalibration.nNdTransparency)       << endl;
+         ss << "nPwmPulseNearEnd fromQ16: "      << fromQ16(cameraInfoConfig.sLensCalibration.nPwmPulseNearEnd)      << endl;
+         ss << "nPwmPulseFarEnd fromQ16: "       << fromQ16(cameraInfoConfig.sLensCalibration.nPwmPulseFarEnd)       << endl;
+         ss << "nVoltagePIOutNearEnd: "          << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutNearEnd)  << endl;
+         ss << "nVoltagePIOut10cm: "             << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOut10cm)     << endl;
+         ss << "nVoltagePIOutInfinity: "         << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutInfinity) << endl;
+         ss << "nVoltagePIOutFarEnd: "           << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutFarEnd)   << endl;*/
+        
+        
+        cout << "sSerialNumber: ";
+        for (int i=0; i<20; i++) 
+        {
+            cout << fromQ16(cameraInfoConfig.sSerialNumber[i]);
+            
+        }
+        cout << endl;
+        
+        cout << "nVoltagePIOutNearEnd: " <<  endl;
+        for (int i=0; i<3; i++) {
+            cout << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutNearEnd[i]);
+        }
+        cout << endl;
+        
+        
+       
+    }
+    
+    
+#define OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN 16
+#define OMX_CONFIG_CAMERAINFOTYPE_SERIALNUM_LEN 20
+#define OMX_CONFIG_CAMERAINFOTYPE_EPROMVER_LEN 8
+    typedef struct OMX_CONFIG_CAMERAINFOTYPE
+    {
+        OMX_U32 nSize;
+        OMX_VERSIONTYPE nVersion;
+        OMX_U8 cameraname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
+        OMX_U8 lensname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
+        OMX_U16 nModelId;
+        OMX_U8 nManufacturerId;
+        OMX_U8 nRevNum;
+        OMX_U8 sSerialNumber[OMX_CONFIG_CAMERAINFOTYPE_SERIALNUM_LEN];
+        OMX_U8 sEpromVersion[OMX_CONFIG_CAMERAINFOTYPE_EPROMVER_LEN];
+        OMX_CONFIG_LENSCALIBRATIONVALUETYPE sLensCalibration;
+        OMX_U32 xFNumber;
+        OMX_U32 xFocalLength;
+    } OMX_CONFIG_CAMERAINFOTYPE;
+#endif
+   // return error;
+    
+    
+}
 bool ofxRPiCameraVideoGrabber::isReady()
 {
     
@@ -411,13 +504,18 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
     return error;
 }
 
-
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
+{
+    return setAutoISO(doAutoSensitivity);
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoISO(bool doAutoISO)
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     if(error == OMX_ErrorNone) 
     {
-        currentMeteringMode.exposurevalue.bAutoSensitivity	= toOMXBool(doAutoSensitivity);
+        currentMeteringMode.exposurevalue.bAutoSensitivity	= toOMXBool(doAutoISO);
         error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
         if(error == OMX_ErrorNone) 
         {
@@ -426,6 +524,31 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivit
     }
     return error;
 }
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setISO(int ISO)
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    if(error == OMX_ErrorNone) 
+    {
+        currentMeteringMode.exposurevalue.nSensitivity	= ISO;
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+        if(error == OMX_ErrorNone) 
+        {
+            updateCurrentMeteringMode(currentMeteringMode.exposurevalue);
+        }else
+        {
+            ofLogError(__func__) << printError(error);
+        }
+    }
+    return error;
+}
+
+int ofxRPiCameraVideoGrabber::getISO()
+{
+    return currentMeteringMode.ISO;
+}
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAperture(int aperture)
 {
@@ -438,12 +561,13 @@ int ofxRPiCameraVideoGrabber::getAperture()
     return currentMeteringMode.aperture;
 }
                 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setShutterSpeed(int shutterSpeed)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setShutterSpeed(int shutterSpeedMicroSeconds)
 {
     
-    currentMeteringMode.shutterSpeedMicroSeconds = shutterSpeed;
+    currentMeteringMode.shutterSpeedMicroSeconds = shutterSpeedMicroSeconds;
     return applyCurrentMeteringMode();
 }
+
 int ofxRPiCameraVideoGrabber::getShutterSpeed()
 {
     return currentMeteringMode.shutterSpeedMicroSeconds;

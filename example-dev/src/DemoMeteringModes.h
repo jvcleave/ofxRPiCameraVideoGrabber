@@ -12,6 +12,7 @@ public:
     bool doChangeMeteringMode = false;
     bool doShutterSpeed;
     bool doAperture;
+    bool doISO;
     vector<CameraMeteringMode> meteringModes;
     int currentMeteringMode;
    
@@ -21,6 +22,7 @@ public:
         CameraDemo::setup(omxCameraSettings_, videoGrabber_);
         doDrawInfo	= true;
         doShutterSpeed = false;
+        doISO = false;
         
 #if 0
         OMX_MeteringModeAverage,     /**< Center-weighted average metering. */
@@ -162,6 +164,18 @@ public:
             }
             videoGrabber->setAperture(currentAperture);
         }
+        if(doISO)
+        {
+            int currentISO = videoGrabber->getISO();
+            if(currentISO+50 < 3200)
+            {
+                currentISO+=50;
+            }else
+            {
+                currentISO = 0;
+            }
+            videoGrabber->setISO(currentISO);
+        }
         
     };
     
@@ -184,10 +198,10 @@ public:
         info << videoGrabber->meteringModetoString() << "\n";
         
         info << "\n";
-        info << "Press c to increment Metering Mode: " << currentMeteringMode << "\n";
+        info << "Press m to increment Metering Mode: " << currentMeteringMode << "\n";
         info << "Press s to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
         info << "Press a to increment aperture: " << videoGrabber->getAperture() << "\n";
-        
+        info << "Press i to increment ISO +50: " << videoGrabber->getISO() << "\n";
         
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
@@ -219,7 +233,12 @@ public:
         {
             doAperture = !doAperture;
         }
-        if (key == 'c')
+        if (key == 'i')
+        {
+            doISO = !doISO;
+        }
+        
+        if (key == 'm')
         {
             doChangeMeteringMode = true;
         }
