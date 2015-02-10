@@ -20,7 +20,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     textureEngine = NULL;
     engine = NULL;
     pixelsRequested = false;
-    
+    dummyTexture = NULL;
     zoomLevel = 0;
     int zoomStepsSource[61] = 
     {
@@ -143,7 +143,33 @@ void ofxRPiCameraVideoGrabber::printCameraInfo()
         ofLogVerbose(__func__) << ss.str();
     }
    
+    frameRateRangeConfig.nPortIndex = CAMERA_OUTPUT_PORT;
+    error = OMX_GetConfig(camera, OMX_IndexParamBrcmFpsRange, &frameRateRangeConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        stringstream ss;
+        ss << "CAMERA_OUTPUT_PORT" << endl;
+        ss << "xFramerateLow: "     << fromQ16(frameRateRangeConfig.xFramerateLow)  << endl;
+        ss << "xFramerateHigh: "    << fromQ16(frameRateRangeConfig.xFramerateHigh) << endl;
+        ofLogVerbose(__func__) << ss.str();
+    }else
+    {
+        ofLogError(__func__) << printError(error);
+    }
     
+    frameRateRangeConfig.nPortIndex = CAMERA_PREVIEW_PORT;
+    error = OMX_GetConfig(camera, OMX_IndexParamBrcmFpsRange, &frameRateRangeConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        stringstream ss;
+        ss << "CAMERA_PREVIEW_PORT" << endl;
+        ss << "xFramerateLow: "     << fromQ16(frameRateRangeConfig.xFramerateLow)  << endl;
+        ss << "xFramerateHigh: "    << fromQ16(frameRateRangeConfig.xFramerateHigh) << endl;
+        ofLogVerbose(__func__) << ss.str();
+    }else
+    {
+        ofLogError(__func__) << printError(error);
+    }
     
 
 #if 0
@@ -255,8 +281,13 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
     if (!textureEngine) 
     {
-        ofLogError() << "TEXTURE NOT ENABLED - EXITING";
-        ofExit(0);
+        if(!dummyTexture)
+        {
+            ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
+            dummyTexture = new ofTexture();
+        }
+        
+        return *dummyTexture;
     }
     return textureEngine->tex;
 }

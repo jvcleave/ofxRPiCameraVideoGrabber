@@ -260,7 +260,7 @@ private:
 	
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
-	
+    ofTexture* dummyTexture;
 	
 	
 	bool pixelsRequested;
@@ -292,7 +292,9 @@ private:
 
 
     OMX_CONFIG_CAMERAINFOTYPE cameraInfoConfig;
-
+    OMX_PARAM_BRCMFRAMERATERANGETYPE frameRateRangeConfig;
+    
+    
     
     
     
@@ -317,7 +319,7 @@ private:
     OMX_PARAM_U32TYPE OMX_IndexConfigCameraIsoReferenceValue
     OMX_CONFIG_ZEROSHUTTERLAGTYPE OMX_IndexParamCameraZeroShutterLag
     OMX_CONFIG_BRCMFOVTYPE OMX_IndexConfigFieldOfView
-    OMX_CONFIG_CAMERAINFOTYPE OMX_IndexConfigCameraInfo
+    //OMX_CONFIG_CAMERAINFOTYPE OMX_IndexConfigCameraInfo
     
     OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE OMX_IndexConfigFocusControl
     OMX_CONFIG_REDEYEREMOVALTYPE OMX_IndexConfigCommonRedEyeRemoval
@@ -331,7 +333,7 @@ private:
     
     OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
     OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
-    OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
+    //OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
     OMX_PARAM_BRCMCONFIGFILETYPE OMX_IndexParamBrcmConfigFileRegisters
     OMX_PARAM_BRCMCONFIGFILECHUNKTYPE OMX_IndexParamBrcmConfigFileChunkRegisters
     
@@ -381,6 +383,10 @@ private:
         
         OMX_INIT_STRUCTURE(digitalZoomConfig);
         digitalZoomConfig.nPortIndex = OMX_ALL;
+        
+        OMX_INIT_STRUCTURE(frameRateRangeConfig);
+        
+        
         
         OMX_INIT_STRUCTURE(cameraInfoConfig);
         

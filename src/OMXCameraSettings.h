@@ -55,6 +55,7 @@ public:
 		
 		doRecordingPreview = true;
 	}
+    
 private:
 	//bool doRecordingPreview;
 };
