@@ -1066,6 +1066,11 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
     cout << "~ofxRPiCameraVideoGrabber" << endl;
     close();
+    if(dummyTexture)
+    {
+        delete dummyTexture;
+        dummyTexture = NULL;
+    }
 }
 
 void ofxRPiCameraVideoGrabber::close()
