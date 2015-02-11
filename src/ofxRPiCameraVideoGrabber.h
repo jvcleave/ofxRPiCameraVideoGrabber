@@ -228,14 +228,16 @@ public:
     bool doPixels;
     ofFbo fbo;
     EGLImageKHR eglImage;
-    void generateEGLImage();
+    void generateEGLImage(int, int);
     void destroyEGLImage();
+    ofAppEGLWindow *appEGLWindow;
     EGLDisplay display;
     EGLContext context;
     
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
-
+    bool hasExitHandler;
+    bool hasOMXInit;
     int zoomLevel;
     vector<int> zoomLevels;
     OMX_ERRORTYPE setDigitalZoom();

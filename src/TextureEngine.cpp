@@ -80,9 +80,18 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
 		{
 			
 			return grabber->onCameraEventParamOrConfigChanged();
-		}			
+		}	
+            
+        case OMX_EventError:
+        {
+            ofLogError(__func__) << OMX_Maps::getInstance().omxErrors[(OMX_ERRORTYPE)nData1];
+        }
 		default: 
 		{
+            ofLog(OF_LOG_VERBOSE, 
+                  "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
+                  __func__, eEvent, nData1, nData2, pEventData);
+            
 			break;
 		}
 	}
@@ -140,6 +149,15 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		{
 			ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_StateIdle PASS";
 		}
+        error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
+        if (error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR, "splitter OMX_SendCommand OMX_CommandPortEnable VIDEO_SPLITTER_INPUT_PORT FAIL error: 0x%08x", error);
+        }else 
+        {
+            ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_CommandPortEnable VIDEO_SPLITTER_INPUT_PORT PASS";
+        }
+    
 	}
 
 	
@@ -184,15 +202,17 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		
 	}
 	
-	//Create camera->splitter Tunnel
-	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera->splitter OMX_SetupTunnel FAIL error: 0x%08x", error);
-	}
+	
 	
 	if(omxCameraSettings.doRecording)
 	{
+        //Create camera->splitter Tunnel
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+        if (error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR, "camera->splitter OMX_SetupTunnel FAIL error: 0x%08x", error);
+        }
+        
 		// Tunnel splitter2 output port and encoder input port
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODE_INPUT_PORT);
 		if(error != OMX_ErrorNone) 
@@ -216,6 +236,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		}
 	}
 	
+    
+    
 	//Enable camera output port
 	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 	if (error != OMX_ErrorNone) 
@@ -390,7 +412,11 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 void TextureEngine::close()
 {
     ofLogVerbose(__func__) << "START";
-
+   // OMXCameraUtils::disableAllPortsForComponent(&splitter);
+    //OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    //OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    //OMX_FreeHandle(splitter);
+    
     BaseEngine::close();
  
     
