@@ -12,7 +12,7 @@
 TextureEngine::TextureEngine()
 {
 	isOpen		= false;
-	textureID	= 0;
+	
 	eglBuffer	= NULL;
 	renderedFrameCounter = 0;
 	recordedFrameCounter = 0;
@@ -28,8 +28,7 @@ TextureEngine::TextureEngine()
 	doFillBuffer = false;
 	bufferAvailable = false;
 	engineType = TEXTURE_ENGINE;
-	pixels = NULL;
-	doPixels = false;
+
 }
 
 int TextureEngine::getFrameCounter()
@@ -38,19 +37,17 @@ int TextureEngine::getFrameCounter()
 	
 }
 
-void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
+void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
-	this->omxCameraSettings = omxCameraSettings;
-	generateEGLImage();
+	omxCameraSettings = omxCameraSettings_;
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &TextureEngine::cameraEventHandlerCallback;
 	
-	string cameraComponentName = "OMX.broadcom.camera";
 	
-	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
+	error = OMX_GetHandle(&camera, (OMX_STRING)"OMX.broadcom.camera", this , &cameraCallbacks);
 	if(error != OMX_ErrorNone) 
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
@@ -61,97 +58,13 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 }
 
 
-void TextureEngine::enablePixels()
-{
-	doPixels = true;
-	
-}
 
 
-void TextureEngine::disablePixels()
-{
-	doPixels = false;
-}
 
 
-void TextureEngine::updatePixels()
-{
-	if (!doPixels) 
-	{
-		return;
-	}
-	
-	if (!fbo.isAllocated()) 
-	{
-		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
-	}
-	int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
-	if (pixels == NULL)
-	{
-		pixels = new unsigned char[dataSize];
-	}
-	fbo.begin();
-		ofClear(0, 0, 0, 0);
-		tex.draw(0, 0);
-		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
-	fbo.end();
-}
-
-unsigned char * TextureEngine::getPixels()
-{
-	return pixels;
-}
 
 
-void TextureEngine::generateEGLImage()
-{
-	
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-	display = appEGLWindow->getEglDisplay();
-	context = appEGLWindow->getEglContext();
-	
-	
-	tex.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
-	//tex.getTextureData().bFlipTexture = true;
-	
-	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = tex.getTextureData().textureID;
-	
-	glEnable(GL_TEXTURE_2D);
-	
-	// setup first texture
-	int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
-	
-	GLubyte* pixelData = new GLubyte [dataSize];
-	
-	
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-	
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, omxCameraSettings.width, omxCameraSettings.height, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-	
-	delete[] pixelData;
-	
-	
-	// Create EGL Image
-	eglImage = eglCreateImageKHR(
-								 display,
-								 context,
-								 EGL_GL_TEXTURE_2D_KHR,
-								 (EGLClientBuffer)textureID,
-								 0);
-    glDisable(GL_TEXTURE_2D);
-	if (eglImage == EGL_NO_IMAGE_KHR)
-	{
-		ofLogError()	<< "Create EGLImage FAIL";
-		return;
-	}
-	else
-	{
-		ofLogVerbose(__func__)	<< "Create EGLImage PASS";
-	}
-}
+
 
 
 OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
@@ -474,6 +387,17 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 }
 
 
+void TextureEngine::close()
+{
+    ofLogVerbose(__func__) << "START";
+
+    BaseEngine::close();
+ 
+    
+    ofLogVerbose(__func__) << "OMX BREAKDOWN END";
+    ofLogVerbose(__func__) << " END";
+    isOpen = false;
+}
 
 
 
@@ -491,14 +415,3 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 	return OMX_ErrorNone;
 }
 
-
-
-
-TextureEngine::~TextureEngine()
-{
-	if (pixels) 
-	{
-		delete[] pixels;
-		pixels = NULL;
-	}
-}

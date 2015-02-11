@@ -17,33 +17,15 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     updateFrameCounter = 0;
     frameCounter = 0;
     hasNewFrame = false;
-    textureEngine = NULL;
     engine = NULL;
-    pixelsRequested = false;
-    dummyTexture = NULL;
+    textureEngine = NULL;
+    
+    pixels = NULL;
+    eglImage = NULL;
+    doPixels = false;
+    textureID	= 0;
+    
     zoomLevel = 0;
-    int zoomStepsSource[61] = 
-    {
-        65536,  68157,  70124,  72745,
-        75366,  77988,  80609,  83231,
-        86508,  89784,  92406,  95683,
-        99615,  102892, 106168, 110100,
-        114033, 117965, 122552, 126484,
-        131072, 135660, 140247, 145490,
-        150733, 155976, 161219, 167117,
-        173015, 178913, 185467, 192020,
-        198574, 205783, 212992, 220201,
-        228065, 236585, 244449, 252969,
-        262144, 271319, 281149, 290980,
-        300810, 311951, 322437, 334234,
-        346030, 357827, 370934, 384041,
-        397148, 411566, 425984, 441057,
-        456131, 472515, 488899, 506593,
-        524288
-    };
-    vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
-    zoomLevels = converted;
-
     
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     
@@ -62,7 +44,9 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     omxCameraSettings = omxCameraSettings_;
     if (omxCameraSettings.isUsingTexture) 
     {
+        generateEGLImage();
         textureEngine = new TextureEngine();
+        textureEngine->eglImage = eglImage;
         textureEngine->setup(omxCameraSettings);
         camera = textureEngine->camera;
         if (omxCameraSettings.enablePixels) 
@@ -274,48 +258,135 @@ GLuint ofxRPiCameraVideoGrabber::getTextureID()
     {
         return 0;
     }
-    return textureEngine->textureID;
+    return textureID;
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
     if (!textureEngine) 
     {
-        if(!dummyTexture)
-        {
-            ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
-            dummyTexture = new ofTexture();
-        }
-        
-        return *dummyTexture;
+      
+        ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
     }
-    return textureEngine->tex;
+    return texture;
 }
+
+void ofxRPiCameraVideoGrabber::generateEGLImage()
+{
+    
+    ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+    display = appEGLWindow->getEglDisplay();
+    context = appEGLWindow->getEglContext();
+    
+    
+    texture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+    //tex.getTextureData().bFlipTexture = true;
+    
+    texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+    textureID = texture.getTextureData().textureID;
+    
+    glEnable(GL_TEXTURE_2D);
+    
+    // setup first texture
+    int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+    
+    GLubyte* pixelData = new GLubyte [dataSize];
+    
+    
+    memset(pixelData, 0xff, dataSize);  // white texture, opaque
+    
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, omxCameraSettings.width, omxCameraSettings.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+    
+    delete[] pixelData;
+    
+    
+    // Create EGL Image
+    eglImage = eglCreateImageKHR(
+                                 display,
+                                 context,
+                                 EGL_GL_TEXTURE_2D_KHR,
+                                 (EGLClientBuffer)textureID,
+                                 0);
+    glDisable(GL_TEXTURE_2D);
+    if (eglImage == EGL_NO_IMAGE_KHR)
+    {
+        ofLogError()	<< "Create EGLImage FAIL";
+        return;
+    }
+    else
+    {
+        ofLogVerbose(__func__)	<< "Create EGLImage PASS";
+    }
+}
+
+void ofxRPiCameraVideoGrabber::destroyEGLImage()
+{
+    
+    if (eglImage)
+    {
+        if (eglDestroyImageKHR(display, eglImage))
+        {
+            ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+        }
+        else
+        {
+            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+        }
+        eglImage = NULL;
+    }
+    
+}
+
+
+void ofxRPiCameraVideoGrabber::updatePixels()
+{
+    if (!doPixels) 
+    {
+        return;
+    }
+    
+    if (!fbo.isAllocated()) 
+    {
+        fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+    }
+    int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+    if (pixels == NULL)
+    {
+        pixels = new unsigned char[dataSize];
+    }
+    fbo.begin();
+        ofClear(0, 0, 0, 0);
+        texture.draw(0, 0);
+        glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
+    fbo.end();
+}
+
 
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
-    if(textureEngine)
+    if(!textureEngine)
     {
-        textureEngine->enablePixels();
-        pixelsRequested = true;
+        ofLogWarning(__func__) << "You are in non-texture mode but asking for a pixels";
     }
+    doPixels = true;
 }
+
+
 
 void ofxRPiCameraVideoGrabber::disablePixels()
 {
-    if(textureEngine)
+    if(!textureEngine)
     {
-        textureEngine->disablePixels();
-        pixelsRequested = false;
+        ofLogWarning(__func__) << "You are in non-texture mode";
     }
+    
+    doPixels = false;
 }
 
 unsigned char * ofxRPiCameraVideoGrabber::getPixels()
 {
-    unsigned char * pixels = NULL;
-    if (textureEngine) {
-        pixels = textureEngine->getPixels();
-    }
     return pixels;
 }
 
@@ -358,10 +429,7 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     {
         if (textureEngine) 
         {
-            if (pixelsRequested) 
-            {
-                textureEngine->updatePixels();
-            }
+            updatePixels();
         }
     }
     //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
@@ -380,7 +448,7 @@ void ofxRPiCameraVideoGrabber::draw()
     {
         return;
     }
-    textureEngine->tex.draw(0, 0);
+    texture.draw(0, 0);
 }
 
 
@@ -1066,11 +1134,12 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
     cout << "~ofxRPiCameraVideoGrabber" << endl;
     close();
-    if(dummyTexture)
+    if (pixels) 
     {
-        delete dummyTexture;
-        dummyTexture = NULL;
+        delete[] pixels;
+        pixels = NULL;
     }
+    
 }
 
 void ofxRPiCameraVideoGrabber::close()
@@ -1088,6 +1157,7 @@ void ofxRPiCameraVideoGrabber::close()
     {
         delete textureEngine;
         textureEngine = NULL;
+        destroyEGLImage();
     }
     
     cout << "~ofxRPiCameraVideoGrabber::close END" << endl;

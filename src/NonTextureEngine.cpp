@@ -409,6 +409,19 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 }
 
 
+void NonTextureEngine::close()
+{
+    ofLogVerbose(__func__) << "START";
+    
+    BaseEngine::close();
+    
+    ofLogVerbose(__func__) << "OMX BREAKDOWN END";
+    ofLogVerbose(__func__) << " END";
+    isOpen = false;
+}
+
+
+
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);

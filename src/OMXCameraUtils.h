@@ -41,6 +41,9 @@ memset(&(a), 0, sizeof(a)); \
 #define VIDEO_SPLITTER_OUTPUT_PORT3 253
 #define VIDEO_SPLITTER_OUTPUT_PORT4 254
 
+#define __func__ __PRETTY_FUNCTION__
+
+
 class OMXCameraUtils
 {
 public:

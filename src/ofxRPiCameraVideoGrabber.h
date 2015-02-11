@@ -10,13 +10,13 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 
+
 #include <IL/OMX_Core.h>
 #include <IL/OMX_Component.h>
 #include <IL/OMX_Index.h>
 #include <IL/OMX_Image.h>
 #include <IL/OMX_Video.h>
 #include <IL/OMX_Broadcom.h>
-
 
 #include "OMXCameraUtils.h"
 #include "OMXCameraSettings.h"
@@ -219,6 +219,20 @@ public:
     
     void printCameraInfo();
     
+    
+    ofTexture texture;
+    
+    GLuint textureID;
+    void updatePixels();
+    unsigned char * pixels;
+    bool doPixels;
+    ofFbo fbo;
+    EGLImageKHR eglImage;
+    void generateEGLImage();
+    void destroyEGLImage();
+    EGLDisplay display;
+    EGLContext context;
+    
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
 
@@ -260,10 +274,10 @@ private:
 	
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
-    ofTexture* dummyTexture;
+    
 	
 	
-	bool pixelsRequested;
+	
     
 
     
@@ -400,7 +414,27 @@ private:
         
         OMX_INIT_STRUCTURE(flickerCancelConfig);
         
-        
+        int zoomStepsSource[61] = 
+        {
+            65536,  68157,  70124,  72745,
+            75366,  77988,  80609,  83231,
+            86508,  89784,  92406,  95683,
+            99615,  102892, 106168, 110100,
+            114033, 117965, 122552, 126484,
+            131072, 135660, 140247, 145490,
+            150733, 155976, 161219, 167117,
+            173015, 178913, 185467, 192020,
+            198574, 205783, 212992, 220201,
+            228065, 236585, 244449, 252969,
+            262144, 271319, 281149, 290980,
+            300810, 311951, 322437, 334234,
+            346030, 357827, 370934, 384041,
+            397148, 411566, 425984, 441057,
+            456131, 472515, 488899, 506593,
+            524288
+        };
+        vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
+        zoomLevels = converted;
         
         
     };
