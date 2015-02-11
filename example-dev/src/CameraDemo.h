@@ -14,9 +14,13 @@ public:
     ImageFilterCollection filterCollection;
     
     string name;
+    string infoString;
+    bool doDrawInfo;
     CameraDemo()
     {
         name = "";
+        infoString = "";
+        doDrawInfo = true;
         filterCollection.setup();
     }
     

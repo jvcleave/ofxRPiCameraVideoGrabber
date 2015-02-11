@@ -14,23 +14,24 @@
 
 
 class ofApp : public ofBaseApp, public KeyListener{
-
-	public:
-
-		void setup();
-		void update();
-		void draw();
-		void keyPressed(int key);
-
-	void onCharacterReceived(KeyListenerEventData& e);
-	TerminalListener consoleListener;
+    
+public:
+    
+    void setup();
+    void update();
+    void draw();
+    void keyPressed(int key);
+    
+    void onCharacterReceived(KeyListenerEventData& e);
+    TerminalListener consoleListener;
     
     OMXCameraSettings omxCameraSettings;
-	ofxRPiCameraVideoGrabber videoGrabber;
-	
+    ofxRPiCameraVideoGrabber videoGrabber;
+    
     vector<CameraDemo*> demos;
     int currentDemoID;
     CameraDemo* currentDemo;
     bool doNextDemo;
+    vector<OMXCameraSettings::Preset> presets;
+    int currentPreset;
 };
-

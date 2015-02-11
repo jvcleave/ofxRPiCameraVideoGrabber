@@ -46,10 +46,10 @@ int NonTextureEngine::getFrameCounter()
 	return frameCounter;
 }
 
-void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings)
+void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
 	
-	this->omxCameraSettings = omxCameraSettings;
+	omxCameraSettings = omxCameraSettings_;
 	
 	if (omxCameraSettings.doRecordingPreview) 
 	{

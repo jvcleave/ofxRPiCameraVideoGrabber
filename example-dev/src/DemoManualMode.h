@@ -51,9 +51,10 @@ public:
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
         
+        infoString = info.str();
         if (doDrawInfo) 
         {
-            ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
+            ofDrawBitmapStringHighlight(infoString, 100, 100, ofColor::black, ofColor::yellow);
         }
         
     };

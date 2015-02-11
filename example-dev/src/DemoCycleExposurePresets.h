@@ -75,9 +75,10 @@ public:
             info << "Press q to stop recording" << "\n";
         }
         
+        infoString = info.str();
         if (doDrawInfo) 
         {
-            ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
+            ofDrawBitmapStringHighlight(infoString, 100, 100, ofColor::black, ofColor::yellow);
         }
 
     };

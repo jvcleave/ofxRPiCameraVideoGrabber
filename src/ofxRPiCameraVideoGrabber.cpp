@@ -13,41 +13,62 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
     OMX_Maps::getInstance();
     initStructures();
-    
+    hasOMXInit = false;
     updateFrameCounter = 0;
     frameCounter = 0;
     hasNewFrame = false;
     engine = NULL;
     textureEngine = NULL;
-    
+    appEGLWindow = NULL;
     pixels = NULL;
     eglImage = NULL;
     doPixels = false;
     textureID	= 0;
-    
+    hasExitHandler  = false;
     zoomLevel = 0;
+    camera = NULL;
     
-    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     
 }
 
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
+    ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    if(engine)
+    {
+        //engine->close();
+        delete engine;
+        engine = NULL;
+        
+    }
+    if(textureEngine)
+    {
+        //textureEngine->close();
+        delete textureEngine;
+        textureEngine = NULL;
+    }
     
     addExitHandler();
-    OMX_ERRORTYPE error = OMX_Init();
-    if (error == OMX_ErrorNone) 
+    if(!hasOMXInit)
     {
-        ofLogVerbose(__func__) << "OMX_Init PASS";
+        OMX_ERRORTYPE error = OMX_Init();
+        if (error == OMX_ErrorNone) 
+        {
+            ofLogVerbose(__func__) << "OMX_Init PASS";
+            hasOMXInit = true;
+        }  
     }
+    
     omxCameraSettings = omxCameraSettings_;
+    omxCameraSettings.checkForPreset();
     if (omxCameraSettings.isUsingTexture) 
     {
-        generateEGLImage();
+        generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
         textureEngine = new TextureEngine();
         textureEngine->eglImage = eglImage;
         textureEngine->setup(omxCameraSettings);
+        ofLogVerbose() << "textureEngine->setup";
         camera = textureEngine->camera;
         if (omxCameraSettings.enablePixels) 
         {
@@ -57,10 +78,12 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     {
         engine = new NonTextureEngine();
         engine->setup(omxCameraSettings);
+        ofLogVerbose() << "engine->setup";
         camera = engine->camera;
     }
     
     setDefaultValues();
+    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 
 void ofxRPiCameraVideoGrabber::setDefaultValues()
@@ -266,11 +289,122 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
     if (!textureEngine) 
     {
       
-        ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
+        //ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
     }
     return texture;
 }
 
+void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
+{
+    ofLogVerbose() << "width: " << width << " height: " << height;
+    bool needsRegeneration = false;
+   
+    if(!eglImage)
+    {
+        needsRegeneration = true;
+    }
+    if (!texture.isAllocated())
+    {
+        needsRegeneration = true;
+    }
+    
+    if (texture.getWidth() != width)
+    {
+        needsRegeneration = true;
+    }
+    if (texture.getHeight() != height)
+    {
+        needsRegeneration = true;
+    }
+    
+    if(!needsRegeneration)
+    {
+        texture.clear();
+        ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
+        return;
+    }
+    
+    if (appEGLWindow == NULL)
+    {
+        appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+    }
+    
+    if (appEGLWindow == NULL)
+    {
+        ofLogError(__func__) << "appEGLWindow is NULL - RETURNING";
+        return;
+    }
+    if (display == NULL)
+    {
+        display = appEGLWindow->getEglDisplay();
+    }
+    if (context == NULL)
+    {
+        context = appEGLWindow->getEglContext();
+    }
+    
+    
+    
+    if (needsRegeneration)
+    {
+        
+        texture.allocate(width, height, GL_RGBA);
+        texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+        textureID = texture.getTextureData().textureID;
+    }
+    
+    
+    //ofLogVerbose(__func__) << "textureID: " << textureID;
+    //ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
+    
+    glEnable(GL_TEXTURE_2D);
+    
+    // setup first texture
+    int dataSize = width * height * 4;
+    
+    if (pixels && needsRegeneration)
+    {
+        delete[] pixels;
+        pixels = NULL;
+    }
+    
+    if (pixels == NULL)
+    {
+        pixels = new unsigned char[dataSize];
+    }
+    
+    //memset(pixels, 0xff, dataSize);  // white texture, opaque
+    
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    
+    
+    if (eglImage && needsRegeneration)
+    {
+        destroyEGLImage();
+    }
+    
+    // Create EGL Image
+    eglImage = eglCreateImageKHR(
+                                 display,
+                                 context,
+                                 EGL_GL_TEXTURE_2D_KHR,
+                                 (EGLClientBuffer)textureID,
+                                 NULL);
+    glDisable(GL_TEXTURE_2D);
+    if (eglImage == EGL_NO_IMAGE_KHR)
+    {
+        ofLogError()	<< "Create EGLImage FAIL <---------------- :(";
+    }
+    else
+    {
+        ofLogVerbose()	<< "Create EGLImage PASS <---------------- :)";
+        
+    }
+}
+
+#if 0
 void ofxRPiCameraVideoGrabber::generateEGLImage()
 {
     
@@ -320,7 +454,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage()
         ofLogVerbose(__func__)	<< "Create EGLImage PASS";
     }
 }
-
+#endif
 void ofxRPiCameraVideoGrabber::destroyEGLImage()
 {
     
@@ -368,7 +502,7 @@ void ofxRPiCameraVideoGrabber::enablePixels()
 {
     if(!textureEngine)
     {
-        ofLogWarning(__func__) << "You are in non-texture mode but asking for a pixels";
+       // ofLogWarning(__func__) << "You are in non-texture mode but asking for a pixels";
     }
     doPixels = true;
 }
@@ -1091,6 +1225,7 @@ void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
 
 void ofxRPiCameraVideoGrabber::addExitHandler()
 {
+    if(hasExitHandler) return;
     
     vector<int> signals;
     signals.push_back(SIGINT);
@@ -1128,6 +1263,7 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
     }
     
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdateDuringExit);
+    hasExitHandler = true;
 }
 
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
