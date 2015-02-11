@@ -10,7 +10,7 @@ public:
 	NonTextureEngine();
 	
 	void setup(OMXCameraSettings& omxCameraSettings);
-
+    void close();
 	
 	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
 	

@@ -29,8 +29,7 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
-	virtual ~BaseEngine();
-	
+    ~BaseEngine();
 	virtual void setup(OMXCameraSettings& omxCameraSettings) = 0;
 	void stopRecording();
 	
@@ -44,7 +43,7 @@ protected:
 
 	void configureCameraResolution();
 	void configureEncoder();
-	void close();
+	virtual void close()=0;
 	
 	OMX_HANDLETYPE splitter;
 	OMX_HANDLETYPE encoder;

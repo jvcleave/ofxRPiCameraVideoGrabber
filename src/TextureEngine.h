@@ -1,25 +1,18 @@
 #pragma once
 
 #include "BaseEngine.h"
-#include "ofAppEGLWindow.h"
 
 
 class TextureEngine : public BaseEngine
 {
 public:
 	TextureEngine();
-	~TextureEngine();
-	void setup(OMXCameraSettings& omxCameraSettings);
-
+	void setup(OMXCameraSettings& omxCameraSettings_);
+    void close();
 	int renderedFrameCounter;
 	
-	void generateEGLImage();
-	GLuint textureID;
-	ofTexture tex;
-	
 	EGLImageKHR eglImage;
-	EGLDisplay display;
-	EGLContext context;
+
 	
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 	
@@ -32,12 +25,6 @@ public:
 	
 	int getFrameCounter();
 	
-	void enablePixels();
-	void disablePixels();
-	unsigned char * getPixels();
-	void updatePixels();
-	unsigned char * pixels;
-	bool doPixels;
-	ofFbo fbo;
+
 	
 };
