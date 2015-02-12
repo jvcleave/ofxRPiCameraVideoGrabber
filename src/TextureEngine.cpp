@@ -84,13 +84,13 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
             
         case OMX_EventError:
         {
-            ofLogError(__func__) << OMX_Maps::getInstance().omxErrors[(OMX_ERRORTYPE)nData1];
+            ofLogError(__func__) << "OMX_EventError: " << OMX_Maps::getInstance().omxErrors[(OMX_ERRORTYPE)nData1];
         }
 		default: 
 		{
-            ofLog(OF_LOG_VERBOSE, 
+            /*ofLog(OF_LOG_VERBOSE, 
                   "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-                  __func__, eEvent, nData1, nData2, pEventData);
+                  __func__, eEvent, nData1, nData2, pEventData);*/
             
 			break;
 		}

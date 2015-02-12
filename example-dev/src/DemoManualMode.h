@@ -10,9 +10,9 @@ public:
     
     bool doDrawInfo;
     bool doAutoMode = false;
-    void setup(OMXCameraSettings omxCameraSettings_, ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
-        CameraDemo::setup(omxCameraSettings_, videoGrabber_);
+        CameraDemo::setup( videoGrabber_);
         doDrawInfo	= true;
         
     };
@@ -34,9 +34,9 @@ public:
         videoGrabber->draw();
         
         //draw a smaller version via the getTextureReference() method
-        int drawWidth = omxCameraSettings.width/4;
-        int drawHeight = omxCameraSettings.height/4;
-        videoGrabber->getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
+        int drawWidth = videoGrabber->getWidth()/4;
+        int drawHeight = videoGrabber->getHeight()/4;
+        videoGrabber->getTextureReference().draw(videoGrabber->getWidth()-drawWidth, videoGrabber->getHeight()-drawHeight, drawWidth, drawHeight);
         
         stringstream info;
         info << name << "\n";

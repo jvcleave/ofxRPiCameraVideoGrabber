@@ -13,9 +13,9 @@ public:
     bool doDrawInfo;
     int exposurePresetIndex;
     
-    void setup(OMXCameraSettings omxCameraSettings_, ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
-        CameraDemo::setup(omxCameraSettings_, videoGrabber_);
+        CameraDemo::setup(videoGrabber_);
         doDrawInfo	= true;
         exposurePresetIndex = 0;
         currentExposureName = "";
@@ -49,9 +49,12 @@ public:
         videoGrabber->draw();
         
         //draw a smaller version via the getTextureReference() method
-        int drawWidth = omxCameraSettings.width/4;
-        int drawHeight = omxCameraSettings.height/4;
-        videoGrabber->getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
+        int drawWidth = videoGrabber->getWidth()/4;
+        int drawHeight = videoGrabber->getHeight()/4;
+        videoGrabber->getTextureReference().draw(videoGrabber->getWidth()-drawWidth, 
+                                                 videoGrabber->getHeight()-drawHeight, 
+                                                 drawWidth, 
+                                                 drawHeight);
         
         stringstream info;
         info << name << "\n";
@@ -70,10 +73,7 @@ public:
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
         
-        if (omxCameraSettings.doRecording) 
-        {
-            info << "Press q to stop recording" << "\n";
-        }
+    
         
         infoString = info.str();
         if (doDrawInfo) 

@@ -30,33 +30,33 @@ void ofApp::setup()
     videoGrabber.setup(omxCameraSettings);
     
     DemoCycleExposurePresets* demo1 = new DemoCycleExposurePresets();
-    demo1->setup(omxCameraSettings, &videoGrabber);
+    demo1->setup(&videoGrabber);
     demo1->name = "CYCLE EXPOSURE DEMO";
     demos.push_back(demo1);
     
     DemoCycleFilters* demo2 = new DemoCycleFilters();
-    demo2->setup(omxCameraSettings, &videoGrabber);
+    demo2->setup(&videoGrabber);
     demo2->name = "CYCLE FILTER DEMO";
     demos.push_back(demo2);
     
     DemoManualMode* demo3 = new DemoManualMode();
-    demo3->setup(omxCameraSettings, &videoGrabber);
+    demo3->setup(&videoGrabber);
     demo3->name = "MANUAL MODE DEMO";
     demos.push_back(demo3);
     
     DemoBCS* demo4 = new DemoBCS();
-    demo4->setup(omxCameraSettings, &videoGrabber);
+    demo4->setup(&videoGrabber);
     demo4->name = "SHARP/BRIGHT/CONTRAST/SATURATION DEMO";
     demos.push_back(demo4);
     
     
     DemoMeteringModes* demo5 = new DemoMeteringModes();
-    demo5->setup(omxCameraSettings, &videoGrabber);
+    demo5->setup(&videoGrabber);
     demo5->name = "METERING MODES";
     demos.push_back(demo5);
     
     DemoFeatureTest* demo6 = new DemoFeatureTest();
-    demo6->setup(omxCameraSettings, &videoGrabber);
+    demo6->setup(&videoGrabber);
     demo6->name = "FEATURE TEST";
     demos.push_back(demo6);
     

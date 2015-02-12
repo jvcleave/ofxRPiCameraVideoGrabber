@@ -10,7 +10,6 @@ class CameraDemo
 public:
     
     ofxRPiCameraVideoGrabber* videoGrabber;
-    OMXCameraSettings omxCameraSettings;
     ImageFilterCollection filterCollection;
     
     string name;
@@ -24,10 +23,9 @@ public:
         filterCollection.setup();
     }
     
-    void setup(OMXCameraSettings omxCameraSettings_, ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         videoGrabber = videoGrabber_;
-        omxCameraSettings =omxCameraSettings_;
     }
     virtual void update()=0;
     virtual void draw()=0;
