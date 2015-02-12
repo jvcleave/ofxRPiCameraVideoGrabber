@@ -235,7 +235,9 @@ public:
     EGLContext context;
     
     BaseEngine* getEngine();
-    
+    void saveImage(bool doRaw=true);
+    bool doSaveImage;
+    bool doRawSave;
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
     bool hasExitHandler;

@@ -27,8 +27,16 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     hasExitHandler  = false;
     zoomLevel = 0;
     camera = NULL;
+    doSaveImage = false;
+    doRawSave = false;
 }
 
+void ofxRPiCameraVideoGrabber::saveImage(bool doRaw)
+{
+    ofLogVerbose(__func__) << "";
+    doRawSave = doRaw;
+    doSaveImage = true;
+}
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
@@ -375,11 +383,10 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
 
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
-    if (!doPixels) 
+    if (!doPixels && !doSaveImage) 
     {
         return;
     }
-    
     if (!fbo.isAllocated()) 
     {
         fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
@@ -394,6 +401,30 @@ void ofxRPiCameraVideoGrabber::updatePixels()
         texture.draw(0, 0);
         glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
     fbo.end();
+    
+    if(doSaveImage)
+    {
+        string fileName;
+        if(doRawSave)
+        {
+            fileName = ofToDataPath(ofGetTimestampString()+".raw", true);
+            ofBuffer buffer((const char*)pixels, dataSize);
+            ofBufferToFile(fileName, buffer, true);
+            
+            
+        }else
+        {
+            fileName = ofToDataPath(ofGetTimestampString()+".png", true);
+            ofImage image;
+            image.setFromPixels(pixels, getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
+            
+            image.saveImage(fileName);
+        }
+        
+        ofLogVerbose(__func__) << "fileName: " << fileName;
+        
+        doSaveImage = false;
+    }
 }
 
 
@@ -463,6 +494,7 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
         if (textureEngine) 
         {
             updatePixels();
+           
         }
     }
     //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;

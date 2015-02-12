@@ -147,6 +147,11 @@ void ofApp::keyPressed  (int key)
             doPresetChange = true;
             break;
         }
+        case '9' :
+        {
+            videoGrabber.saveImage();
+            break;
+        }
         default:
         {
             currentDemo->onKey(key);
