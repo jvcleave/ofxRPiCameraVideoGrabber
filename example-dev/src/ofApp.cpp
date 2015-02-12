@@ -14,12 +14,13 @@ void ofApp::setup()
     
     
     //new preset option
-    //presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
-    //presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
     
     // presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
     

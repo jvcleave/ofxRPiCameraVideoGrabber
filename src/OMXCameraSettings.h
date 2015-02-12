@@ -18,6 +18,8 @@ public:
         PRESET_480P_30FPS_TEXTURE,
         PRESET_480P_30FPS_NONTEXTURE,
         PRESET_480P_40FPS_TEXTURE,
+        PRESET_480P_90FPS_TEXTURE,
+        PRESET_480P_90FPS_NONTEXTURE,
         PRESET_480P_90FPS,
         PRESET_480P_60FPS,
         PRESET_480P_40FPS,
@@ -124,6 +126,22 @@ public:
                 isUsingTexture = false;
                 break;
             }
+            case PRESET_480P_90FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                isUsingTexture = true;
+                break;
+            }    
+            case PRESET_480P_90FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                isUsingTexture = false;
+                break;
+            }    
             case PRESET_480P_40FPS_TEXTURE :
             {
                 width = 640;

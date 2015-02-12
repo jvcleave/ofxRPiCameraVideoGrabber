@@ -5,6 +5,7 @@
  */
 
 #include "NonTextureEngine.h"
+
 NonTextureEngine::NonTextureEngine()
 {
 	engineType = NON_TEXTURE_ENGINE;
@@ -40,7 +41,7 @@ int NonTextureEngine::getFrameCounter()
 		frameCounter = stats.nFrameCount;
 	}else
 	{		
-		ofLog(OF_LOG_ERROR, "error OMX_CONFIG_BRCMPORTSTATSTYPE FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "error OMX_CONFIG_BRCMPORTSTATSTYPE FAIL " << omxErrorToString(error);
 		//frameCounter = 0;
 	}
 	return frameCounter;
@@ -67,7 +68,7 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
 	if(error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera OMX_GetHandle FAIL " << omxErrorToString(error);
 	}
 	
 	configureCameraResolution();
@@ -80,7 +81,7 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 		error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
 		if(error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "cameraPreviewPortDefinition OMX_GetParameter OMX_IndexParamPortDefinition FAIL " << omxErrorToString(error);
 		}
 		
 		cameraPreviewPortDefinition.format.video.nFrameWidth		= omxCameraSettings.previewWidth;
@@ -89,7 +90,7 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 		error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
 		if(error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "cameraPreviewPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "cameraPreviewPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL " << omxErrorToString(error);
 			
 		}
 		
@@ -98,13 +99,18 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 }
 
 
-OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                                                           OMX_PTR pAppData, 
+                                                           OMX_EVENTTYPE eEvent, 
+                                                           OMX_U32 nData1, 
+                                                           OMX_U32 nData2, 
+                                                           OMX_PTR pEventData)
 {
-	ofLog(OF_LOG_VERBOSE, 
+	/*ofLog(OF_LOG_VERBOSE, 
 	 "NonTextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-	 __func__, eEvent, nData1, nData2, pEventData);
-	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	//ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
+	 __func__, eEvent, nData1, nData2, pEventData);*/
+
+    NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
 	switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:
@@ -128,9 +134,10 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	ofLogVerbose(__func__) << "START";
 	
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 	}
 	
 	//Enable Camera Output Port
@@ -142,7 +149,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera enable Output Port FAIL " << omxErrorToString(error);
 	}
 	
 	
@@ -168,7 +175,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_GetHandle FAIL " << omxErrorToString(error);
 		}
 		
 		configureEncoder();
@@ -179,7 +186,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
 			if (error != OMX_ErrorNone) 
 			{
-				ofLog(OF_LOG_ERROR, "camera->video_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+				ofLogError(__func__) << "camera->video_render OMX_SetupTunnel FAIL " << omxErrorToString(error);
 			}
 		}
 
@@ -187,7 +194,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, VIDEO_ENCODE_INPUT_PORT);
 		if(error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 
 		
@@ -195,14 +202,14 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 		}
 		
 		//Set camera to Idle
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 		}
 		
 		if (omxCameraSettings.doRecordingPreview)
@@ -211,7 +218,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
 			if (error != OMX_ErrorNone) 
 			{
-				ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_PREVIEW_PORT FAIL error: 0x%08x", error);
+				ofLogError(__func__) << "camera OMX_CommandPortEnable CAMERA_PREVIEW_PORT FAIL " << omxErrorToString(error);
 			}
 		}
 	
@@ -219,21 +226,21 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera OMX_CommandPortEnable CAMERA_OUTPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera OMX_CommandPortEnable CAMERA_OUTPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable encoder input port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable encoder output port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		if (omxCameraSettings.doRecordingPreview) 
@@ -242,7 +249,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
 			if (error != OMX_ErrorNone) 
 			{
-				ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
+				ofLogError(__func__) << "render enable output port FAIL " << omxErrorToString(error);
 			}
 		}
 
@@ -252,7 +259,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL " << omxErrorToString(error);
 		}else 
 		{
 			ofLogVerbose(__func__) << "VIDEO_ENCODE_OUTPUT_PORT eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
@@ -261,7 +268,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
 			
 		}
 		
@@ -270,14 +277,14 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera OMX_StateExecuting FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera OMX_StateExecuting FAIL " << omxErrorToString(error);
 		}
 		
 		//Start encoder
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_StateExecuting FAIL error: 0x%08x", error);		
+			ofLogError(__func__) << "encoder OMX_StateExecuting FAIL " << omxErrorToString(error);		
 		}
 		
 		if (omxCameraSettings.doRecordingPreview) 
@@ -287,7 +294,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 			if (error != OMX_ErrorNone) 
 			{
-				ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
+				ofLogError(__func__) << "render OMX_StateExecuting FAIL " << omxErrorToString(error);		
 			}
 			
 			setupDisplay();
@@ -299,7 +306,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);		
+			ofLogError(__func__) << "encoder OMX_FillThisBuffer FAIL " << omxErrorToString(error);		
 		}
 		
 		bool doThreadBlocking	= true;
@@ -314,21 +321,21 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, VIDEO_RENDER_INPUT_PORT);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera->video_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera->video_render OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable camera output port
 		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera enable output port FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera enable output port FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable render input port
 		error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "render enable output port FAIL " << omxErrorToString(error);
 		}
 		
 		
@@ -336,14 +343,14 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
+			ofLogError(__func__) << "render OMX_StateExecuting FAIL " << omxErrorToString(error);		
 		}
 		
 		//Start camera
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera OMX_StateExecuting FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera OMX_StateExecuting FAIL " << omxErrorToString(error);
 		}
 		
 		setupDisplay();
@@ -379,7 +386,7 @@ OMX_ERRORTYPE NonTextureEngine::setupDisplay()
 		ofLogVerbose(__func__) << "render OMX_IndexConfigDisplayRegion PASS";
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_IndexConfigDisplayRegion FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render OMX_IndexConfigDisplayRegion FAIL " << omxErrorToString(error);
 	}
 	
 	return error;
@@ -397,29 +404,16 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 	string renderComponentName = "OMX.broadcom.video_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	OMXCameraUtils::disableAllPortsForComponent(&render);
+	disableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	OMX_ERRORTYPE error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 	}
 	return error;
 }
-
-#if 0
-void NonTextureEngine::close()
-{
-    ofLogVerbose(__func__) << "START";
-    
-    BaseEngine::close();
-    
-    ofLogVerbose(__func__) << "OMX BREAKDOWN END";
-    ofLogVerbose(__func__) << " END";
-    isOpen = false;
-}
-#endif
 
 void NonTextureEngine::close()
 {
@@ -442,7 +436,6 @@ void NonTextureEngine::close()
         writeFile();
         
     }
-    ofLogVerbose(__func__) << " START";
     
     OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     if(omxCameraSettings.doRecording)
@@ -453,12 +446,10 @@ void NonTextureEngine::close()
     
     if(omxCameraSettings.doRecording)
     {
-        OMXCameraUtils::disableAllPortsForComponent(&encoder);
+        disableAllPortsForComponent(&encoder);
     }
     
-    
-    
-    OMXCameraUtils::disableAllPortsForComponent(&camera);
+    disableAllPortsForComponent(&camera);
     
     if(omxCameraSettings.doRecording)
     {
@@ -484,7 +475,13 @@ void NonTextureEngine::close()
     {
         OMX_FreeHandle(encoder);
     }
-    ofLogVerbose(__func__) << " END";
+    
+    
+   OMX_ERRORTYPE error =  OMX_FreeHandle(render);
+    if (error != OMX_ErrorNone) 
+    {
+        ofLogError(__func__) << "render OMX_FreeHandle FAIL " << omxErrorToString(error);
+    }
 }
 
 NonTextureEngine::~NonTextureEngine()

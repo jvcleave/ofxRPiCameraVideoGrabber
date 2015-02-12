@@ -51,7 +51,7 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	error = OMX_GetHandle(&camera, (OMX_STRING)"OMX.broadcom.camera", this , &cameraCallbacks);
 	if(error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera OMX_GetHandle FAIL " << omxErrorToString(error);
 	}
 	
 	configureCameraResolution();
@@ -116,7 +116,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 	}
 	
 	//Enable Camera Output Port
@@ -128,7 +128,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera enable Output Port FAIL " << omxErrorToString(error);
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -139,13 +139,13 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		string splitterComponentName = "OMX.broadcom.video_splitter";
 		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
-		OMXCameraUtils::disableAllPortsForComponent(&splitter);
+		disableAllPortsForComponent(&splitter);
 		
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 		}else 
 		{
 			ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_StateIdle PASS";
@@ -153,7 +153,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
         if (error != OMX_ErrorNone) 
         {
-            ofLog(OF_LOG_ERROR, "splitter OMX_SendCommand OMX_CommandPortEnable VIDEO_SPLITTER_INPUT_PORT FAIL error: 0x%08x", error);
+            ofLogError(__func__) << "splitter OMX_SendCommand OMX_CommandPortEnable VIDEO_SPLITTER_INPUT_PORT FAIL " << omxErrorToString(error);
         }else 
         {
             ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_CommandPortEnable VIDEO_SPLITTER_INPUT_PORT PASS";
@@ -172,13 +172,13 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	string renderComponentName = "OMX.broadcom.egl_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	OMXCameraUtils::disableAllPortsForComponent(&render);
+	disableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -196,7 +196,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_GetHandle FAIL " << omxErrorToString(error);
 		}
 		
 		configureEncoder();
@@ -211,21 +211,21 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
         if (error != OMX_ErrorNone) 
         {
-            ofLog(OF_LOG_ERROR, "camera->splitter OMX_SetupTunnel FAIL error: 0x%08x", error);
+            ofLogError(__func__) << "camera->splitter OMX_SetupTunnel FAIL " << omxErrorToString(error);
         }
         
 		// Tunnel splitter2 output port and encoder input port
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODE_INPUT_PORT);
 		if(error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 		
 		//Create splitter->egl_render Tunnel
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, render, EGL_RENDER_INPUT_PORT);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter->egl_render OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 	}else 
 	{
@@ -233,7 +233,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "camera->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "camera->egl_render OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 	}
 	
@@ -243,7 +243,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera enable output port FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera enable output port FAIL " << omxErrorToString(error);
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -252,21 +252,21 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter enable input port FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter enable input port FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable splitter output port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT1, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter enable output port 1 FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter enable output port 1 FAIL " << omxErrorToString(error);
 		}
 	
 		//Enable splitter output2 port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT2, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter enable output port 2 FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter enable output port 2 FAIL " << omxErrorToString(error);
 		}
 	}
 	
@@ -275,14 +275,14 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render enable output port FAIL " << omxErrorToString(error);
 	}
 	
 	//Enable render input port
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_INPUT_PORT, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render enable input port FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render enable input port FAIL " << omxErrorToString(error);
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -291,21 +291,21 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL " << omxErrorToString(error);
 		}
 	
 		//Set encoder to Idle
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_SendCommand OMX_StateIdle FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable encoder output port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		// Configure encoder output buffer
@@ -315,7 +315,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL " << omxErrorToString(error);
 		}else 
 		{
 			ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
@@ -334,7 +334,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
 			
 		}
 	}
@@ -343,14 +343,14 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImage);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render OMX_UseEGLImage-----> FAIL " << omxErrorToString(error);
 	}
 	
 	//Start renderer
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
+		ofLogError(__func__) << "render OMX_StateExecuting FAIL " << omxErrorToString(error);		
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -359,14 +359,14 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_StateExecuting FAIL error: 0x%08x", error);		
+			ofLogError(__func__) << "encoder OMX_StateExecuting FAIL " << omxErrorToString(error);		
 		}
 		
 		//Start splitter
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLog(OF_LOG_ERROR, "splitter OMX_StateExecuting FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "splitter OMX_StateExecuting FAIL " << omxErrorToString(error);
 		}
 	}
 	
@@ -376,7 +376,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
 	if (error != OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "camera OMX_StateExecuting FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "camera OMX_StateExecuting FAIL " << omxErrorToString(error);
 	}
 	
 	//start the buffer filling loop
@@ -388,7 +388,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		
 	}else 
 	{
-		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL error: 0x%08x", error);
+		ofLogError(__func__) << "render OMX_FillThisBuffer FAIL " << omxErrorToString(error);
 	}
 	
 	if(omxCameraSettings.doRecording)
@@ -400,7 +400,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			
 		}else 
 		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+			ofLogError(__func__) << "encoder OMX_FillThisBuffer FAIL " << omxErrorToString(error);
 		}
 		bool doThreadBlocking	= true;
 		startThread(doThreadBlocking);
@@ -430,7 +430,6 @@ void TextureEngine::close()
         writeFile();
         
     }
-    ofLogVerbose(__func__) << " START";
     
     OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     if(omxCameraSettings.doRecording)
@@ -441,12 +440,10 @@ void TextureEngine::close()
     
     if(omxCameraSettings.doRecording)
     {
-        OMXCameraUtils::disableAllPortsForComponent(&encoder);
+        disableAllPortsForComponent(&encoder);
     }
     
-    
-    
-    OMXCameraUtils::disableAllPortsForComponent(&camera);
+    disableAllPortsForComponent(&camera);
     
     if(omxCameraSettings.doRecording)
     {
@@ -477,22 +474,14 @@ void TextureEngine::close()
     
     if (error != OMX_ErrorNone) 
     {
-        ofLog(OF_LOG_ERROR, "render OMX_FreeBuffer FAIL error: 0x%08x", error);
-    }else
-    {
-        ofLogVerbose(__func__) << "render OMX_FreeBuffer PASS";
+        ofLogError(__func__) << "render OMX_FreeBuffer FAIL " << omxErrorToString(error);
     }
     
     error =  OMX_FreeHandle(render);
     if (error != OMX_ErrorNone) 
     {
-        ofLog(OF_LOG_ERROR, "render OMX_FreeHandle FAIL error: 0x%08x", error);
-    }else
-    {
-        ofLogVerbose(__func__) << "render OMX_FreeHandle PASS";
+        ofLogError(__func__) << "render OMX_FreeHandle FAIL " << omxErrorToString(error);
     }
-    
-    ofLogVerbose(__func__) << " END";
 }
 
 TextureEngine::~TextureEngine()
@@ -502,32 +491,6 @@ TextureEngine::~TextureEngine()
         close();
     }
 }
-
-#if 0
-void TextureEngine::close()
-{
-    ofLogVerbose(__func__) << "START";
-   // OMXCameraUtils::disableAllPortsForComponent(&splitter);
-    //OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    //OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-    //OMX_FreeHandle(splitter);
-    
-    //BaseEngine::close();
-    
-    OMX_ERRORTYPE error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
-
-    if (error != OMX_ErrorNone) 
-    {
-        ofLog(OF_LOG_ERROR, "render OMX_FreeBuffer FAIL error: 0x%08x", error);
-    }else
-    {
-        ofLogVerbose(__func__) << "render OMX_FreeBuffer PASS";
-    }
-    ofLogVerbose(__func__) << "OMX BREAKDOWN END";
-    ofLogVerbose(__func__) << " END";
-    isOpen = false;
-}
-#endif
 
 
 

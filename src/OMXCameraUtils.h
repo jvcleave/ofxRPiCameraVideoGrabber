@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OMXCameraUtils_
+#define OMXCameraUtils_
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
@@ -11,6 +12,8 @@
 #include <IL/OMX_Broadcom.h>
 
 #include "OMX_Maps.h"
+
+
 
 #define OMX_INIT_STRUCTURE(a) \
 memset(&(a), 0, sizeof(a)); \
@@ -44,10 +47,20 @@ memset(&(a), 0, sizeof(a)); \
 #define __func__ __PRETTY_FUNCTION__
 
 
-class OMXCameraUtils
-{
-public:
-	OMXCameraUtils();
-	static OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* m_handle);
+#ifndef GLOBAL_OMX_FUNCTIONS_
+#define GLOBAL_OMX_FUNCTIONS_
 
-};
+OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE*);
+string omxErrorToString(OMX_ERRORTYPE);
+
+const char* omxErrorToCString(OMX_ERRORTYPE);
+
+OMX_BOOL toOMXBool(bool);
+bool fromOMXBool(OMX_BOOL);
+
+float toQ16(float);
+float fromQ16(float);
+
+#endif
+
+#endif

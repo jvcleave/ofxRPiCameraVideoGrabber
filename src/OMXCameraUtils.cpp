@@ -9,12 +9,38 @@
 
 #include "OMXCameraUtils.h"
 
-OMXCameraUtils::OMXCameraUtils()
+string omxErrorToString(OMX_ERRORTYPE error)
 {
-	
+    return OMX_Maps::getInstance().omxErrors[error];
 }
 
-OMX_ERRORTYPE OMXCameraUtils::disableAllPortsForComponent(OMX_HANDLETYPE* handle)
+const char* omxErrorToCString(OMX_ERRORTYPE error)
+{
+    return OMX_Maps::getInstance().omxErrors[error].c_str();
+}
+
+OMX_BOOL toOMXBool(bool boolean)
+{
+    if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
+}
+
+bool fromOMXBool(OMX_BOOL omxBool)
+{
+    if(omxBool == OMX_TRUE) { return true; } else { return false; } 
+}
+
+float toQ16(float n) 
+{
+    return n* 65536; 
+}
+
+float fromQ16(float n) 
+{ 
+    return n*(1/65536.0); 
+}
+
+
+OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* handle)
 {
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;

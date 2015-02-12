@@ -159,7 +159,7 @@ void ofxRPiCameraVideoGrabber::printCameraInfo()
         ofLogVerbose(__func__) << ss.str();
     }else
     {
-        ofLogError(__func__) << printError(error);
+        ofLogError(__func__) << omxErrorToString(error);
     }
     
     frameRateRangeConfig.nPortIndex = CAMERA_PREVIEW_PORT;
@@ -173,75 +173,26 @@ void ofxRPiCameraVideoGrabber::printCameraInfo()
         ofLogVerbose(__func__) << ss.str();
     }else
     {
-        ofLogError(__func__) << printError(error);
+        ofLogError(__func__) << omxErrorToString(error);
     }
-    
-
-#if 0
-    
-    
-    OMX_U16  nShutterDelayTime;
-    OMX_U16  nNdTransparency;
-    OMX_U16  nPwmPulseNearEnd;  /**< Num pulses to move lens 1um at near end */
-    OMX_U16  nPwmPulseFarEnd;   /**< Num pulses to move lens 1um at far end */
-    short unsigned int  nVoltagePIOutNearEnd[3];
-    short unsigned int  nVoltagePIOut10cm[3];
-    short unsigned int  nVoltagePIOutInfinity[3];
-    OMX_U16  nVoltagePIOutFarEnd[3];
-    OMX_U32  nAdcConversionNearEnd;
-    OMX_U32  nAdcConversionFarEnd;
-        /*ss << "nShutterDelayTime fromQ16: "     << fromQ16(cameraInfoConfig.sLensCalibration.nShutterDelayTime)     << endl;
-         ss << "nNdTransparency fromQ16: "       << fromQ16(cameraInfoConfig.sLensCalibration.nNdTransparency)       << endl;
-         ss << "nPwmPulseNearEnd fromQ16: "      << fromQ16(cameraInfoConfig.sLensCalibration.nPwmPulseNearEnd)      << endl;
-         ss << "nPwmPulseFarEnd fromQ16: "       << fromQ16(cameraInfoConfig.sLensCalibration.nPwmPulseFarEnd)       << endl;
-         ss << "nVoltagePIOutNearEnd: "          << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutNearEnd)  << endl;
-         ss << "nVoltagePIOut10cm: "             << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOut10cm)     << endl;
-         ss << "nVoltagePIOutInfinity: "         << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutInfinity) << endl;
-         ss << "nVoltagePIOutFarEnd: "           << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutFarEnd)   << endl;*/
-        
-        
-        cout << "sSerialNumber: ";
-        for (int i=0; i<20; i++) 
-        {
-            cout << fromQ16(cameraInfoConfig.sSerialNumber[i]);
-            
-        }
-        cout << endl;
-        
-        cout << "nVoltagePIOutNearEnd: " <<  endl;
-        for (int i=0; i<3; i++) {
-            cout << fromQ16(cameraInfoConfig.sLensCalibration.nVoltagePIOutNearEnd[i]);
-        }
-        cout << endl;
-        
-        
-       
-    }
-    
-    
-#define OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN 16
-#define OMX_CONFIG_CAMERAINFOTYPE_SERIALNUM_LEN 20
-#define OMX_CONFIG_CAMERAINFOTYPE_EPROMVER_LEN 8
-    typedef struct OMX_CONFIG_CAMERAINFOTYPE
-    {
-        OMX_U32 nSize;
-        OMX_VERSIONTYPE nVersion;
-        OMX_U8 cameraname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
-        OMX_U8 lensname[OMX_CONFIG_CAMERAINFOTYPE_NAME_LEN];
-        OMX_U16 nModelId;
-        OMX_U8 nManufacturerId;
-        OMX_U8 nRevNum;
-        OMX_U8 sSerialNumber[OMX_CONFIG_CAMERAINFOTYPE_SERIALNUM_LEN];
-        OMX_U8 sEpromVersion[OMX_CONFIG_CAMERAINFOTYPE_EPROMVER_LEN];
-        OMX_CONFIG_LENSCALIBRATIONVALUETYPE sLensCalibration;
-        OMX_U32 xFNumber;
-        OMX_U32 xFocalLength;
-    } OMX_CONFIG_CAMERAINFOTYPE;
-#endif
-   // return error;
-    
-    
 }
+
+
+BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
+{
+    if (engine) 
+    {
+        return engine;
+    }
+    
+    if (textureEngine) 
+    {
+        return textureEngine;
+    }
+    return NULL;
+}
+
+
 bool ofxRPiCameraVideoGrabber::isReady()
 {
     
@@ -719,7 +670,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setISO(int ISO)
             updateCurrentMeteringMode(currentMeteringMode.exposurevalue);
         }else
         {
-            ofLogError(__func__) << printError(error);
+            ofLogError(__func__) << omxErrorToString(error);
         }
     }
     return error;
@@ -869,7 +820,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSensorCrop(ofRectangle& rectangle)
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigInputCropPercentages, &sensorCropConfig);
     if(error != OMX_ErrorNone)
     {
-        ofLogError(__func__) << printError(error);
+        ofLogError(__func__) << omxErrorToString(error);
         if(error == OMX_ErrorBadParameter)
         {
             ofLogWarning(__func__) << "resetting cropRectangle to known good params (0, 0, 100, 100)";
@@ -942,7 +893,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDigitalZoom()
         OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonDigitalZoom, &digitalZoomConfig);
         if(error != OMX_ErrorNone)
         {
-            ofLogError(__func__) << printError(error);
+            ofLogError(__func__) << omxErrorToString(error);
         }
         return error;
     }
@@ -1060,7 +1011,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setHDR(bool doHDR)
     {
         ofLogVerbose(__func__) << " PASS";
     }else{
-        ofLogError(__func__) << "FAIL" << printError(error);
+        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
     }
     return error;
 }
@@ -1216,36 +1167,29 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
 
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
-    cout << "~ofxRPiCameraVideoGrabber START" << endl;
     close();
     if (pixels) 
     {
         delete[] pixels;
         pixels = NULL;
     }
-    cout << "~ofxRPiCameraVideoGrabber END" << endl;
 
 }
 
 void ofxRPiCameraVideoGrabber::close()
 {
-    cout << "ofxRPiCameraVideoGrabber::close START" << endl;
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
-        cout << "ofxRPiCameraVideoGrabber::close delete engine" << endl;
         delete engine;
         engine = NULL;
     }
     if(textureEngine)
     {
-        cout << "ofxRPiCameraVideoGrabber::close delete textureEngine" << endl;
         delete textureEngine;
         textureEngine = NULL;
         destroyEGLImage();
     }
-    
-    cout << "ofxRPiCameraVideoGrabber::close END" << endl;
 }
 
 

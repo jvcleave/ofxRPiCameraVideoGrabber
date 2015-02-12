@@ -234,6 +234,8 @@ public:
     EGLDisplay display;
     EGLContext context;
     
+    BaseEngine* getEngine();
+    
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
     bool hasExitHandler;
@@ -242,22 +244,7 @@ private:
     vector<int> zoomLevels;
     OMX_ERRORTYPE setDigitalZoom();
     
-    OMX_BOOL toOMXBool(bool boolean)
-    {
-        if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
-    }
-    
-    bool fromOMXBool(OMX_BOOL omxBool)
-    {
-        if(omxBool == OMX_TRUE) { return true; } else { return false; } 
-    }
-    
-    string printError(OMX_ERRORTYPE& error)
-    {
-        return OMX_Maps::getInstance().omxErrors[error];
-    }
-    float toQ16(float n) { return n* 65536; }
-    float fromQ16(float n) { return n*(1/65536.0); }
+
     
 	void addExitHandler();
 	void onUpdate(ofEventArgs & args);
@@ -271,9 +258,7 @@ private:
 	bool LED_CURRENT_STATE;
   
 	OMX_ERRORTYPE toggleImageEffects(bool doDisable);
-	
-	OMXCameraUtils omxCameraUtils;
-	
+		
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
     

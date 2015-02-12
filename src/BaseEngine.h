@@ -29,16 +29,15 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
-    //~BaseEngine();
 	virtual void setup(OMXCameraSettings& omxCameraSettings) = 0;
-	void stopRecording();
-    
 	virtual int getFrameCounter() = 0;
     virtual void close()=0;
     
+    void stopRecording();
     OMX_HANDLETYPE camera;
     EngineType engineType;
     bool isOpen;
+    
 protected:
 	OMXCameraSettings omxCameraSettings;
 
@@ -70,37 +69,49 @@ protected:
 	
 	int recordedFrameCounter;
 	
-	static OMX_ERRORTYPE splitterEventHandlerCallback(OMX_HANDLETYPE hComponent, 
-                                                      OMX_PTR pAppData, 
-                                                      OMX_EVENTTYPE eEvent, 
-                                                      OMX_U32 nData1, 
-                                                      OMX_U32 nData2, 
-                                                      OMX_PTR pEventData){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    splitterEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                                 OMX_PTR pAppData, 
+                                 OMX_EVENTTYPE eEvent, 
+                                 OMX_U32 nData1, 
+                                 OMX_U32 nData2, 
+                                 OMX_PTR pEventData)
+                                {return OMX_ErrorNone;};
 
-	static OMX_ERRORTYPE encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
-                                                     OMX_PTR pAppData, 
-                                                     OMX_EVENTTYPE eEvent, 
-                                                     OMX_U32 nData1, 
-                                                     OMX_U32 nData2, 
-                                                     OMX_PTR pEventData){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                                OMX_PTR pAppData, 
+                                OMX_EVENTTYPE eEvent, 
+                                OMX_U32 nData1, 
+                                OMX_U32 nData2, 
+                                OMX_PTR pEventData)
+                                {return OMX_ErrorNone;};
     
-	static OMX_ERRORTYPE encoderEmptyBufferDone(OMX_HANDLETYPE hComponent, 
-                                                OMX_PTR pAppData, 
-                                                OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    encoderEmptyBufferDone(OMX_HANDLETYPE hComponent, 
+                           OMX_PTR pAppData, 
+                           OMX_BUFFERHEADERTYPE* pBuffer)
+                            {return OMX_ErrorNone;};
 	
-	static OMX_ERRORTYPE renderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
-                                                    OMX_PTR pAppData, 
-                                                    OMX_EVENTTYPE eEvent, 
-                                                    OMX_U32 nData1, 
-                                                    OMX_U32 nData2, 
-                                                    OMX_PTR pEventData){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    renderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                               OMX_PTR pAppData, 
+                               OMX_EVENTTYPE eEvent, 
+                               OMX_U32 nData1, 
+                               OMX_U32 nData2, 
+                               OMX_PTR pEventData)
+                                {return OMX_ErrorNone;};
     
-	static OMX_ERRORTYPE renderEmptyBufferDone(OMX_HANDLETYPE hComponent, 
-                                               OMX_PTR pAppData, 
-                                               OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    renderEmptyBufferDone(OMX_HANDLETYPE hComponent, 
+                          OMX_PTR pAppData, 
+                          OMX_BUFFERHEADERTYPE* pBuffer)
+                            {return OMX_ErrorNone;};
     
-	static OMX_ERRORTYPE renderFillBufferDone(OMX_HANDLETYPE hComponent, 
-                                              OMX_PTR pAppData, 
-                                              OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+	static OMX_ERRORTYPE 
+    renderFillBufferDone(OMX_HANDLETYPE hComponent, 
+                         OMX_PTR pAppData, 
+                         OMX_BUFFERHEADERTYPE* pBuffer)
+                        {return OMX_ErrorNone;};
 	
 };
