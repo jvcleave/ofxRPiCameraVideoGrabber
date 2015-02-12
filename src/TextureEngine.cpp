@@ -14,6 +14,7 @@ TextureEngine::TextureEngine()
 	isOpen		= false;
 	
 	eglBuffer	= NULL;
+    eglImage = NULL;
 	renderedFrameCounter = 0;
 	recordedFrameCounter = 0;
 	
@@ -408,7 +409,101 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	return error;
 }
 
+void TextureEngine::close()
+{
+    if(omxCameraSettings.doRecording)
+    {
+        //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+        //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    }else 
+    {
+        //may have to revisit this if creating new instances of the videograbber
+        //otherwise OMX components seem smart enough to clean up themselves on destruction
+        //ofLogVerbose(__func__) << "END - just exiting";
+        //isOpen = false;
+        //return;
+    }
+    
+    
+    if(omxCameraSettings.doRecording && !didWriteFile)
+    {
+        writeFile();
+        
+    }
+    ofLogVerbose(__func__) << " START";
+    
+    OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMXCameraUtils::disableAllPortsForComponent(&encoder);
+    }
+    
+    
+    
+    OMXCameraUtils::disableAllPortsForComponent(&camera);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+    }
+    
+    OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    }
+    
+    OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    }
+    
+    OMX_FreeHandle(camera);
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_FreeHandle(encoder);
+    }
+    
+    OMX_ERRORTYPE error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
+    
+    if (error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR, "render OMX_FreeBuffer FAIL error: 0x%08x", error);
+    }else
+    {
+        ofLogVerbose(__func__) << "render OMX_FreeBuffer PASS";
+    }
+    
+    error =  OMX_FreeHandle(render);
+    if (error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR, "render OMX_FreeHandle FAIL error: 0x%08x", error);
+    }else
+    {
+        ofLogVerbose(__func__) << "render OMX_FreeHandle PASS";
+    }
+    
+    ofLogVerbose(__func__) << " END";
+}
 
+TextureEngine::~TextureEngine()
+{
+    if(isOpen)
+    {
+        close();
+    }
+}
+
+#if 0
 void TextureEngine::close()
 {
     ofLogVerbose(__func__) << "START";
@@ -417,14 +512,22 @@ void TextureEngine::close()
     //OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     //OMX_FreeHandle(splitter);
     
-    BaseEngine::close();
- 
+    //BaseEngine::close();
     
+    OMX_ERRORTYPE error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
+
+    if (error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR, "render OMX_FreeBuffer FAIL error: 0x%08x", error);
+    }else
+    {
+        ofLogVerbose(__func__) << "render OMX_FreeBuffer PASS";
+    }
     ofLogVerbose(__func__) << "OMX BREAKDOWN END";
     ofLogVerbose(__func__) << " END";
     isOpen = false;
 }
-
+#endif
 
 
 

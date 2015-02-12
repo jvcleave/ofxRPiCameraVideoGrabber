@@ -27,8 +27,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     hasExitHandler  = false;
     zoomLevel = 0;
     camera = NULL;
-    
-    
 }
 
 
@@ -404,57 +402,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     }
 }
 
-#if 0
-void ofxRPiCameraVideoGrabber::generateEGLImage()
-{
-    
-    ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-    display = appEGLWindow->getEglDisplay();
-    context = appEGLWindow->getEglContext();
-    
-    
-    texture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
-    //tex.getTextureData().bFlipTexture = true;
-    
-    texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-    textureID = texture.getTextureData().textureID;
-    
-    glEnable(GL_TEXTURE_2D);
-    
-    // setup first texture
-    int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
-    
-    GLubyte* pixelData = new GLubyte [dataSize];
-    
-    
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-    
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, omxCameraSettings.width, omxCameraSettings.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-    
-    delete[] pixelData;
-    
-    
-    // Create EGL Image
-    eglImage = eglCreateImageKHR(
-                                 display,
-                                 context,
-                                 EGL_GL_TEXTURE_2D_KHR,
-                                 (EGLClientBuffer)textureID,
-                                 0);
-    glDisable(GL_TEXTURE_2D);
-    if (eglImage == EGL_NO_IMAGE_KHR)
-    {
-        ofLogError()	<< "Create EGLImage FAIL";
-        return;
-    }
-    else
-    {
-        ofLogVerbose(__func__)	<< "Create EGLImage PASS";
-    }
-}
-#endif
+
 void ofxRPiCameraVideoGrabber::destroyEGLImage()
 {
     
@@ -1268,35 +1216,36 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
 
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
 {
-    cout << "~ofxRPiCameraVideoGrabber" << endl;
+    cout << "~ofxRPiCameraVideoGrabber START" << endl;
     close();
     if (pixels) 
     {
         delete[] pixels;
         pixels = NULL;
     }
-    
+    cout << "~ofxRPiCameraVideoGrabber END" << endl;
+
 }
 
 void ofxRPiCameraVideoGrabber::close()
 {
-    
-    cout << "ofxRPiCameraVideoGrabber::close" << endl;
+    cout << "ofxRPiCameraVideoGrabber::close START" << endl;
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
-        cout << "~ofxRPiCameraVideoGrabber delete engine" << endl;
+        cout << "ofxRPiCameraVideoGrabber::close delete engine" << endl;
         delete engine;
         engine = NULL;
     }
     if(textureEngine)
     {
+        cout << "ofxRPiCameraVideoGrabber::close delete textureEngine" << endl;
         delete textureEngine;
         textureEngine = NULL;
         destroyEGLImage();
     }
     
-    cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
+    cout << "ofxRPiCameraVideoGrabber::close END" << endl;
 }
 
 

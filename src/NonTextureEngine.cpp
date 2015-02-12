@@ -408,7 +408,7 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 	return error;
 }
 
-
+#if 0
 void NonTextureEngine::close()
 {
     ofLogVerbose(__func__) << "START";
@@ -419,7 +419,81 @@ void NonTextureEngine::close()
     ofLogVerbose(__func__) << " END";
     isOpen = false;
 }
+#endif
 
+void NonTextureEngine::close()
+{
+    if(omxCameraSettings.doRecording)
+    {
+        //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+        //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    }else 
+    {
+        //may have to revisit this if creating new instances of the videograbber
+        //otherwise OMX components seem smart enough to clean up themselves on destruction
+        //ofLogVerbose(__func__) << "END - just exiting";
+        //isOpen = false;
+        //return;
+    }
+    
+    
+    if(omxCameraSettings.doRecording && !didWriteFile)
+    {
+        writeFile();
+        
+    }
+    ofLogVerbose(__func__) << " START";
+    
+    OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMXCameraUtils::disableAllPortsForComponent(&encoder);
+    }
+    
+    
+    
+    OMXCameraUtils::disableAllPortsForComponent(&camera);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+    }
+    
+    OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    }
+    
+    OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    }
+    
+    OMX_FreeHandle(camera);
+    if(omxCameraSettings.doRecording)
+    {
+        OMX_FreeHandle(encoder);
+    }
+    ofLogVerbose(__func__) << " END";
+}
+
+NonTextureEngine::~NonTextureEngine()
+{
+    if(isOpen)
+    {
+        close();
+    }
+}
 
 
 OMX_ERRORTYPE NonTextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)

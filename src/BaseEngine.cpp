@@ -18,13 +18,13 @@ BaseEngine::BaseEngine()
 	recordedFrameCounter = 0;
 }
 
-BaseEngine::~BaseEngine()
+/*BaseEngine::~BaseEngine()
 {
 	if(isOpen)
 	{
 		close();
 	}
-}
+}*/
 
 void BaseEngine::configureCameraResolution()
 {
@@ -225,7 +225,7 @@ void BaseEngine::stopRecording()
 	
 }
 
-
+#if 0
 void BaseEngine::close()
 {
     if(omxCameraSettings.doRecording)
@@ -290,7 +290,7 @@ void BaseEngine::close()
         OMX_FreeHandle(encoder);
     }
 }
-
+#endif
 
 void BaseEngine::writeFile()
 {

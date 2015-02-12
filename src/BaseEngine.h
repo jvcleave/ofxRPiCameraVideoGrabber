@@ -29,12 +29,12 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
-    ~BaseEngine();
+    //~BaseEngine();
 	virtual void setup(OMXCameraSettings& omxCameraSettings) = 0;
 	void stopRecording();
     
 	virtual int getFrameCounter() = 0;
-    virtual void close();
+    virtual void close()=0;
     
     OMX_HANDLETYPE camera;
     EngineType engineType;
