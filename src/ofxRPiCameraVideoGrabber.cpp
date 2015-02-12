@@ -31,26 +31,30 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     doRawSave = false;
 }
 
-void ofxRPiCameraVideoGrabber::saveImage(bool doRaw)
+void ofxRPiCameraVideoGrabber::saveImage()
 {
-    ofLogVerbose(__func__) << "";
-    doRawSave = doRaw;
+    doRawSave = false;
     doSaveImage = true;
 }
+void ofxRPiCameraVideoGrabber::saveRawImage()
+{
+    ofLogVerbose(__func__) << "";
+    doRawSave = true;
+    doSaveImage = true;
+}
+
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
-        //engine->close();
         delete engine;
         engine = NULL;
         
     }
     if(textureEngine)
     {
-        //textureEngine->close();
         delete textureEngine;
         textureEngine = NULL;
     }
@@ -67,7 +71,12 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }
     
     omxCameraSettings = omxCameraSettings_;
-    omxCameraSettings.checkForPreset();
+    omxCameraSettings.applyPreset();
+    if (omxCameraSettings.enablePixels) 
+    {
+        enablePixels();
+    }
+    
     if (omxCameraSettings.isUsingTexture) 
     {
         generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
@@ -76,10 +85,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         textureEngine->setup(omxCameraSettings);
         ofLogVerbose() << "textureEngine->setup";
         camera = textureEngine->camera;
-        if (omxCameraSettings.enablePixels) 
-        {
-            enablePixels();
-        }
+        
     }else 
     {
         engine = new NonTextureEngine();
@@ -125,7 +131,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     ofFile gpioProgram("/usr/local/bin/gpio");
     if(gpioProgram.exists())
     {
-        system("gpio export 5 out");
+        int result = system("gpio export 5 out");
+        if(result == 0){};
         LED_CURRENT_STATE = true;
         setLEDState(LED_CURRENT_STATE);
     }    
@@ -304,15 +311,21 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     
     if (needsRegeneration)
     {
-        
+        if(doPixels)//go ahead and take the allocate hit here
+        {
+            if(!fbo.isAllocated() ||
+               fbo.getWidth() != width ||
+               fbo.getHeight() != height)
+            {
+                fbo.allocate(width, height, GL_RGBA);
+            }
+        }
+           
+
         texture.allocate(width, height, GL_RGBA);
         texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
         textureID = texture.getTextureData().textureID;
     }
-    
-    
-    //ofLogVerbose(__func__) << "textureID: " << textureID;
-    //ofLogVerbose(__func__) << "tex.isAllocated(): " << texture.isAllocated();
     
     glEnable(GL_TEXTURE_2D);
     
@@ -387,11 +400,13 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     {
         return;
     }
+    int width = getWidth();
+    int height = getHeight();
     if (!fbo.isAllocated()) 
     {
-        fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+        fbo.allocate(width, height, GL_RGBA);
     }
-    int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+    int dataSize = width * height * 4;
     if (pixels == NULL)
     {
         pixels = new unsigned char[dataSize];
@@ -399,30 +414,39 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     fbo.begin();
         ofClear(0, 0, 0, 0);
         texture.draw(0, 0);
-        glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
+        glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
     fbo.end();
     
     if(doSaveImage)
     {
-        string fileName;
+        stringstream fileName;
+        fileName << width;
+        fileName << "px";
+        fileName << "_x_";
+        fileName << height;
+        fileName << "px";
+        fileName << "_4ch_";
+        fileName << ofGetTimestampString();
+        
+        string imagePath;
         if(doRawSave)
         {
-            fileName = ofToDataPath(ofGetTimestampString()+".raw", true);
+            imagePath = ofToDataPath(fileName.str()+".raw", true);
             ofBuffer buffer((const char*)pixels, dataSize);
-            ofBufferToFile(fileName, buffer, true);
+            ofBufferToFile(imagePath, buffer, true);
             
             
         }else
         {
-            fileName = ofToDataPath(ofGetTimestampString()+".png", true);
+            imagePath = ofToDataPath(fileName.str()+".png", true);
             ofImage image;
+            image.setUseTexture(false);
             image.setFromPixels(pixels, getWidth(), getHeight(), OF_IMAGE_COLOR_ALPHA);
-            
-            image.saveImage(fileName);
+            image.saveImage(imagePath);
         }
         
-        ofLogVerbose(__func__) << "fileName: " << fileName;
-        
+        ofLogVerbose(__func__) << "imagePath: " << imagePath;
+        doRawSave = false;
         doSaveImage = false;
     }
 }
@@ -956,7 +980,8 @@ void ofxRPiCameraVideoGrabber::setLEDState(bool status)
     
     LED_CURRENT_STATE = status;	
     string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
-    system(command.c_str());
+    int result = system(command.c_str());
+    if(result == 0){};
     
 }
 

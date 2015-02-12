@@ -14,11 +14,12 @@ void ofApp::setup()
     
     
     //new preset option
+    
+    presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
     
@@ -26,6 +27,7 @@ void ofApp::setup()
     
     currentPreset = 0;
     omxCameraSettings.preset = presets[currentPreset];
+    omxCameraSettings.enablePixels = true;
     
     //pass in the settings and it will start the camera
     videoGrabber.setup(omxCameraSettings);
@@ -147,9 +149,14 @@ void ofApp::keyPressed  (int key)
             doPresetChange = true;
             break;
         }
-        case '9' :
+        case '8' :
         {
             videoGrabber.saveImage();
+            break;
+        }
+        case '9' :
+        {
+            videoGrabber.saveRawImage();
             break;
         }
         default:

@@ -121,12 +121,12 @@ public:
     void draw();
 	void close();
 	
-    ofTexture& getTextureReference();
-    GLuint getTextureID();
-    
     bool isReady();
     bool isFrameNew();
 
+    BaseEngine* getEngine();
+    ofTexture& getTextureReference();
+    GLuint getTextureID();
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
@@ -140,16 +140,29 @@ public:
     void enablePixels();
     void disablePixels();
     unsigned char * getPixels();
+    unsigned char * pixels;
+    
+    
+    ofFbo fbo;
+    ofTexture texture;
+    
+    GLuint textureID;
+    void updatePixels();
+ 
+    
+    void saveImage();
+    void saveRawImage();
+    
+    
 	void disableImageEffects();
 	void enableImageEffects();
-	
 	
     void toggleLED();
     void setLEDState(bool status);
 
     string meteringModetoString();
     void printMeteringMode();
-    
+    void printCameraInfo();
     
     OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
     
@@ -217,27 +230,10 @@ public:
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
     OMX_ERRORTYPE enableBurstMode();
     
-    void printCameraInfo();
     
     
-    ofTexture texture;
     
-    GLuint textureID;
-    void updatePixels();
-    unsigned char * pixels;
-    bool doPixels;
-    ofFbo fbo;
-    EGLImageKHR eglImage;
-    void generateEGLImage(int, int);
-    void destroyEGLImage();
-    ofAppEGLWindow *appEGLWindow;
-    EGLDisplay display;
-    EGLContext context;
-    
-    BaseEngine* getEngine();
-    void saveImage(bool doRaw=true);
-    bool doSaveImage;
-    bool doRawSave;
+
 private:
     OMX_ERRORTYPE applyCurrentMeteringMode();
     bool hasExitHandler;
@@ -264,11 +260,17 @@ private:
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;
     
-	
-	
-	
+    bool doSaveImage;
+    bool doRawSave;
+    ofAppEGLWindow *appEGLWindow;
+    EGLDisplay display;
+    EGLContext context;
+    EGLImageKHR eglImage;
     
-
+    bool doPixels;
+    
+    void generateEGLImage(int, int);
+    void destroyEGLImage();
     
     CameraMeteringMode currentMeteringMode;
     void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);

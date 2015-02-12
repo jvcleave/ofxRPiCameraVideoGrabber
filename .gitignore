@@ -1,5 +1,8 @@
 *.mkv
 *.h264
+*.png
+*.raw
+*.tiff
 /libs
 obj
 *.app
@@ -10,3 +13,4 @@ obj
 bin/ofxRPiCameraVideoGrabber
 bin/data/*.mp4
 .smbdelete*
+bin/example*

@@ -11,26 +11,40 @@ public:
     enum Preset 
     {
         PRESET_NONE =0,
+        PRESET_FASTEST_480P,
+        PRESET_FASTEST_720P,
+        PRESET_FASTEST_FRAME_RATE,
+        PRESET_HIGHEST_RES,
+        PRESET_HIGHEST_RES_TEXTURE,
+        PRESET_HIGHEST_RES_NONTEXTURE,
+        
         PRESET_1080P_30FPS_TEXTURE,
         PRESET_1080P_30FPS_NONTEXTURE,
-        PRESET_720P_30FPS_TEXTURE,
+        PRESET_1080P_30FPS,
+        
+        PRESET_720P_40FPS_NONTEXTURE,
         PRESET_720P_30FPS_NONTEXTURE,
-        PRESET_480P_30FPS_TEXTURE,
-        PRESET_480P_30FPS_NONTEXTURE,
-        PRESET_480P_40FPS_TEXTURE,
+        
+        PRESET_720P_40FPS_TEXTURE,
+        PRESET_720P_30FPS_TEXTURE,
+        
+        PRESET_720P_40FPS,
+        PRESET_720P_30FPS,
+        
         PRESET_480P_90FPS_TEXTURE,
+        PRESET_480P_60FPS_TEXTURE,
+        PRESET_480P_40FPS_TEXTURE,
+        PRESET_480P_30FPS_TEXTURE,
+        
         PRESET_480P_90FPS_NONTEXTURE,
+        PRESET_480P_60FPS_NONTEXTURE,
+        PRESET_480P_40FPS_NONTEXTURE,
+        PRESET_480P_30FPS_NONTEXTURE,
+        
         PRESET_480P_90FPS,
         PRESET_480P_60FPS,
         PRESET_480P_40FPS,
         PRESET_480P_30FPS,
-        PRESET_720P_40FPS,
-        PRESET_720P_30FPS,
-        PRESET_1080P_30FPS,
-        PRESET_1944P_15FPS,
-        PRESET_1944P_1FPS,
-        PRESET_FASTEST_FRAME_RATE,
-        PRESET_HIGHEST_RES
     };
     
     int width;
@@ -48,8 +62,6 @@ public:
     
     bool doManualExposure;
     Preset preset;
-    // EGLImageKHR eglImage;
-    //ofTexture* texture;
     OMXCameraSettings()
     {
         width = 1280;
@@ -64,8 +76,6 @@ public:
         recordingFilePath = "";
         doConvertToMKV = false;
         preset = PRESET_NONE;
-        // eglImage = NULL;
-        //texture = NULL;
         doManualExposure = false;
         
         //doFlipTexture = false;
@@ -86,7 +96,7 @@ public:
         doRecordingPreview = true;
     }
     
-    void checkForPreset()
+    void applyPreset()
     {
         switch(preset)
         {
@@ -95,6 +105,7 @@ public:
                 break;
             }
             case PRESET_1080P_30FPS_TEXTURE :
+            case PRESET_HIGHEST_RES_TEXTURE :
             {
                 width = 1920;
                 height = 1080;
@@ -102,7 +113,9 @@ public:
                 isUsingTexture = true;
                 break;
             }
+                
             case PRESET_1080P_30FPS_NONTEXTURE :
+            case PRESET_HIGHEST_RES_NONTEXTURE :
             {
                 width = 1920;
                 height = 1080;
@@ -110,94 +123,36 @@ public:
                 isUsingTexture = false;
                 break;
             }
-            case PRESET_720P_30FPS_TEXTURE :
+            
+            case PRESET_1080P_30FPS :
+            case PRESET_HIGHEST_RES :
+            {
+                width = 1920;
+                height = 1080;
+                framerate = 30;
+                break;
+            }
+                
+            case PRESET_720P_40FPS_TEXTURE :
             {
                 width = 1280;
                 height = 720;
-                framerate = 30;
-                isUsingTexture = true;
-                break;
-            }
-            case PRESET_720P_30FPS_NONTEXTURE :
-            {
-                width = 1280;
-                height = 720;
-                framerate = 30;
-                isUsingTexture = false;
-                break;
-            }
-            case PRESET_480P_90FPS_TEXTURE :
-            {
-                width = 640;
-                height = 480;
-                framerate = 90;
-                isUsingTexture = true;
-                break;
-            }    
-            case PRESET_480P_90FPS_NONTEXTURE :
-            {
-                width = 640;
-                height = 480;
-                framerate = 90;
-                isUsingTexture = false;
-                break;
-            }    
-            case PRESET_480P_40FPS_TEXTURE :
-            {
-                width = 640;
-                height = 480;
                 framerate = 40;
                 isUsingTexture = true;
                 break;
             }
-            case PRESET_480P_30FPS_TEXTURE :
+                
+            case PRESET_720P_40FPS_NONTEXTURE :
             {
-                width = 640;
-                height = 480;
-                framerate = 30;
-                isUsingTexture = true;
-                break;
-            }
-            case PRESET_480P_30FPS_NONTEXTURE :
-            {
-                width = 640;
-                height = 480;
-                framerate = 30;
+                width = 1280;
+                height = 720;
+                framerate = 40;
                 isUsingTexture = false;
                 break;
             }
                 
-            case PRESET_480P_90FPS :
-            case PRESET_FASTEST_FRAME_RATE :
-                
-            {
-                width = 640;
-                height = 480;
-                framerate = 90;
-                break;
-            }
-            case PRESET_480P_60FPS :
-            {
-                width = 640;
-                height = 480;
-                framerate = 60;
-                break;
-            }
-            case PRESET_480P_40FPS :
-            {
-                width = 640;
-                height = 480;
-                framerate = 40;
-                break;
-            }
-            case PRESET_480P_30FPS :
-            {
-                width = 640;
-                height = 480;
-                framerate = 30;
-                break;
-            }
             case PRESET_720P_40FPS :
+            case PRESET_FASTEST_720P:
             {
                 width = 1280;
                 height = 720;
@@ -211,29 +166,130 @@ public:
                 framerate = 30;
                 break;
             }
-            case PRESET_1080P_30FPS :
+             
+            
+            case PRESET_720P_30FPS_TEXTURE :
             {
-                width = 1920;
-                height = 1080;
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                isUsingTexture = true;
+                break;
+            }
+                
+            case PRESET_720P_30FPS_NONTEXTURE :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                isUsingTexture = false;
+                break;
+            }
+                
+            case PRESET_480P_90FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                isUsingTexture = true;
+                break;
+            } 
+            case PRESET_480P_60FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                isUsingTexture = true;
+                break;
+            }    
+                
+            case PRESET_480P_40FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                isUsingTexture = true;
+                break;
+            }    
+            
+             
+            case PRESET_480P_30FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 30;
+                isUsingTexture = true;
+                break;
+            }
+                
+            case PRESET_480P_90FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                isUsingTexture = false;
+                break;
+            } 
+            case PRESET_480P_60FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                isUsingTexture = false;
+                break;
+            } 
+            case PRESET_480P_40FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                isUsingTexture = false;
+                break;
+            } 
+            
+            case PRESET_480P_30FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 30;
+                isUsingTexture = false;
+                break;
+            }
+                
+            case PRESET_480P_90FPS :
+            case PRESET_FASTEST_480P:
+            case PRESET_FASTEST_FRAME_RATE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                break;
+            }
+                
+            case PRESET_480P_60FPS :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                break;
+            }
+                
+            case PRESET_480P_40FPS :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                break;
+            }
+                
+            case PRESET_480P_30FPS :
+            {
+                width = 640;
+                height = 480;
                 framerate = 30;
                 break;
             }
                 
-            case PRESET_1944P_15FPS :
-            case PRESET_HIGHEST_RES :
-            {
-                width = 2592;
-                height = 1944;
-                framerate = 15;
-                break;
-            }
-            case PRESET_1944P_1FPS :
-            {
-                width = 2592;
-                height = 1944;
-                framerate = 1;
-                break;
-            }
             default:
             {
                 width = 1280;
