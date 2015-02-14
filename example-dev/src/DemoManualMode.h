@@ -24,7 +24,7 @@ public:
             doAutoMode = !doAutoMode;
             videoGrabber->setAutoAperture(doAutoMode);
             videoGrabber->setAutoShutter(doAutoMode);
-            videoGrabber->setAutoSensitivity(doAutoMode);
+            videoGrabber->setAutoISO(doAutoMode);
         }
     };
     

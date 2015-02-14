@@ -68,6 +68,10 @@ public:
         info << "\n";
         info << "currentExposureName: " << currentExposureName << "\n";
         
+        info << "Press z to toggle autoShutter: " << videoGrabber->getAutoShutter() << "\n";
+        info << "Press x to toggle autoISO: "     << videoGrabber->getAutoISO()   <<"\n";
+        info << "Press c to toggle autoAperture: " << videoGrabber->getAutoAperture()   <<"\n";
+               
         info << "\n";
         info << "Press e to increment filter" << "\n";
         info << "Press g to Toggle info" << "\n";
@@ -86,59 +90,20 @@ public:
     void onKey(int key)
     {
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-        if(key == 'a')
+        if(key == 'z')
         {
-            videoGrabber->setAutoShutter(true);
+            videoGrabber->setAutoShutter(!videoGrabber->getAutoShutter());
         }
-        if(key == 's')
+        if(key == 'x')
         {
-            videoGrabber->setAutoShutter(false);
+            videoGrabber->setAutoISO(!videoGrabber->getAutoISO());
         }
-        if(key == 'd')
+        if(key == 'c')
         {
-            videoGrabber->setAutoSensitivity(true);
-        }
-        if(key == 'f')
-        {
-            videoGrabber->setAutoSensitivity(false);
-        }
-        if(key == 'g')
-        {
-            videoGrabber->setAutoAperture(true);
-        }
-        if(key == 'h')
-        {
-            videoGrabber->setAutoAperture(false);
+            videoGrabber->setAutoAperture(!videoGrabber->getAutoAperture());
         }
         
         
-       /* if(key == ' ')
-        {
-            videoGrabber->printMeteringMode();
-        }*/
-        
-#if 0
-        if (key == 'e')
-        {
-            videoGrabber->applyImageFilter(filterCollection.getNextFilter());
-        }
-        
-        if (key == 'g')
-        {
-            doDrawInfo = !doDrawInfo;
-        }
-        
-        if (key == 'q')
-        {
-            ofLogVerbose(__func__) << "STOPPING RECORDING";
-            videoGrabber->stopRecording();
-        }
-        
-        if (key == 't')
-        {
-            videoGrabber->toggleLED();
-        }
-#endif    
         
 
     };

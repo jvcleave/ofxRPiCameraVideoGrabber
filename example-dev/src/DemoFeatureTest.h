@@ -104,16 +104,16 @@ public:
         info << "Crop HEIGHT %: "    << videoGrabber->getCropRectangle().getHeight()  <<  "\n";
         
         info << "\n";
-        info << "Press a to increment DRC: "    << drcLevel << "\n";
-        info << "Press c to randomize Crop" <<  "\n";
+        info << "Press z to increment DRC: "    << drcLevel << "\n";
+        info << "Press x to randomize Crop" <<  "\n";
         info << "\n";
-        info << "Press z to toggle Digital Zoom: " << doDigitalZoom <<  "\n";
-        info << "Press s to toggle Digital Zoom Direction: " <<  doZoomIn << "\n";
-        info << "Press r for random Zoom" <<  "\n";
+        info << "Press c to toggle Digital Zoom: " << doDigitalZoom <<  "\n";
+        info << "Press v to toggle Digital Zoom Direction: " <<  doZoomIn << "\n";
+        info << "Press b for random Zoom" <<  "\n";
         info << "getZoomLevelNormalized: " <<  videoGrabber->getZoomLevelNormalized() << "\n";
         info << "\n";
         
-        info << "Press h to toggle HDR: " <<  hdrState  << "\n";
+        info << "Press n to toggle HDR: " <<  hdrState  << "\n";
         info << "Press g to Toggle info" << "\n";
         
         
@@ -129,34 +129,33 @@ public:
     void onKey(int key)
     {
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-        if (key == 'a')
+        if (key == 'z')
         {
             doDRC = true;
         }
-        if (key == 'c')
+        if (key == 'x')
         {
             doCrop = !doCrop;
+        }
+        if (key == 'c') 
+        {
+            doDigitalZoom = !doDigitalZoom;
+        }
+        if (key == 'v') {
+            doZoomIn = !doZoomIn;
+        }
+        if (key == 'b') 
+        {
+            doRandomZoom = true;
+        }
+        if (key == 'n') 
+        {
+            hdrState = !hdrState;
+            doHDR = true;
         }
         if (key == 'g')
         {
             doDrawInfo = !doDrawInfo;
         }
-        if (key == 'h') 
-        {
-            hdrState = !hdrState;
-            doHDR = true;
-        }
-        if (key == 'z') 
-        {
-            doDigitalZoom = !doDigitalZoom;
-        }
-        if (key == 'r') 
-        {
-            doRandomZoom = true;
-        }
-        if (key == 's') {
-            doZoomIn = !doZoomIn;
-        }
-        
     };
 };

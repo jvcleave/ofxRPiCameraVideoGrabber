@@ -287,7 +287,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	}
 	
     
-        
+    /*    
     bool disableDiscardMode = true;
     if(disableDiscardMode)
     {
@@ -304,7 +304,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
             ofLogVerbose(__func__) << "render disableDiscardMode OMX_IndexParamBrcmVideoEGLRenderDiscardMode PASS ";
 
         }
-    }
+    }*/
     
     
 	if(omxCameraSettings.doRecording)

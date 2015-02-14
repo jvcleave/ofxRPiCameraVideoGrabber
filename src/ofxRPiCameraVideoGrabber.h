@@ -171,6 +171,7 @@ public:
     
  
     OMX_ERRORTYPE setAutoShutter(bool);
+    bool getAutoShutter(){return currentMeteringMode.autoShutter;}
     int getShutterSpeed();
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
     
@@ -224,13 +225,13 @@ public:
     OMX_ERRORTYPE setAutoAperture(bool);
     int getAperture();
     OMX_ERRORTYPE setAperture(int aperture);
+    bool getAutoAperture(){return currentMeteringMode.autoAperture;}
     
     //no effect seen
     int getISO();
     OMX_ERRORTYPE setISO(int ISO);
-    OMX_ERRORTYPE setAutoSensitivity(bool); //alias to setAutoISO
     OMX_ERRORTYPE setAutoISO(bool);
-    
+    bool getAutoISO(){return currentMeteringMode.autoISO;} 
     
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
@@ -259,6 +260,17 @@ public:
     };
     OMX_ERRORTYPE setMirror(MIRROR);
 
+    OMX_ERRORTYPE setSoftwareSharpening(bool state);
+    OMX_ERRORTYPE enableSoftwareSharpening();
+    OMX_ERRORTYPE disableSoftwareSharpening();
+    bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
+
+        
+    OMX_ERRORTYPE setSoftwareSaturation(bool state);
+    OMX_ERRORTYPE enableSoftwareSaturation();
+    OMX_ERRORTYPE disableSoftwareSaturation();
+    bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
+    
 private:
     OMX_ERRORTYPE applyMirror();
     OMX_ERRORTYPE applyRotation();
@@ -331,12 +343,14 @@ private:
     OMX_CONFIG_ROTATIONTYPE rotationConfig;
     OMX_CONFIG_MIRRORTYPE mirrorConfig;
     
+    OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
+    OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
 #if 0
     
 
     
     //OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
-    OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
+    //OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
     
     OMX_PARAM_U32TYPE OMX_IndexConfigCameraIsoReferenceValue
     OMX_CONFIG_ZEROSHUTTERLAGTYPE OMX_IndexParamCameraZeroShutterLag
@@ -361,8 +375,8 @@ private:
     
     OMX_PARAM_BRCMFRAMERATERANGETYPE OMX_IndexParamBrcmFpsRange
     OMX_PARAM_S32TYPE OMX_IndexParamCaptureExposureCompensation
-    OMX_IndexParamSWSharpenDisable
-    OMX_IndexParamSWSaturationDisable
+    //OMX_IndexParamSWSharpenDisable
+   // OMX_IndexParamSWSaturationDisable
  
 #endif
     //OMX_CameraDisableAlgorithmDynamicRangeExpansion
@@ -414,6 +428,8 @@ private:
         OMX_INIT_STRUCTURE(mirrorConfig);
         mirrorConfig.nPortIndex = CAMERA_OUTPUT_PORT;
         
+        OMX_INIT_STRUCTURE(disableSoftwareSharpenConfig);
+        OMX_INIT_STRUCTURE(disableSoftwareSaturationConfig);
         
         
         OMX_INIT_STRUCTURE(cameraInfoConfig);
@@ -427,6 +443,7 @@ private:
         OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
         
         OMX_INIT_STRUCTURE(flickerCancelConfig);
+        flickerCancelConfig.nPortIndex = OMX_ALL;
         
         int zoomStepsSource[61] = 
         {

@@ -198,10 +198,10 @@ public:
         info << videoGrabber->meteringModetoString() << "\n";
         
         info << "\n";
-        info << "Press m to increment Metering Mode: " << currentMeteringMode << "\n";
-        info << "Press s to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
-        info << "Press a to increment aperture: " << videoGrabber->getAperture() << "\n";
-        info << "Press i to increment ISO +50: " << videoGrabber->getISO() << "\n";
+        info << "Press z to increment Metering Mode: " << currentMeteringMode << "\n";
+        info << "Press x to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
+        info << "Press c to increment aperture: " << videoGrabber->getAperture() << "\n";
+        info << "Press v to increment ISO +50: " << videoGrabber->getISO() << "\n";
         
         info << "Press g to Toggle info" << "\n";
         info << "Press SPACE for next Demo" << "\n";
@@ -226,20 +226,20 @@ public:
         {
             doDrawInfo = !doDrawInfo;
         }
-        if (key == 's')
+        if (key == 'z')
         {
             doShutterSpeed = !doShutterSpeed;
         }
-        if (key == 'a')
+        if (key == 'x')
         {
             doAperture = !doAperture;
         }
-        if (key == 'i')
+        if (key == 'c')
         {
             doISO = !doISO;
         }
         
-        if (key == 'm')
+        if (key == 'v')
         {
             doChangeMeteringMode = true;
         }

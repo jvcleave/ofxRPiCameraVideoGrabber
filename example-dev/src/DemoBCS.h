@@ -35,7 +35,7 @@ public:
     {
         videoGrabber->setAutoAperture(doAutoMode);
         videoGrabber->setAutoShutter(doAutoMode);
-        videoGrabber->setAutoSensitivity(doAutoMode);
+        videoGrabber->setAutoISO(doAutoMode);
         if(doValueResetToZero)
         {
             videoGrabber->setSharpness(0);
@@ -134,12 +134,12 @@ public:
         info << "doAutoMode: "  << doAutoMode   << "\n";
         
         info << "\n";
-        info << "Press 1 to cycle sharpness" << "\n";
-        info << "Press 2 to cycle contrast" << "\n";
-        info << "Press 3 to cycle brightness" << "\n";
-        info << "Press 4 to cycle saturation" << "\n";
-        info << "Press r to reset values to defaults" << "\n";
-        info << "Press 0 to set values to 0" << "\n";
+        info << "Press z to cycle sharpness" << "\n";
+        info << "Press x to cycle contrast" << "\n";
+        info << "Press c to cycle brightness" << "\n";
+        info << "Press v to cycle saturation" << "\n";
+        info << "Press b to reset values to defaults" << "\n";
+        info << "Press n to set values to 0" << "\n";
         info << "Press m to toggle auto exposure" << "\n";
         
         info << "Press g to Toggle info" << "\n";
@@ -156,37 +156,39 @@ public:
     void onKey(int key)
     {
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-        if (key == '1')
+        if (key == 'z')
         {
             doSharpness = !doSharpness;
         }
         
-        if (key == '2')
+        if (key == 'x')
         {
             doContrast = !doContrast;
         }
         
-        if (key == '3')
+        if (key == 'c')
         {
             doBrightness = !doBrightness;
         }
-        if (key == '4')
+        if (key == 'v')
         {
             doSaturation = !doSaturation;
+        }
+        if (key == 'b')
+        {
+            doValueReset = true;
+        }
+        if (key == 'n')
+        {
+            doValueResetToZero = true;
         }
         if (key == 'm')
         {
             doAutoMode = !doAutoMode;
         }
         
-        if (key == 'r')
-        {
-            doValueReset = true;
-        }
-        if (key == '0')
-        {
-            doValueResetToZero = true;
-        }
+       
+        
         if (key == 'g')
         {
             doDrawInfo = !doDrawInfo;

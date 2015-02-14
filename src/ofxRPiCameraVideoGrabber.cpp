@@ -139,6 +139,17 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
         LED_CURRENT_STATE = true;
         setLEDState(LED_CURRENT_STATE);
     }  
+    
+    OMX_GetConfig(camera, OMX_IndexParamSWSharpenDisable, &disableSoftwareSharpenConfig);
+    OMX_GetConfig(camera, OMX_IndexParamSWSaturationDisable, &disableSoftwareSaturationConfig);
+    
+    //disableSoftwareSaturation();
+    //disableSoftwareSharpening();
+    
+    ofLogVerbose(__func__) << "isSoftwareSharpeningEnabled: " << isSoftwareSharpeningEnabled();
+    
+    ofLogVerbose(__func__) << "isSoftwareSaturationEnabled: " << isSoftwareSaturationEnabled();
+
 }
 
 
@@ -694,10 +705,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoSensitivity(bool doAutoSensitivity)
-{
-    return setAutoISO(doAutoSensitivity);
-}
 
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoISO(bool doAutoISO)
@@ -987,7 +994,7 @@ bool ofxRPiCameraVideoGrabber::setLEDState(bool state)
     {
         ofLogVerbose(__func__) << " PASS";
     }else{
-        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
+        ofLogError(__func__) << "FAIL " << omxErrorToString(error);
     }
     LED_CURRENT_STATE = turnLEDOn;
     
@@ -1019,7 +1026,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
     {
         ofLogVerbose(__func__) << " PASS";
     }else{
-        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
+        ofLogError(__func__) << "FAIL " << omxErrorToString(error);
     }
     return error;
 }
@@ -1161,8 +1168,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setHDR(bool doHDR)
     if(error == OMX_ErrorNone) 
     {
         ofLogVerbose(__func__) << " PASS";
-    }else{
-        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
+    }else
+    {
+        ofLogError(__func__) << "FAIL " << omxErrorToString(error);
     }
     return error;
 }
@@ -1173,11 +1181,85 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableBurstMode()
     return OMX_SetConfig(camera, OMX_IndexConfigBrcmHighDynamicRange, &burstModeConfig);
 }
 
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSoftwareSharpening(bool state)
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexParamSWSharpenDisable, &disableSoftwareSharpenConfig);
+    
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << "OMX_GetConfig PASS";
+        disableSoftwareSharpenConfig.bEnabled = toOMXBool(state);
+        
+        error = OMX_SetConfig(camera, OMX_IndexParamSWSharpenDisable, &disableSoftwareSharpenConfig);
+        if(error == OMX_ErrorNone) 
+        {
+            ofLogVerbose(__func__) << "OMX_SetConfig PASS";
+        }else
+        {
+            ofLogError(__func__) << "OMX_SetConfig FAIL " << omxErrorToString(error);
+        }
+        
+    }else
+    {
+        ofLogError(__func__) << "OMX_GetConfig FAIL " << omxErrorToString(error);
+    }
+    return error;
+}
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableSoftwareSharpening()
+{
+    return setSoftwareSharpening(false);
+}
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::disableSoftwareSharpening()
+{
+    
+   return setSoftwareSharpening(true);
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSoftwareSaturation(bool state)
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexParamSWSaturationDisable, &disableSoftwareSaturationConfig);
+    
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << "OMX_GetConfig PASS";
+        disableSoftwareSaturationConfig.bEnabled = toOMXBool(state);
+        
+        error = OMX_SetConfig(camera, OMX_IndexParamSWSaturationDisable, &disableSoftwareSaturationConfig);
+        if(error == OMX_ErrorNone) 
+        {
+            ofLogVerbose(__func__) << "OMX_SetConfig PASS";
+        }else
+        {
+            ofLogError(__func__) << "OMX_SetConfig FAIL " << omxErrorToString(error);
+        }
+        
+    }else
+    {
+        ofLogError(__func__) << "OMX_GetConfig FAIL " << omxErrorToString(error);
+    }
+    return error;
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableSoftwareSaturation()
+{
+    return setSoftwareSaturation(false);
+}
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::disableSoftwareSaturation()
+{
+    
+    return setSoftwareSaturation(true);
+}
+
+
+
+
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
     
     
-    flickerCancelConfig.nPortIndex = OMX_ALL;
+    
     
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
     if(error == OMX_ErrorNone) 
