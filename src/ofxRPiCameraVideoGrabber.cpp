@@ -125,6 +125,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     setSensorCrop(cropRectangle);
     resetZoom();
     setRotation(ROTATION_0);
+    setMirror(MIRROR_NONE);
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -1002,6 +1003,28 @@ bool ofxRPiCameraVideoGrabber::setLEDState(bool state)
     
     return LED_CURRENT_STATE;
 }
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(MIRROR mirrorType)
+{
+    mirrorConfig.eMirror = (OMX_MIRRORTYPE) mirrorType;
+    return applyMirror();
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
+{
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonMirror, &mirrorConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << " PASS";
+    }else{
+        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
+    }
+    return error;
+}
+
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setRotation(int value)
 {

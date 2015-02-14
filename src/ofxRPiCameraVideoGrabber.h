@@ -250,9 +250,17 @@ public:
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
-    
+    enum MIRROR
+    {
+        MIRROR_NONE=OMX_MirrorNone,
+        MIRROR_VERTICAL=OMX_MirrorVertical,
+        MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
+        MIRROR_BOTH=OMX_MirrorBoth,
+    };
+    OMX_ERRORTYPE setMirror(MIRROR);
 
 private:
+    OMX_ERRORTYPE applyMirror();
     OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
     bool hasExitHandler;
@@ -321,13 +329,13 @@ private:
     
     
     OMX_CONFIG_ROTATIONTYPE rotationConfig;
-    
+    OMX_CONFIG_MIRRORTYPE mirrorConfig;
     
 #if 0
     
 
     
-    OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
+    //OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
     OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
     
     OMX_PARAM_U32TYPE OMX_IndexConfigCameraIsoReferenceValue
@@ -402,6 +410,9 @@ private:
         
         OMX_INIT_STRUCTURE(rotationConfig);
         rotationConfig.nPortIndex = CAMERA_OUTPUT_PORT;
+        
+        OMX_INIT_STRUCTURE(mirrorConfig);
+        mirrorConfig.nPortIndex = CAMERA_OUTPUT_PORT;
         
         
         

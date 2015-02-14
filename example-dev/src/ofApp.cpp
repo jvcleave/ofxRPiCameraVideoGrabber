@@ -147,6 +147,26 @@ void ofApp::keyPressed  (int key)
             doPresetChange = true;
             break;
         }
+        case '0' :
+        {
+            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_NONE);
+            break;
+        }
+        case '1' :
+        {
+            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_VERTICAL);
+            break;
+        }
+        case '2' :
+        {
+            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_HORIZONTAL);
+            break;
+        }
+        case '3' :
+        {
+            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_BOTH);
+            break;
+        }    
         case '4' :
         {
             videoGrabber.setRotation(0);
