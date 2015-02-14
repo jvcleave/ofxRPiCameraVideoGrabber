@@ -123,10 +123,10 @@ public:
 	
     bool isReady();
     bool isFrameNew();
-
+   
     BaseEngine* getEngine();
     ofTexture& getTextureReference();
-    GLuint getTextureID();
+    int getTextureID() { return (int)textureID; }
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
@@ -135,6 +135,8 @@ public:
     int getContrast()   { return contrastConfig.nContrast;	}
     int getBrightness() { return brightnessConfig.nBrightness; }
     int getSaturation() { return saturationConfig.nSaturation; }
+    bool isTextureEnabled();
+    
     
     void stopRecording();
     void enablePixels();
@@ -146,7 +148,7 @@ public:
     ofFbo fbo;
     ofTexture texture;
     
-    GLuint textureID;
+    
     void updatePixels();
  
     
@@ -157,8 +159,9 @@ public:
 	void disableImageEffects();
 	void enableImageEffects();
 	
-    void toggleLED();
-    void setLEDState(bool status);
+    bool toggleLED();
+    bool getLEDState() { return LED_CURRENT_STATE; }
+    bool setLEDState(bool turnLEDOn);
 
     string meteringModetoString();
     void printMeteringMode();
@@ -166,22 +169,11 @@ public:
     
     OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
     
-    //fixed aperture - no effect
-    OMX_ERRORTYPE setAutoAperture(bool);
-    int getAperture();
-    OMX_ERRORTYPE setAperture(int aperture);
-    
-    
+ 
     OMX_ERRORTYPE setAutoShutter(bool);
     int getShutterSpeed();
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
     
-    
-    
-    int getISO();
-    OMX_ERRORTYPE setISO(int ISO);
-    OMX_ERRORTYPE setAutoSensitivity(bool); //alias to setAutoISO
-    OMX_ERRORTYPE setAutoISO(bool);
     
     OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
     
@@ -226,15 +218,42 @@ public:
     OMX_ERRORTYPE resetZoom();
     float getZoomLevelNormalized();
     OMX_ERRORTYPE setZoomLevelNormalized(float);
+    
+    
+    //fixed aperture - no effect
+    OMX_ERRORTYPE setAutoAperture(bool);
+    int getAperture();
+    OMX_ERRORTYPE setAperture(int aperture);
+    
+    //no effect seen
+    int getISO();
+    OMX_ERRORTYPE setISO(int ISO);
+    OMX_ERRORTYPE setAutoSensitivity(bool); //alias to setAutoISO
+    OMX_ERRORTYPE setAutoISO(bool);
+    
+    
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
     OMX_ERRORTYPE enableBurstMode();
     
+    enum ROTATION
+    {
+        ROTATION_0=0,
+        ROTATION_90=90,
+        ROTATION_180=180,
+        ROTATION_270=270,
+    };
+    OMX_ERRORTYPE setRotation(int value);
+    OMX_ERRORTYPE setRotation(ROTATION);
     
+    int getRotation();
+    OMX_ERRORTYPE rotateClockwise();
+    OMX_ERRORTYPE rotateCounterClockwise();
     
     
 
 private:
+    OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
     bool hasExitHandler;
     bool hasOMXInit;
@@ -269,6 +288,7 @@ private:
     
     bool doPixels;
     
+    GLuint textureID;
     void generateEGLImage(int, int);
     void destroyEGLImage();
     
@@ -300,23 +320,12 @@ private:
     OMX_PARAM_BRCMFRAMERATERANGETYPE frameRateRangeConfig;
     
     
-    
+    OMX_CONFIG_ROTATIONTYPE rotationConfig;
     
     
 #if 0
     
-    /** 
-     * Structure defining percent to scale each frame dimension.  For example:  
-     * To make the width 50% larger, use fWidth = 1.5 and to make the width
-     * 1/2 the original size, use fWidth = 0.5
-     */
-    typedef struct OMX_CONFIG_SCALEFACTORTYPE {
-        OMX_U32 nSize;            /**< Size of the structure in bytes */
-        OMX_VERSIONTYPE nVersion; /**< OMX specification version info */ 
-        OMX_U32 nPortIndex;       /**< Port that this struct applies to */
-        OMX_S32 xWidth;           /**< Fixed point value stored as Q16 */
-        OMX_S32 xHeight;          /**< Fixed point value stored as Q16 */
-    }OMX_CONFIG_SCALEFACTORTYPE;
+
     
     OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
     OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
@@ -336,7 +345,7 @@ private:
     OMX_PARAM_BRCMTHUMBNAILTYPE OMX_IndexParamBrcmThumbnail
     OMX_PARAM_TIMESTAMPMODETYPE OMX_IndexParamCommonUseStcTimestamps
     
-    OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
+    //OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
     OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
     //OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
     OMX_PARAM_BRCMCONFIGFILETYPE OMX_IndexParamBrcmConfigFileRegisters
@@ -390,6 +399,9 @@ private:
         digitalZoomConfig.nPortIndex = OMX_ALL;
         
         OMX_INIT_STRUCTURE(frameRateRangeConfig);
+        
+        OMX_INIT_STRUCTURE(rotationConfig);
+        rotationConfig.nPortIndex = CAMERA_OUTPUT_PORT;
         
         
         

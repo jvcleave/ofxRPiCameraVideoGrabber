@@ -112,7 +112,6 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     }
     
     applyCurrentMeteringMode();
-    //setMeteringMode(OMX_MeteringModeMatrix, 0, 0,  true); //OMX_MeteringModeMatrix, OMX_MeteringModeAverage, OMX_MeteringModeSpot, OMX_MeteringModeBacklit
     setSharpness(-50);
     setContrast(-10);
     setBrightness(50);
@@ -125,17 +124,20 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     cropRectangle.set(0, 0, 100, 100);
     setSensorCrop(cropRectangle);
     resetZoom();
+    setRotation(ROTATION_0);
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
     ofFile gpioProgram("/usr/local/bin/gpio");
     if(gpioProgram.exists())
     {
-        int result = system("gpio export 5 out");
-        if(result == 0){};
+        if(system("gpio export 5 out") == 0)
+        {
+           //silence compiler warning 
+        }
         LED_CURRENT_STATE = true;
         setLEDState(LED_CURRENT_STATE);
-    }    
+    }  
 }
 
 
@@ -237,15 +239,6 @@ int ofxRPiCameraVideoGrabber::getHeight()
 int ofxRPiCameraVideoGrabber::getFrameRate()
 {
     return omxCameraSettings.framerate;
-}
-
-GLuint ofxRPiCameraVideoGrabber::getTextureID()
-{
-    if (!textureEngine) 
-    {
-        return 0;
-    }
-    return textureID;
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
@@ -393,7 +386,15 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
     
 }
 
-
+bool ofxRPiCameraVideoGrabber::isTextureEnabled()
+{
+    bool isEnabled = false;
+    if(textureEngine)
+    {
+        isEnabled = true;
+    }
+    return isEnabled;
+}
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
     if (!doPixels && !doSaveImage) 
@@ -957,32 +958,102 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDigitalZoom()
     
 }
 
-void ofxRPiCameraVideoGrabber::toggleLED()
+bool ofxRPiCameraVideoGrabber::toggleLED()
 {
-    setLEDState(!LED_CURRENT_STATE);
+    return setLEDState(!LED_CURRENT_STATE);
 }
 
-void ofxRPiCameraVideoGrabber::setLEDState(bool status)
+bool ofxRPiCameraVideoGrabber::setLEDState(bool state)
 {
-    //OMX doesn't work - using GPIO 
-    /*OMX_ERRORTYPE error = OMX_ErrorNone;
+   
+    /*
+     https://github.com/raspberrypi/firmware/issues/186
      
+     OMX_CONFIG_PRIVACYINDICATORTYPE ledConfig;
+     OMX_INIT_STRUCTURE(ledConfig);
      
-     OMX_CONFIG_PRIVACYINDICATORTYPE privacy;
-     OMX_INIT_STRUCTURE(privacy);
-     privacy.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOff;
+    if(turnLEDOn)
+    {
+        ledConfig.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOn;
+    }
+    else
+    {
+        ledConfig.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOff;
+    }
      
-     error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
-     if(error != OMX_ErrorNone) 
-     {
-     ofLog(OF_LOG_ERROR, "camera setLEDState FAIL error: 0x%08x", error);
-     }*/
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &ledConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose(__func__) << " PASS";
+    }else{
+        ofLogError(__func__) << "FAIL" << omxErrorToString(error);
+    }
+    LED_CURRENT_STATE = turnLEDOn;
     
-    LED_CURRENT_STATE = status;	
+    return error;
+    */
+     
+    LED_CURRENT_STATE = state;	
     string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
-    int result = system(command.c_str());
-    if(result == 0){};
+    if(system(command.c_str()) == 0)
+    {
+        //silence compiler warning
+    }; 
     
+    return LED_CURRENT_STATE;
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setRotation(int value)
+{
+    return setRotation((ROTATION) value);
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setRotation(ROTATION value)
+{
+    switch (value)
+    {
+        case ROTATION_0: {rotationConfig.nRotation=0;} break;
+        case ROTATION_90: {rotationConfig.nRotation=90;} break;
+        case ROTATION_180: {rotationConfig.nRotation=180;} break;
+        case ROTATION_270: {rotationConfig.nRotation=270;} break;
+        default: {rotationConfig.nRotation=0;} break;
+    }
+    return applyRotation();
+}
+int ofxRPiCameraVideoGrabber::getRotation()
+{
+    return rotationConfig.nRotation;
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyRotation()
+{
+    return OMX_SetConfig(camera, OMX_IndexConfigCommonRotate, &rotationConfig);
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::rotateClockwise()
+{
+    int currentRotation  = getRotation();
+    if(currentRotation+90<360)
+    {
+        rotationConfig.nRotation+=90;
+    }else{
+        rotationConfig.nRotation = 0;
+    }
+
+    return applyRotation();
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::rotateCounterClockwise()
+{
+    int currentRotation  = getRotation();
+    if(currentRotation-90>=0)
+    {
+        rotationConfig.nRotation-=90;
+    }else{
+        rotationConfig.nRotation = 270;
+    }
+    
+    return applyRotation();
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)

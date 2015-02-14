@@ -15,10 +15,10 @@ void ofApp::setup()
     
     //new preset option
     
-    presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
+   /* presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);*/
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
@@ -105,7 +105,7 @@ void ofApp::update()
         videoGrabber.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
-        
+        ofLogVerbose() << "isTextureEnabled: " << videoGrabber.isTextureEnabled();
     }else
     {
         currentDemo->update();
@@ -115,10 +115,8 @@ void ofApp::update()
 
 
 //--------------------------------------------------------------
-void ofApp::draw(){
-    
-    
-    
+void ofApp::draw()
+{
     
     currentDemo->draw();
     if (doPrintInfo) 
@@ -149,6 +147,26 @@ void ofApp::keyPressed  (int key)
             doPresetChange = true;
             break;
         }
+        case '4' :
+        {
+            videoGrabber.setRotation(0);
+            break;
+        }
+        case '5' :
+        {
+            videoGrabber.rotateCounterClockwise();
+            break;
+        }
+        case '6' :
+        {
+            videoGrabber.rotateClockwise();
+            break;
+        }
+        case '7' :
+        {
+            videoGrabber.toggleLED();
+            break;
+        }
         case '8' :
         {
             videoGrabber.saveImage();
@@ -159,6 +177,7 @@ void ofApp::keyPressed  (int key)
             videoGrabber.saveRawImage();
             break;
         }
+        
         default:
         {
             currentDemo->onKey(key);

@@ -269,8 +269,9 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 			ofLogError(__func__) << "splitter enable output port 2 FAIL " << omxErrorToString(error);
 		}
 	}
-	
-	
+    
+    
+    
 	//Enable render output port
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
 	if (error != OMX_ErrorNone) 
@@ -285,6 +286,27 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		ofLogError(__func__) << "render enable input port FAIL " << omxErrorToString(error);
 	}
 	
+    
+        
+    bool disableDiscardMode = true;
+    if(disableDiscardMode)
+    {
+        OMX_CONFIG_PORTBOOLEANTYPE discardMode;
+        OMX_INIT_STRUCTURE(discardMode);
+        discardMode.nPortIndex = EGL_RENDER_INPUT_PORT;
+        discardMode.bEnabled = OMX_FALSE;
+        error = OMX_SetParameter(render, OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);
+        if (error != OMX_ErrorNone) 
+        {
+            ofLogError(__func__) << "render disableDiscardMode OMX_IndexParamBrcmVideoEGLRenderDiscardMode FAIL " << omxErrorToString(error);
+        }else
+        {
+            ofLogVerbose(__func__) << "render disableDiscardMode OMX_IndexParamBrcmVideoEGLRenderDiscardMode PASS ";
+
+        }
+    }
+    
+    
 	if(omxCameraSettings.doRecording)
 	{
 		//Enable encoder input port
