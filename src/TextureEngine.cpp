@@ -286,7 +286,9 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		ofLogError(__func__) << "render enable input port FAIL " << omxErrorToString(error);
 	}
 	
-    
+    /*
+     Boolean parameter to enable/disable EGL discard mode. With discard mode enabled (default), EGL render will only buffer up to one image. If a new image is received while an image is waiting to be processed, the old image will be dropped. With discard mode disabled, 32 VC images (used in tunnelled mode) can be buffered. Once the buffer is full, the upstream component is notified and should attempt to send the image again later. Non-discard mode only applies to the tunnelled case (it does not apply when called internally).
+     */
     /*    
     bool disableDiscardMode = true;
     if(disableDiscardMode)
@@ -294,7 +296,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         OMX_CONFIG_PORTBOOLEANTYPE discardMode;
         OMX_INIT_STRUCTURE(discardMode);
         discardMode.nPortIndex = EGL_RENDER_INPUT_PORT;
-        discardMode.bEnabled = OMX_FALSE;
+        discardMode.bEnabled = OMX_FALSE; //default true
         error = OMX_SetParameter(render, OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);
         if (error != OMX_ErrorNone) 
         {
