@@ -58,16 +58,6 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	
 }
 
-
-
-
-
-
-
-
-
-
-
 OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
 	/*ofLog(OF_LOG_VERBOSE, 
@@ -85,7 +75,7 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
             
         case OMX_EventError:
         {
-            ofLogError(__func__) << "OMX_EventError: " << OMX_Maps::getInstance().omxErrors[(OMX_ERRORTYPE)nData1];
+            ofLogError(__func__) << "OMX_EventError: " << omxErrorToString( (OMX_ERRORTYPE)nData1 );
         }
 		default: 
 		{
@@ -139,7 +129,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		string splitterComponentName = "OMX.broadcom.video_splitter";
 		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
-		disableAllPortsForComponent(&splitter);
+		DisableAllPortsForComponent(&splitter);
 		
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -172,7 +162,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	string renderComponentName = "OMX.broadcom.egl_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	disableAllPortsForComponent(&render);
+	DisableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -289,7 +279,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     /*
      Boolean parameter to enable/disable EGL discard mode. With discard mode enabled (default), EGL render will only buffer up to one image. If a new image is received while an image is waiting to be processed, the old image will be dropped. With discard mode disabled, 32 VC images (used in tunnelled mode) can be buffered. Once the buffer is full, the upstream component is notified and should attempt to send the image again later. Non-discard mode only applies to the tunnelled case (it does not apply when called internally).
      */
-    /*    
+       
     bool disableDiscardMode = true;
     if(disableDiscardMode)
     {
@@ -306,7 +296,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
             ofLogVerbose(__func__) << "render disableDiscardMode OMX_IndexParamBrcmVideoEGLRenderDiscardMode PASS ";
 
         }
-    }*/
+    }
     
     
 	if(omxCameraSettings.doRecording)
@@ -464,10 +454,10 @@ void TextureEngine::close()
     
     if(omxCameraSettings.doRecording)
     {
-        disableAllPortsForComponent(&encoder);
+        DisableAllPortsForComponent(&encoder);
     }
     
-    disableAllPortsForComponent(&camera);
+    DisableAllPortsForComponent(&camera);
     
     if(omxCameraSettings.doRecording)
     {

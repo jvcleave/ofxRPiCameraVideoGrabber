@@ -47,11 +47,45 @@ memset(&(a), 0, sizeof(a)); \
 #define __func__ __PRETTY_FUNCTION__
 
 
-#ifndef GLOBAL_OMX_FUNCTIONS_
-#define GLOBAL_OMX_FUNCTIONS_
+extern inline  
+string omxErrorToString(OMX_ERRORTYPE error)
+{
+    return OMX_Maps::getInstance().omxErrors[error];
+}
+
+
+extern inline 
+const char* omxErrorToCString(OMX_ERRORTYPE error)
+{
+    return OMX_Maps::getInstance().omxErrors[error].c_str();
+}
+
+extern inline 
+OMX_BOOL toOMXBool(bool boolean)
+{
+    if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
+}
+
+extern inline  
+bool fromOMXBool(OMX_BOOL omxBool)
+{
+    if(omxBool == OMX_TRUE) { return true; } else { return false; } 
+}
+
+extern inline 
+float toQ16(float n) 
+{
+    return n* 65536; 
+}
+
+extern inline 
+float fromQ16(float n) 
+{ 
+    return n*(1/65536.0); 
+}
 
 extern inline
-OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* handle)
+OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle)
 {
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -93,52 +127,14 @@ OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* handle)
                 error = OMX_SendCommand(*handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
                 if(error != OMX_ErrorNone)
                 {
-                    ofLog(OF_LOG_VERBOSE, "disableAllPortsForComponent - Error disable port %d on component %s error: 0x%08x", 
-                          (int)(ports.nStartPortNumber) + j, "m_componentName", (int)error);
+                    ofLogError(__func__) << omxErrorToString(error);
                 }
             }
             
         }
     }
     
-    return OMX_ErrorNone;
+    return error;
 }
-
-extern inline  
-string omxErrorToString(OMX_ERRORTYPE error)
-{
-    return OMX_Maps::getInstance().omxErrors[error];
-}
-
-extern inline 
-const char* omxErrorToCString(OMX_ERRORTYPE error)
-{
-    return OMX_Maps::getInstance().omxErrors[error].c_str();
-}
-
-extern inline 
-OMX_BOOL toOMXBool(bool boolean)
-{
-    if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
-}
-
-extern inline  
-bool fromOMXBool(OMX_BOOL omxBool)
-{
-    if(omxBool == OMX_TRUE) { return true; } else { return false; } 
-}
-
-extern inline 
-float toQ16(float n) 
-{
-    return n* 65536; 
-}
-
-extern inline 
-float fromQ16(float n) 
-{ 
-    return n*(1/65536.0); 
-}
-#endif
 
 #endif

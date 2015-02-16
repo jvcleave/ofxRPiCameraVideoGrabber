@@ -107,7 +107,6 @@ struct CameraMeteringMode
 
 class ofxRPiCameraVideoGrabber
 {
-
 public:
 
 	ofxRPiCameraVideoGrabber();
@@ -260,7 +259,7 @@ public:
         MIRROR_BOTH=OMX_MirrorBoth,
     };
     OMX_ERRORTYPE setMirror(MIRROR);
-    string getMirrorStateAsString();
+    string getMirrorAsString();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool state);
     OMX_ERRORTYPE enableSoftwareSharpening();

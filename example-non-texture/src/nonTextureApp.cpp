@@ -20,7 +20,6 @@ void nonTextureApp::setup()
 	{		
 		omxCameraSettings.doRecordingPreview	= true;
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
-		omxCameraSettings.doConvertToMKV		= false;	//converts file to .mkv using mkvmerge(if present)
 	}
 	
 	

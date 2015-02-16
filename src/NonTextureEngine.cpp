@@ -404,7 +404,7 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 	string renderComponentName = "OMX.broadcom.video_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	disableAllPortsForComponent(&render);
+	DisableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	OMX_ERRORTYPE error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -446,10 +446,10 @@ void NonTextureEngine::close()
     
     if(omxCameraSettings.doRecording)
     {
-        disableAllPortsForComponent(&encoder);
+        DisableAllPortsForComponent(&encoder);
     }
     
-    disableAllPortsForComponent(&camera);
+    DisableAllPortsForComponent(&camera);
     
     if(omxCameraSettings.doRecording)
     {

@@ -216,13 +216,14 @@ void ofxRPiCameraVideoGrabber::saveState()
     state << "cropRectangle=" << cropRectangle.x  << "," << cropRectangle.y << "," << cropRectangle.width << "," << cropRectangle.height << "\n";
     state << "zoomLevel="   << zoomLevel                    << "\n";
     state << "rotation="    << rotationConfig.nRotation     << "\n";
-    state << "mirror="      << getMirrorStateAsString()     << "\n";
+    state << "mirror="      << getMirrorAsString()     << "\n";
     
-    //OMX_MIRRORTYPE mirrorType = OMX_Maps::getInstance().mirrorTypes[getMirrorStateAsString()];
+    //OMX_MIRRORTYPE mirrorType = OMX_Maps::getInstance().mirrorTypes[getMirrorAsString()];
     
     ofLogVerbose(__func__) << state.str();
 }
-string ofxRPiCameraVideoGrabber::getMirrorStateAsString()
+
+string ofxRPiCameraVideoGrabber::getMirrorAsString()
 {
     string value;
     switch (mirrorConfig.eMirror) {

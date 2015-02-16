@@ -58,7 +58,6 @@ public:
     bool isUsingTexture;
     bool enablePixels;
     string recordingFilePath;
-    bool doConvertToMKV;
     
     bool doManualExposure;
     Preset preset;
@@ -74,7 +73,6 @@ public:
         previewWidth = width;
         previewHeight = height;
         recordingFilePath = "";
-        doConvertToMKV = false;
         preset = PRESET_NONE;
         doManualExposure = false;
         

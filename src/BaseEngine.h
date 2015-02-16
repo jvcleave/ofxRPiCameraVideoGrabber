@@ -41,8 +41,8 @@ public:
 protected:
 	OMXCameraSettings omxCameraSettings;
 
-	void configureCameraResolution();
-	void configureEncoder();
+	OMX_ERRORTYPE configureCameraResolution();
+	OMX_ERRORTYPE configureEncoder();
     
 	
 	OMX_HANDLETYPE splitter;
@@ -62,7 +62,7 @@ protected:
 	bool bufferAvailable;
 	
 	void threadedFunction();
-	void writeFile();
+	bool writeFile();
 	
 	ofBuffer recordingFileBuffer;
 	OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
