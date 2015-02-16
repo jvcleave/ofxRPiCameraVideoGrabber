@@ -50,17 +50,95 @@ memset(&(a), 0, sizeof(a)); \
 #ifndef GLOBAL_OMX_FUNCTIONS_
 #define GLOBAL_OMX_FUNCTIONS_
 
-OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE*);
-string omxErrorToString(OMX_ERRORTYPE);
+extern inline
+OMX_ERRORTYPE disableAllPortsForComponent(OMX_HANDLETYPE* handle)
+{
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    
+    OMX_INDEXTYPE indexTypes[] = 
+    {
+        OMX_IndexParamAudioInit,
+        OMX_IndexParamImageInit,
+        OMX_IndexParamVideoInit, 
+        OMX_IndexParamOtherInit
+    };
+    
+    OMX_PORT_PARAM_TYPE ports;
+    OMX_INIT_STRUCTURE(ports);
+    
+    for(int i=0; i < 4; i++)
+    {
+        error = OMX_GetParameter(*handle, indexTypes[i], &ports);
+        if(error == OMX_ErrorNone) 
+        {
+            
+            uint32_t j;
+            for(j=0; j<ports.nPorts; j++)
+            {
+                OMX_PARAM_PORTDEFINITIONTYPE portFormat;
+                OMX_INIT_STRUCTURE(portFormat);
+                portFormat.nPortIndex = ports.nStartPortNumber+j;
+                
+                error = OMX_GetParameter(*handle, OMX_IndexParamPortDefinition, &portFormat);
+                if(error != OMX_ErrorNone)
+                {
+                    if(portFormat.bEnabled == OMX_FALSE)
+                    {
+                        continue;
+                    }
+                }
+                
+                error = OMX_SendCommand(*handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
+                if(error != OMX_ErrorNone)
+                {
+                    ofLog(OF_LOG_VERBOSE, "disableAllPortsForComponent - Error disable port %d on component %s error: 0x%08x", 
+                          (int)(ports.nStartPortNumber) + j, "m_componentName", (int)error);
+                }
+            }
+            
+        }
+    }
+    
+    return OMX_ErrorNone;
+}
 
-const char* omxErrorToCString(OMX_ERRORTYPE);
+extern inline  
+string omxErrorToString(OMX_ERRORTYPE error)
+{
+    return OMX_Maps::getInstance().omxErrors[error];
+}
 
-OMX_BOOL toOMXBool(bool);
-bool fromOMXBool(OMX_BOOL);
+extern inline 
+const char* omxErrorToCString(OMX_ERRORTYPE error)
+{
+    return OMX_Maps::getInstance().omxErrors[error].c_str();
+}
 
-float toQ16(float);
-float fromQ16(float);
+extern inline 
+OMX_BOOL toOMXBool(bool boolean)
+{
+    if(boolean) { return OMX_TRUE; } else { return OMX_FALSE; }
+}
 
+extern inline  
+bool fromOMXBool(OMX_BOOL omxBool)
+{
+    if(omxBool == OMX_TRUE) { return true; } else { return false; } 
+}
+
+extern inline 
+float toQ16(float n) 
+{
+    return n* 65536; 
+}
+
+extern inline 
+float fromQ16(float n) 
+{ 
+    return n*(1/65536.0); 
+}
 #endif
 
 #endif
