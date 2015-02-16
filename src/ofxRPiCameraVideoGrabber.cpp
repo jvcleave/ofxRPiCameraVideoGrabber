@@ -149,7 +149,90 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     ofLogVerbose(__func__) << "isSoftwareSharpeningEnabled: " << isSoftwareSharpeningEnabled();
     
     ofLogVerbose(__func__) << "isSoftwareSaturationEnabled: " << isSoftwareSaturationEnabled();
+    saveState();
 
+}
+
+void ofxRPiCameraVideoGrabber::saveState()
+{
+    stringstream state;
+    //Exposure Preset
+    for (map<string, OMX_EXPOSURECONTROLTYPE>::iterator it=OMX_Maps::getInstance().exposurePresets.begin(); 
+         it!=OMX_Maps::getInstance().exposurePresets.end(); 
+         ++it)
+    {
+        if(it->second == exposurePresetConfig.eExposureControl)
+        {
+            
+            state << "exposurePresets: " << it->first << "\n";
+        }
+    }
+    
+    //Metering Mode
+    
+    state << "meteringType="               << currentMeteringMode.getMeteringTypeString();
+    state << "evCompensation="             << currentMeteringMode.evCompensation           << "\n";
+    state << "autoShutter="                << currentMeteringMode.autoShutter              << "\n";
+    state << "shutterSpeedMicroSeconds="   << currentMeteringMode.shutterSpeedMicroSeconds << "\n";
+    state << "autoAperture="               << currentMeteringMode.autoAperture             << "\n";
+    state << "aperture="                   << currentMeteringMode.aperture                 << "\n";
+    state << "autoISO="                    << currentMeteringMode.autoISO                  << "\n";
+    state << "ISO="                        << currentMeteringMode.ISO                      << "\n";
+    
+    state << "sharpness="  << getSharpness()   << "\n";
+    state << "contrast="   << getContrast()    << "\n";
+    state << "brightness=" << getBrightness()  << "\n";
+    state << "saturation=" << getSaturation()  << "\n";
+    
+    
+    state << "framestabilization=" << fromOMXBool(framestabilizationConfig.bStab)          << "\n";
+    
+    //White Balance
+    for (map<string, OMX_WHITEBALCONTROLTYPE>::iterator it=OMX_Maps::getInstance().whiteBalanceControls.begin(); 
+         it!=OMX_Maps::getInstance().whiteBalanceControls.end(); 
+         ++it)
+    {
+        if(it->second == whiteBalanceConfig.eWhiteBalControl)
+        {
+            
+            state << "whiteBalance=" << it->first << "\n";
+        }
+    }
+    
+    //Image Filter
+    for (map<string, OMX_IMAGEFILTERTYPE>::iterator it=OMX_Maps::getInstance().imageFilters.begin(); 
+         it!=OMX_Maps::getInstance().imageFilters.end(); 
+         ++it)
+    {
+        if(it->second == imagefilterConfig.eImageFilter)
+        {
+            
+            state << "imageFilter=" << it->first << "\n";
+        }
+    }
+    //DRC
+    
+    state << "drcLevel=" << OMX_Maps::getInstance().drcTypes[drcConfig.eMode]         << "\n";
+    state << "cropRectangle=" << cropRectangle.x  << "," << cropRectangle.y << "," << cropRectangle.width << "," << cropRectangle.height << "\n";
+    state << "zoomLevel="   << zoomLevel                    << "\n";
+    state << "rotation="    << rotationConfig.nRotation     << "\n";
+    state << "mirror="      << getMirrorStateAsString()     << "\n";
+    
+    //OMX_MIRRORTYPE mirrorType = OMX_Maps::getInstance().mirrorTypes[getMirrorStateAsString()];
+    
+    ofLogVerbose(__func__) << state.str();
+}
+string ofxRPiCameraVideoGrabber::getMirrorStateAsString()
+{
+    string value;
+    switch (mirrorConfig.eMirror) {
+        case MIRROR_NONE:       {value = "MIRROR_NONE";}        break;
+        case MIRROR_VERTICAL:   {value = "MIRROR_VERTICAL";}    break;
+        case MIRROR_HORIZONTAL: {value = "MIRROR_HORIZONTAL";}  break;
+        case MIRROR_BOTH:       {value = "MIRROR_BOTH";}        break;
+        default:                {value = "MIRROR_NONE";}        break;
+    }
+    return value;
 }
 
 

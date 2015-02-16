@@ -29,6 +29,7 @@ public:
 		return instance;
 	}
     
+    map<OMX_DYNAMICRANGEEXPANSIONMODETYPE, int> drcTypes;
     
 	vector<string> imageFilterNames;
 	map<string, OMX_IMAGEFILTERTYPE> imageFilters;
@@ -90,9 +91,22 @@ public:
 	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
     
     map<OMX_ERRORTYPE, string> omxErrors;
+    
+    map<string, OMX_MIRRORTYPE> mirrorTypes;
+    
 private:	
 	OMX_Maps()
 	{
+        
+        mirrorTypes["MIRROR_NONE"] = OMX_MirrorNone;
+        mirrorTypes["MIRROR_VERTICAL"] = OMX_MirrorVertical;
+        mirrorTypes["MIRROR_HORIZONTAL"] = OMX_MirrorHorizontal;
+        mirrorTypes["MIRROR_BOTH"] = OMX_MirrorBoth;
+        
+        drcTypes[OMX_DynRangeExpOff] = 0;
+        drcTypes[OMX_DynRangeExpLow] = 1;
+        drcTypes[OMX_DynRangeExpMedium] = 2;
+        drcTypes[OMX_DynRangeExpHigh] = 3;
         
         omxErrors[OMX_ErrorNone] =  "OMX_ErrorNone";
         omxErrors[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";

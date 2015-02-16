@@ -118,6 +118,7 @@ public:
 	void setup(OMXCameraSettings);
     
     void setDefaultValues();
+    void saveState();
     void draw();
 	void close();
 	
@@ -259,7 +260,8 @@ public:
         MIRROR_BOTH=OMX_MirrorBoth,
     };
     OMX_ERRORTYPE setMirror(MIRROR);
-
+    string getMirrorStateAsString();
+    
     OMX_ERRORTYPE setSoftwareSharpening(bool state);
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
