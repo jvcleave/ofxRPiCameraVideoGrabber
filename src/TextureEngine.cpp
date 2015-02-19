@@ -406,8 +406,12 @@ void TextureEngine::close()
     error = DisableAllPortsForComponent(&splitter, "splitter");
     OMX_TRACE(error, "DisableAllPortsForComponent splitter");
     
-    error = DisableAllPortsForComponent(&encoder, "encoder");
-    OMX_TRACE(error, "DisableAllPortsForComponent encoder");
+    if(encoder)
+    {
+        error = DisableAllPortsForComponent(&encoder, "encoder");
+        OMX_TRACE(error, "DisableAllPortsForComponent encoder");
+    }
+
     
     error = DisableAllPortsForComponent(&render, "egl_render");
     OMX_TRACE(error, "DisableAllPortsForComponent: render");
@@ -426,14 +430,18 @@ void TextureEngine::close()
     error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "splitter->OMX_StateIdle");
     
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error, "encoder->OMX_StateIdle");
+    if(encoder)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error, "encoder->OMX_StateIdle");
+    
               
-    ofSleepMillis(1000);
+        ofSleepMillis(1000);
               
-    OMX_STATETYPE encoderState;
-    error = OMX_GetState(encoder, &encoderState);
-    OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
+        OMX_STATETYPE encoderState;
+        error = OMX_GetState(encoder, &encoderState);
+        OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
+    }
     
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "render->OMX_StateIdle");
@@ -445,8 +453,11 @@ void TextureEngine::close()
     error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "splitter->OMX_StateLoaded");
     
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-    OMX_TRACE(error, "encoder->OMX_StateLoaded");
+    if(encoder)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+        OMX_TRACE(error, "encoder->OMX_StateLoaded");
+    }
     
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "render->OMX_StateLoaded");
@@ -459,9 +470,12 @@ void TextureEngine::close()
     error = OMX_FreeHandle(splitter);
     OMX_TRACE(error, "OMX_FreeHandle(splitter)");
     
-    error = OMX_FreeHandle(encoder);
-    OMX_TRACE(error, "OMX_FreeHandle(encoder)");
-    
+    if(encoder)
+    {
+        error = OMX_FreeHandle(encoder);
+        OMX_TRACE(error, "OMX_FreeHandle(encoder)"); 
+    }    
+
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
 }
