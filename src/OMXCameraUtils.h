@@ -23,26 +23,39 @@ memset(&(a), 0, sizeof(a)); \
 (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
 (a).nVersion.s.nStep = OMX_VERSION_STEP
 
-#define VIDEO_RENDER_INPUT_PORT	90
 
-#define EGL_RENDER_INPUT_PORT	220
-#define EGL_RENDER_OUTPUT_PORT	221
 
+#define OMX_CAMERA "OMX.broadcom.camera"
 #define CAMERA_PREVIEW_PORT		70
 #define CAMERA_OUTPUT_PORT		71
 
+#define OMX_VIDEO_ENCODER "OMX.broadcom.video_encode"
 #define VIDEO_ENCODE_INPUT_PORT 200
 #define VIDEO_ENCODE_OUTPUT_PORT 201
 
-#define NULL_SINK_INPUT_PORT 240
+#define OMX_VIDEO_DECODER "OMX.broadcom.video_decode"
+#define VIDEO_DECODE_INPUT_PORT 130
+#define VIDEO_DECODE_OUTPUT_PORT 131
 
 
+#define OMX_VIDEO_SPLITTER "OMX.broadcom.video_splitter"
 #define VIDEO_SPLITTER_INPUT_PORT 250
 
 #define VIDEO_SPLITTER_OUTPUT_PORT1 251
 #define VIDEO_SPLITTER_OUTPUT_PORT2 252
 #define VIDEO_SPLITTER_OUTPUT_PORT3 253
 #define VIDEO_SPLITTER_OUTPUT_PORT4 254
+
+#define OMX_VIDEO_RENDER "OMX.broadcom.video_render"
+#define VIDEO_RENDER_INPUT_PORT	90
+
+#define OMX_EGL_RENDER "OMX.broadcom.egl_render"
+#define EGL_RENDER_INPUT_PORT	220
+#define EGL_RENDER_OUTPUT_PORT	221
+
+#define OMX_NULL_SINK "OMX.broadcom.null_sink"
+#define NULL_SINK_INPUT_PORT 240
+
 
 #define __func__ __PRETTY_FUNCTION__
 

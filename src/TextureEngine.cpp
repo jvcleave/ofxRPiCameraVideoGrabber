@@ -48,7 +48,7 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	cameraCallbacks.EventHandler    = &TextureEngine::cameraEventHandlerCallback;
 	
 	
-	error = OMX_GetHandle(&camera, (OMX_STRING)"OMX.broadcom.camera", this , &cameraCallbacks);
+	error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
 	if(error != OMX_ErrorNone) 
 	{
 		ofLogError(__func__) << "camera OMX_GetHandle FAIL " << omxErrorToString(error);
@@ -126,9 +126,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		//Set up video splitter
 		OMX_CALLBACKTYPE splitterCallbacks;
 		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
-
-		string splitterComponentName = "OMX.broadcom.video_splitter";
-		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
+		OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
 		DisableAllPortsForComponent(&splitter);
 		
 		//Set splitter to Idle
@@ -159,9 +157,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
 	renderCallbacks.FillBufferDone	= &TextureEngine::renderFillBufferDone;
 	
-	string renderComponentName = "OMX.broadcom.egl_render";
 	
-	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+	OMX_GetHandle(&render, OMX_EGL_RENDER, this , &renderCallbacks);
 	DisableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
@@ -180,10 +177,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
 		encoderCallbacks.FillBufferDone		= &TextureEngine::encoderFillBufferDone;
 		
-		
-		string encoderComponentName = "OMX.broadcom.video_encode";
-		
-		error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
+		error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLogError(__func__) << "encoder OMX_GetHandle FAIL " << omxErrorToString(error);
