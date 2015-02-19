@@ -13,8 +13,8 @@ void ofApp::setup()
 	
 	omxCameraSettings.width = 1280; //default 1280
 	omxCameraSettings.height = 720; //default 720
-	omxCameraSettings.isUsingTexture = false; //default true
-	omxCameraSettings.doRecording = true;   //default false
+	omxCameraSettings.isUsingTexture = true; //default true
+	omxCameraSettings.doRecording = false;   //default false
 	
 	if (omxCameraSettings.doRecording) 
 	{
@@ -61,12 +61,8 @@ void ofApp::update()
 
 
 //--------------------------------------------------------------
-void ofApp::draw(){
-
-    if (videoGrabber.isTextureEnabled()) 
-    {
-        return;
-    }
+void ofApp::draw()
+{
 	//draws at camera resolution
 	videoGrabber.draw();
 	
@@ -125,6 +121,12 @@ void ofApp::keyPressed  (int key)
 		doDrawInfo = !doDrawInfo;
 	}
 	
+    if (key == 's')
+    {
+        ofLogVerbose(__func__) << "STARTING RECORDING";
+        videoGrabber.startRecording();
+    }
+    
 	if (key == 'q')
 	{
 		ofLogVerbose(__func__) << "STOPPING RECORDING";

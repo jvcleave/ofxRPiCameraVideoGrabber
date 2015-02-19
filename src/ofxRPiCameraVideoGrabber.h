@@ -137,7 +137,8 @@ public:
     int getSaturation() { return saturationConfig.nSaturation; }
     bool isTextureEnabled();
     
-    
+    bool isRecording();
+    void startRecording();
     void stopRecording();
     void enablePixels();
     void disablePixels();
@@ -271,6 +272,7 @@ public:
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
+    
     
 private:
     OMX_ERRORTYPE applyMirror();

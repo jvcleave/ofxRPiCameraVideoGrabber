@@ -16,6 +16,7 @@ BaseEngine::BaseEngine()
 	bufferAvailable = false;
 	
 	recordedFrameCounter = 0;
+    isCurrentlyRecording = false;
 }
 
 

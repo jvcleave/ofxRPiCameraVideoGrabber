@@ -33,6 +33,8 @@ public:
 	virtual int getFrameCounter() = 0;
     virtual void close()=0;
     
+    bool isRecording() {return isCurrentlyRecording;};
+    void startRecording(){};
     void stopRecording();
     OMX_HANDLETYPE camera;
     EngineType engineType;
@@ -60,7 +62,8 @@ protected:
 	int isKeyframeValid;
 	bool doFillBuffer;
 	bool bufferAvailable;
-	
+    bool isCurrentlyRecording;
+    
 	void threadedFunction();
 	bool writeFile();
 	

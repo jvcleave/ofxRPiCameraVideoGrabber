@@ -25,20 +25,20 @@ memset(&(a), 0, sizeof(a)); \
 
 
 
-#define OMX_CAMERA "OMX.broadcom.camera"
+#define OMX_CAMERA (OMX_STRING)"OMX.broadcom.camera"
 #define CAMERA_PREVIEW_PORT		70
 #define CAMERA_OUTPUT_PORT		71
 
-#define OMX_VIDEO_ENCODER "OMX.broadcom.video_encode"
+#define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
 #define VIDEO_ENCODE_INPUT_PORT 200
 #define VIDEO_ENCODE_OUTPUT_PORT 201
 
-#define OMX_VIDEO_DECODER "OMX.broadcom.video_decode"
+#define OMX_VIDEO_DECODER (OMX_STRING)"OMX.broadcom.video_decode"
 #define VIDEO_DECODE_INPUT_PORT 130
 #define VIDEO_DECODE_OUTPUT_PORT 131
 
 
-#define OMX_VIDEO_SPLITTER "OMX.broadcom.video_splitter"
+#define OMX_VIDEO_SPLITTER (OMX_STRING)"OMX.broadcom.video_splitter"
 #define VIDEO_SPLITTER_INPUT_PORT 250
 
 #define VIDEO_SPLITTER_OUTPUT_PORT1 251
@@ -46,18 +46,23 @@ memset(&(a), 0, sizeof(a)); \
 #define VIDEO_SPLITTER_OUTPUT_PORT3 253
 #define VIDEO_SPLITTER_OUTPUT_PORT4 254
 
-#define OMX_VIDEO_RENDER "OMX.broadcom.video_render"
+#define OMX_VIDEO_RENDER (OMX_STRING)"OMX.broadcom.video_render"
 #define VIDEO_RENDER_INPUT_PORT	90
 
-#define OMX_EGL_RENDER "OMX.broadcom.egl_render"
+#define OMX_EGL_RENDER (OMX_STRING)"OMX.broadcom.egl_render"
 #define EGL_RENDER_INPUT_PORT	220
 #define EGL_RENDER_OUTPUT_PORT	221
 
-#define OMX_NULL_SINK "OMX.broadcom.null_sink"
+#define OMX_NULL_SINK (OMX_STRING)"OMX.broadcom.null_sink"
 #define NULL_SINK_INPUT_PORT 240
 
 
 #define __func__ __PRETTY_FUNCTION__
+
+//#define OMX_TRACE(error) ofLogVerbose(__func__) << __LINE__ << " " << omxErrorToString(error);
+
+
+
 
 
 extern inline  
@@ -66,6 +71,57 @@ string omxErrorToString(OMX_ERRORTYPE error)
     return OMX_Maps::getInstance().omxErrors[error];
 }
 
+#define OMX_LOG_LEVEL 2
+
+extern inline  
+void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName="", int lineNumber=0)
+{
+    string commentLine = " ";
+    if(!comments.empty())
+    {
+        commentLine = " " + comments + " ";
+    }
+    
+    switch(OMX_LOG_LEVEL)
+    {
+        case 1:
+        {
+            if(error != OMX_ErrorNone)
+            {
+                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
+            }else
+            {
+                ofLogVerbose(functionName) << lineNumber << commentLine << omxErrorToString(error);
+            }
+            break;
+        }
+        case 2:
+        {
+            if(error != OMX_ErrorNone)
+            {
+                ofLogError(functionName) << lineNumber << commentLine << omxErrorToString(error);
+            }
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
+    
+}
+
+
+#define OMX_TRACE_1_ARGS(error)                      logOMXError(error, "", __func__, __LINE__);
+#define OMX_TRACE_2_ARGS(error, comments)            logOMXError(error, comments, __func__, __LINE__);
+#define OMX_TRACE_3_ARGS(error, comments, whatever)  logOMXError(error, comments, __func__, __LINE__);
+
+#define GET_OMX_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
+#define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
+
+#define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+
+//#define OMX_TRACE(error)
 
 extern inline 
 const char* omxErrorToCString(OMX_ERRORTYPE error)

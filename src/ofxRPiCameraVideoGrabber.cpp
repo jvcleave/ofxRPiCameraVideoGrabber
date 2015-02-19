@@ -306,6 +306,33 @@ BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
 }
 
 
+void ofxRPiCameraVideoGrabber::startRecording()
+{
+    if (engine) 
+    {
+        engine->startRecording();
+    }
+    
+    if (textureEngine) 
+    {
+        textureEngine->startRecording();
+    }
+}
+
+bool ofxRPiCameraVideoGrabber::isRecording()
+{
+    if (engine) 
+    {
+        return engine->isRecording();
+    }
+    
+    if (textureEngine) 
+    {
+        return textureEngine->isRecording();
+    }
+    return false;
+}
+
 bool ofxRPiCameraVideoGrabber::isReady()
 {
     
