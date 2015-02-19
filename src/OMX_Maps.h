@@ -3,7 +3,7 @@
  *  openFrameworksRPi
  *
  *  Created by jason van cleave on 11/1/13.
- *  Copyright 2013 jasonvancleave.com. All rights reserved.
+ *  Copyright 2013 jasonvancleave.com. :video_camera:
  *
  */
 #pragma once
