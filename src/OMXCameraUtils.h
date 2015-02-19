@@ -30,8 +30,8 @@ memset(&(a), 0, sizeof(a)); \
 #define CAMERA_OUTPUT_PORT		71
 
 #define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
-#define VIDEO_ENCODE_INPUT_PORT 200
-#define VIDEO_ENCODE_OUTPUT_PORT 201
+#define ENCODER_INPUT_PORT 200
+#define ENCODER_OUTPUT_PORT 201
 
 #define OMX_VIDEO_DECODER (OMX_STRING)"OMX.broadcom.video_decode"
 #define VIDEO_DECODE_INPUT_PORT 130
@@ -63,7 +63,11 @@ memset(&(a), 0, sizeof(a)); \
 
 
 
-
+extern inline  
+string getStateString(OMX_STATETYPE state)
+{
+    return OMX_Maps::getInstance().omxStateNames[state];
+}
 
 extern inline  
 string omxErrorToString(OMX_ERRORTYPE error)
@@ -154,7 +158,7 @@ float fromQ16(float n)
 }
 
 extern inline
-OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle)
+OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string componentName="")
 {
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -180,6 +184,8 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle)
             uint32_t j;
             for(j=0; j<ports.nPorts; j++)
             {
+                
+                
                 OMX_PARAM_PORTDEFINITIONTYPE portFormat;
                 OMX_INIT_STRUCTURE(portFormat);
                 portFormat.nPortIndex = ports.nStartPortNumber+j;
@@ -193,11 +199,27 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle)
                     }
                 }
                 
+                /*
+                 
+                 OMX_CONFIG_BRCMUSEPROPRIETARYCALLBACKTYPE cbType;
+                 OMX_INIT_STRUCTURE(cbType);
+                 cbType.nPortIndex = ports.nStartPortNumber+j;
+                 error = OMX_GetParameter(*handle, OMX_IndexConfigBrcmUseProprietaryCallback, &cbType);
+                 ofLogVerbose()<<  componentName << " PORT # " << ports.nStartPortNumber+j << " PROPRIETARY CALLBACK ENABLED: " << fromOMXBool(cbType.bEnable);
+                 
+                 */
+                
                 error = OMX_SendCommand(*handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
                 if(error != OMX_ErrorNone)
                 {
                     ofLogError(__func__) << omxErrorToString(error);
+                }else
+                {
+                    ofLogVerbose() << componentName << " PORT # " << ports.nStartPortNumber+j << " DISABLED";
                 }
+                
+                
+                
             }
             
         }

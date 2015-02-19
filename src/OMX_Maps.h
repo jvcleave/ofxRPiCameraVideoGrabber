@@ -93,10 +93,16 @@ public:
     map<OMX_ERRORTYPE, string> omxErrors;
     
     map<string, OMX_MIRRORTYPE> mirrorTypes;
+    map<OMX_STATETYPE, string>omxStateNames;
     
 private:	
-	OMX_Maps()
-	{
+    OMX_Maps()
+    {
+        omxStateNames[OMX_StateInvalid] = "OMX_StateInvalid";
+        omxStateNames[OMX_StateLoaded] = "OMX_StateLoaded";
+        omxStateNames[OMX_StateIdle] = "OMX_StateIdle";
+        omxStateNames[OMX_StateExecuting] = "OMX_StateExecuting";
+        omxStateNames[OMX_StatePause] = "OMX_StatePause";
         
         mirrorTypes["MIRROR_NONE"] = OMX_MirrorNone;
         mirrorTypes["MIRROR_VERTICAL"] = OMX_MirrorVertical;

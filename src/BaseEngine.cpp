@@ -78,7 +78,7 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	// Configure video format emitted by encoder output port
 	OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 	OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-	encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+	encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
 	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 	if (error == OMX_ErrorNone) 
 	{
@@ -122,7 +122,7 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
 	
 	encodingBitrate.nTargetBitrate = recordingBitRate;
-	encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+	encodingBitrate.nPortIndex = ENCODER_OUTPUT_PORT;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
 	
@@ -134,7 +134,7 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	// Configure encoding format
 	OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
 	OMX_INIT_STRUCTURE(encodingFormat);
-	encodingFormat.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+	encodingFormat.nPortIndex = ENCODER_OUTPUT_PORT;
 	encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);

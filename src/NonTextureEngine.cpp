@@ -191,10 +191,10 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		}
 
 		// Tunnel camera video output port and encoder input port
-		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, VIDEO_ENCODE_INPUT_PORT);
+		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, ENCODER_INPUT_PORT);
 		if(error != OMX_ErrorNone) 
 		{
-			ofLogError(__func__) << "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL " << omxErrorToString(error);
+			ofLogError(__func__) << "CAMERA_OUTPUT_PORT->ENCODER_INPUT_PORT OMX_SetupTunnel FAIL " << omxErrorToString(error);
 		}
 
 		
@@ -230,17 +230,17 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		}
 		
 		//Enable encoder input port
-		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
+		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL " << omxErrorToString(error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable ENCODER_INPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		//Enable encoder output port
-		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLogError(__func__) << "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
+			ofLogError(__func__) << "encoder OMX_CommandPortEnable ENCODER_OUTPUT_PORT FAIL " << omxErrorToString(error);
 		}
 		
 		if (omxCameraSettings.doRecordingPreview) 
@@ -255,20 +255,20 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+		encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
 		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
 		if (error != OMX_ErrorNone) 
 		{
 			ofLogError(__func__) << "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL " << omxErrorToString(error);
 		}else 
 		{
-			ofLogVerbose(__func__) << "VIDEO_ENCODE_OUTPUT_PORT eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
+			ofLogVerbose(__func__) << "ENCODER_OUTPUT_PORT eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
 		}
 
-		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
+		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
 		if (error != OMX_ErrorNone) 
 		{
-			ofLogError(__func__) << "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL " << omxErrorToString(error);
+			ofLogError(__func__) << "encoder OMX_AllocateBuffer ENCODER_OUTPUT_PORT FAIL " << omxErrorToString(error);
 			
 		}
 		
@@ -440,8 +440,8 @@ void NonTextureEngine::close()
     OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     if(omxCameraSettings.doRecording)
     {
-        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
-        OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_INPUT_PORT, NULL);
+        OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_OUTPUT_PORT, NULL);
     }
     
     if(omxCameraSettings.doRecording)
@@ -453,7 +453,7 @@ void NonTextureEngine::close()
     
     if(omxCameraSettings.doRecording)
     {
-        OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT, encoderOutputBuffer);
     }
     
     OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
