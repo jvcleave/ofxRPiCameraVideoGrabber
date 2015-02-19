@@ -435,9 +435,7 @@ void TextureEngine::close()
         error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
         OMX_TRACE(error, "encoder->OMX_StateIdle");
     
-              
-        ofSleepMillis(1000);
-              
+
         OMX_STATETYPE encoderState;
         error = OMX_GetState(encoder, &encoderState);
         OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
