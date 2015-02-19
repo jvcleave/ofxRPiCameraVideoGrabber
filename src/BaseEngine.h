@@ -29,10 +29,10 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
+    ~BaseEngine();
 	virtual void setup(OMXCameraSettings& omxCameraSettings) = 0;
 	virtual int getFrameCounter() = 0;
-    virtual void close()=0;
-    
+    void closeEngine();
     bool isRecording() {return isCurrentlyRecording;};
     void startRecording(){};
     void stopRecording();
@@ -50,7 +50,8 @@ protected:
 	OMX_HANDLETYPE splitter;
 	OMX_HANDLETYPE encoder;
 	OMX_HANDLETYPE render;
-	
+    OMX_BUFFERHEADERTYPE* eglBuffer;
+
 	
 	bool didWriteFile;
 	
