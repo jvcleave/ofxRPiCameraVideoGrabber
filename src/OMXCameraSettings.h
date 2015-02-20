@@ -71,34 +71,29 @@ public:
         stringstream state;
         
         //Metering Mode
-        state << "exposurePreset: " << exposurePreset << "\n";
-        state << "meteringType="               << meteringType;
-        state << "evCompensation="             << evCompensation           << "\n";
-        state << "autoShutter="                << autoShutter              << "\n";
-        state << "shutterSpeedMicroSeconds="   << shutterSpeedMicroSeconds << "\n";
-        state << "autoAperture="               << autoAperture             << "\n";
-        state << "aperture="                   << aperture                 << "\n";
-        state << "autoISO="                    << autoISO                  << "\n";
-        state << "ISO="                        << ISO                      << "\n";
+        state << "exposurePreset="              << exposurePreset           << "\n";
+        state << "meteringType="                << meteringType             << "\n";
+        state << "evCompensation="              << evCompensation           << "\n";
+        state << "autoShutter="                 << autoShutter              << "\n";
+        state << "shutterSpeedMicroSeconds="    << shutterSpeedMicroSeconds << "\n";
+        state << "autoAperture="                << autoAperture             << "\n";
+        state << "aperture="                    << aperture                 << "\n";
+        state << "autoISO="                     << autoISO                  << "\n";
+        state << "ISO="                         << ISO                      << "\n";
         
-        state << "sharpness="  << sharpness   << "\n";
-        state << "contrast="   << contrast    << "\n";
-        state << "brightness=" << brightness  << "\n";
-        state << "saturation=" << saturation  << "\n";
+        state << "sharpness="                   << sharpness                << "\n";
+        state << "contrast="                    << contrast                 << "\n";
+        state << "brightness="                  << brightness               << "\n";
+        state << "saturation="                  << saturation               << "\n";
         
-        
-        state << "framestabilization=" << framestabilization          << "\n";
-        
-        state << "whiteBalance=" << whiteBalance << "\n";
-        
-        state << "imageFilter=" << imageFilter << "\n";
-        //DRC
-        
-        state << "drcLevel=" << drcLevel         << "\n";
+        state << "framestabilization="          << framestabilization       << "\n";
+        state << "whiteBalance="                << whiteBalance             << "\n";
+        state << "imageFilter="                 << imageFilter              << "\n";        
+        state << "drcLevel="                    << drcLevel                 << "\n";
         state << "cropRectangle=" << cropRectangle.x  << "," << cropRectangle.y << "," << cropRectangle.width << "," << cropRectangle.height << "\n";
-        state << "zoomLevel="   << zoomLevel                    << "\n";
-        state << "rotation="    << rotation     << "\n";
-        state << "mirror="      << mirror     << "\n";
+        state << "zoomLevel="                   << zoomLevel                << "\n";
+        state << "rotation="                    << rotation                 << "\n";
+        state << "mirror="                      << mirror                   << "\n";
         
         
         ofLogVerbose(__func__) << state.str();

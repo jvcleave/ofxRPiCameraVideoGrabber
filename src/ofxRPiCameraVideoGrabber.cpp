@@ -128,6 +128,10 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     setDigitalZoom();
     setRotation(currentState.rotation);
     setMirror(OMX_Maps::getInstance().mirrorTypes[currentState.mirror]);
+    
+    setSoftwareSharpening(currentState.disableSoftwareSharpen);
+    setSoftwareSaturation(currentState.disableSoftwareSaturation);
+    
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -140,65 +144,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
         }
         LED_CURRENT_STATE = true;
         setLEDState(LED_CURRENT_STATE);
-    }  
-    setSoftwareSharpening(currentState.disableSoftwareSharpen);
-    setSoftwareSaturation(currentState.disableSoftwareSaturation);
-    
-    //saveState();
-    
+    } 
 }
-
-
-#if 0
-void ofxRPiCameraVideoGrabber::setDefaultValues()
-{
-    
-    setExposurePreset(OMX_ExposureControlAuto); 
-    applyCurrentMeteringMode();
-    setSharpness(-50);
-    setContrast(-10);
-    setBrightness(50);
-    setSaturation(0);
-    setFrameStabilization(false);
-    setWhiteBalance(OMX_WhiteBalControlAuto);
-    applyImageFilter(OMX_ImageFilterNone);
-    setColorEnhancement(false);	 
-    setDRC(0);
-    cropRectangle.set(0, 0, 100, 100);
-    setSensorCrop(cropRectangle);
-    resetZoom();
-    setRotation(ROTATION_0);
-    setMirror(MIRROR_NONE);
-    //Requires gpio program provided via wiringPi
-    //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
-    
-    ofFile gpioProgram("/usr/local/bin/gpio");
-    if(gpioProgram.exists())
-    {
-        if(system("gpio export 5 out") == 0)
-        {
-           //silence compiler warning 
-        }
-        LED_CURRENT_STATE = true;
-        setLEDState(LED_CURRENT_STATE);
-    }  
-    
-    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexParamSWSharpenDisable, &disableSoftwareSharpenConfig);
-    OMX_TRACE(error);
-    
-    error = OMX_GetConfig(camera, OMX_IndexParamSWSaturationDisable, &disableSoftwareSaturationConfig);
-    OMX_TRACE(error);
-    
-    //disableSoftwareSaturation();
-    //disableSoftwareSharpening();
-    
-    ofLogVerbose(__func__) << "isSoftwareSharpeningEnabled: " << isSoftwareSharpeningEnabled();
-    
-    ofLogVerbose(__func__) << "isSoftwareSaturationEnabled: " << isSoftwareSaturationEnabled();
-    saveState();
-
-}
-#endif
 void ofxRPiCameraVideoGrabber::saveState()
 {
     CameraState state;
@@ -213,9 +160,6 @@ void ofxRPiCameraVideoGrabber::saveState()
             state.exposurePreset = it->first;
         }
     }
-    
-    //Metering Mode
-    
     state.meteringType=currentMeteringMode.getMeteringTypeString();
     state.evCompensation=currentMeteringMode.evCompensation;
     state.autoShutter=currentMeteringMode.autoShutter;
@@ -634,6 +578,7 @@ void ofxRPiCameraVideoGrabber::startRecording()
     {
         stopRecording();
     }
+    saveState();
     doStartRecording = true;
 }
 
@@ -1198,9 +1143,9 @@ bool ofxRPiCameraVideoGrabber::setLEDState(bool state)
 }
 
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(OMX_MIRRORTYPE mirrorType)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
 {
-    mirrorConfig.eMirror = mirrorType;
+    mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
     return applyMirror();
 }
 

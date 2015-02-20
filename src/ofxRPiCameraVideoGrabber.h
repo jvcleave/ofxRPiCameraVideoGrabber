@@ -252,7 +252,15 @@ public:
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
-    OMX_ERRORTYPE setMirror(OMX_MIRRORTYPE);
+    enum MIRROR
+    {
+        MIRROR_NONE=OMX_MirrorNone,
+        MIRROR_VERTICAL=OMX_MirrorVertical,
+        MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
+        MIRROR_BOTH=OMX_MirrorBoth,
+    };
+    
+    OMX_ERRORTYPE setMirror(int);
     string getMirrorAsString();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool state);
