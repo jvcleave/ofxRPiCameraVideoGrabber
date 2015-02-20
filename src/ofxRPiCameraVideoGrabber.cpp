@@ -61,7 +61,9 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }
     if(doStartRecording)
     {
-        ofSleepMillis(2000); 
+        
+        destroyEGLImage();
+        //ofSleepMillis(500);
     }
      
     addExitHandler();
