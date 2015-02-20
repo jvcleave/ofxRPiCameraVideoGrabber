@@ -275,6 +275,8 @@ public:
     
     
 private:
+    
+    bool doStartRecording;
     OMX_ERRORTYPE applyMirror();
     OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();

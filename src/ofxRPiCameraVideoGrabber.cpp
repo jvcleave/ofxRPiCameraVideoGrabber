@@ -29,6 +29,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     camera = NULL;
     doSaveImage = false;
     doRawSave = false;
+    doStartRecording = false;
 }
 
 void ofxRPiCameraVideoGrabber::saveImage()
@@ -58,7 +59,11 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         delete textureEngine;
         textureEngine = NULL;
     }
-    
+    if(doStartRecording)
+    {
+        ofSleepMillis(2000); 
+    }
+     
     addExitHandler();
     if(!hasOMXInit)
     {
@@ -308,15 +313,7 @@ BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
 
 void ofxRPiCameraVideoGrabber::startRecording()
 {
-    if (engine) 
-    {
-        engine->startRecording();
-    }
-    
-    if (textureEngine) 
-    {
-        textureEngine->startRecording();
-    }
+    doStartRecording = true;
 }
 
 bool ofxRPiCameraVideoGrabber::isRecording()
@@ -616,36 +613,48 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
-    if(textureEngine)
+    if(doStartRecording)
     {
-        frameCounter  = textureEngine->getFrameCounter();
-        
+        ofLogVerbose(__func__) << "doStartRecording REQUESTED";
+        omxCameraSettings.doRecording = true;
+        omxCameraSettings.doRecordingPreview = true;
+        setup(omxCameraSettings);
+        doStartRecording = false;
     }else
     {
-        if (engine) 
+        //ofLogVerbose(__func__) << doStartRecording;
+
+        if(textureEngine)
         {
-            frameCounter  = engine->getFrameCounter();
+            frameCounter  = textureEngine->getFrameCounter();
+            
+        }else
+        {
+            if (engine) 
+            {
+                frameCounter  = engine->getFrameCounter();
+            }
         }
-    }
-    
-    if (frameCounter > updateFrameCounter) 
-    {
-        updateFrameCounter = frameCounter;
-        hasNewFrame = true;
         
-    }else
-    {
-        hasNewFrame = false;
-    }
-    if (hasNewFrame) 
-    {
-        if (textureEngine) 
+        if (frameCounter > updateFrameCounter) 
         {
-            updatePixels();
-           
+            updateFrameCounter = frameCounter;
+            hasNewFrame = true;
+            
+        }else
+        {
+            hasNewFrame = false;
+        }
+        if (hasNewFrame) 
+        {
+            if (textureEngine) 
+            {
+                updatePixels();
+                
+            }
         }
     }
-    //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
+        //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
 
 
