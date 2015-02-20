@@ -391,7 +391,10 @@ void BaseEngine::closeEngine()
             //OMX_TRACE(error, "OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT");
             break;
         }
-        case NON_TEXTURE_ENGINE: {break;}
+        case NON_TEXTURE_ENGINE: 
+        {
+            break;
+        }
     }
     
     //OMX_FreeHandle
@@ -408,10 +411,11 @@ void BaseEngine::closeEngine()
     {
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error, "OMX_FreeHandle(encoder)"); 
-    }    
+    }  
     
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
+
     ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine END";
 
 }

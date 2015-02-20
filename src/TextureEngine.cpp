@@ -92,7 +92,7 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
 
 
 
-OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->renderedFrameCounter++;
@@ -122,16 +122,10 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
 		OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
 		DisableAllPortsForComponent(&splitter);
-		
-        //error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
-        //OMX_TRACE(error);
-        
+		        
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		OMX_TRACE(error);
-        
-     
-    
 	}
 
 	
@@ -346,7 +340,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 #pragma mark encoder callbacks
 
-OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->lock();
