@@ -259,7 +259,8 @@ public:
         MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
         MIRROR_BOTH=OMX_MirrorBoth,
     };
-    OMX_ERRORTYPE setMirror(MIRROR);
+    
+    OMX_ERRORTYPE setMirror(int);
     string getMirrorAsString();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool state);
@@ -273,7 +274,7 @@ public:
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
     
-    
+    void saveCurrentStateToFile(string filePath="");
 private:
     
     bool doStartRecording;

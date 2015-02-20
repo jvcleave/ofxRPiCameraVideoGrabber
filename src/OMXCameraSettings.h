@@ -4,6 +4,109 @@
 
 #define MEGABYTE_IN_BITS 8388608
 
+
+
+class CameraState
+{
+public:
+    
+    string exposurePreset;
+    string meteringType;
+    int evCompensation;
+    bool autoShutter;
+    int shutterSpeedMicroSeconds;
+    bool autoAperture;
+    int aperture;
+    bool autoISO;
+    int ISO;
+    int sharpness;
+    int contrast;
+    int brightness;
+    int saturation;
+    bool framestabilization;
+    string whiteBalance;
+    string imageFilter;
+    int drcLevel;
+    ofRectangle cropRectangle;
+    int zoomLevel;
+    int rotation;
+    string mirror; 
+    
+    bool disableSoftwareSharpen;
+    bool disableSoftwareSaturation;
+    
+    CameraState()
+    {
+        exposurePreset = "Auto";
+        meteringType="OMX_MeteringModeAverage";
+        evCompensation=0;
+        autoShutter=true;
+        shutterSpeedMicroSeconds=0;
+        autoAperture=true;
+        aperture=0;
+        autoISO=true;
+        ISO=0;
+        sharpness=-50;
+        contrast=-10;
+        brightness=50;
+        saturation=0;
+        framestabilization=false;
+        whiteBalance="Auto";
+        imageFilter="None";
+        drcLevel=0;
+        cropRectangle.set(0,0,100,100);
+        zoomLevel=0;
+        rotation=0;
+        mirror="MIRROR_NONE";
+        disableSoftwareSharpen = false;
+        disableSoftwareSaturation = false;
+    }
+    void validate()
+    {
+        //TODO
+    }
+    void saveToFile(string filePath="")
+    {
+        
+        stringstream state;
+        
+        //Metering Mode
+        state << "exposurePreset="              << exposurePreset           << "\n";
+        state << "meteringType="                << meteringType             << "\n";
+        state << "evCompensation="              << evCompensation           << "\n";
+        state << "autoShutter="                 << autoShutter              << "\n";
+        state << "shutterSpeedMicroSeconds="    << shutterSpeedMicroSeconds << "\n";
+        state << "autoAperture="                << autoAperture             << "\n";
+        state << "aperture="                    << aperture                 << "\n";
+        state << "autoISO="                     << autoISO                  << "\n";
+        state << "ISO="                         << ISO                      << "\n";
+        
+        state << "sharpness="                   << sharpness                << "\n";
+        state << "contrast="                    << contrast                 << "\n";
+        state << "brightness="                  << brightness               << "\n";
+        state << "saturation="                  << saturation               << "\n";
+        
+        state << "framestabilization="          << framestabilization       << "\n";
+        state << "whiteBalance="                << whiteBalance             << "\n";
+        state << "imageFilter="                 << imageFilter              << "\n";        
+        state << "drcLevel="                    << drcLevel                 << "\n";
+        state << "cropRectangle=" << cropRectangle.x  << "," << cropRectangle.y << "," << cropRectangle.width << "," << cropRectangle.height << "\n";
+        state << "zoomLevel="                   << zoomLevel                << "\n";
+        state << "rotation="                    << rotation                 << "\n";
+        state << "mirror="                      << mirror                   << "\n";
+        
+        
+        ofLogVerbose(__func__) << state.str();
+        if(filePath.empty())
+        {
+            filePath = ofToDataPath("CameraState.ini", true);
+        }
+        ofBuffer buffer(state.str());
+        ofBufferToFile(filePath, buffer);
+    }
+
+};
+
 class OMXCameraSettings
 {
 public:
@@ -56,8 +159,8 @@ public:
     bool enablePixels;
     string recordingFilePath;
     
-    bool doManualExposure;
     Preset preset;
+    CameraState state;
     OMXCameraSettings()
     {
         width = 1280;
@@ -68,8 +171,6 @@ public:
         doRecording = false;
         recordingFilePath = "";
         preset = PRESET_NONE;
-        doManualExposure = false;
-        
         //doFlipTexture = false;
     }
     

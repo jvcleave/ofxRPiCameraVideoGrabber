@@ -147,6 +147,11 @@ void ofApp::keyPressed  (int key)
             doPresetChange = true;
             break;
         }
+        case 'S' :
+        {
+            videoGrabber.saveCurrentStateToFile();
+            break;
+        }
         case '0' :
         {
             videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_NONE);
@@ -189,12 +194,12 @@ void ofApp::keyPressed  (int key)
         }
         case '8' :
         {
-            videoGrabber.saveImage();
+            videoGrabber.startRecording();
             break;
         }
         case '9' :
         {
-            videoGrabber.saveRawImage();
+            videoGrabber.stopRecording();
             break;
         }
         
