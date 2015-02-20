@@ -1085,7 +1085,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDigitalZoom()
     int value = zoomLevels[zoomLevel];
     if(digitalZoomConfig.xWidth != value && digitalZoomConfig.xHeight != value)
     {
-        cout << "zoomLevel: " << zoomLevel << endl;
         digitalZoomConfig.xWidth  = value;
         digitalZoomConfig.xHeight = value;
         

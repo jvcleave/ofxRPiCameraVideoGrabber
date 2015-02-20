@@ -102,6 +102,7 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
+        videoGrabber.saveState();
         videoGrabber.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
@@ -124,6 +125,18 @@ void ofApp::draw()
         ofLogVerbose() << currentDemo->infoString;
         doPrintInfo = false;
     }
+    ofColor circleColor;
+    if (videoGrabber.isRecording()) 
+    {
+        circleColor = ofColor::green;
+    }else
+    {
+        circleColor = ofColor::red;
+    }
+    ofPushStyle();
+        ofSetColor(circleColor, 90);
+        ofCircle(ofPoint(ofGetWidth() - 200, 100), 50);
+    ofPopStyle();
 }
 
 //--------------------------------------------------------------

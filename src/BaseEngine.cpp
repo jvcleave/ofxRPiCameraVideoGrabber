@@ -214,8 +214,21 @@ bool BaseEngine::writeFile()
 	
 	fileName << numMBps << "MBps_";
 	
-	fileName << recordedFrameCounter << "numFrames";
+	fileName << recordedFrameCounter << "numFrames_";
 	
+    switch(engineType)
+    {
+        case TEXTURE_ENGINE:
+        {
+            fileName << "TEXTURE_ENGINE";
+            break;
+        }
+        case NON_TEXTURE_ENGINE:
+        {
+            fileName << "NON_TEXTURE_ENGINE";
+            break;
+        }
+    }
 	
 	fileName << ".h264";
 	
@@ -246,7 +259,6 @@ BaseEngine::~BaseEngine()
 
 void BaseEngine::closeEngine()
 {
-    ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine START";
     if(isCurrentlyRecording && !didWriteFile)
     {
         writeFile();
@@ -310,8 +322,6 @@ void BaseEngine::closeEngine()
     }
     
     
-
-    
     //OMX_StateIdle
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
@@ -358,20 +368,7 @@ void BaseEngine::closeEngine()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "render->OMX_StateLoaded");
     
-    switch(engineType)
-    {
-        case TEXTURE_ENGINE:
-        {
-            //error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
-            //OMX_TRACE(error, "OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT");
-            break;
-        }
-        case NON_TEXTURE_ENGINE: 
-        {
-            break;
-        }
-    }
-    
+ 
     //OMX_FreeHandle
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error, "OMX_FreeHandle(camera)");
@@ -390,7 +387,5 @@ void BaseEngine::closeEngine()
     
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
-
-    ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine END";
 
 }

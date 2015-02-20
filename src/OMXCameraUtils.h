@@ -75,7 +75,12 @@ string omxErrorToString(OMX_ERRORTYPE error)
     return OMX_Maps::getInstance().omxErrors[error];
 }
 
-#define OMX_LOG_LEVEL 3
+#define OMX_LOG_LEVEL_DEV 1
+#define OMX_LOG_LEVEL_ERROR_ONLY 2
+#define OMX_LOG_LEVEL_VERBOSE 3
+#define OMX_LOG_LEVEL_SILENT 9
+
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
 
 extern inline  
 void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName="", int lineNumber=0)
@@ -88,7 +93,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
     
     switch(OMX_LOG_LEVEL)
     {
-        case 1:
+        case OMX_LOG_LEVEL_DEV:
         {
             if(error != OMX_ErrorNone)
             {
