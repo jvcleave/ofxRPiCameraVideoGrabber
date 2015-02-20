@@ -47,16 +47,24 @@ void ofApp::setup()
 
 
 }
-
+bool doStartRecording = false;
+bool doStopRecording = false;
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	//not working yet
-	/*if (videoGrabber.isFrameNew())
-	{
-		
-	}*/
+    if (doStartRecording) 
+    {
+        ofLogVerbose(__func__) << "STARTING RECORDING";
+        videoGrabber.startRecording();
+        doStartRecording = false;
+    }
+    if(doStopRecording)
+    {
+        ofLogVerbose(__func__) << "STOPPING RECORDING";
 
+        videoGrabber.stopRecording();
+        doStopRecording = false;
+    }
 }
 
 
@@ -127,14 +135,14 @@ void ofApp::keyPressed  (int key)
 	
     if (key == 's')
     {
-        ofLogVerbose(__func__) << "STARTING RECORDING";
-        videoGrabber.startRecording();
+        doStartRecording = true;
+        
     }
     
 	if (key == 'q')
 	{
-		ofLogVerbose(__func__) << "STOPPING RECORDING";
-		videoGrabber.stopRecording();
+	
+        doStopRecording = true;
 	}
 	
 	if (key == 't')

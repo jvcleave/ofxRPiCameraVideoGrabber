@@ -34,7 +34,6 @@ public:
 	virtual int getFrameCounter() = 0;
     void closeEngine();
     bool isRecording() {return isCurrentlyRecording;};
-    void startRecording(){};
     void stopRecording();
     OMX_HANDLETYPE camera;
     EngineType engineType;

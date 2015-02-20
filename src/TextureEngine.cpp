@@ -92,7 +92,7 @@ OMX_ERRORTYPE TextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponen
 
 
 
-OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->renderedFrameCounter++;
@@ -122,14 +122,10 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
 		OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
 		DisableAllPortsForComponent(&splitter);
-		
+		        
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		OMX_TRACE(error);
-        
-        error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
-        OMX_TRACE(error);
-    
 	}
 
 	
@@ -252,16 +248,15 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
 
 	
-		//Set encoder to Idle
-		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-        OMX_TRACE(error);
-
-		
 		//Enable encoder output port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
         OMX_TRACE(error);
 
 		
+        //Set encoder to Idle
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+        
 		// Configure encoder output buffer
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
@@ -333,6 +328,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		bool doThreadBlocking	= true;
 		startThread(doThreadBlocking);
+        isCurrentlyRecording = true;
 	}
 	isOpen = true;
 	return error;
@@ -344,7 +340,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 #pragma mark encoder callbacks
 
-OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->lock();

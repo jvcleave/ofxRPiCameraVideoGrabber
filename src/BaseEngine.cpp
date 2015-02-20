@@ -182,14 +182,17 @@ void BaseEngine::threadedFunction()
                ) 
 			{
 				ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
+                doFillBuffer = false;
 				writeFile();
 				
-				doFillBuffer = false;
+				
 			}else 
 			{
 				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, 
                                            encoderOutputBuffer->nFilledLen);
-				doFillBuffer = true;
+                ofLogVerbose() << recordingFileBuffer.size();
+                doFillBuffer = true;
+                
 			}
 		}
 		// Buffer flushed, request a new buffer to be filled by the encoder component
@@ -213,21 +216,21 @@ void BaseEngine::stopRecording()
 	
 	if(omxCameraSettings.doRecording)
 	{
-		lock();
+		//lock();
+        encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+        OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+        OMX_TRACE(error);
 		stopRequested = true;
-		writeFile();
-		unlock();
+		//writeFile();
+		//unlock();
 	}	
 }
 
 bool BaseEngine::writeFile()
 {
-	//TODO not currently setup to allow recording after setup
-	if (!omxCameraSettings.doRecording) 
-	{
-		return false;
-	}
+
 	stopThread();
+    isCurrentlyRecording = false;
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
@@ -253,6 +256,8 @@ bool BaseEngine::writeFile()
 	}
 	
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
+    ofLogVerbose() << "didWriteFile: " << didWriteFile << " filePath: " << filePath;
+    recordingFileBuffer.clear();
     return didWriteFile;
 }
 
@@ -266,7 +271,7 @@ BaseEngine::~BaseEngine()
 
 void BaseEngine::closeEngine()
 {
-    
+    ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine START";
     if(omxCameraSettings.doRecording && !didWriteFile)
     {
         writeFile();
@@ -329,16 +334,7 @@ void BaseEngine::closeEngine()
         OMX_TRACE(error, "OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT");
     }
     
-    switch(engineType)
-    {
-        case TEXTURE_ENGINE:
-        {
-            error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
-            OMX_TRACE(error, "OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT");
-            break;
-        }
-        case NON_TEXTURE_ENGINE: {break;}
-    }
+    
 
     
     //OMX_StateIdle
@@ -366,6 +362,8 @@ void BaseEngine::closeEngine()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "render->OMX_StateIdle");
     
+   
+    
     //OMX_StateLoaded
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "camera->OMX_StateLoaded");
@@ -385,6 +383,19 @@ void BaseEngine::closeEngine()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "render->OMX_StateLoaded");
     
+    switch(engineType)
+    {
+        case TEXTURE_ENGINE:
+        {
+            //error = OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT, eglBuffer);
+            //OMX_TRACE(error, "OMX_FreeBuffer(render, EGL_RENDER_OUTPUT_PORT");
+            break;
+        }
+        case NON_TEXTURE_ENGINE: 
+        {
+            break;
+        }
+    }
     
     //OMX_FreeHandle
     error = OMX_FreeHandle(camera);
@@ -400,8 +411,11 @@ void BaseEngine::closeEngine()
     {
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error, "OMX_FreeHandle(encoder)"); 
-    }    
+    }  
     
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
+
+    ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine END";
+
 }
