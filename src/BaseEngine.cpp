@@ -27,8 +27,10 @@ BaseEngine::BaseEngine()
 OMX_ERRORTYPE BaseEngine::configureCameraResolution()
 {
     
-	OMX_ERRORTYPE error = DisableAllPortsForComponent(&camera);
-	
+    OMX_ERRORTYPE error;
+    error = DisableAllPortsForComponent(&camera);
+	OMX_TRACE(error);
+    
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
 	cameraCallback.nPortIndex	=	OMX_ALL;
@@ -36,7 +38,8 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
 	cameraCallback.bEnable		=	OMX_TRUE;
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
-	
+	OMX_TRACE(error);
+    
 	//Set the camera (always 0)
 	OMX_PARAM_U32TYPE device;
 	OMX_INIT_STRUCTURE(device);
@@ -44,13 +47,15 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
 	device.nU32			= 0;
 	
 	error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
-	
+	OMX_TRACE(error);
+    
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE cameraOutputPortDefinition;
 	OMX_INIT_STRUCTURE(cameraOutputPortDefinition);
 	cameraOutputPortDefinition.nPortIndex = CAMERA_OUTPUT_PORT;
 	
 	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
+    OMX_TRACE(error);
 	if(error == OMX_ErrorNone) 
 	{
         cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
@@ -60,13 +65,7 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
         //cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-        if(error != OMX_ErrorNone) 
-        {
-            ofLogError(__func__) << omxErrorToString(error);
-        }
-	}else 
-	{
-        ofLogError(__func__) << omxErrorToString(error);
+        OMX_TRACE(error);
 	}
 	
     return error;
@@ -75,8 +74,11 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
 OMX_ERRORTYPE BaseEngine::configureEncoder()
 {
 		
-	OMX_ERRORTYPE error = DisableAllPortsForComponent(&encoder);
-	
+    OMX_ERRORTYPE error;
+    
+    error = DisableAllPortsForComponent(&encoder);
+    OMX_TRACE(error);
+
 	// Encoder input port definition is done automatically upon tunneling
 	
 	// Configure video format emitted by encoder output port
@@ -84,6 +86,8 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
 	encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
 	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
+    OMX_TRACE(error);
+
 	if (error == OMX_ErrorNone) 
 	{
         
@@ -98,10 +102,6 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
          
         ofLogVerbose(__func__) << bufferInfo.str();
         
-	}else 
-	{
-        ofLogError(__func__) << omxErrorToString(error);
-		
 	}
 	
 	
@@ -110,15 +110,8 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	recordingBitRate = MEGABYTE_IN_BITS * numMBps;
 	encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
 	error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << omxErrorToString(error);
-		
-	}
-	
-	
-	
+    OMX_TRACE(error);
+
 	// Configure encoding bitrate
 	OMX_VIDEO_PARAM_BITRATETYPE encodingBitrate;
 	OMX_INIT_STRUCTURE(encodingBitrate);
@@ -129,12 +122,8 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	encodingBitrate.nPortIndex = ENCODER_OUTPUT_PORT;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << omxErrorToString(error);
-		
-	}
+    OMX_TRACE(error);
+
 	// Configure encoding format
 	OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
 	OMX_INIT_STRUCTURE(encodingFormat);
@@ -142,19 +131,7 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLogError(__func__) << omxErrorToString(error);
-	}
-    
-    /*
-	error = OMX_GetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "CHECK: encodingFormat.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encodingFormat.eColorFormat];
-
-	}
-     */
+    OMX_TRACE(error);
     return error;
 
 }
@@ -173,7 +150,7 @@ void BaseEngine::threadedFunction()
 			// small delay in exiting.
 			if(stopRequested && !isStopping) 
 			{
-				ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
+				ofLogVerbose(__func__) << "Stop Requested, waiting for next key frame boundry...";
 				isStopping = true;
 				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
 			}
@@ -214,15 +191,12 @@ void BaseEngine::threadedFunction()
 void BaseEngine::stopRecording()
 {
 	
-	if(omxCameraSettings.doRecording)
+	if(isCurrentlyRecording)
 	{
-		//lock();
         encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
         OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
 		stopRequested = true;
-		//writeFile();
-		//unlock();
 	}	
 }
 
@@ -256,7 +230,8 @@ bool BaseEngine::writeFile()
 	}
 	
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);
-    ofLogVerbose() << "didWriteFile: " << didWriteFile << " filePath: " << filePath;
+    ofLogVerbose(__func__) << "didWriteFile: " << didWriteFile << " filePath: " << filePath;
+    
     recordingFileBuffer.clear();
     return didWriteFile;
 }
@@ -272,7 +247,7 @@ BaseEngine::~BaseEngine()
 void BaseEngine::closeEngine()
 {
     ofLogVerbose() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! closeEngine START";
-    if(omxCameraSettings.doRecording && !didWriteFile)
+    if(isCurrentlyRecording && !didWriteFile)
     {
         writeFile();
         

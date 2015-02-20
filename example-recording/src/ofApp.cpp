@@ -11,33 +11,11 @@ void ofApp::setup()
 	consoleListener.setup(this);
 	
 	
-	omxCameraSettings.width = 1280; //default 1280
-	omxCameraSettings.height = 720; //default 720
+	omxCameraSettings.width = 1920; //default 1280
+	omxCameraSettings.height = 1080; //default 720
 	omxCameraSettings.isUsingTexture = false; //default true
 	omxCameraSettings.doRecording = false;   //default false
 	
-	if (omxCameraSettings.doRecording) 
-	{
-		/*
-		 If you are recording you have the option to display a "preview"
-		 
-		 This seems to have issues at 1080p so calling omxSettings.enablePreview()
-		 will do some validation
-		 
-		 */
-		if (omxCameraSettings.doRecordingPreview)
-		{
-			omxCameraSettings.enablePreview();
-		}
-		/*
-		 
-		 You can also specify a filename or it will generate one 
-		 using a timestamp and put it in bin/data
-		 
-		 */
-		omxCameraSettings.recordingFilePath = ""; //default "" will self-generate
-		
-	}
 
 	//pass in the settings and it will start the camera
 	videoGrabber.setup(omxCameraSettings);

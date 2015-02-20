@@ -282,7 +282,6 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error);
-
 	}
 	
 	//Set renderer to use texture

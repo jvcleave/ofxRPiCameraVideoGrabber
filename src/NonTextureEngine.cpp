@@ -52,12 +52,6 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	
 	omxCameraSettings = omxCameraSettings_;
 	
-	if (omxCameraSettings.doRecordingPreview) 
-	{
-		//validate the settings
-		omxCameraSettings.enablePreview();
-	}
-	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
 	OMX_CALLBACKTYPE cameraCallbacks;
@@ -70,22 +64,6 @@ void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 	
 	configureCameraResolution();
 	
-	if (omxCameraSettings.doRecording && omxCameraSettings.doRecordingPreview) 
-	{
-		OMX_PARAM_PORTDEFINITIONTYPE cameraPreviewPortDefinition;
-		OMX_INIT_STRUCTURE(cameraPreviewPortDefinition);
-		cameraPreviewPortDefinition.nPortIndex = CAMERA_PREVIEW_PORT;
-		error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-		OMX_TRACE(error);
-		
-		cameraPreviewPortDefinition.format.video.nFrameWidth		= omxCameraSettings.previewWidth;
-		cameraPreviewPortDefinition.format.video.nFrameHeight		= omxCameraSettings.previewHeight;
-		cameraPreviewPortDefinition.format.video.nStride			= omxCameraSettings.previewWidth;
-		error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-        OMX_TRACE(error);
-
-		
-	}
 	
 }
 
@@ -142,156 +120,178 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 	
 	
 	if (omxCameraSettings.doRecording) 
-	{		
-		if (omxCameraSettings.doRecordingPreview) 
-		{
-			//Set up renderer
-			setupRenderer();
-		} 
-		
-		
-		//set up encoder
-		OMX_CALLBACKTYPE encoderCallbacks;
-		encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
-		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
-		encoderCallbacks.FillBufferDone		= &NonTextureEngine::encoderFillBufferDone;
-		
-		
-		
-		error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
+	{	
+        
+        //Set up video splitter
+        OMX_CALLBACKTYPE splitterCallbacks;
+        splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
+        OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
+        DisableAllPortsForComponent(&splitter);
+        
+        //Set splitter to Idle
+        error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+    }
+        
+    OMX_CALLBACKTYPE renderCallbacks;
+    renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+    renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
+    
+    OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
+    DisableAllPortsForComponent(&render);
+    
+    //Set renderer to Idle
+    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error, "render OMX_StateIdle"); 
+	
+    if(omxCameraSettings.doRecording)
+    {
+        //Create encoder
+        
+        OMX_CALLBACKTYPE encoderCallbacks;
+        encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
+        encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
+        encoderCallbacks.FillBufferDone		= &NonTextureEngine::encoderFillBufferDone;
+        
+        error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
+        OMX_TRACE(error);
+        
+        
+        configureEncoder();
+        
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        //Create camera->splitter Tunnel
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        // Tunnel splitter2 output port and encoder input port
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, ENCODER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        //Create splitter->video_render Tunnel
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, render, VIDEO_RENDER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+    }else 
+    {
+        //Create camera->video_render Tunnel
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, VIDEO_RENDER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+    }
+	
+    //Enable camera output port
+    error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        //Enable splitter input port
+        error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
+        OMX_TRACE(error);
+        
+        
+        //Enable splitter output port
+        error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT1, NULL);
+        OMX_TRACE(error);
+        
+        
+        //Enable splitter output2 port
+        error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT2, NULL);
+        OMX_TRACE(error);
+        
+    }
+    
+
+    //Enable render input port
+    error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
+    OMX_TRACE(error);
+
+
+    if(omxCameraSettings.doRecording)
+    {
+        //Enable encoder input port
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
+        OMX_TRACE(error);
+        
+        
+        //Enable encoder output port
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
+        OMX_TRACE(error);
+        
+        
+        //Set encoder to Idle
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+        
+        // Configure encoder output buffer
+        OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
+        OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
+        encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
+        error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
+        if (error != OMX_ErrorNone) 
+        {
+            OMX_TRACE(error, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL");
+        }else 
+        {
+            ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
+            ofLog(OF_LOG_VERBOSE, 
+                  "nBufferCountMin(%u)					\n \
+                  nBufferCountActual(%u)				\n \
+                  nBufferSize(%u)						\n \
+                  nBufferAlignmen(%u) \n", 
+                  encoderOutputPortDefinition.nBufferCountMin, 
+                  encoderOutputPortDefinition.nBufferCountActual, 
+                  encoderOutputPortDefinition.nBufferSize, 
+                  encoderOutputPortDefinition.nBufferAlignment);
+            
+        }
+        
+        error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error);
 
-		
-		configureEncoder();
-		
-		if (omxCameraSettings.doRecordingPreview) 
-		{
-			//Create camera->video_render Tunnel
-			error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
-            OMX_TRACE(error, "CAMERA_PREVIEW_PORT->VIDEO_RENDER_INPUT_PORT");
+    }
+    
+    //Start renderer
+    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    OMX_TRACE(error);
+    
+    
+    if(omxCameraSettings.doRecording)
+    {
+        //Start encoder
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+        OMX_TRACE(error);
+        
+        
+        //Start splitter
+        error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+        OMX_TRACE(error);
+        
+    }
+    
+    
+    //Start camera
+    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    OMX_TRACE(error);
 
-		}
-
-		// Tunnel camera video output port and encoder input port
-		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, encoder, ENCODER_INPUT_PORT);
-        OMX_TRACE(error, "CAMERA_OUTPUT_PORT->ENCODER_INPUT_PORT");
-
-
-		
-		//Set encoder to Idle
-		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		OMX_TRACE(error, "encoder->OMX_StateIdle");
-		
-		//Set camera to Idle
-		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		OMX_TRACE(error, "camera->OMX_StateIdle");
-		
-		if (omxCameraSettings.doRecordingPreview)
-		{
-			//Enable camera preview port
-			error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
-            OMX_TRACE(error, "camera CAMERA_PREVIEW_PORT Enable");
-
-		}
-	
-		//Enable camera output port
-		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "camera CAMERA_OUTPUT_PORT Enable");
-
-		
-		//Enable encoder input port
-		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder ENCODER_INPUT_PORT Enable");
-
-		
-		//Enable encoder output port
-		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder ENCODER_OUTPUT_PORT Enable");
-
-		
-		if (omxCameraSettings.doRecordingPreview) 
-		{
-			//Enable render input port
-			error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
-            OMX_TRACE(error, "render VIDEO_RENDER_INPUT_PORT Enable");
-
-		}
-
-		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
-		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-		encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
-		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-
-
-		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
-        OMX_TRACE(error, "encoder OMX_AllocateBuffer");
-
-		
-
-		//Start camera
-		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-        OMX_TRACE(error, "camera OMX_StateExecuting");
-
-		
-		//Start encoder
-		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-        OMX_TRACE(error, "encoder OMX_StateExecuting");
-
-		
-		if (omxCameraSettings.doRecordingPreview) 
-		{
-			
-			//Start renderer
-			error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-            OMX_TRACE(error, "render OMX_StateExecuting");
-            
-			setupDisplay();
-			
-		}
-		
-		
-		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+   
+    if(omxCameraSettings.doRecording)
+    {   
+        error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error, "encoder OMX_FillThisBuffer");
-
-		if (error != OMX_ErrorNone) 
-		{
-			ofLogError(__func__) << "encoder OMX_FillThisBuffer FAIL " << omxErrorToString(error);		
-		}
-		
-		bool doThreadBlocking	= true;
-		startThread(doThreadBlocking);
-		
-	}else 
-	{
-		setupRenderer();
-		
-		
-		//Create camera->video_render Tunnel
-		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, VIDEO_RENDER_INPUT_PORT);
-        OMX_TRACE(error, "CAMERA_OUTPUT_PORT->VIDEO_RENDER_INPUT_PORT");
-
-		//Enable camera output port
-		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "camera CAMERA_OUTPUT_PORT Enable");
-
-		
-		//Enable render input port
-		error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
-        OMX_TRACE(error, "render VIDEO_RENDER_INPUT_PORT Enable");
-
-		
-		//Start renderer
-		error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-        OMX_TRACE(error, "render OMX_StateExecuting");
-
-		
-		//Start camera
-		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-        OMX_TRACE(error, "camera OMX_StateExecuting");
-
-		setupDisplay();
-				
-	}
+        bool doThreadBlocking	= true;
+        startThread(doThreadBlocking);
+        isCurrentlyRecording = true;
+    }
+    
+	setupDisplay();
 
 	isOpen = true;
 	return error;
