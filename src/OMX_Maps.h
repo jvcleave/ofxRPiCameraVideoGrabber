@@ -79,7 +79,6 @@ public:
 	
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
-    
     vector<string>& getAlgorithmNames()
     {
         return algorithmNames;
@@ -93,6 +92,7 @@ public:
     map<OMX_ERRORTYPE, string> omxErrors;
     
     map<string, OMX_MIRRORTYPE> mirrorTypes;
+    map<OMX_MIRRORTYPE, string> mirrorNames;
     map<OMX_STATETYPE, string>omxStateNames;
     
 private:	
@@ -104,10 +104,17 @@ private:
         omxStateNames[OMX_StateExecuting] = "OMX_StateExecuting";
         omxStateNames[OMX_StatePause] = "OMX_StatePause";
         
-        mirrorTypes["MIRROR_NONE"] = OMX_MirrorNone;
-        mirrorTypes["MIRROR_VERTICAL"] = OMX_MirrorVertical;
-        mirrorTypes["MIRROR_HORIZONTAL"] = OMX_MirrorHorizontal;
-        mirrorTypes["MIRROR_BOTH"] = OMX_MirrorBoth;
+        mirrorTypes["None"] = OMX_MirrorNone;
+        mirrorTypes["Vertical"] = OMX_MirrorVertical;
+        mirrorTypes["Horizontal"] = OMX_MirrorHorizontal;
+        mirrorTypes["Both"] = OMX_MirrorBoth;
+        
+        mirrorNames[OMX_MirrorNone] = "None";
+        mirrorNames[OMX_MirrorVertical] = "Vertical";
+        mirrorNames[OMX_MirrorHorizontal] = "Horizontal";
+        mirrorNames[OMX_MirrorBoth] = "Both";
+        
+        
         
         drcTypes[OMX_DynRangeExpOff] = 0;
         drcTypes[OMX_DynRangeExpLow] = 1;

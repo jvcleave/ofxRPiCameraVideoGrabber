@@ -13,7 +13,7 @@ void ofApp::setup()
 	
 	omxCameraSettings.width = 1920; //default 1280
 	omxCameraSettings.height = 1080; //default 720
-	omxCameraSettings.isUsingTexture = false; //default true
+	omxCameraSettings.isUsingTexture = true; //default true
 	omxCameraSettings.doRecording = false;   //default false
 	
 

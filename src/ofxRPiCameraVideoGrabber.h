@@ -252,14 +252,7 @@ public:
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
-    enum MIRROR
-    {
-        MIRROR_NONE=OMX_MirrorNone,
-        MIRROR_VERTICAL=OMX_MirrorVertical,
-        MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
-        MIRROR_BOTH=OMX_MirrorBoth,
-    };
-    OMX_ERRORTYPE setMirror(MIRROR);
+    OMX_ERRORTYPE setMirror(OMX_MIRRORTYPE);
     string getMirrorAsString();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool state);
@@ -273,7 +266,7 @@ public:
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
     
-    
+    void saveCurrentStateToFile(string filePath="");
 private:
     
     bool doStartRecording;
