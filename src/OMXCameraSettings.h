@@ -51,10 +51,7 @@ public:
     int height;
     int framerate;
     bool doRecording;
-    bool doRecordingPreview; //TODO make private
     
-    int previewWidth;
-    int previewHeight;
     bool isUsingTexture;
     bool enablePixels;
     string recordingFilePath;
@@ -69,9 +66,6 @@ public:
         isUsingTexture = true;
         enablePixels = false;
         doRecording = false;
-        doRecordingPreview = false;
-        previewWidth = width;
-        previewHeight = height;
         recordingFilePath = "";
         preset = PRESET_NONE;
         doManualExposure = false;
@@ -79,20 +73,6 @@ public:
         //doFlipTexture = false;
     }
     
-    void enablePreview()
-    {
-        if(width<=1280)
-        {
-            previewWidth = width;
-            previewHeight = height;
-        }else 
-        {
-            previewWidth = 0;
-            previewHeight = 0;
-        }
-        
-        doRecordingPreview = true;
-    }
     
     void applyPreset()
     {
@@ -298,9 +278,4 @@ public:
                 
         }
     }
-    
-
-    
-private:
-    //bool doRecordingPreview;
 };

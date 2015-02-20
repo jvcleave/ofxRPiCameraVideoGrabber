@@ -587,6 +587,10 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 
 void ofxRPiCameraVideoGrabber::startRecording()
 {
+    if(isRecording())
+    {
+        stopRecording();
+    }
     doStartRecording = true;
 }
 
@@ -623,8 +627,6 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     {
         ofLogVerbose(__func__) << "doStartRecording REQUESTED";
         omxCameraSettings.doRecording = true;
-        omxCameraSettings.doRecordingPreview = true;
-        omxCameraSettings.enablePreview();
         setup(omxCameraSettings);
         doStartRecording = false;
     }else

@@ -11,8 +11,8 @@ void ofApp::setup()
 	consoleListener.setup(this);
 	
 	
-	omxCameraSettings.width = 1280; //default 1280
-	omxCameraSettings.height = 720; //default 720
+	omxCameraSettings.width = 1920; //default 1280
+	omxCameraSettings.height = 1080; //default 720
 	omxCameraSettings.isUsingTexture = false; //default true
 	omxCameraSettings.doRecording = false;   //default false
 	

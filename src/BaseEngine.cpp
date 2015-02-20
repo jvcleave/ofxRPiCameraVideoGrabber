@@ -103,23 +103,8 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
         ofLogVerbose(__func__) << bufferInfo.str();
         
 	}
-    
-    //Set encoder to Idle
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error, "encoder->OMX_StateIdle");
-    
-    //Enable encoder input port
-    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder ENCODER_INPUT_PORT Enable");
-    
-    
-    //Enable encoder output port
-    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder ENCODER_OUTPUT_PORT Enable");
-    
-    error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
-    OMX_TRACE(error, "encoder OMX_AllocateBuffer");
-
+	
+	
 	
 	//colorFormatTypes
 	recordingBitRate = MEGABYTE_IN_BITS * numMBps;
@@ -147,8 +132,6 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
     OMX_TRACE(error);
-    
-    
     return error;
 
 }

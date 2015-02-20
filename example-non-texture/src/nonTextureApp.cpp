@@ -18,7 +18,6 @@ void nonTextureApp::setup()
 	omxCameraSettings.doRecording			= false;		//default: false
 	if (omxCameraSettings.doRecording) 
 	{		
-		omxCameraSettings.doRecordingPreview	= true;
 		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
 	}
 	
