@@ -256,7 +256,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         //Set encoder to Idle
         error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
         OMX_TRACE(error);
-        
+#if 0
 		// Configure encoder output buffer
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
@@ -282,7 +282,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error);
-
+#endif
 	}
 	
 	//Set renderer to use texture

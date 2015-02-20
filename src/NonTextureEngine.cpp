@@ -177,12 +177,15 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error, "CAMERA_OUTPUT_PORT->ENCODER_INPUT_PORT");
 
 
+#if 0
 		
 		//Set encoder to Idle
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		OMX_TRACE(error, "encoder->OMX_StateIdle");
 		
-		//Set camera to Idle
+#endif	
+        
+        //Set camera to Idle
 		error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
 		OMX_TRACE(error, "camera->OMX_StateIdle");
 		
@@ -197,7 +200,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		//Enable camera output port
 		error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
         OMX_TRACE(error, "camera CAMERA_OUTPUT_PORT Enable");
-
+#if 0
 		
 		//Enable encoder input port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
@@ -208,7 +211,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
         OMX_TRACE(error, "encoder ENCODER_OUTPUT_PORT Enable");
 
-		
+#endif		
 		if (omxCameraSettings.doRecordingPreview) 
 		{
 			//Enable render input port
@@ -216,7 +219,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
             OMX_TRACE(error, "render VIDEO_RENDER_INPUT_PORT Enable");
 
 		}
-
+#if 0
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
 		encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
@@ -225,7 +228,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 
 		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error, "encoder OMX_AllocateBuffer");
-
+#endif
 		
 
 		//Start camera
@@ -258,8 +261,10 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 			ofLogError(__func__) << "encoder OMX_FillThisBuffer FAIL " << omxErrorToString(error);		
 		}
 		
+        
 		bool doThreadBlocking	= true;
 		startThread(doThreadBlocking);
+        isCurrentlyRecording = true;
 		
 	}else 
 	{
