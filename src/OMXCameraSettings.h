@@ -61,6 +61,48 @@ public:
         disableSoftwareSharpen = false;
         disableSoftwareSaturation = false;
     }
+    
+    void processKeyValues(vector<string>& keyValues)
+    {
+        string& key = keyValues[0];
+        string& value = keyValues[1];
+        if(key == "exposurePreset") exposurePreset = value; return;
+        if(key == "meteringType") meteringType = value;  return;
+        if(key == "evCompensation") evCompensation = ofToInt(value); return;
+        if(key == "autoShutter") autoShutter = ofToBool(value); return;
+        if(key == "shutterSpeedMicroSeconds") shutterSpeedMicroSeconds = ofToInt(value); return;
+        if(key == "autoAperture") autoAperture = ofToBool(value); return;
+        if(key == "aperture") aperture = ofToInt(value); return;
+        if(key == "autoISO") autoISO = ofToBool(value); return;
+        if(key == "ISO") ISO = ofToInt(value); return;
+        if(key == "sharpness") sharpness = ofToInt(value); return;
+        if(key == "contrast") contrast = ofToInt(value); return;
+        if(key == "brightness") brightness = ofToInt(value); return;
+        if(key == "saturation") saturation = ofToInt(value); return;
+        if(key == "framestabilization") framestabilization = ofToBool(value); return;
+        if(key == "whiteBalance") whiteBalance = value; return;
+        if(key == "imageFilter") imageFilter = value; return;
+        if(key == "drcLevel") drcLevel = ofToInt(value); return;
+        if(key == "zoomLevel") zoomLevel = ofToInt(value); return;
+        if(key == "rotation") rotation = ofToInt(value); return;
+        if(key == "mirror") mirror = value; return;
+        if(key == "mirror") mirror = value; return;
+        if(key == "disableSoftwareSharpen") disableSoftwareSharpen = ofToBool(value); return;
+        if(key == "disableSoftwareSaturation") disableSoftwareSaturation = ofToBool(value); return;
+
+        if(key == "cropRectangle")
+        {
+            vector<string> rectValues = ofSplitString(value, ",");
+            cropRectangle.set(ofToInt(rectValues[0]),
+                              ofToInt(rectValues[1]),
+                              ofToInt(rectValues[2]),
+                              ofToInt(rectValues[3])
+                              );
+        }
+        
+    }
+    
+    
     void validate()
     {
         //TODO
@@ -100,9 +142,45 @@ public:
         if(filePath.empty())
         {
             filePath = ofToDataPath("CameraState.ini", true);
+            ofFile file(filePath);
+            if(file.exists())
+            {
+                //file.renameTo(ofGetTimestampString()+"CameraState.ini", false);
+            }
         }
         ofBuffer buffer(state.str());
         ofBufferToFile(filePath, buffer);
+    }
+    
+
+    void loadFromFile(string filePath="")
+    {
+        
+        if(filePath.empty())
+        {
+            filePath = ofToDataPath("CameraState.ini", true);
+        
+        }
+        ofFile file(filePath);
+        if(!file.exists())
+        {
+            ofLogError(__func__) << "NO FILE AT " << filePath;
+        }else
+        {
+            ofBuffer buffer = file.readToBuffer();
+            string contents = buffer.getText();
+            ofLogVerbose() << "contents: " << contents;
+            vector<string> lines = ofSplitString(contents, "\n");
+            ofLogVerbose(__func__) << "lines.size(): " << lines.size();
+            for(size_t i=0; i<lines.size(); i++)
+            {
+                string& line = lines[i];
+                
+                vector<string> keyValues = ofSplitString(line, "=");
+                processKeyValues(keyValues);
+                
+            }
+        }
     }
 
 };
@@ -113,7 +191,7 @@ public:
     
     enum Preset 
     {
-        PRESET_NONE =0,
+        PRESET_NONE,
         PRESET_FASTEST_480P,
         PRESET_FASTEST_720P,
         PRESET_FASTEST_FRAME_RATE,

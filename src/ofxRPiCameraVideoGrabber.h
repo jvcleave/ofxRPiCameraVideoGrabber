@@ -274,6 +274,7 @@ public:
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
     
+    void loadStateFromFile(string filePath="");
     void saveCurrentStateToFile(string filePath="");
 private:
     

@@ -13,9 +13,17 @@ void ofApp::setup()
     consoleListener.setup(this);
     
     
-    //new preset option
     
+   
+
+
+    
+    
+    //new preset option
+    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
+    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
    /* presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
     presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);*/
@@ -24,6 +32,18 @@ void ofApp::setup()
     //presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
     
     // presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
+    
+    presets.clear();
+    
+    for ( int preset = OMXCameraSettings::PRESET_NONE; preset != OMXCameraSettings::PRESET_480P_30FPS; preset++ )
+    {
+        if(preset != OMXCameraSettings::PRESET_NONE)
+        {
+            presets.push_back((OMXCameraSettings::Preset)preset);
+        }
+        
+    }
+    
     
     currentPreset = 0;
     omxCameraSettings.preset = presets[currentPreset];
@@ -163,6 +183,11 @@ void ofApp::keyPressed  (int key)
         case 'S' :
         {
             videoGrabber.saveCurrentStateToFile();
+            break;
+        }
+        case 'L' :
+        {
+            videoGrabber.loadStateFromFile();
             break;
         }
         case '0' :

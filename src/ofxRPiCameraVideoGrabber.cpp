@@ -210,6 +210,10 @@ void ofxRPiCameraVideoGrabber::saveState()
         
 }
 
+void ofxRPiCameraVideoGrabber::loadStateFromFile(string filePath)
+{
+    omxCameraSettings.state.loadFromFile(filePath);
+}
 void ofxRPiCameraVideoGrabber::saveCurrentStateToFile(string filePath)
 {
     saveState();
