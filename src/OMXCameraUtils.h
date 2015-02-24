@@ -80,7 +80,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_VERBOSE 3
 #define OMX_LOG_LEVEL_SILENT 9
 
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_DEV
 
 extern inline  
 void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName="", int lineNumber=0)
@@ -133,9 +133,9 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
 #define GET_OMX_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
 #define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
 
-#define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+//#define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 
-//#define OMX_TRACE(error)
+#define OMX_TRACE(...)
 
 extern inline 
 const char* omxErrorToCString(OMX_ERRORTYPE error)
@@ -188,6 +188,7 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
     for(int i=0; i < 4; i++)
     {
         error = OMX_GetParameter(*handle, indexTypes[i], &ports);
+        OMX_TRACE(error);
         if(error == OMX_ErrorNone) 
         {
             
@@ -201,6 +202,7 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
                 portFormat.nPortIndex = ports.nStartPortNumber+j;
                 
                 error = OMX_GetParameter(*handle, OMX_IndexParamPortDefinition, &portFormat);
+                OMX_TRACE(error);
                 if(error != OMX_ErrorNone)
                 {
                     if(portFormat.bEnabled == OMX_FALSE)
@@ -220,14 +222,7 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
                  */
                 
                 error = OMX_SendCommand(*handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
-                if(error != OMX_ErrorNone)
-                {
-                    ofLogError(__func__) << omxErrorToString(error);
-                }else
-                {
-                    ofLogVerbose() << componentName << " PORT # " << ports.nStartPortNumber+j << " DISABLED";
-                }
-                
+                OMX_TRACE(error, componentName + " PORT # " + ofToString(ports.nStartPortNumber+j) + " DISABLED")
                 
                 
             }

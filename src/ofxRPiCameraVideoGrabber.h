@@ -118,6 +118,7 @@ public:
     
     void setDefaultValues();
     void saveState();
+    void resetToCommonState();
     void draw();
 	void close();
 	
@@ -194,10 +195,7 @@ public:
     
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
-    
-    //setExposureMode is now setExposurePreset - sorry :(
-    //OMX_ERRORTYPE setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode){return setExposurePreset(exposureMode);};
-    OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode);
+    OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
     
     OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
     
@@ -267,8 +265,20 @@ public:
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
     bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
+    
+    
+    enum EXPOSURE_MODE
+    {
+        EXPOSURE_MODE_AUTO,
+        EXPOSURE_MODE_MANUAL,
+        EXPOSURE_MODE_INVALID,
+    };
+    
+    EXPOSURE_MODE getExposureMode();
 
-        
+    OMX_ERRORTYPE enableAutoExposure();
+    OMX_ERRORTYPE enableManualExposure();
+    
     OMX_ERRORTYPE setSoftwareSaturation(bool state);
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
@@ -276,6 +286,7 @@ public:
     
     void loadStateFromFile(string filePath="");
     void saveCurrentStateToFile(string filePath="");
+    bool forceEGLReuse;
 private:
     
     bool doStartRecording;
@@ -287,8 +298,6 @@ private:
     int zoomLevel;
     vector<int> zoomLevels;
     OMX_ERRORTYPE setDigitalZoom();
-    
-
     
 	void addExitHandler();
 	void onUpdate(ofEventArgs & args);

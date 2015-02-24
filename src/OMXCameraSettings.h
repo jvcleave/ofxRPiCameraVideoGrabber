@@ -251,8 +251,19 @@ public:
         preset = PRESET_NONE;
         //doFlipTexture = false;
     }
-    
-    
+    vector<OMXCameraSettings::Preset> getAllPresets()
+    {
+        vector<OMXCameraSettings::Preset> presets;
+        for ( int preset = OMXCameraSettings::PRESET_NONE; preset != OMXCameraSettings::PRESET_480P_30FPS; ++preset )
+        {
+            if(preset != OMXCameraSettings::PRESET_NONE)
+            {
+                presets.push_back((OMXCameraSettings::Preset)preset);
+            }
+            
+        }
+        return presets;
+    }
     void applyPreset()
     {
         switch(preset)

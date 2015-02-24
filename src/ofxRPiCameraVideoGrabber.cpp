@@ -36,6 +36,8 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     doSaveImage = false;
     doRawSave = false;
     doStartRecording = false;
+    
+    forceEGLReuse = false;
 }
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
@@ -51,12 +53,23 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     {
         delete textureEngine;
         textureEngine = NULL;
-    }
-    if(doStartRecording)
-    {
+        /*
+         In certain cases you can get away with not destroyEGLImage
+         but texture allocation is fairly quick 
+         1080P 77 milliseconds
+         720P 50 milliseconds
+         480P 10 milliseconds
+         
+         Not destroying was causing blank textures when switching modes
+         */
+        if(!forceEGLReuse)
+        {
+            destroyEGLImage();
+        }
         
-        destroyEGLImage();
     }
+    
+    
      
     addExitHandler();
     if(!hasOMXInit)
@@ -214,12 +227,22 @@ void ofxRPiCameraVideoGrabber::loadStateFromFile(string filePath)
 {
     omxCameraSettings.state.loadFromFile(filePath);
 }
+
 void ofxRPiCameraVideoGrabber::saveCurrentStateToFile(string filePath)
 {
     saveState();
     omxCameraSettings.state.saveToFile(filePath);
     
 }
+
+void ofxRPiCameraVideoGrabber::resetToCommonState()
+{
+    CameraState state;
+    omxCameraSettings.state = state;
+    setDefaultValues();
+}
+
+
 string ofxRPiCameraVideoGrabber::getMirrorAsString()
 {
 
@@ -296,17 +319,10 @@ BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
-    
-    if (engine) 
+    if (getEngine()) 
     {
-        return engine->isOpen;
+        return getEngine()->isOpen;
     }
-    
-    if (textureEngine) 
-    {
-        return textureEngine->isOpen;
-    }
-    
     return false;
 }
 
@@ -337,7 +353,7 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
-    ofLogVerbose() << "width: " << width << " height: " << height;
+    int startTime = ofGetElapsedTimeMillis();
     bool needsRegeneration = false;
    
     if(!eglImage)
@@ -449,6 +465,9 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         ofLogVerbose()	<< "Create EGLImage PASS <---------------- :)";
         
     }
+    int endTime = ofGetElapsedTimeMillis();
+    ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
+
 }
 
 
@@ -588,14 +607,9 @@ void ofxRPiCameraVideoGrabber::startRecording()
 
 bool ofxRPiCameraVideoGrabber::isRecording()
 {
-    if (engine) 
+    if (getEngine()) 
     {
-        return engine->isRecording();
-    }
-    
-    if (textureEngine) 
-    {
-        return textureEngine->isRecording();
+        return getEngine()->isRecording();
     }
     return false;
 }
@@ -674,11 +688,41 @@ void ofxRPiCameraVideoGrabber::draw()
     texture.draw(0, 0);
 }
 
-
-
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposureMode)
+ofxRPiCameraVideoGrabber::EXPOSURE_MODE
+ofxRPiCameraVideoGrabber::getExposureMode()
 {
-    exposurePresetConfig.eExposureControl = exposureMode;
+    if(currentMeteringMode.autoShutter && currentMeteringMode.autoAperture)
+    {
+        return EXPOSURE_MODE_AUTO;
+    }
+    if(!currentMeteringMode.autoShutter && !currentMeteringMode.autoAperture)
+    {
+        return EXPOSURE_MODE_MANUAL;
+    }
+    return EXPOSURE_MODE_INVALID;
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableAutoExposure()
+{
+    currentMeteringMode.autoShutter = true;
+    currentMeteringMode.autoAperture = true;
+    currentMeteringMode.autoISO = true;
+    return applyCurrentMeteringMode();
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::enableManualExposure()
+{
+    currentMeteringMode.autoShutter = false;
+    currentMeteringMode.autoAperture = false;
+    currentMeteringMode.autoISO = false;
+    return applyCurrentMeteringMode();
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposurePreset)
+{
+    exposurePresetConfig.eExposureControl = exposurePreset;
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposurePresetConfig);
     OMX_TRACE(error);

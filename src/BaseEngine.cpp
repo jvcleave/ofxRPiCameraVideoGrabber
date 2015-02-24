@@ -60,7 +60,10 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
 	{
         cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
         cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
+        //cameraOutputPortDefinition.format.video.xFramerate		= (omxCameraSettings.framerate/1) << 16;
         cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16;
+        //cameraOutputPortDefinition.format.video.xFramerate		=  (((int64_t)omxCameraSettings.framerate) << 16) / (1<<16);
+
         cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
         //cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
         
@@ -387,5 +390,6 @@ void BaseEngine::closeEngine()
     
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
+    isOpen = false;
 
 }
