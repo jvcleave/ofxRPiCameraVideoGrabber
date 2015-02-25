@@ -196,7 +196,7 @@ public:
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
-    
+    string getCurrentExposurePresetName();
     OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 

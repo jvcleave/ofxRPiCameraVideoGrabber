@@ -2,7 +2,7 @@
 #include "CameraDemo.h"
 
 
-class DemoMirrorMode  : public CameraDemo
+class DemoRotation  : public CameraDemo
 {
     
 public:
@@ -16,22 +16,22 @@ public:
     
     void update()
     {
-
+        
         stringstream info;
         
         info << "\n";
         info << "CURRENT MIRROR MODE: " << videoGrabber->getMirrorAsString() << "\n";
-        info << "Press 1 for MIRROR_NONE"       << "\n";
-        info << "Press 2 for MIRROR_VERTICAL"   << "\n";
-        info << "Press 3 for MIRROR_HORIZONTAL" << "\n";
-        info << "Press 4 for MIRROR_BOTH"       << "\n";
+        info << "Press 1 for 0"     << "\n";
+        info << "Press 2 for 90"    << "\n";
+        info << "Press 3 for 180"   << "\n";
+        info << "Press 4 for 270"   << "\n";
         infoString = info.str();
-   
+        
     };
     
     void draw()
     {
-
+        
         
         
         
@@ -43,25 +43,25 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         switch (key)
         {
-        
+                
             case '1':
             {
-                videoGrabber->setMirror(ofxRPiCameraVideoGrabber::MIRROR_NONE);
+                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_0);
                 break;
             }
             case '2':
             {
-                videoGrabber->setMirror(ofxRPiCameraVideoGrabber::MIRROR_VERTICAL);
+                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_90);
                 break;
             }
             case '3':
             {
-                videoGrabber->setMirror(ofxRPiCameraVideoGrabber::MIRROR_HORIZONTAL);
+                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_180);
                 break;
             }
             case '4':
             {
-                videoGrabber->setMirror(ofxRPiCameraVideoGrabber::MIRROR_BOTH);
+                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_270);
                 break;
             }
             default:

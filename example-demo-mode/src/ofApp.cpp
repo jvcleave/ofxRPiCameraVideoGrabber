@@ -28,14 +28,9 @@ void ofApp::setup()
     exposureModeDemo->name = "EXPOSURE MODES";
     demos.push_back(exposureModeDemo);
     
-    DemoMirrorMode* mirrorModeDemo = new DemoMirrorMode();
-    mirrorModeDemo->setup(&videoGrabber);
-    mirrorModeDemo->name = "MIRROR MODE";
-    demos.push_back(mirrorModeDemo);
-    
     DemoEnhancement* enhancementDemo = new DemoEnhancement();
     enhancementDemo->setup(&videoGrabber);
-    enhancementDemo->name = "IMMAGE ENHANCEMENT";
+    enhancementDemo->name = "IMAGE ENHANCEMENT";
     demos.push_back(enhancementDemo);
     
     DemoFilters* filterDemo = new DemoFilters();
@@ -43,23 +38,27 @@ void ofApp::setup()
     filterDemo->name = "FILTERS";
     demos.push_back(filterDemo);
     
+    DemoExposurePresets* exposurePresetDemo = new DemoExposurePresets();
+    exposurePresetDemo->setup(&videoGrabber);
+    exposurePresetDemo->name = "EXPOSURE PRESETS";
+    demos.push_back(exposurePresetDemo);
     
-    /*
-    DemoCycleExposurePresets* demo1 = new DemoCycleExposurePresets();
-    demo1->setup(&videoGrabber);
-    demo1->name = "CYCLE EXPOSURE DEMO";
-    demos.push_back(demo1);
-     */
-    /*
-    ;
+    DemoMirrorMode* mirrorModeDemo = new DemoMirrorMode();
+    mirrorModeDemo->setup(&videoGrabber);
+    mirrorModeDemo->name = "MIRROR MODE";
+    demos.push_back(mirrorModeDemo);
     
-
+    DemoRotation* rotationDemo = new DemoRotation();
+    rotationDemo->setup(&videoGrabber);
+    rotationDemo->name = "ROTATION";
+    demos.push_back(rotationDemo);
     
-    */
+    DemoZoomCrop* zoomCropDemo = new DemoZoomCrop();
+    zoomCropDemo->setup(&videoGrabber);
+    zoomCropDemo->name = "ZOOM/CROP";
+    demos.push_back(zoomCropDemo);
     
-    
-
-    
+   
     
     doNextDemo = false;
     currentDemoID =0;
@@ -172,11 +171,11 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key)
 {
+    ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
     switch (key) 
     {
         case ' ':
         {
-            //videoGrabber.printCameraInfo();
             doNextDemo = true;
             break;
         }
@@ -211,29 +210,7 @@ void ofApp::keyPressed  (int key)
             videoGrabber.loadStateFromFile();
             break;
         }
-       
-        case '0' :
-        {
-            
-            break;
-        }
-        case '1' :
-        {
-            break;
-        }
-        case '2' :
-        {
-            break;
-        }
-        case '3' :
-        {
-            break;
-        }    
-        case '4' :
-        {
-            videoGrabber.setRotation(0);
-            break;
-        }
+        /*
         case '5' :
         {
             videoGrabber.rotateCounterClockwise();
@@ -259,7 +236,7 @@ void ofApp::keyPressed  (int key)
             videoGrabber.stopRecording();
             break;
         }
-        
+        */
         default:
         {
             currentDemo->onKey(key);

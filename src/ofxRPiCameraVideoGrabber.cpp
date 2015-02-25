@@ -728,7 +728,11 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
     OMX_TRACE(error);
     return error;
 }
-
+string ofxRPiCameraVideoGrabber::getCurrentExposurePresetName()
+{
+    
+    return "IMPLEMENT ME";
+}
 /*
  int
  ofxRPiCameraVideoGrabber::getMeteringEvCompensation()

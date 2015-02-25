@@ -52,7 +52,7 @@ public:
         }
         
         stringstream info;
-        info << "Press z to change Exposure Mode: " << currentModeString << "\n";
+        info << "Press 1 to change Exposure Mode: " << currentModeString << "\n";
 
         infoString = info.str();
         
@@ -68,7 +68,7 @@ public:
     void onKey(int key)
     {
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-        if (key == 'z')
+        if (key == '1')
         {
             doSwitchModes = !doSwitchModes;
         }

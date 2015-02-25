@@ -26,7 +26,7 @@ public:
         stringstream info;
         info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
         info << "\n";
-        info << "Press z to increment filter" << "\n";
+        info << "Press 1 to increment filter" << "\n";
         infoString = info.str();
         
     };
@@ -38,7 +38,7 @@ public:
     
     void onKey(int key)
     {
-        if (key == 'z')
+        if (key == '1')
         {
             doChangeFilter = !doChangeFilter;
         }

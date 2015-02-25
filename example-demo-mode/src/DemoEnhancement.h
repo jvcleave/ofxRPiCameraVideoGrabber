@@ -40,10 +40,14 @@ public:
 
         if(doValueReset)
         {
-            videoGrabber->setSharpness(0);
-            videoGrabber->setContrast(0);
-            videoGrabber->setBrightness(0);
+            videoGrabber->setSharpness(-50);
+            videoGrabber->setContrast(-10);
+            videoGrabber->setBrightness(50);
             videoGrabber->setSaturation(0);
+            doSharpness = false;
+            doContrast = false;
+            doBrightness = false;
+            doSaturation = false;
             doValueReset = false;
         }
         
@@ -110,11 +114,11 @@ public:
         info << "saturation: "  << videoGrabber->getSaturation()   << "\n";
                 
         info << "\n";
-        info << "Press z to cycle sharpness" << "\n";
-        info << "Press x to cycle contrast" << "\n";
-        info << "Press c to cycle brightness" << "\n";
-        info << "Press v to cycle saturation" << "\n";
-        info << "Press b to set values to 0" << "\n";
+        info << "Press 1 to cycle sharpness" << "\n";
+        info << "Press 2 to cycle contrast" << "\n";
+        info << "Press 3 to cycle brightness" << "\n";
+        info << "Press 4 to cycle saturation" << "\n";
+        info << "Press 0 to reset above to defaults" << "\n";
         
 
         infoString = info.str();
@@ -128,25 +132,25 @@ public:
     
     void onKey(int key)
     {
-        if (key == 'z')
+        if (key == '1')
         {
             doSharpness = !doSharpness;
         }
         
-        if (key == 'x')
+        if (key == '2')
         {
             doContrast = !doContrast;
         }
         
-        if (key == 'c')
+        if (key == '3')
         {
             doBrightness = !doBrightness;
         }
-        if (key == 'v')
+        if (key == '4')
         {
             doSaturation = !doSaturation;
         }
-        if (key == 'b')
+        if (key == '0')
         {
             doValueReset = true;
         }

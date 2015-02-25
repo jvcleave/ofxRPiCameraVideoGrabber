@@ -10,7 +10,9 @@
 #include "DemoMirrorMode.h"
 #include "DemoEnhancement.h"
 #include "DemoFilters.h"
-
+#include "DemoRotation.h"
+#include "DemoZoomCrop.h"
+#include "DemoExposurePresets.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
     
