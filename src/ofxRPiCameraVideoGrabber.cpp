@@ -728,11 +728,13 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
     OMX_TRACE(error);
     return error;
 }
+
 string ofxRPiCameraVideoGrabber::getCurrentExposurePresetName()
 {
     
-    return "IMPLEMENT ME";
+    return OMX_Maps::getInstance().exposurePresetsValueStringMap[exposurePresetConfig.eExposureControl];
 }
+
 /*
  int
  ofxRPiCameraVideoGrabber::getMeteringEvCompensation()
@@ -1235,6 +1237,7 @@ int ofxRPiCameraVideoGrabber::getRotation()
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyRotation()
 {
+    
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonRotate, &rotationConfig);
     OMX_TRACE(error);
     return error;

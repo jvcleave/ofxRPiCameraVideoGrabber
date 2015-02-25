@@ -290,6 +290,7 @@ public:
 private:
     
     bool doStartRecording;
+    
     OMX_ERRORTYPE applyMirror();
     OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
@@ -298,19 +299,19 @@ private:
     int zoomLevel;
     vector<int> zoomLevels;
     OMX_ERRORTYPE setDigitalZoom();
-    
-	void addExitHandler();
-	void onUpdate(ofEventArgs & args);
+
+    void addExitHandler();
+    void onUpdate(ofEventArgs & args);
     void onUpdateDuringExit(ofEventArgs& args);
 
-	bool hasNewFrame;
-	int updateFrameCounter;
+    bool hasNewFrame;
+    int updateFrameCounter;
     int frameCounter;
-    
-	OMX_HANDLETYPE camera;
-	bool LED_CURRENT_STATE;
-  
-	OMX_ERRORTYPE toggleImageEffects(bool doDisable);
+
+    OMX_HANDLETYPE camera;
+    bool LED_CURRENT_STATE;
+
+    OMX_ERRORTYPE toggleImageEffects(bool doDisable);
 		
 	TextureEngine* textureEngine;
 	NonTextureEngine* engine;

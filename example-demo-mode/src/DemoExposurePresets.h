@@ -38,8 +38,8 @@ public:
             changePreset = false;
         }
         stringstream info;
-        info << "currentExposureName: " << currentExposureName << "\n";
-//        info << "currentExposureName: " << videoGrabber->getCurrentExposurePresetName() << "\n";
+//        info << "currentExposureName: " << currentExposureName << "\n";
+        info << "currentExposureName: " << videoGrabber->getCurrentExposurePresetName() << "\n";
         infoString = info.str();
     };
     
