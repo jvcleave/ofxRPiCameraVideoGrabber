@@ -11,7 +11,7 @@
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-    OMX_Maps::getInstance();
+    //OMX_Maps::getInstance();
     initStructures();
     
     hasOMXInit = false;

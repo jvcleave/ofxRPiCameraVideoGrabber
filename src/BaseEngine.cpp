@@ -63,7 +63,7 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
         cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16;
 
         cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
-        //cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
+        cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
         OMX_TRACE(error);

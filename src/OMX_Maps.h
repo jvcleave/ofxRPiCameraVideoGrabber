@@ -55,6 +55,11 @@ public:
     
 	vector<string> exposurePresetNames;
 	map<string, OMX_EXPOSURECONTROLTYPE> exposurePresets;
+    map<string, OMX_EXPOSURECONTROLTYPE>& getExposurePresets()
+    {
+        return exposurePresets;
+    }
+    
     vector<string>& getExposurePresetNames()
     {
         return exposurePresetNames;

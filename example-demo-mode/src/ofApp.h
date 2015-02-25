@@ -8,6 +8,8 @@
 
 #include "DemoExposureMode.h"
 #include "DemoMirrorMode.h"
+#include "DemoEnhancement.h"
+#include "DemoFilters.h"
 
 
 class ofApp : public ofBaseApp, public KeyListener{

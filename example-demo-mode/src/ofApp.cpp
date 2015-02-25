@@ -16,8 +16,8 @@ void ofApp::setup()
     presets = omxCameraSettings.getAllPresets();
     
     currentPreset = 0;
-    omxCameraSettings.preset = presets[currentPreset];
-    omxCameraSettings.enablePixels = true;
+    //omxCameraSettings.preset = presets[currentPreset];
+    omxCameraSettings.preset = OMXCameraSettings::PRESET_720P_30FPS_TEXTURE;
     
     //pass in the settings and it will start the camera
     videoGrabber.setup(omxCameraSettings);
@@ -25,7 +25,7 @@ void ofApp::setup()
     
     DemoExposureMode* exposureModeDemo = new DemoExposureMode();
     exposureModeDemo->setup(&videoGrabber);
-    exposureModeDemo->name = "EXPOSURE MODE DEMO";
+    exposureModeDemo->name = "EXPOSURE MODES";
     demos.push_back(exposureModeDemo);
     
     DemoMirrorMode* mirrorModeDemo = new DemoMirrorMode();
@@ -33,23 +33,29 @@ void ofApp::setup()
     mirrorModeDemo->name = "MIRROR MODE";
     demos.push_back(mirrorModeDemo);
     
+    DemoEnhancement* enhancementDemo = new DemoEnhancement();
+    enhancementDemo->setup(&videoGrabber);
+    enhancementDemo->name = "IMMAGE ENHANCEMENT";
+    demos.push_back(enhancementDemo);
+    
+    DemoFilters* filterDemo = new DemoFilters();
+    filterDemo->setup(&videoGrabber);
+    filterDemo->name = "FILTERS";
+    demos.push_back(filterDemo);
+    
+    
     /*
     DemoCycleExposurePresets* demo1 = new DemoCycleExposurePresets();
     demo1->setup(&videoGrabber);
     demo1->name = "CYCLE EXPOSURE DEMO";
     demos.push_back(demo1);
-    
-    DemoCycleFilters* demo2 = new DemoCycleFilters();
-    demo2->setup(&videoGrabber);
-    demo2->name = "CYCLE FILTER DEMO";
-    demos.push_back(demo2);
+     */
+    /*
+    ;
     
 
     
-    DemoBCS* demo4 = new DemoBCS();
-    demo4->setup(&videoGrabber);
-    demo4->name = "SHARP/BRIGHT/CONTRAST/SATURATION DEMO";
-    demos.push_back(demo4);*/
+    */
     
     
 
@@ -78,7 +84,6 @@ void ofApp::update()
         settings->preset = presets[currentPreset];
         omxCameraSettings = *settings;
         
-        //pass in the settings and it will start the camera
         videoGrabber.setup(omxCameraSettings);
         doPresetChange = false;
         doPrintInfo = true;
@@ -98,7 +103,6 @@ void ofApp::update()
         videoGrabber.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
-        ofLogVerbose() << "isTextureEnabled: " << videoGrabber.isTextureEnabled();
     }else
     {
         currentDemo->update();
@@ -127,18 +131,23 @@ void ofApp::draw()
         info << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
-        info << currentDemo->name << "\n";
+        info << "\n";
+        info << "DEMO: " << currentDemo->name << "\n";
+        info << "\n";
         info << currentDemo->infoString;
-        
         info << "\n";
-        info << "Press d to Toggle info" << "\n";
-        info << "Press i to print info to Terminal" << "\n";
-        info << "\n";
-        info << "Press P for next Preset" << "\n";
+        info << "Press p for next Preset" << "\n";
+        info << "Press r to reset camera settings" << "\n";
         info << "Press SPACE for next Demo" << "\n";
+        
         if (doDrawInfo) 
         {
-            ofDrawBitmapStringHighlight(info.str(), 100, 100, ofColor::black, ofColor::yellow);
+            int x = 100;
+            if(videoGrabber.getWidth()<1280)
+            {
+                x = videoGrabber.getWidth();
+            }
+            ofDrawBitmapStringHighlight(info.str(), x, 40, ofColor(ofColor::black, 10), ofColor::yellow);
         }
         if (doPrintInfo) 
         {
@@ -156,7 +165,7 @@ void ofApp::draw()
     }
     ofPushStyle();
         ofSetColor(circleColor, 90);
-        ofCircle(ofPoint(ofGetWidth() - 200, 100), 50);
+        ofCircle(ofPoint(ofGetWidth() - 200, 40), 20);
     ofPopStyle();
 }
 
@@ -181,11 +190,17 @@ void ofApp::keyPressed  (int key)
             doPrintInfo = !doPrintInfo;
             break;
         }
-        case 'P' :
+        case 'p' :
         {
             doPresetChange = true;
             break;
         }
+        case 'r' :
+        {
+            videoGrabber.resetToCommonState();
+            break;
+        }
+            
         case 'S' :
         {
             videoGrabber.saveCurrentStateToFile();
@@ -196,11 +211,7 @@ void ofApp::keyPressed  (int key)
             videoGrabber.loadStateFromFile();
             break;
         }
-        case 'R' :
-        {
-            videoGrabber.resetToCommonState();
-            break;
-        }
+       
         case '0' :
         {
             

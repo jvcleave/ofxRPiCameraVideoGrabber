@@ -21,7 +21,7 @@ public:
         currentExposureName = "";
         //set local alias to silly static map
         ;
-        exposurePresetNames = OMX_Maps::getInstance().getExposurePresetNames();
+        exposurePresetNames = ExposurePresetNames();
     };
     
     void update()
@@ -37,7 +37,7 @@ public:
             }
             currentExposureName = exposurePresetNames[exposurePresetIndex];
             
-            videoGrabber->setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
+            videoGrabber->setExposurePreset(ExposurePresets[currentExposureName]);
             //videoGrabber->printMeteringMode();
             //ofLogVerbose() << "currentExposureName: " << currentExposureName;
         }
