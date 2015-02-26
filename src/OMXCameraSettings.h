@@ -26,7 +26,7 @@ public:
     bool framestabilization;
     string whiteBalance;
     string imageFilter;
-    int drcLevel;
+    int dreLevel;
     ofRectangle cropRectangle;
     int zoomLevel;
     int rotation;
@@ -53,7 +53,7 @@ public:
         framestabilization=false;
         whiteBalance="Auto";
         imageFilter="None";
-        drcLevel=0;
+        dreLevel=0;
         cropRectangle.set(0,0,100,100);
         zoomLevel=0;
         rotation=0;
@@ -82,7 +82,7 @@ public:
         if(key == "framestabilization") framestabilization = ofToBool(value); return;
         if(key == "whiteBalance") whiteBalance = value; return;
         if(key == "imageFilter") imageFilter = value; return;
-        if(key == "drcLevel") drcLevel = ofToInt(value); return;
+        if(key == "dreLevel") dreLevel = ofToInt(value); return;
         if(key == "zoomLevel") zoomLevel = ofToInt(value); return;
         if(key == "rotation") rotation = ofToInt(value); return;
         if(key == "mirror") mirror = value; return;
@@ -131,7 +131,7 @@ public:
         state << "framestabilization="          << framestabilization       << "\n";
         state << "whiteBalance="                << whiteBalance             << "\n";
         state << "imageFilter="                 << imageFilter              << "\n";        
-        state << "drcLevel="                    << drcLevel                 << "\n";
+        state << "dreLevel="                    << dreLevel                 << "\n";
         state << "cropRectangle=" << cropRectangle.x  << "," << cropRectangle.y << "," << cropRectangle.width << "," << cropRectangle.height << "\n";
         state << "zoomLevel="                   << zoomLevel                << "\n";
         state << "rotation="                    << rotation                 << "\n";

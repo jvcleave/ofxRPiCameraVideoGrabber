@@ -113,7 +113,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     CameraState& currentState = omxCameraSettings.state;
     currentState.validate();
    
-    setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentState.exposurePreset]); 
+    setExposurePreset(OMX_Maps::getInstance().getExposurePreset(currentState.exposurePreset)); 
     CameraMeteringMode cameraMeteringMode;
     cameraMeteringMode.meteringType = OMX_Maps::getInstance().metering[currentState.meteringType];
     cameraMeteringMode.evCompensation = currentState.evCompensation;
@@ -131,16 +131,16 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     setBrightness(currentState.brightness);
     setSaturation(currentState.saturation);
     setFrameStabilization(currentState.framestabilization);
-    setWhiteBalance(OMX_Maps::getInstance().whiteBalanceControls[currentState.whiteBalance]);
-    applyImageFilter(OMX_Maps::getInstance().imageFilters[currentState.imageFilter]);
+    setWhiteBalance(OMX_Maps::getInstance().getWhiteBalance(currentState.whiteBalance));
+    applyImageFilter(OMX_Maps::getInstance().getImageFilter(currentState.imageFilter));
     setColorEnhancement(false);	 //TODO implement
-    setDRC(currentState.drcLevel);
+    setDRE(currentState.dreLevel);
     cropRectangle = currentState.cropRectangle;
     setSensorCrop(cropRectangle);
     zoomLevel = currentState.zoomLevel;
     setDigitalZoom();
     setRotation(currentState.rotation);
-    setMirror(OMX_Maps::getInstance().mirrorTypes[currentState.mirror]);
+    setMirror(OMX_Maps::getInstance().getMirror(currentState.mirror));
     
     setSoftwareSharpening(currentState.disableSoftwareSharpen);
     setSoftwareSaturation(currentState.disableSoftwareSaturation);
@@ -162,17 +162,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
 void ofxRPiCameraVideoGrabber::saveState()
 {
     CameraState state;
-    //Exposure Preset
-    for (map<string, OMX_EXPOSURECONTROLTYPE>::iterator it=OMX_Maps::getInstance().exposurePresets.begin(); 
-         it!=OMX_Maps::getInstance().exposurePresets.end(); 
-         ++it)
-    {
-        if(it->second == exposurePresetConfig.eExposureControl)
-        {
-            
-            state.exposurePreset = it->first;
-        }
-    }
+ 
+    state.exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
     state.meteringType=currentMeteringMode.getMeteringTypeString();
     state.evCompensation=currentMeteringMode.evCompensation;
     state.autoShutter=currentMeteringMode.autoShutter;
@@ -189,32 +180,12 @@ void ofxRPiCameraVideoGrabber::saveState()
     
     state.framestabilization=fromOMXBool(framestabilizationConfig.bStab);
     
-    //White Balance
-    for (map<string, OMX_WHITEBALCONTROLTYPE>::iterator it=OMX_Maps::getInstance().whiteBalanceControls.begin(); 
-         it!=OMX_Maps::getInstance().whiteBalanceControls.end(); 
-         ++it)
-    {
-        if(it->second == whiteBalanceConfig.eWhiteBalControl)
-        {
-            
-            state.whiteBalance=it->first;
-        }
-    }
-    
-    //Image Filter
-    for (map<string, OMX_IMAGEFILTERTYPE>::iterator it=OMX_Maps::getInstance().imageFilters.begin(); 
-         it!=OMX_Maps::getInstance().imageFilters.end(); 
-         ++it)
-    {
-        if(it->second == imagefilterConfig.eImageFilter)
-        {
-            
-            state.imageFilter=it->first;
-        }
-    }
+    state.whiteBalance=OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
+
+    state.imageFilter=OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
     //DRC
     
-    state.drcLevel=OMX_Maps::getInstance().drcTypes[drcConfig.eMode];
+    state.dreLevel=OMX_Maps::getInstance().dreTypes[dreConfig.eMode];
     state.cropRectangle=cropRectangle;
     state.zoomLevel=zoomLevel;
     state.rotation=rotationConfig.nRotation;
@@ -732,9 +703,22 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
 string ofxRPiCameraVideoGrabber::getCurrentExposurePresetName()
 {
     
-    return OMX_Maps::getInstance().exposurePresetsValueStringMap[exposurePresetConfig.eExposureControl];
+    return OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setEvCompensation(int value)
+{
+    if ((value >= -4) && (value <= 4)) 
+    {
+        currentMeteringMode.evCompensation = value;
+    }
+    return applyCurrentMeteringMode();
+    
+}
+int ofxRPiCameraVideoGrabber::getEvCompensation()
+{
+    return currentMeteringMode.evCompensation;
+}
 /*
  int
  ofxRPiCameraVideoGrabber::getMeteringEvCompensation()
@@ -763,7 +747,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
     
     error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
     OMX_TRACE(error);
-    
+  
     /*
      
      weird this is backwards from what is expected
@@ -1035,6 +1019,11 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE 
     return error;
 }
 
+string ofxRPiCameraVideoGrabber::getCurrentWhiteBalanceName()
+{
+    return OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
+}
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
     colorEnhancementConfig.bColorEnhancement = toOMXBool(doColorEnhance);
@@ -1299,7 +1288,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE ima
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRC(int level)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRE(int level)
 {
     OMX_DYNAMICRANGEEXPANSIONMODETYPE type = OMX_DynRangeExpOff;
     switch (level) 
@@ -1332,8 +1321,8 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRC(int level)
         
     }
     
-    drcConfig.eMode = type;
-    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &drcConfig);
+    dreConfig.eMode = type;
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &dreConfig);
     OMX_TRACE(error);
     
     return error;

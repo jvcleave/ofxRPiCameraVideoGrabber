@@ -30,7 +30,7 @@ struct CameraMeteringMode
     OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
     
     OMX_METERINGTYPE meteringType;
-    int evCompensation;
+    float evCompensation;
     
     
     bool autoShutter;
@@ -49,7 +49,7 @@ struct CameraMeteringMode
         meteringType = OMX_MeteringModeAverage;
         
         
-        evCompensation=0; //-10 to +10
+        evCompensation=0; //-4 to +4
         
         autoShutter = true;
         shutterSpeedMicroSeconds = 0;
@@ -176,7 +176,9 @@ public:
     bool getAutoShutter(){return currentMeteringMode.autoShutter;}
     int getShutterSpeed();
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
-    
+    OMX_ERRORTYPE setEvCompensation(int);
+    int getEvCompensation();
+
     
     OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
     
@@ -198,12 +200,13 @@ public:
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
     string getCurrentExposurePresetName();
     OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+    string getCurrentWhiteBalanceName();
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
                                       int U=128, 
                                       int V=128);
     
-    OMX_ERRORTYPE setDRC(int level);
+    OMX_ERRORTYPE setDRE(int);//0-3
     OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
     
     ofRectangle cropRectangle;
@@ -220,22 +223,6 @@ public:
     OMX_ERRORTYPE setZoomLevelNormalized(float);
     
     
-    //fixed aperture - no effect
-    OMX_ERRORTYPE setAutoAperture(bool);
-    int getAperture();
-    OMX_ERRORTYPE setAperture(int aperture);
-    bool getAutoAperture(){return currentMeteringMode.autoAperture;}
-    
-    //no effect seen
-    int getISO();
-    OMX_ERRORTYPE setISO(int ISO);
-    OMX_ERRORTYPE setAutoISO(bool);
-    bool getAutoISO(){return currentMeteringMode.autoISO;} 
-    
-    //not sure if functional
-    OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
-    OMX_ERRORTYPE enableBurstMode();
-    
     enum ROTATION
     {
         ROTATION_0=0,
@@ -243,7 +230,7 @@ public:
         ROTATION_180=180,
         ROTATION_270=270,
     };
-    OMX_ERRORTYPE setRotation(int value);
+    OMX_ERRORTYPE setRotation(int);
     OMX_ERRORTYPE setRotation(ROTATION);
     
     int getRotation();
@@ -261,7 +248,7 @@ public:
     OMX_ERRORTYPE setMirror(int);
     string getMirrorAsString();
     
-    OMX_ERRORTYPE setSoftwareSharpening(bool state);
+    OMX_ERRORTYPE setSoftwareSharpening(bool);
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
     bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
@@ -279,7 +266,7 @@ public:
     OMX_ERRORTYPE enableAutoExposure();
     OMX_ERRORTYPE enableManualExposure();
     
-    OMX_ERRORTYPE setSoftwareSaturation(bool state);
+    OMX_ERRORTYPE setSoftwareSaturation(bool);
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
@@ -287,6 +274,25 @@ public:
     void loadStateFromFile(string filePath="");
     void saveCurrentStateToFile(string filePath="");
     bool forceEGLReuse;
+    
+    
+    //fixed aperture - no effect
+    OMX_ERRORTYPE setAutoAperture(bool);
+    int getAperture();
+    OMX_ERRORTYPE setAperture(int);
+    bool getAutoAperture(){return currentMeteringMode.autoAperture;}
+    
+    //no effect seen
+    int getISO();
+    OMX_ERRORTYPE setISO(int ISO);
+    OMX_ERRORTYPE setAutoISO(bool);
+    bool getAutoISO(){return currentMeteringMode.autoISO;} 
+    
+    //not sure if functional
+    OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+    OMX_ERRORTYPE enableBurstMode();
+    
+    
 private:
     
     bool doStartRecording;
@@ -349,7 +355,7 @@ private:
 
     OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
     OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
-    OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE drcConfig;
+    OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE dreConfig;
     OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
 
 
@@ -451,7 +457,7 @@ private:
         
         OMX_INIT_STRUCTURE(cameraInfoConfig);
         
-        OMX_INIT_STRUCTURE(drcConfig);
+        OMX_INIT_STRUCTURE(dreConfig);
         
         OMX_INIT_STRUCTURE(hdrConfig);
         

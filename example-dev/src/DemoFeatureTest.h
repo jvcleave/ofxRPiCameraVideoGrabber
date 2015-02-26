@@ -9,10 +9,10 @@ public:
     
     
     bool doDrawInfo;
-    bool doDRC;
+    bool doDRE;
     bool doCrop;
     bool doHDR;
-    int drcLevel;
+    int dreLevel;
     bool hdrState;
     bool doDigitalZoom;
     bool doZoomIn;
@@ -22,7 +22,7 @@ public:
                
         CameraDemo::setup( videoGrabber_);
         doDrawInfo	= true;
-        doDRC = false;
+        doDRE = false;
         doCrop = false;
         doHDR = false;
         hdrState = false;
@@ -30,23 +30,23 @@ public:
         doDigitalZoom = false;
         doZoomIn = true;
         
-        drcLevel = 0;
+        dreLevel = 0;
     };
     
     void update()
     {
-        if (doDRC) 
+        if (doDRE) 
         {
-            if (drcLevel+1 <= 3) 
+            if (dreLevel+1 <= 3) 
             {
-                drcLevel++;
+                dreLevel++;
             }else
             {
-                drcLevel = 0;
+                dreLevel = 0;
             }
-            ofLogVerbose() << "drcLevel: " << drcLevel;
-            videoGrabber->setDRC(drcLevel);
-            doDRC = false;
+            ofLogVerbose() << "dreLevel: " << dreLevel;
+            videoGrabber->setDRE(dreLevel);
+            doDRE = false;
         }
         if (doCrop) 
         {
@@ -104,7 +104,7 @@ public:
         info << "Crop HEIGHT %: "    << videoGrabber->getCropRectangle().getHeight()  <<  "\n";
         
         info << "\n";
-        info << "Press z to increment DRC: "    << drcLevel << "\n";
+        info << "Press z to increment DRC: "    << dreLevel << "\n";
         info << "Press x to randomize Crop" <<  "\n";
         info << "\n";
         info << "Press c to toggle Digital Zoom: " << doDigitalZoom <<  "\n";
@@ -131,7 +131,7 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == 'z')
         {
-            doDRC = true;
+            doDRE = true;
         }
         if (key == 'x')
         {

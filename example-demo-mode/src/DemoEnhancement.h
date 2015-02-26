@@ -22,7 +22,8 @@ public:
     
     bool doValueReset;
     bool doValueResetToZero;
-    
+    bool doDRE;
+    int dreLevel;
     
     void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
@@ -31,7 +32,10 @@ public:
         doContrast = false;
         doBrightness = false;
         doSaturation = false;
+        doDRE = false;
+        dreLevel = 0;
         doValueReset = false;
+        
         videoGrabber->enableAutoExposure();
     }
     
@@ -44,11 +48,29 @@ public:
             videoGrabber->setContrast(-10);
             videoGrabber->setBrightness(50);
             videoGrabber->setSaturation(0);
+            videoGrabber->setDRE(0);
             doSharpness = false;
             doContrast = false;
             doBrightness = false;
             doSaturation = false;
+            doDRE = false;
+            dreLevel = 0;
             doValueReset = false;
+            
+        }
+        
+        if (doDRE) 
+        {
+            if (dreLevel+1 <= 3) 
+            {
+                dreLevel++;
+            }else
+            {
+                dreLevel = 0;
+            }
+            ofLogVerbose() << "dreLevel: " << dreLevel;
+            videoGrabber->setDRE(dreLevel);
+            doDRE = false;
         }
         
         if (doSharpness) 
@@ -118,6 +140,7 @@ public:
         info << "Press 2 to cycle contrast" << "\n";
         info << "Press 3 to cycle brightness" << "\n";
         info << "Press 4 to cycle saturation" << "\n";
+        info << "Press 5 to increment Dynamic Range Expansion (DRE): " << dreLevel << "\n";
         info << "Press 0 to reset above to defaults" << "\n";
         
 
@@ -149,6 +172,10 @@ public:
         if (key == '4')
         {
             doSaturation = !doSaturation;
+        }
+        if (key == '5')
+        {
+            doDRE = true;
         }
         if (key == '0')
         {

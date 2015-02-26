@@ -13,6 +13,7 @@
 #include "DemoRotation.h"
 #include "DemoZoomCrop.h"
 #include "DemoExposurePresets.h"
+#include "DemoManualControls.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
     

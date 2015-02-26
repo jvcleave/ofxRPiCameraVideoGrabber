@@ -23,10 +23,11 @@ void ofApp::setup()
     videoGrabber.setup(omxCameraSettings);
     
     
-    DemoExposureMode* exposureModeDemo = new DemoExposureMode();
-    exposureModeDemo->setup(&videoGrabber);
-    exposureModeDemo->name = "EXPOSURE MODES";
-    demos.push_back(exposureModeDemo);
+   
+    DemoManualControls*  manualControlDemo = new DemoManualControls();
+    manualControlDemo->setup(&videoGrabber);
+    manualControlDemo->name = "MANUAL CONTROLS";
+    demos.push_back(manualControlDemo);
     
     DemoEnhancement* enhancementDemo = new DemoEnhancement();
     enhancementDemo->setup(&videoGrabber);
@@ -58,7 +59,27 @@ void ofApp::setup()
     zoomCropDemo->name = "ZOOM/CROP";
     demos.push_back(zoomCropDemo);
     
-   
+    DemoExposureMode* exposureModeDemo = new DemoExposureMode();
+    exposureModeDemo->setup(&videoGrabber);
+    exposureModeDemo->name = "EXPOSURE MODES";
+    demos.push_back(exposureModeDemo);
+    
+
+    
+    /*
+     DEMOS TODO
+     
+    - Manual mode, shutter speed, disable sharpen/saturation, White Balance/Metering
+    - Recording mode
+    - Saving/Loading States
+     
+    
+    */
+    for(int i=-5; i<5; i++)
+    {
+        cout << 65536 * i << endl;
+    }
+  
     
     doNextDemo = false;
     currentDemoID =0;
@@ -135,7 +156,7 @@ void ofApp::draw()
         info << "\n";
         info << currentDemo->infoString;
         info << "\n";
-        info << "Press p for next Preset" << "\n";
+        info << "Press p for next Size/FPS/Mode Preset" << "\n";
         info << "Press r to reset camera settings" << "\n";
         info << "Press SPACE for next Demo" << "\n";
         

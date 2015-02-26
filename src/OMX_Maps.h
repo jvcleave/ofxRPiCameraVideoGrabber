@@ -29,33 +29,68 @@ public:
 		return instance;
 	}
     
-    map<OMX_DYNAMICRANGEEXPANSIONMODETYPE, int> drcTypes;
+    map<OMX_DYNAMICRANGEEXPANSIONMODETYPE, int> dreTypes;
     
 	vector<string> imageFilterNames;
 	map<string, OMX_IMAGEFILTERTYPE> imageFilters;
+    map<OMX_IMAGEFILTERTYPE, string> imageFilterTypes;
+    
     vector<string>& getImageFilterNames()
     {
         return imageFilterNames;
     }
+    string getImageFilter(OMX_IMAGEFILTERTYPE type)
+    {
+        return imageFilterTypes[type];
+    }
+    
+    OMX_IMAGEFILTERTYPE getImageFilter(string name)
+    {
+        return imageFilters[name];
+    }
+    
     
 	vector<string> whiteBalanceNames;
 	map<string, OMX_WHITEBALCONTROLTYPE> whiteBalanceControls;
+    map<OMX_WHITEBALCONTROLTYPE, string> whiteBalanceControlTypes;
     vector<string>& getWhiteBalanceNames()
     {
         return whiteBalanceNames;
     }
     
-	
+    string getWhiteBalance(OMX_WHITEBALCONTROLTYPE type)
+    {
+        return whiteBalanceControlTypes[type];
+    }
+    
+    OMX_WHITEBALCONTROLTYPE getWhiteBalance(string name)
+    {
+        return whiteBalanceControls[name];
+    }
+    
+    
 	vector<string> meteringNames;
 	map<string, OMX_METERINGTYPE> metering;
+    map<OMX_METERINGTYPE, string> meteringTypes;
     vector<string>& getMeteringNames()
     {
         return meteringNames;
     }
+    string getMetering(OMX_METERINGTYPE type)
+    {
+        return meteringTypes[type];
+    }
+    
+    OMX_METERINGTYPE getMetering(string name)
+    {
+        return metering[name];
+    }
+    
+    
     
 	vector<string> exposurePresetNames;
 	map<string, OMX_EXPOSURECONTROLTYPE> exposurePresets;
-    map<OMX_EXPOSURECONTROLTYPE, string> exposurePresetsValueStringMap;
+    map<OMX_EXPOSURECONTROLTYPE, string> exposurePresetTypes;
     map<string, OMX_EXPOSURECONTROLTYPE>& getExposurePresets()
     {
         return exposurePresets;
@@ -65,6 +100,31 @@ public:
     {
         return exposurePresetNames;
     }
+    string getExposurePreset(OMX_EXPOSURECONTROLTYPE type)
+    {
+        return exposurePresetTypes[type];
+    }
+    
+    OMX_EXPOSURECONTROLTYPE getExposurePreset(string name)
+    {
+        return exposurePresets[name];
+    }
+    
+    map<string, OMX_MIRRORTYPE> mirrors;
+    map<OMX_MIRRORTYPE, string> mirrorTypes;
+    vector<string> mirrorNames;
+    
+    
+    string getMirror(OMX_MIRRORTYPE type)
+    {
+        return mirrorTypes[type];
+    }
+    
+    OMX_MIRRORTYPE getMirror(string name)
+    {
+        return mirrors[name];
+    }
+    
     
     
 	vector<string> videoCodingNames;
@@ -85,6 +145,7 @@ public:
 	
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
+    map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithmTypes;
     vector<string>& getAlgorithmNames()
     {
         return algorithmNames;
@@ -97,31 +158,24 @@ public:
     
     map<OMX_ERRORTYPE, string> omxErrors;
     
-    map<string, OMX_MIRRORTYPE> mirrorTypes;
-    map<OMX_MIRRORTYPE, string> mirrorNames;
-    
+ 
     map<OMX_STATETYPE, string>omxStateNames;
     
 private:	
     OMX_Maps()
     {
 
-        drcTypes[OMX_DynRangeExpOff] = 0;
-        drcTypes[OMX_DynRangeExpLow] = 1;
-        drcTypes[OMX_DynRangeExpMedium] = 2;
-        drcTypes[OMX_DynRangeExpHigh] = 3;
+        dreTypes[OMX_DynRangeExpOff] = 0;
+        dreTypes[OMX_DynRangeExpLow] = 1;
+        dreTypes[OMX_DynRangeExpMedium] = 2;
+        dreTypes[OMX_DynRangeExpHigh] = 3;
 
 
 
-        mirrorTypes["None"] = OMX_MirrorNone;
-        mirrorTypes["Vertical"] = OMX_MirrorVertical;
-        mirrorTypes["Horizontal"] = OMX_MirrorHorizontal;
-        mirrorTypes["Both"] = OMX_MirrorBoth;
-
-        mirrorNames[OMX_MirrorNone] = "None";
-        mirrorNames[OMX_MirrorVertical] = "Vertical";
-        mirrorNames[OMX_MirrorHorizontal] = "Horizontal";
-        mirrorNames[OMX_MirrorBoth] = "Both";
+        mirrors["None"] = OMX_MirrorNone;
+        mirrors["Vertical"] = OMX_MirrorVertical;
+        mirrors["Horizontal"] = OMX_MirrorHorizontal;
+        mirrors["Both"] = OMX_MirrorBoth;
 
 
         imageFilters["None"] = OMX_ImageFilterNone;
@@ -150,7 +204,7 @@ private:
         imageFilters["ColourBalance"] = OMX_ImageFilterColourBalance;
         imageFilters["Cartoon"] = OMX_ImageFilterCartoon;
 
-        collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames);
+        collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
 
 
         whiteBalanceControls["Off"] = OMX_WhiteBalControlOff;
@@ -164,31 +218,15 @@ private:
         whiteBalanceControls["Flash"] = OMX_WhiteBalControlFlash;
         whiteBalanceControls["Horizon"] = OMX_WhiteBalControlHorizon;
 
-        collectNames<OMX_WHITEBALCONTROLTYPE>(whiteBalanceControls, whiteBalanceNames);
-
+        collectNames<OMX_WHITEBALCONTROLTYPE>(whiteBalanceControls, whiteBalanceNames, whiteBalanceControlTypes);
+        
         metering["Average"] = OMX_MeteringModeAverage;
         metering["Spot"] = OMX_MeteringModeSpot;
         metering["Matrix"] = OMX_MeteringModeMatrix;
         metering["Backlit"] = OMX_MeteringModeBacklit;
 
-        collectNames<OMX_METERINGTYPE>(metering, meteringNames);
+        collectNames<OMX_METERINGTYPE>(metering, meteringNames, meteringTypes);
 
-
-        exposurePresetsValueStringMap[OMX_ExposureControlOff] = "Off";
-        exposurePresetsValueStringMap[OMX_ExposureControlAuto] = "Auto";
-        exposurePresetsValueStringMap[OMX_ExposureControlNight] = "Night";
-        exposurePresetsValueStringMap[OMX_ExposureControlBackLight] = "BackLight";
-        exposurePresetsValueStringMap[OMX_ExposureControlSpotLight] = "SpotLight";
-        exposurePresetsValueStringMap[OMX_ExposureControlSports] = "Sports";
-        exposurePresetsValueStringMap[OMX_ExposureControlSnow] = "Snow";
-        exposurePresetsValueStringMap[OMX_ExposureControlBeach] = "Beach";
-        exposurePresetsValueStringMap[OMX_ExposureControlLargeAperture] = "LargeAperture";
-        exposurePresetsValueStringMap[OMX_ExposureControlSmallAperture] = "SmallAperture";
-        exposurePresetsValueStringMap[OMX_ExposureControlVeryLong] = "VeryLong";
-        exposurePresetsValueStringMap[OMX_ExposureControlFixedFps] = "FixedFps";
-        exposurePresetsValueStringMap[OMX_ExposureControlNightWithPreview] = "NightWithPreview";
-        exposurePresetsValueStringMap[OMX_ExposureControlAntishake] = "Antishake";
-        exposurePresetsValueStringMap[OMX_ExposureControlFireworks] = "Fireworks";
 
         exposurePresets["Off"] = OMX_ExposureControlOff;
         exposurePresets["Auto"] = OMX_ExposureControlAuto;
@@ -206,60 +244,8 @@ private:
         exposurePresets["Antishake"] = OMX_ExposureControlAntishake;
         exposurePresets["Fireworks"] = OMX_ExposureControlFireworks;
 
-        collectNames<OMX_EXPOSURECONTROLTYPE>(exposurePresets, exposurePresetNames);
+        collectNames<OMX_EXPOSURECONTROLTYPE>(exposurePresets, exposurePresetNames, exposurePresetTypes);
 
-        colorFormatTypes[OMX_COLOR_FormatUnused] = "OMX_COLOR_FormatUnused";
-        colorFormatTypes[OMX_COLOR_FormatMonochrome] = "OMX_COLOR_FormatMonochrome";
-        colorFormatTypes[OMX_COLOR_Format8bitRGB332] = "OMX_COLOR_Format8bitRGB332";
-        colorFormatTypes[OMX_COLOR_Format12bitRGB444] = "OMX_COLOR_Format12bitRGB444";
-        colorFormatTypes[OMX_COLOR_Format16bitARGB4444] = "OMX_COLOR_Format16bitARGB4444";
-        colorFormatTypes[OMX_COLOR_Format16bitARGB1555] = "OMX_COLOR_Format16bitARGB1555";
-        colorFormatTypes[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitRGB565";
-        colorFormatTypes[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format16bitBGR565";
-        colorFormatTypes[OMX_COLOR_Format16bitRGB565] = "OMX_COLOR_Format18bitRGB666";
-        colorFormatTypes[OMX_COLOR_Format18bitARGB1665] = "OMX_COLOR_Format18bitARGB1665";
-        colorFormatTypes[OMX_COLOR_Format19bitARGB1666] = "OMX_COLOR_Format19bitARGB1666"; 
-        colorFormatTypes[OMX_COLOR_Format24bitRGB888] = "OMX_COLOR_Format24bitRGB888";
-        colorFormatTypes[OMX_COLOR_Format24bitBGR888] = "OMX_COLOR_Format24bitBGR888";
-        colorFormatTypes[OMX_COLOR_Format24bitARGB1887] = "OMX_COLOR_Format24bitARGB1887";
-        colorFormatTypes[OMX_COLOR_Format25bitARGB1888] = "OMX_COLOR_Format25bitARGB1888";
-        colorFormatTypes[OMX_COLOR_Format32bitBGRA8888] = "OMX_COLOR_Format32bitBGRA8888";
-        colorFormatTypes[OMX_COLOR_Format32bitARGB8888] = "OMX_COLOR_Format32bitARGB8888";
-        colorFormatTypes[OMX_COLOR_FormatYUV411Planar] = "OMX_COLOR_FormatYUV411Planar";
-        colorFormatTypes[OMX_COLOR_FormatYUV411PackedPlanar] = "OMX_COLOR_FormatYUV411PackedPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYUV420Planar] = "OMX_COLOR_FormatYUV420Planar";
-        colorFormatTypes[OMX_COLOR_FormatYUV420PackedPlanar] = "OMX_COLOR_FormatYUV420PackedPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYUV420SemiPlanar] = "OMX_COLOR_FormatYUV420SemiPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYUV422Planar] = "OMX_COLOR_FormatYUV422Planar";
-        colorFormatTypes[OMX_COLOR_FormatYUV422PackedPlanar] = "OMX_COLOR_FormatYUV422PackedPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYUV422SemiPlanar] = "OMX_COLOR_FormatYUV422SemiPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYCbYCr] = "OMX_COLOR_FormatYCbYCr";
-        colorFormatTypes[OMX_COLOR_FormatYCrYCb] = "OMX_COLOR_FormatYCrYCb";
-        colorFormatTypes[OMX_COLOR_FormatCbYCrY] = "OMX_COLOR_FormatCbYCrY";
-        colorFormatTypes[OMX_COLOR_FormatCrYCbY] = "OMX_COLOR_FormatCrYCbY";
-        colorFormatTypes[OMX_COLOR_FormatYUV444Interleaved] = "OMX_COLOR_FormatYUV444Interleaved";
-        colorFormatTypes[OMX_COLOR_FormatRawBayer8bit] = "OMX_COLOR_FormatRawBayer8bit";
-        colorFormatTypes[OMX_COLOR_FormatRawBayer10bit] = "OMX_COLOR_FormatRawBayer10bit";
-        colorFormatTypes[OMX_COLOR_FormatRawBayer8bitcompressed] = "OMX_COLOR_FormatRawBayer8bitcompressed";
-        colorFormatTypes[OMX_COLOR_FormatL2] = "OMX_COLOR_FormatL2"; 
-        colorFormatTypes[OMX_COLOR_FormatL4] = "OMX_COLOR_FormatL4"; 
-        colorFormatTypes[OMX_COLOR_FormatL8] = "OMX_COLOR_FormatL8"; 
-        colorFormatTypes[OMX_COLOR_FormatL16] = "OMX_COLOR_FormatL16"; 
-        colorFormatTypes[OMX_COLOR_FormatL24] = "OMX_COLOR_FormatL24"; 
-        colorFormatTypes[OMX_COLOR_FormatL32] = "OMX_COLOR_FormatL32";
-        colorFormatTypes[OMX_COLOR_FormatYUV420PackedSemiPlanar] = "OMX_COLOR_FormatYUV420PackedSemiPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYUV422PackedSemiPlanar] = "OMX_COLOR_FormatYUV422PackedSemiPlanar";
-        colorFormatTypes[OMX_COLOR_Format18BitBGR666] = "OMX_COLOR_Format18BitBGR666";
-        colorFormatTypes[OMX_COLOR_Format24BitARGB6666] = "OMX_COLOR_Format24BitARGB6666";
-        colorFormatTypes[OMX_COLOR_Format24BitABGR6666] = "OMX_COLOR_Format24BitABGR6666";
-        colorFormatTypes[OMX_COLOR_Format32bitABGR8888] = "OMX_COLOR_Format32bitABGR8888";
-        colorFormatTypes[OMX_COLOR_Format8bitPalette] = "OMX_COLOR_Format8bitPalette";
-        colorFormatTypes[OMX_COLOR_FormatYUVUV128] = "OMX_COLOR_FormatYUVUV128";
-        colorFormatTypes[OMX_COLOR_FormatRawBayer12bit] = "OMX_COLOR_FormatRawBayer12bit";
-        colorFormatTypes[OMX_COLOR_FormatBRCMEGL] = "OMX_COLOR_FormatBRCMEGL";
-        colorFormatTypes[OMX_COLOR_FormatBRCMOpaque] = "OMX_COLOR_FormatBRCMOpaque";
-        colorFormatTypes[OMX_COLOR_FormatYVU420PackedPlanar] = "OMX_COLOR_FormatYVU420PackedPlanar";
-        colorFormatTypes[OMX_COLOR_FormatYVU420PackedSemiPlanar] = "OMX_COLOR_FormatYVU420PackedSemiPlanar";
 
 
         colorFormats["Unused"] = OMX_COLOR_FormatUnused;
@@ -316,27 +302,7 @@ private:
         colorFormats["YVU420PackedSemiPlanar"] = OMX_COLOR_FormatYVU420PackedSemiPlanar;
 
 
-        collectNames<OMX_COLOR_FORMATTYPE>(colorFormats, colorFormatNames);
-
-
-        videoCodingTypes[OMX_VIDEO_CodingUnused] = "OMX_VIDEO_CodingUnused";
-        videoCodingTypes[OMX_VIDEO_CodingAutoDetect] = "OMX_VIDEO_CodingAutoDetect";
-        videoCodingTypes[OMX_VIDEO_CodingMPEG2] = "OMX_VIDEO_CodingMPEG2";
-        videoCodingTypes[OMX_VIDEO_CodingH263] = "OMX_VIDEO_CodingH263";
-        videoCodingTypes[OMX_VIDEO_CodingMPEG4] = "OMX_VIDEO_CodingMPEG4";
-        videoCodingTypes[OMX_VIDEO_CodingWMV] = "OMX_VIDEO_CodingWMV";
-        videoCodingTypes[OMX_VIDEO_CodingRV] = "OMX_VIDEO_CodingRV";
-        videoCodingTypes[OMX_VIDEO_CodingAVC] = "OMX_VIDEO_CodingAVC";
-        videoCodingTypes[OMX_VIDEO_CodingMJPEG] = "OMX_VIDEO_CodingMJPEG";
-        videoCodingTypes[OMX_VIDEO_CodingVP6] = "OMX_VIDEO_CodingVP6";
-        videoCodingTypes[OMX_VIDEO_CodingVP7] = "OMX_VIDEO_CodingVP7";
-        videoCodingTypes[OMX_VIDEO_CodingVP8] = "OMX_VIDEO_CodingVP8";
-        videoCodingTypes[OMX_VIDEO_CodingYUV] = "OMX_VIDEO_CodingYUV";
-        videoCodingTypes[OMX_VIDEO_CodingSorenson] = "OMX_VIDEO_CodingSorenson";
-        videoCodingTypes[OMX_VIDEO_CodingTheora] = "OMX_VIDEO_CodingTheora";
-        videoCodingTypes[OMX_VIDEO_CodingMVC] = "OMX_VIDEO_CodingMVC"; 	
-
-
+        collectNames<OMX_COLOR_FORMATTYPE>(colorFormats, colorFormatNames, colorFormatTypes);
 
 
         videoCoding["Unused"] = OMX_VIDEO_CodingUnused;
@@ -357,7 +323,7 @@ private:
         videoCoding["MVC"] = OMX_VIDEO_CodingMVC; 	
 
 
-        collectNames<OMX_VIDEO_CODINGTYPE>(videoCoding, videoCodingNames);
+        collectNames<OMX_VIDEO_CODINGTYPE>(videoCoding, videoCodingNames, videoCodingTypes);
 
 
         algorithms["Facetracking"] = OMX_CameraDisableAlgorithmFacetracking;
@@ -376,7 +342,7 @@ private:
         algorithms["HighDynamicRange"] = OMX_CameraDisableAlgorithmHighDynamicRange;
 
 
-        collectNames<OMX_CAMERADISABLEALGORITHMTYPE>(algorithms, algorithmNames);
+        collectNames<OMX_CAMERADISABLEALGORITHMTYPE>(algorithms, algorithmNames, algorithmTypes);
 
 
         omxStateNames[OMX_StateInvalid] = "OMX_StateInvalid";
@@ -450,17 +416,29 @@ private:
 	OMX_Maps(OMX_Maps const&);
 	void operator=(OMX_Maps const&);
 	
+    
 	template<typename OMXEnum>
-	void collectNames(map<string, OMXEnum>& sourceMap, vector<string>& names)
+	void collectNames(map<string, OMXEnum>& sourceMap, vector<string>& names, map<OMXEnum, string>& reverseMap)
 	{
 		typename map<string, OMXEnum>::iterator mapIterator = sourceMap.begin();
 		while (mapIterator != sourceMap.end()) 
 		{
 			names.push_back((*mapIterator).first);
+            reverseMap[(*mapIterator).second] = (*mapIterator).first;
 			++mapIterator;
 		}
 	}
-	
+    
+    template<typename OMXEnum>
+    void collectNames(map<string, OMXEnum>& sourceMap, vector<string>& names)
+    {
+        typename map<string, OMXEnum>::iterator mapIterator = sourceMap.begin();
+        while (mapIterator != sourceMap.end()) 
+        {
+            names.push_back((*mapIterator).first);
+            ++mapIterator;
+        }
+    }
     
 	
 	
