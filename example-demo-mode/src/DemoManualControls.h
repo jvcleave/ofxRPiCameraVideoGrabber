@@ -12,7 +12,9 @@ public:
     bool doChangeMeteringMode;
     bool doChangeWhiteBalance;
     bool doEvCompensation;
+    bool doMeteringChange;
     size_t currentWhiteBalanceIndex;
+    size_t currentMeteringTypeIndex;
     void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
@@ -21,7 +23,9 @@ public:
         doChangeMeteringMode = false;
         doChangeWhiteBalance = false;
         doEvCompensation = false;
+        doMeteringChange = false;
         currentWhiteBalanceIndex = 0;
+        currentMeteringTypeIndex = 0;
     };
     
     void update()
@@ -106,6 +110,18 @@ public:
             videoGrabber->setEvCompensation(ev);
             doEvCompensation = false;
         }
+        if(doMeteringChange)
+        {
+            if(currentMeteringTypeIndex+1<OMX_Maps::getInstance().meteringNames.size())
+            {
+                currentMeteringTypeIndex++;
+            }else
+            {
+                currentMeteringTypeIndex = 0;
+            }
+            videoGrabber->setMeteringType(OMX_Maps::getInstance().meteringNames[currentMeteringTypeIndex]);
+            doMeteringChange = false;
+        }
         stringstream info;
         
         info << "CURRENT SHUTTER SPEED (Microseconds): " <<videoGrabber->getShutterSpeed() << "\n";
@@ -115,7 +131,7 @@ public:
         info << "Press 3 to Reset Shutter to 100"           <<  "\n";
         info << "Press 4 to Change White Balance: " << videoGrabber->getCurrentWhiteBalanceName()<<  "\n";
         info << "Press 5 to Change EV Compensation: " << videoGrabber->getEvCompensation()<<  "\n";
-        
+        info << "Press 6 to Change Metering Type: " << videoGrabber->getCurrentMeteringTypeAsString()<<  "\n";
         infoString = info.str();
         
     };
@@ -157,6 +173,11 @@ public:
             case '5':
             {
                 doEvCompensation = true;
+                break;
+            }
+            case '6':
+            {
+                doMeteringChange = true;
                 break;
             }
             default:

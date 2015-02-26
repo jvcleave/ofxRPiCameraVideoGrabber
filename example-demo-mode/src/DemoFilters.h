@@ -19,7 +19,7 @@ public:
     {
         if (doChangeFilter) 
         {
-            videoGrabber->applyImageFilter(filterCollection.getNextFilter());
+            videoGrabber->setImageFilter(filterCollection.getNextFilter());
             doChangeFilter = false;
         }
         

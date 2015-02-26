@@ -91,7 +91,7 @@ void pixelsApp::keyPressed  (int key)
 	
 	if (key == 'e')
 	{
-		videoGrabber.applyImageFilter(filterCollection.getNextFilter());
+		videoGrabber.setImageFilter(filterCollection.getNextFilter());
 	}
 	if (key == 'g')
 	{

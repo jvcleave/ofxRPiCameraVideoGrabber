@@ -113,7 +113,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     CameraState& currentState = omxCameraSettings.state;
     currentState.validate();
    
-    setExposurePreset(OMX_Maps::getInstance().getExposurePreset(currentState.exposurePreset)); 
+    setExposurePreset(currentState.exposurePreset); 
     CameraMeteringMode cameraMeteringMode;
     cameraMeteringMode.meteringType = OMX_Maps::getInstance().metering[currentState.meteringType];
     cameraMeteringMode.evCompensation = currentState.evCompensation;
@@ -131,8 +131,8 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     setBrightness(currentState.brightness);
     setSaturation(currentState.saturation);
     setFrameStabilization(currentState.framestabilization);
-    setWhiteBalance(OMX_Maps::getInstance().getWhiteBalance(currentState.whiteBalance));
-    applyImageFilter(OMX_Maps::getInstance().getImageFilter(currentState.imageFilter));
+    setWhiteBalance(currentState.whiteBalance);
+    setImageFilter(currentState.imageFilter);
     setColorEnhancement(false);	 //TODO implement
     setDRE(currentState.dreLevel);
     cropRectangle = currentState.cropRectangle;
@@ -140,7 +140,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     zoomLevel = currentState.zoomLevel;
     setDigitalZoom();
     setRotation(currentState.rotation);
-    setMirror(OMX_Maps::getInstance().getMirror(currentState.mirror));
+    setMirror(currentState.mirror);
     
     setSoftwareSharpening(currentState.disableSoftwareSharpen);
     setSoftwareSaturation(currentState.disableSoftwareSaturation);
@@ -164,7 +164,7 @@ void ofxRPiCameraVideoGrabber::saveState()
     CameraState state;
  
     state.exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
-    state.meteringType=currentMeteringMode.getMeteringTypeString();
+    state.meteringType=currentMeteringMode.getMeteringTypeAsString();
     state.evCompensation=currentMeteringMode.evCompensation;
     state.autoShutter=currentMeteringMode.autoShutter;
     state.shutterSpeedMicroSeconds=currentMeteringMode.shutterSpeedMicroSeconds;
@@ -217,7 +217,7 @@ void ofxRPiCameraVideoGrabber::resetToCommonState()
 string ofxRPiCameraVideoGrabber::getMirrorAsString()
 {
 
-    return OMX_Maps::getInstance().mirrorNames[mirrorConfig.eMirror];
+    return OMX_Maps::getInstance().mirrorTypes[mirrorConfig.eMirror];
     
 }
 
@@ -700,11 +700,18 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
     return error;
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(string exposurePresetAsString)
+{
+    return setExposurePreset(OMX_Maps::getInstance().exposurePresets[exposurePresetAsString]);
+}
+
+
 string ofxRPiCameraVideoGrabber::getCurrentExposurePresetName()
 {
     
     return OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
 }
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setEvCompensation(int value)
 {
@@ -719,25 +726,25 @@ int ofxRPiCameraVideoGrabber::getEvCompensation()
 {
     return currentMeteringMode.evCompensation;
 }
-/*
- int
- ofxRPiCameraVideoGrabber::getMeteringEvCompensation()
- {
- OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
- OMX_INIT_STRUCTURE(exposurevalue);
- exposurevalue.nPortIndex = OMX_ALL;
- 
- error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
- if(error != OMX_ErrorNone) 
- {
- ofLog(OF_LOG_ERROR,	"getMeteringEvCompensation OMX_GetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
- }
- }
- */
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode cameraMeteringMode)
 {
     currentMeteringMode = cameraMeteringMode;
     return applyCurrentMeteringMode();
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(OMX_METERINGTYPE meteringType)
+{
+    currentMeteringMode.meteringType = meteringType;
+    return applyCurrentMeteringMode();    
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(string meteringTypeAsString)
+{
+    
+    currentMeteringMode.meteringType = OMX_Maps::getInstance().metering[meteringTypeAsString];
+    return applyCurrentMeteringMode();    
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
@@ -809,6 +816,11 @@ void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALU
     
 }
 
+string ofxRPiCameraVideoGrabber::getCurrentMeteringTypeAsString()
+{
+    return OMX_Maps::getInstance().meteringTypes[currentMeteringMode.exposurevalue.eMetering];
+}
+/*
 string ofxRPiCameraVideoGrabber::meteringModetoString()
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
@@ -816,7 +828,7 @@ string ofxRPiCameraVideoGrabber::meteringModetoString()
     
     stringstream ss;
     
-    ss << "OMX_METERINGTYPE: "      <<  currentMeteringMode.getMeteringTypeString()  << "\n";
+    ss << "OMX_METERINGTYPE: "      <<  currentMeteringMode.getMeteringTypeAsString()  << "\n";
     ss << "xEVCompensation: Q16"    <<  currentMeteringMode.exposurevalue.xEVCompensation       << "\n";
     ss << "nApertureFNumber Q16: "  <<  currentMeteringMode.exposurevalue.nApertureFNumber      << "\n";
     ss << "bAutoAperture: "         <<  currentMeteringMode.exposurevalue.bAutoAperture         << "\n";
@@ -832,11 +844,7 @@ string ofxRPiCameraVideoGrabber::meteringModetoString()
     return ss.str();
 }
 
-void ofxRPiCameraVideoGrabber::printMeteringMode()
-{
-    ofLogVerbose() << meteringModetoString();
-}
-
+*/
 
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoAperture(bool doAutoAperture)
@@ -1019,6 +1027,12 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE 
     return error;
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(string controlTypeAsString)
+{	
+
+    return setWhiteBalance(OMX_Maps::getInstance().whiteBalanceControls[controlTypeAsString]);
+}
+
 string ofxRPiCameraVideoGrabber::getCurrentWhiteBalanceName()
 {
     return OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
@@ -1190,7 +1204,10 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
     mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
     return applyMirror();
 }
-
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirrorTypeAsString)
+{
+    return setMirror(OMX_Maps::getInstance().mirrors[mirrorTypeAsString]);
+}
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
 {
@@ -1279,7 +1296,7 @@ void ofxRPiCameraVideoGrabber::disableImageEffects()
     toggleImageEffects(false);
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
     
     imagefilterConfig.eImageFilter = imageFilter;
@@ -1287,6 +1304,13 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE ima
     OMX_TRACE(error);
     return error;
 }
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(string imageFilterAsString)
+{
+    return setImageFilter(OMX_Maps::getInstance().imageFilters[imageFilterAsString]);
+}
+
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setDRE(int level)
 {
@@ -1441,7 +1465,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKER
 
 
 #if 0
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyImageFilterWithParams(OMX_CONFIG_IMAGEFILTERPARAMSTYPE imageFilter)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilterWithParams(OMX_CONFIG_IMAGEFILTERPARAMSTYPE imageFilter)
 {
     OMX_INIT_STRUCTURE(imageFilter);
     imageFilter.nPortIndex = OMX_ALL;

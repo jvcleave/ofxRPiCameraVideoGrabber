@@ -61,34 +61,16 @@ struct CameraMeteringMode
         ISO=0;
     };
     
-    string getMeteringTypeString()
+    string getMeteringTypeAsString()
     {
-        stringstream ss;
-        
-        if(meteringType == OMX_MeteringModeAverage)
-        {
-            ss << "OMX_MeteringModeAverage" << "\n";
-        }
-        if(meteringType == OMX_MeteringModeSpot)
-        {
-            ss << "OMX_MeteringModeSpot" << "\n";
-        }
-        if(meteringType == OMX_MeteringModeMatrix)
-        {
-            ss << "OMX_MeteringModeMatrix" << "\n";
-        }
-        if(meteringType == OMX_MeteringModeBacklit)
-        {
-            ss << "OMX_MeteringModeBacklit" << "\n";
-        }
-        return ss.str();
+        return OMX_Maps::getInstance().meteringTypes[meteringType];
     };
     
     string toString()
     {
         stringstream ss;
         
-        ss << getMeteringTypeString() << "\n";
+        ss << getMeteringTypeAsString() << "\n";
         ss << "evCompensation: " << evCompensation << "\n";
         
         ss << "autoShutter: " << autoShutter << "\n";
@@ -115,19 +97,18 @@ public:
     OMXCameraSettings omxCameraSettings;
 	
 	void setup(OMXCameraSettings);
-    
+    void close();
     void setDefaultValues();
     void saveState();
     void resetToCommonState();
     void draw();
-	void close();
 	
     bool isReady();
     bool isFrameNew();
    
     BaseEngine* getEngine();
     ofTexture& getTextureReference();
-    int getTextureID() { return (int)textureID; }
+    
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
@@ -141,23 +122,22 @@ public:
     bool isRecording();
     void startRecording();
     void stopRecording();
-    void enablePixels();
-    void disablePixels();
-    unsigned char * getPixels();
-    unsigned char * pixels;
-    
-    
+
     ofFbo fbo;
     ofTexture texture;
+    int getTextureID() { return (int)textureID; }
+    bool forceEGLReuse;
     
+    void enablePixels();
+    void disablePixels();
     
+    unsigned char * pixels;
     void updatePixels();
- 
-    
+    unsigned char * getPixels();
+
     void saveImage();
     void saveRawImage();
-    
-    
+        
 	void disableImageEffects();
 	void enableImageEffects();
 	
@@ -165,23 +145,26 @@ public:
     bool getLEDState() { return LED_CURRENT_STATE; }
     bool setLEDState(bool turnLEDOn);
 
-    string meteringModetoString();
-    void printMeteringMode();
     void printCameraInfo();
     
     OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
+    OMX_ERRORTYPE setMeteringType(OMX_METERINGTYPE);
+    OMX_ERRORTYPE setMeteringType(string);
     
+    string getCurrentMeteringTypeAsString();
  
     OMX_ERRORTYPE setAutoShutter(bool);
     bool getAutoShutter(){return currentMeteringMode.autoShutter;}
     int getShutterSpeed();
+    
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
+    
     OMX_ERRORTYPE setEvCompensation(int);
     int getEvCompensation();
 
     
-    OMX_ERRORTYPE applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
-    
+    OMX_ERRORTYPE setImageFilter(OMX_IMAGEFILTERTYPE);
+    OMX_ERRORTYPE setImageFilter(string);
     
     OMX_ERRORTYPE setSharpness(int sharpness); //-100 to 100
     OMX_ERRORTYPE setSharpnessNormalized(int sharpnessNormalized);
@@ -198,8 +181,11 @@ public:
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
+    OMX_ERRORTYPE setExposurePreset(string);
     string getCurrentExposurePresetName();
-    OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
+    
+    OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE);
+    OMX_ERRORTYPE setWhiteBalance(string);
     string getCurrentWhiteBalanceName();
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
@@ -207,7 +193,6 @@ public:
                                       int V=128);
     
     OMX_ERRORTYPE setDRE(int);//0-3
-    OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
     
     ofRectangle cropRectangle;
     OMX_ERRORTYPE setSensorCrop(ofRectangle& rectangle);
@@ -220,8 +205,8 @@ public:
     OMX_ERRORTYPE zoomOut();
     OMX_ERRORTYPE resetZoom();
     float getZoomLevelNormalized();
-    OMX_ERRORTYPE setZoomLevelNormalized(float);
     
+    OMX_ERRORTYPE setZoomLevelNormalized(float);
     
     enum ROTATION
     {
@@ -246,6 +231,7 @@ public:
     };
     
     OMX_ERRORTYPE setMirror(int);
+    OMX_ERRORTYPE setMirror(string);
     string getMirrorAsString();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool);
@@ -273,8 +259,6 @@ public:
     
     void loadStateFromFile(string filePath="");
     void saveCurrentStateToFile(string filePath="");
-    bool forceEGLReuse;
-    
     
     //fixed aperture - no effect
     OMX_ERRORTYPE setAutoAperture(bool);
@@ -291,6 +275,8 @@ public:
     //not sure if functional
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
     OMX_ERRORTYPE enableBurstMode();
+    OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
+
     
     
 private:

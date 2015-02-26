@@ -158,9 +158,9 @@ bool fromOMXBool(OMX_BOOL omxBool)
 }
 
 extern inline 
-float toQ16(float n) 
+int toQ16(float n) 
 {
-    return n* 65536; 
+    return (int)(n* 65536); 
 }
 
 extern inline 
