@@ -20,7 +20,7 @@ public:
         stringstream info;
         
         info << "\n";
-        info << "CURRENT MIRROR MODE: " << videoGrabber->getMirrorAsString() << "\n";
+        info << "CURRENT MIRROR MODE: " << videoGrabber->getMirror() << "\n";
         info << "Press 1 for MIRROR_NONE"       << "\n";
         info << "Press 2 for MIRROR_VERTICAL"   << "\n";
         info << "Press 3 for MIRROR_HORIZONTAL" << "\n";

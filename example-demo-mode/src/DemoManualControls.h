@@ -13,8 +13,10 @@ public:
     bool doChangeWhiteBalance;
     bool doEvCompensation;
     bool doMeteringChange;
+    bool doFocusChange;
     size_t currentWhiteBalanceIndex;
     size_t currentMeteringTypeIndex;
+    size_t currentFocusIndex;
     void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
@@ -24,8 +26,10 @@ public:
         doChangeWhiteBalance = false;
         doEvCompensation = false;
         doMeteringChange = false;
+        doFocusChange = false;
         currentWhiteBalanceIndex = 0;
         currentMeteringTypeIndex = 0;
+        currentFocusIndex = 0;
     };
     
     void update()
@@ -33,12 +37,20 @@ public:
         if(videoGrabber->getExposureMode() != ofxRPiCameraVideoGrabber::EXPOSURE_MODE_MANUAL)
         {
             videoGrabber->enableManualExposure();
-            string currentWhiteBalanceName = videoGrabber->getCurrentWhiteBalanceName();
+            string currentWhiteBalanceName = videoGrabber->getWhiteBalance();
             for(size_t i =0; i<OMX_Maps::getInstance().getWhiteBalanceNames().size(); ++i)
             {
                 if(currentWhiteBalanceName == OMX_Maps::getInstance().getWhiteBalanceNames()[i])
                 {
                     currentWhiteBalanceIndex = i;
+                }
+            }
+            string currentFocusName = videoGrabber->getFocus();
+            for(size_t i =0; i<OMX_Maps::getInstance().getFocusNames().size(); ++i)
+            {
+                if(currentFocusName == OMX_Maps::getInstance().getFocusNames()[i])
+                {
+                    currentFocusIndex = i;
                 }
             }
         }
@@ -92,8 +104,8 @@ public:
             {
                 currentWhiteBalanceIndex = 0;
             }
-            string currentWhiteBalanceName = OMX_Maps::getInstance().getWhiteBalanceNames()[currentWhiteBalanceIndex];
-            videoGrabber->setWhiteBalance(OMX_Maps::getInstance().getWhiteBalance(currentWhiteBalanceName));
+            string whiteBalanceName = OMX_Maps::getInstance().getWhiteBalanceNames()[currentWhiteBalanceIndex];
+            videoGrabber->setWhiteBalance(whiteBalanceName);
             doChangeWhiteBalance = false;
         }
         if(doEvCompensation)
@@ -122,6 +134,19 @@ public:
             videoGrabber->setMeteringType(OMX_Maps::getInstance().meteringNames[currentMeteringTypeIndex]);
             doMeteringChange = false;
         }
+        if(doFocusChange)
+        {
+            if(currentFocusIndex+1 < OMX_Maps::getInstance().getFocusNames().size())
+            {
+                currentFocusIndex++;
+            }else
+            {
+                currentFocusIndex = 0;
+            }
+            string focusName = OMX_Maps::getInstance().getFocusNames()[currentFocusIndex];
+            videoGrabber->setFocus(focusName);
+            doFocusChange = false;
+        }
         stringstream info;
         
         info << "CURRENT SHUTTER SPEED (Microseconds): " <<videoGrabber->getShutterSpeed() << "\n";
@@ -129,9 +154,10 @@ public:
         info << "Press 1 to Step Shutter Speed x2"          <<  "\n";
         info << "Press 2 to Cycle Shutter Speed +100"       <<  "\n";
         info << "Press 3 to Reset Shutter to 100"           <<  "\n";
-        info << "Press 4 to Change White Balance: " << videoGrabber->getCurrentWhiteBalanceName()<<  "\n";
-        info << "Press 5 to Change EV Compensation: " << videoGrabber->getEvCompensation()<<  "\n";
-        info << "Press 6 to Change Metering Type: " << videoGrabber->getCurrentMeteringTypeAsString()<<  "\n";
+        info << "Press 4 to Change White Balance: "     << videoGrabber->getWhiteBalance()      <<  "\n";
+        info << "Press 5 to Change EV Compensation: "   << videoGrabber->getEvCompensation()    <<  "\n";
+        info << "Press 6 to Change Metering Type: "     << videoGrabber->getMeteringType()      <<  "\n";
+        info << "Press 7 to Change Focus Type: "        << videoGrabber->getFocus()             <<  "\n";
         infoString = info.str();
         
     };
@@ -178,6 +204,11 @@ public:
             case '6':
             {
                 doMeteringChange = true;
+                break;
+            }
+            case '7':
+            {
+                doFocusChange = true;
                 break;
             }
             default:

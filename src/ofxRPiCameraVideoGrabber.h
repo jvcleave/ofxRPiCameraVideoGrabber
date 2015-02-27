@@ -150,8 +150,7 @@ public:
     OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
     OMX_ERRORTYPE setMeteringType(OMX_METERINGTYPE);
     OMX_ERRORTYPE setMeteringType(string);
-    
-    string getCurrentMeteringTypeAsString();
+    string getMeteringType();
  
     OMX_ERRORTYPE setAutoShutter(bool);
     bool getAutoShutter(){return currentMeteringMode.autoShutter;}
@@ -159,7 +158,7 @@ public:
     
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
     
-    OMX_ERRORTYPE setEvCompensation(int);
+    OMX_ERRORTYPE setEvCompensation(int); //-4 to 4
     int getEvCompensation();
 
     
@@ -182,11 +181,11 @@ public:
     
     OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
     OMX_ERRORTYPE setExposurePreset(string);
-    string getCurrentExposurePresetName();
+    string getExposurePreset();
     
     OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE);
     OMX_ERRORTYPE setWhiteBalance(string);
-    string getCurrentWhiteBalanceName();
+    string getWhiteBalance();
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, 
                                       int U=128, 
@@ -204,9 +203,14 @@ public:
     OMX_ERRORTYPE zoomIn();
     OMX_ERRORTYPE zoomOut();
     OMX_ERRORTYPE resetZoom();
-    float getZoomLevelNormalized();
+    
     
     OMX_ERRORTYPE setZoomLevelNormalized(float);
+    float getZoomLevelNormalized();
+    
+    OMX_ERRORTYPE setFocus(OMX_IMAGE_FOCUSCONTROLTYPE);
+    OMX_ERRORTYPE setFocus(string);
+    string getFocus();
     
     enum ROTATION
     {
@@ -217,8 +221,8 @@ public:
     };
     OMX_ERRORTYPE setRotation(int);
     OMX_ERRORTYPE setRotation(ROTATION);
-    
     int getRotation();
+    
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
@@ -232,7 +236,7 @@ public:
     
     OMX_ERRORTYPE setMirror(int);
     OMX_ERRORTYPE setMirror(string);
-    string getMirrorAsString();
+    string getMirror();
     
     OMX_ERRORTYPE setSoftwareSharpening(bool);
     OMX_ERRORTYPE enableSoftwareSharpening();
@@ -354,6 +358,8 @@ private:
     
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
+    
+    OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE focusControlConfig;
 #if 0
     
 
@@ -440,6 +446,8 @@ private:
         OMX_INIT_STRUCTURE(disableSoftwareSharpenConfig);
         OMX_INIT_STRUCTURE(disableSoftwareSaturationConfig);
         
+        OMX_INIT_STRUCTURE(focusControlConfig);
+        focusControlConfig.nPortIndex = OMX_ALL;
         
         OMX_INIT_STRUCTURE(cameraInfoConfig);
         

@@ -115,7 +115,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
    
     setExposurePreset(currentState.exposurePreset); 
     CameraMeteringMode cameraMeteringMode;
-    cameraMeteringMode.meteringType = OMX_Maps::getInstance().metering[currentState.meteringType];
+    cameraMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(currentState.meteringType);
     cameraMeteringMode.evCompensation = currentState.evCompensation;
     cameraMeteringMode.autoShutter = currentState.autoShutter;
     cameraMeteringMode.shutterSpeedMicroSeconds = currentState.shutterSpeedMicroSeconds;
@@ -144,7 +144,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     
     setSoftwareSharpening(currentState.disableSoftwareSharpen);
     setSoftwareSaturation(currentState.disableSoftwareSaturation);
-    
+    setFocus("Hyperfocal");
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -158,6 +158,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
         LED_CURRENT_STATE = true;
         setLEDState(LED_CURRENT_STATE);
     } 
+
 }
 void ofxRPiCameraVideoGrabber::saveState()
 {
@@ -183,13 +184,12 @@ void ofxRPiCameraVideoGrabber::saveState()
     state.whiteBalance=OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
 
     state.imageFilter=OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
-    //DRC
     
     state.dreLevel=OMX_Maps::getInstance().dreTypes[dreConfig.eMode];
     state.cropRectangle=cropRectangle;
     state.zoomLevel=zoomLevel;
     state.rotation=rotationConfig.nRotation;
-    state.mirror = getMirrorAsString();
+    state.mirror = getMirror();
     omxCameraSettings.state = state;
         
 }
@@ -214,7 +214,7 @@ void ofxRPiCameraVideoGrabber::resetToCommonState()
 }
 
 
-string ofxRPiCameraVideoGrabber::getMirrorAsString()
+string ofxRPiCameraVideoGrabber::getMirror()
 {
 
     return OMX_Maps::getInstance().mirrorTypes[mirrorConfig.eMirror];
@@ -700,18 +700,34 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(string exposurePresetAsString)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(string exposurePreset)
 {
-    return setExposurePreset(OMX_Maps::getInstance().exposurePresets[exposurePresetAsString]);
+    return setExposurePreset(OMX_Maps::getInstance().getExposurePreset(exposurePreset));
 }
 
 
-string ofxRPiCameraVideoGrabber::getCurrentExposurePresetName()
+string ofxRPiCameraVideoGrabber::getExposurePreset()
 {
     
     return OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
 }
 
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFocus(OMX_IMAGE_FOCUSCONTROLTYPE type)
+{
+    focusControlConfig.eFocusControl = type;
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigFocusControl, &focusControlConfig);
+    OMX_TRACE(error);
+    return error;
+}
+string ofxRPiCameraVideoGrabber::getFocus()
+{
+    return OMX_Maps::getInstance().getFocus(focusControlConfig.eFocusControl);
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFocus(string type)
+{
+    return setFocus(OMX_Maps::getInstance().getFocus(type));
+}
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setEvCompensation(int value)
 {
@@ -740,10 +756,10 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(OMX_METERINGTYPE meterin
     return applyCurrentMeteringMode();    
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(string meteringTypeAsString)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(string meteringType)
 {
     
-    currentMeteringMode.meteringType = OMX_Maps::getInstance().metering[meteringTypeAsString];
+    currentMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(meteringType);
     return applyCurrentMeteringMode();    
 }
 
@@ -816,9 +832,9 @@ void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALU
     
 }
 
-string ofxRPiCameraVideoGrabber::getCurrentMeteringTypeAsString()
+string ofxRPiCameraVideoGrabber::getMeteringType()
 {
-    return OMX_Maps::getInstance().meteringTypes[currentMeteringMode.exposurevalue.eMetering];
+    return OMX_Maps::getInstance().getMetering(currentMeteringMode.exposurevalue.eMetering);
 }
 /*
 string ofxRPiCameraVideoGrabber::meteringModetoString()
@@ -1027,13 +1043,13 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE 
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(string controlTypeAsString)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(string name)
 {	
 
-    return setWhiteBalance(OMX_Maps::getInstance().whiteBalanceControls[controlTypeAsString]);
+    return setWhiteBalance(OMX_Maps::getInstance().getWhiteBalance(name));
 }
 
-string ofxRPiCameraVideoGrabber::getCurrentWhiteBalanceName()
+string ofxRPiCameraVideoGrabber::getWhiteBalance()
 {
     return OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
 }
@@ -1204,9 +1220,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
     mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
     return applyMirror();
 }
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirrorTypeAsString)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror)
 {
-    return setMirror(OMX_Maps::getInstance().mirrors[mirrorTypeAsString]);
+    return setMirror(OMX_Maps::getInstance().getMirror(mirror));
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
@@ -1305,9 +1321,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(OMX_IMAGEFILTERTYPE image
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(string imageFilterAsString)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(string imageFilter)
 {
-    return setImageFilter(OMX_Maps::getInstance().imageFilters[imageFilterAsString]);
+    return setImageFilter(OMX_Maps::getInstance().getImageFilter(imageFilter));
 }
 
 

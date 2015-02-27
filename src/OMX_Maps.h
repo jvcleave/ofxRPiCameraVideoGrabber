@@ -51,8 +51,8 @@ public:
     
     
 	vector<string> whiteBalanceNames;
-	map<string, OMX_WHITEBALCONTROLTYPE> whiteBalanceControls;
-    map<OMX_WHITEBALCONTROLTYPE, string> whiteBalanceControlTypes;
+	map<string, OMX_WHITEBALCONTROLTYPE> whiteBalance;
+    map<OMX_WHITEBALCONTROLTYPE, string> whiteBalanceTypes;
     vector<string>& getWhiteBalanceNames()
     {
         return whiteBalanceNames;
@@ -60,13 +60,34 @@ public:
     
     string getWhiteBalance(OMX_WHITEBALCONTROLTYPE type)
     {
-        return whiteBalanceControlTypes[type];
+        return whiteBalanceTypes[type];
     }
     
     OMX_WHITEBALCONTROLTYPE getWhiteBalance(string name)
     {
-        return whiteBalanceControls[name];
+        return whiteBalance[name];
     }
+    
+    vector<string> focusNames;
+    map<string, OMX_IMAGE_FOCUSCONTROLTYPE> focusControls;
+    map<OMX_IMAGE_FOCUSCONTROLTYPE, string> focusControlTypes;
+    
+    vector<string>& getFocusNames()
+    {
+        return focusNames;
+    }
+    
+    string getFocus(OMX_IMAGE_FOCUSCONTROLTYPE type)
+    {
+        return focusControlTypes[type];
+    }
+    
+    OMX_IMAGE_FOCUSCONTROLTYPE getFocus(string name)
+    {
+        return focusControls[name];
+    }
+
+    
     
     
 	vector<string> meteringNames;
@@ -141,7 +162,7 @@ public:
     {
         return colorFormatNames;
     }
-	
+ 
 	
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
@@ -160,11 +181,34 @@ public:
     
  
     map<OMX_STATETYPE, string>omxStateNames;
+
     
 private:	
     OMX_Maps()
     {
-
+ 
+        focusControls["On"] = OMX_IMAGE_FocusControlOn;
+        focusControls["Off"] = OMX_IMAGE_FocusControlOff;
+        focusControls["Auto"] = OMX_IMAGE_FocusControlAuto;
+        focusControls["AutoLock"] = OMX_IMAGE_FocusControlAutoLock;
+        focusControls["Hyperfocal"] = OMX_IMAGE_FocusControlHyperfocal;
+        focusControls["AutoMacro"] = OMX_IMAGE_FocusControlAutoMacro;
+        focusControls["AutoInfinity"] = OMX_IMAGE_FocusControlAutoInfinity;
+        focusControls["AutoLockMacro"] = OMX_IMAGE_FocusControlAutoLockMacro;
+        focusControls["AutoLockInfinity"] = OMX_IMAGE_FocusControlAutoLockInfinity;
+        focusControls["NearFixed"] = OMX_IMAGE_FocusControlNearFixed;
+        focusControls["AutoNear"] = OMX_IMAGE_FocusControlAutoNear;
+        focusControls["AutoLockNear"] = OMX_IMAGE_FocusControlAutoLockNear;
+        focusControls["InfinityFixed"] = OMX_IMAGE_FocusControlInfinityFixed;
+        focusControls["MacroFixed"] = OMX_IMAGE_FocusControlMacroFixed;
+        focusControls["AutoFast"] = OMX_IMAGE_FocusControlAutoFast;
+        focusControls["AutoMacroFast"] = OMX_IMAGE_FocusControlAutoMacroFast;
+        focusControls["AutoNearFast"] = OMX_IMAGE_FocusControlAutoNearFast;
+        focusControls["AutoInfinityFast"] = OMX_IMAGE_FocusControlAutoInfinityFast;
+        focusControls["CurrentFixed"] = OMX_IMAGE_FocusControlCurrentFixed;
+        
+        collectNames<OMX_IMAGE_FOCUSCONTROLTYPE>(focusControls, focusNames, focusControlTypes);
+        
         dreTypes[OMX_DynRangeExpOff] = 0;
         dreTypes[OMX_DynRangeExpLow] = 1;
         dreTypes[OMX_DynRangeExpMedium] = 2;
@@ -207,18 +251,18 @@ private:
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
 
 
-        whiteBalanceControls["Off"] = OMX_WhiteBalControlOff;
-        whiteBalanceControls["Auto"] = OMX_WhiteBalControlAuto;
-        whiteBalanceControls["SunLight"] = OMX_WhiteBalControlSunLight;
-        whiteBalanceControls["Cloudy"] = OMX_WhiteBalControlCloudy;
-        whiteBalanceControls["Shade"] = OMX_WhiteBalControlShade;
-        whiteBalanceControls["Tungsten"] = OMX_WhiteBalControlTungsten;
-        whiteBalanceControls["Fluorescent"] = OMX_WhiteBalControlFluorescent;
-        whiteBalanceControls["Incandescent"] = OMX_WhiteBalControlIncandescent;
-        whiteBalanceControls["Flash"] = OMX_WhiteBalControlFlash;
-        whiteBalanceControls["Horizon"] = OMX_WhiteBalControlHorizon;
+        whiteBalance["Off"] = OMX_WhiteBalControlOff;
+        whiteBalance["Auto"] = OMX_WhiteBalControlAuto;
+        whiteBalance["SunLight"] = OMX_WhiteBalControlSunLight;
+        whiteBalance["Cloudy"] = OMX_WhiteBalControlCloudy;
+        whiteBalance["Shade"] = OMX_WhiteBalControlShade;
+        whiteBalance["Tungsten"] = OMX_WhiteBalControlTungsten;
+        whiteBalance["Fluorescent"] = OMX_WhiteBalControlFluorescent;
+        whiteBalance["Incandescent"] = OMX_WhiteBalControlIncandescent;
+        whiteBalance["Flash"] = OMX_WhiteBalControlFlash;
+        whiteBalance["Horizon"] = OMX_WhiteBalControlHorizon;
 
-        collectNames<OMX_WHITEBALCONTROLTYPE>(whiteBalanceControls, whiteBalanceNames, whiteBalanceControlTypes);
+        collectNames<OMX_WHITEBALCONTROLTYPE>(whiteBalance, whiteBalanceNames, whiteBalanceTypes);
         
         metering["Average"] = OMX_MeteringModeAverage;
         metering["Spot"] = OMX_MeteringModeSpot;

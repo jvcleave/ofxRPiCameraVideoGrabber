@@ -39,7 +39,7 @@ public:
         }
         stringstream info;
 
-        info << "Press 1 to change Exposure Preset: " << videoGrabber->getCurrentExposurePresetName() << "\n";
+        info << "Press 1 to change Exposure Preset: " << videoGrabber->getExposurePreset() << "\n";
 
         infoString = info.str();
     };
