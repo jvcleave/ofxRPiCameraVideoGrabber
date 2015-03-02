@@ -24,10 +24,10 @@ void ofApp::setup()
     
     
    
-    DemoManualControls*  manualControlDemo = new DemoManualControls();
+   /* DemoManualControls*  manualControlDemo = new DemoManualControls();
     manualControlDemo->setup(&videoGrabber);
     manualControlDemo->name = "MANUAL CONTROLS";
-    demos.push_back(manualControlDemo);
+    demos.push_back(manualControlDemo);*/
     
     DemoEnhancement* enhancementDemo = new DemoEnhancement();
     enhancementDemo->setup(&videoGrabber);

@@ -21,8 +21,7 @@
 #include "OMXCameraUtils.h"
 #include "OMXCameraSettings.h"
 
-#include "TextureEngine.h"
-#include "NonTextureEngine.h"
+#include "BaseEngine.h"
 
 
 struct CameraMeteringMode
@@ -281,7 +280,7 @@ public:
     
     
 private:
-    
+    bool isTextureMode;
     bool doStartRecording;
     
     OMX_ERRORTYPE applyMirror();
@@ -306,8 +305,7 @@ private:
 
     OMX_ERRORTYPE toggleImageEffects(bool doDisable);
 		
-	TextureEngine* textureEngine;
-	NonTextureEngine* engine;
+	BaseEngine* engine;
     
     bool doSaveImage;
     bool doRawSave;
