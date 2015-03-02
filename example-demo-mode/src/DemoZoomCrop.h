@@ -33,6 +33,7 @@ public:
         if(resetCrop)
         {
             videoGrabber->setSensorCrop(0, 0,  100, 100);
+            resetCrop = false;
         }
         
         if (doCrop) 

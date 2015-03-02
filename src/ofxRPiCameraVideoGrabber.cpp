@@ -23,11 +23,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     
     camera = NULL;
     engine = NULL;
-    textureEngine = NULL;
     appEGLWindow = NULL;
     pixels = NULL;
     eglImage = NULL;
-    
+    isTextureMode = false;
     doPixels = false;
     textureID	= 0;
     
@@ -42,6 +41,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
+   
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
@@ -49,24 +49,19 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         engine = NULL;
         
     }
-    if(textureEngine)
+    
+    /*
+     In certain cases you can get away with not destroyEGLImage
+     but texture allocation is fairly quick 
+     1080P 77 milliseconds
+     720P 50 milliseconds
+     480P 10 milliseconds
+     
+     Not destroying was causing blank textures when switching modes
+     */
+    if(!forceEGLReuse)
     {
-        delete textureEngine;
-        textureEngine = NULL;
-        /*
-         In certain cases you can get away with not destroyEGLImage
-         but texture allocation is fairly quick 
-         1080P 77 milliseconds
-         720P 50 milliseconds
-         480P 10 milliseconds
-         
-         Not destroying was causing blank textures when switching modes
-         */
-        if(!forceEGLReuse)
-        {
-            destroyEGLImage();
-        }
-        
+        destroyEGLImage();
     }
     
     
@@ -84,28 +79,27 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     
     omxCameraSettings = omxCameraSettings_;
     omxCameraSettings.applyPreset();
+    isTextureMode = omxCameraSettings.isUsingTexture;
+
     if (omxCameraSettings.enablePixels) 
     {
         enablePixels();
     }
-    
-    if (omxCameraSettings.isUsingTexture) 
+    if (isTextureEnabled()) 
     {
         generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
-        textureEngine = new TextureEngine();
-        textureEngine->eglImage = eglImage;
-        textureEngine->setup(omxCameraSettings);
-        camera = textureEngine->camera;
-        
-    }else 
-    {
-        engine = new NonTextureEngine();
-        engine->setup(omxCameraSettings);
-        camera = engine->camera;
     }
+    engine = new BaseEngine();
+    if (isTextureEnabled()) 
+    {
+        engine->eglImage = eglImage;
+    }
+    engine->setup(omxCameraSettings);
+    camera = engine->camera;
     
     setDefaultValues();
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    ofLogVerbose() << "isTextureMode: " << isTextureMode;
 }
 
 void ofxRPiCameraVideoGrabber::setDefaultValues()
@@ -278,20 +272,15 @@ BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
     {
         return engine;
     }
-    
-    if (textureEngine) 
-    {
-        return textureEngine;
-    }
     return NULL;
 }
 
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
-    if (getEngine()) 
+    if (engine) 
     {
-        return getEngine()->isOpen;
+        return engine->isOpen;
     }
     return false;
 }
@@ -313,7 +302,7 @@ int ofxRPiCameraVideoGrabber::getFrameRate()
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
-    if (!textureEngine) 
+    if (!isTextureEnabled()) 
     {
       
         //ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
@@ -461,12 +450,7 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
 
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
-    bool isEnabled = false;
-    if(textureEngine)
-    {
-        isEnabled = true;
-    }
-    return isEnabled;
+    return isTextureMode;
 }
 
 void ofxRPiCameraVideoGrabber::updatePixels()
@@ -529,10 +513,7 @@ void ofxRPiCameraVideoGrabber::updatePixels()
 
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
-    if(!textureEngine)
-    {
-       // ofLogWarning(__func__) << "You are in non-texture mode but asking for a pixels";
-    }
+    
     doPixels = true;
 }
 
@@ -540,11 +521,6 @@ void ofxRPiCameraVideoGrabber::enablePixels()
 
 void ofxRPiCameraVideoGrabber::disablePixels()
 {
-    if(!textureEngine)
-    {
-        ofLogWarning(__func__) << "You are in non-texture mode";
-    }
-    
     doPixels = false;
 }
 
@@ -558,10 +534,6 @@ void ofxRPiCameraVideoGrabber::stopRecording()
     if (engine) 
     {
         engine->stopRecording();
-    }
-    if (textureEngine) 
-    {
-        textureEngine->stopRecording();
     }
 }
 
@@ -609,17 +581,11 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     {
         //ofLogVerbose(__func__) << doStartRecording;
 
-        if(textureEngine)
+        if (engine) 
         {
-            frameCounter  = textureEngine->getFrameCounter();
-            
-        }else
-        {
-            if (engine) 
-            {
-                frameCounter  = engine->getFrameCounter();
-            }
+            frameCounter  = engine->getFrameCounter();
         }
+        
         
         if (frameCounter > updateFrameCounter) 
         {
@@ -630,13 +596,10 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
         {
             hasNewFrame = false;
         }
+        hasNewFrame = true;
         if (hasNewFrame) 
         {
-            if (textureEngine) 
-            {
-                updatePixels();
-                
-            }
+            updatePixels();
         }
     }
         //ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
@@ -651,7 +614,7 @@ bool ofxRPiCameraVideoGrabber::isFrameNew()
 
 void ofxRPiCameraVideoGrabber::draw()
 {
-    if (!textureEngine)
+    if (!isTextureEnabled())
     {
         return;
     }
@@ -1581,12 +1544,12 @@ void ofxRPiCameraVideoGrabber::close()
         delete engine;
         engine = NULL;
     }
-    if(textureEngine)
+    destroyEGLImage();
+    /*if(eglImage)
     {
-        delete textureEngine;
-        textureEngine = NULL;
         destroyEGLImage();
-    }
+        eglImage = NULL;
+    }*/
 }
 
 
