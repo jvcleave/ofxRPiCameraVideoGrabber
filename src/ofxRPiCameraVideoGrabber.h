@@ -207,10 +207,7 @@ public:
     
     OMX_ERRORTYPE setZoomLevelNormalized(float);
     float getZoomLevelNormalized();
-    
-    OMX_ERRORTYPE setFocus(OMX_IMAGE_FOCUSCONTROLTYPE);
-    OMX_ERRORTYPE setFocus(string);
-    string getFocus();
+
     
     enum ROTATION
     {
@@ -359,7 +356,6 @@ private:
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
     
-    OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE focusControlConfig;
 #if 0
     
 
@@ -372,7 +368,7 @@ private:
     OMX_CONFIG_BRCMFOVTYPE OMX_IndexConfigFieldOfView
     //OMX_CONFIG_CAMERAINFOTYPE OMX_IndexConfigCameraInfo
     
-    OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE OMX_IndexConfigFocusControl
+    //OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE OMX_IndexConfigFocusControl
     OMX_CONFIG_REDEYEREMOVALTYPE OMX_IndexConfigCommonRedEyeRemoval
     
     OMX_PARAM_CAPTURESTATETYPE OMX_IndexParamCaptureStatus
@@ -383,13 +379,12 @@ private:
     OMX_PARAM_TIMESTAMPMODETYPE OMX_IndexParamCommonUseStcTimestamps
     
     //OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
-    OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
+    //OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
     //OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
     OMX_PARAM_BRCMCONFIGFILETYPE OMX_IndexParamBrcmConfigFileRegisters
     OMX_PARAM_BRCMCONFIGFILECHUNKTYPE OMX_IndexParamBrcmConfigFileChunkRegisters
     
     OMX_PARAM_BRCMFRAMERATERANGETYPE OMX_IndexParamBrcmFpsRange
-    OMX_PARAM_S32TYPE OMX_IndexParamCaptureExposureCompensation
     //OMX_IndexParamSWSharpenDisable
    // OMX_IndexParamSWSaturationDisable
  
@@ -445,9 +440,6 @@ private:
         
         OMX_INIT_STRUCTURE(disableSoftwareSharpenConfig);
         OMX_INIT_STRUCTURE(disableSoftwareSaturationConfig);
-        
-        OMX_INIT_STRUCTURE(focusControlConfig);
-        focusControlConfig.nPortIndex = OMX_ALL;
         
         OMX_INIT_STRUCTURE(cameraInfoConfig);
         

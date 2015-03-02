@@ -144,7 +144,6 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
     
     setSoftwareSharpening(currentState.disableSoftwareSharpen);
     setSoftwareSaturation(currentState.disableSoftwareSaturation);
-    setFocus("Hyperfocal");
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -710,23 +709,6 @@ string ofxRPiCameraVideoGrabber::getExposurePreset()
 {
     
     return OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
-}
-
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFocus(OMX_IMAGE_FOCUSCONTROLTYPE type)
-{
-    focusControlConfig.eFocusControl = type;
-    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigFocusControl, &focusControlConfig);
-    OMX_TRACE(error);
-    return error;
-}
-string ofxRPiCameraVideoGrabber::getFocus()
-{
-    return OMX_Maps::getInstance().getFocus(focusControlConfig.eFocusControl);
-}
-
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFocus(string type)
-{
-    return setFocus(OMX_Maps::getInstance().getFocus(type));
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setEvCompensation(int value)
