@@ -89,7 +89,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     {
         generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
     }
-    engine = new BaseEngine();
+    engine = new CameraEngine();
     if (isTextureEnabled()) 
     {
         engine->eglImage = eglImage;
@@ -266,7 +266,7 @@ void ofxRPiCameraVideoGrabber::printCameraInfo()
 }
 
 
-BaseEngine* ofxRPiCameraVideoGrabber::getEngine()
+CameraEngine* ofxRPiCameraVideoGrabber::getEngine()
 {
     if (engine) 
     {
@@ -280,7 +280,7 @@ bool ofxRPiCameraVideoGrabber::isReady()
 {
     if (engine) 
     {
-        return engine->isOpen;
+        return engine->isOpen();
     }
     return false;
 }

@@ -1,9 +1,9 @@
-#include "BaseEngine.h"
+#include "CameraEngine.h"
 
 
-BaseEngine::BaseEngine()
+CameraEngine::CameraEngine()
 {
-	isOpen		= false;
+	didOpen		= false;
 	
 	didWriteFile = false;
 	
@@ -29,10 +29,10 @@ BaseEngine::BaseEngine()
 }   
 
 
-int BaseEngine::getFrameCounter()
+int CameraEngine::getFrameCounter()
 {
     return renderedFrameCounter;
-    if(!isOpen) return 0;
+    if(!didOpen) return 0;
     
     if(engineType == TEXTURE_ENGINE)
     {
@@ -64,7 +64,7 @@ int BaseEngine::getFrameCounter()
 #endif
     return 0;
 }
-void BaseEngine::setup(OMXCameraSettings& omxCameraSettings_)
+void CameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
     omxCameraSettings = omxCameraSettings_;
     
@@ -82,7 +82,7 @@ void BaseEngine::setup(OMXCameraSettings& omxCameraSettings_)
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     OMX_CALLBACKTYPE cameraCallbacks;
-    cameraCallbacks.EventHandler    = &BaseEngine::cameraEventHandlerCallback;
+    cameraCallbacks.EventHandler    = &CameraEngine::cameraEventHandlerCallback;
     
     
     error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
@@ -94,19 +94,19 @@ void BaseEngine::setup(OMXCameraSettings& omxCameraSettings_)
     configureCameraResolution();
     
 }
-OMX_ERRORTYPE BaseEngine::egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE CameraEngine::egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-    BaseEngine *grabber = static_cast<BaseEngine*>(pAppData);
+    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
     grabber->renderedFrameCounter++;
     OMX_ERRORTYPE error = OMX_FillThisBuffer(hComponent, pBuffer);
     return error;
 }
 
-OMX_ERRORTYPE BaseEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE CameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
                                                 OMX_PTR pAppData,
                                                 OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-    BaseEngine *grabber = static_cast<BaseEngine*>(pAppData);
+    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
     grabber->lock();
     //ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
     grabber->bufferAvailable = true;
@@ -115,7 +115,7 @@ OMX_ERRORTYPE BaseEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
     return OMX_ErrorNone;
 }
 
-OMX_ERRORTYPE BaseEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE CameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
                                                      OMX_PTR pAppData,
                                                      OMX_EVENTTYPE eEvent,
                                                      OMX_U32 nData1,
@@ -125,7 +125,7 @@ OMX_ERRORTYPE BaseEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
     /*ofLog(OF_LOG_VERBOSE, 
      "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
      __func__, eEvent, nData1, nData2, pEventData);*/
-    BaseEngine *grabber = static_cast<BaseEngine*>(pAppData);
+    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
     //ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
     switch (eEvent) 
     {
@@ -152,7 +152,7 @@ OMX_ERRORTYPE BaseEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
 }
 
 
-OMX_ERRORTYPE BaseEngine::configureCameraResolution()
+OMX_ERRORTYPE CameraEngine::configureCameraResolution()
 {
     
     OMX_ERRORTYPE error;
@@ -202,7 +202,7 @@ OMX_ERRORTYPE BaseEngine::configureCameraResolution()
     return error;
 }
 
-OMX_ERRORTYPE BaseEngine::configureEncoder()
+OMX_ERRORTYPE CameraEngine::configureEncoder()
 {
 		
     OMX_ERRORTYPE error;
@@ -266,7 +266,7 @@ OMX_ERRORTYPE BaseEngine::configureEncoder()
     return error;
 
 }
-void BaseEngine::threadedFunction()
+void CameraEngine::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
@@ -319,7 +319,7 @@ void BaseEngine::threadedFunction()
 	}
 }
 
-OMX_ERRORTYPE BaseEngine::onCameraEventParamOrConfigChanged()
+OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
 {
     
     OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -338,7 +338,7 @@ OMX_ERRORTYPE BaseEngine::onCameraEventParamOrConfigChanged()
     {
         //Set up video splitter
         OMX_CALLBACKTYPE splitterCallbacks;
-        splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
+        splitterCallbacks.EventHandler    = &CameraEngine::splitterEventHandlerCallback;
         OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
         DisableAllPortsForComponent(&splitter);
         
@@ -351,14 +351,14 @@ OMX_ERRORTYPE BaseEngine::onCameraEventParamOrConfigChanged()
     
     //Set up texture renderer
     OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler	= &BaseEngine::renderEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+    renderCallbacks.EventHandler	= &CameraEngine::renderEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone	= &CameraEngine::renderEmptyBufferDone;
     if(engineType == TEXTURE_ENGINE)
     {
-        renderCallbacks.FillBufferDone	= &BaseEngine::egl_renderFillBufferDone;
+        renderCallbacks.FillBufferDone	= &CameraEngine::egl_renderFillBufferDone;
     }else
     {
-        renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
+        renderCallbacks.FillBufferDone	= &CameraEngine::renderFillBufferDone;
 
     }
     
@@ -376,9 +376,9 @@ OMX_ERRORTYPE BaseEngine::onCameraEventParamOrConfigChanged()
         //Create encoder
         
         OMX_CALLBACKTYPE encoderCallbacks;
-        encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
-        encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
-        encoderCallbacks.FillBufferDone		= &BaseEngine::encoderFillBufferDone;
+        encoderCallbacks.EventHandler		= &CameraEngine::encoderEventHandlerCallback;
+        encoderCallbacks.EmptyBufferDone	= &CameraEngine::encoderEmptyBufferDone;
+        encoderCallbacks.FillBufferDone		= &CameraEngine::encoderFillBufferDone;
         
         error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
@@ -569,11 +569,11 @@ OMX_ERRORTYPE BaseEngine::onCameraEventParamOrConfigChanged()
         setupDisplay();
     }
 
-    isOpen = true;
+    didOpen = true;
     return error;
 }
 
-OMX_ERRORTYPE BaseEngine::setupDisplay()
+OMX_ERRORTYPE CameraEngine::setupDisplay()
 {
     
     OMX_CONFIG_DISPLAYREGIONTYPE region;
@@ -600,7 +600,7 @@ OMX_ERRORTYPE BaseEngine::setupDisplay()
     
 }
 
-void BaseEngine::stopRecording()
+void CameraEngine::stopRecording()
 {
 	
 	if(isCurrentlyRecording)
@@ -612,7 +612,7 @@ void BaseEngine::stopRecording()
 	}	
 }
 
-bool BaseEngine::writeFile()
+bool CameraEngine::writeFile()
 {
 
 	stopThread();
@@ -661,15 +661,15 @@ bool BaseEngine::writeFile()
     return didWriteFile;
 }
 
-BaseEngine::~BaseEngine()
+CameraEngine::~CameraEngine()
 {
-    if(isOpen)
+    if(didOpen)
     {
         closeEngine();
     }
 }
 
-void BaseEngine::closeEngine()
+void CameraEngine::closeEngine()
 {
     if(isCurrentlyRecording && !didWriteFile)
     {
@@ -799,6 +799,6 @@ void BaseEngine::closeEngine()
     
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
-    isOpen = false;
+    didOpen = false;
 
 }

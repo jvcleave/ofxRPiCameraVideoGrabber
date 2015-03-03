@@ -1,5 +1,5 @@
 /*
- *  BaseEngine.h
+ *  CameraEngine.h
  *
  *  Created by jason van cleave on 2/10/14.
  *  Copyright 2014 jasonvancleave.com. All rights reserved.
@@ -25,26 +25,28 @@ enum EngineType {
 	NON_TEXTURE_ENGINE
 };
 
-class BaseEngine: public ofThread
+class CameraEngine: public ofThread
 {
 public:
-	BaseEngine();
-    ~BaseEngine();
+	CameraEngine();
+    ~CameraEngine();
     void setup(OMXCameraSettings& omxCameraSettings_);
-    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
+    
 	int getFrameCounter();
     void closeEngine();
     bool isRecording() {return isCurrentlyRecording;};
     void stopRecording();
     OMX_HANDLETYPE camera;
 
-    bool isOpen;
-
-    OMX_ERRORTYPE setupDisplay();
+    
     EGLImageKHR eglImage;
-
-    int renderedFrameCounter; 
+    bool isOpen(){return didOpen;}
+    
 private:
+    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
+    bool didOpen;
+    int renderedFrameCounter; 
+    OMX_ERRORTYPE setupDisplay();
 	OMXCameraSettings omxCameraSettings;
 
 	OMX_ERRORTYPE configureCameraResolution();

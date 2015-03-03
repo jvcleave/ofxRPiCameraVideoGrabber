@@ -226,6 +226,16 @@ void ofApp::keyPressed  (int key)
             videoGrabber.loadStateFromFile();
             break;
         }
+        case '8' :
+        {
+            videoGrabber.startRecording();
+            break;
+        }
+        case '9' :
+        {
+            videoGrabber.stopRecording();
+            break;
+        }
         /*
         case '5' :
         {
