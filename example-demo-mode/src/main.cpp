@@ -1,6 +1,7 @@
 #include "ofMain.h"
 #include "ofGLProgrammableRenderer.h"
 
+//#define ENABLE_OMX_TRACE 1
 #include "ofApp.h"
 int main()
 {

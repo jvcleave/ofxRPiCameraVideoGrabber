@@ -38,10 +38,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     
     forceEGLReuse = false;
 }
-
+#if 0
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
-   
+    
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
@@ -65,7 +65,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }
     
     
-     
+    
     addExitHandler();
     if(!hasOMXInit)
     {
@@ -80,7 +80,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     omxCameraSettings = omxCameraSettings_;
     omxCameraSettings.applyPreset();
     isTextureMode = omxCameraSettings.isUsingTexture;
-
+    
     if (omxCameraSettings.enablePixels) 
     {
         enablePixels();
@@ -99,8 +99,8 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     
     setDefaultValues();
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
-    ofLogVerbose() << "isTextureMode: " << isTextureMode;
 }
+#endif
 
 void ofxRPiCameraVideoGrabber::setDefaultValues()
 {
@@ -309,7 +309,7 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
     }
     return texture;
 }
-
+#if 0
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
     int startTime = ofGetElapsedTimeMillis();
@@ -447,7 +447,7 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
     }
     
 }
-
+#endif
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
     return isTextureMode;

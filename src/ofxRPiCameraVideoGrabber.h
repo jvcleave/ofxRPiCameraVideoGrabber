@@ -95,7 +95,7 @@ public:
     
     OMXCameraSettings omxCameraSettings;
 	
-	void setup(OMXCameraSettings);
+	//void setup(OMXCameraSettings);
     void close();
     void setDefaultValues();
     void saveState();
@@ -278,7 +278,68 @@ public:
     OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
 
     
-    
+    void setup(OMXCameraSettings omxCameraSettings_)
+    {
+        
+        ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+        if(engine)
+        {
+            delete engine;
+            engine = NULL;
+            
+        }
+        
+        /*
+         In certain cases you can get away with not destroyEGLImage
+         but texture allocation is fairly quick 
+         1080P 77 milliseconds
+         720P 50 milliseconds
+         480P 10 milliseconds
+         
+         Not destroying was causing blank textures when switching modes
+         */
+        if(!forceEGLReuse)
+        {
+            destroyEGLImage();
+        }
+        
+        
+        
+        addExitHandler();
+        if(!hasOMXInit)
+        {
+            OMX_ERRORTYPE error = OMX_Init();
+            OMX_TRACE(error);
+            if (error == OMX_ErrorNone) 
+            {
+                hasOMXInit = true;
+            }  
+        }
+        
+        omxCameraSettings = omxCameraSettings_;
+        omxCameraSettings.applyPreset();
+        isTextureMode = omxCameraSettings.isUsingTexture;
+        
+        if (omxCameraSettings.enablePixels) 
+        {
+            enablePixels();
+        }
+        if (isTextureEnabled()) 
+        {
+            generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
+        }
+        engine = new CameraEngine();
+        if (isTextureEnabled()) 
+        {
+            engine->eglImage = eglImage;
+        }
+        engine->setup(omxCameraSettings);
+        camera = engine->camera;
+        
+        setDefaultValues();
+        ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    }
+
 private:
     bool isTextureMode;
     bool doStartRecording;
@@ -317,9 +378,8 @@ private:
     bool doPixels;
     
     GLuint textureID;
-    void generateEGLImage(int, int);
-    void destroyEGLImage();
     
+
     CameraMeteringMode currentMeteringMode;
     void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
     
@@ -353,6 +413,123 @@ private:
     
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
+    
+    
+    void generateEGLImage(int width, int height)
+    {
+        bool needsRegeneration = false;
+        
+        if(!eglImage)
+        {
+            needsRegeneration = true;
+        }
+        if (!texture.isAllocated())
+        {
+            needsRegeneration = true;
+        }
+        
+        if (texture.getWidth() != width)
+        {
+            needsRegeneration = true;
+        }
+        if (texture.getHeight() != height)
+        {
+            needsRegeneration = true;
+        }
+        
+        if(!needsRegeneration)
+        {
+            texture.clear();
+            return;
+        }
+        
+        if (appEGLWindow == NULL)
+        {
+            appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+        }
+        
+        if (appEGLWindow == NULL)
+        {
+            return;
+        }
+        if (display == NULL)
+        {
+            display = appEGLWindow->getEglDisplay();
+        }
+        if (context == NULL)
+        {
+            context = appEGLWindow->getEglContext();
+        }
+        
+        
+        
+        if (needsRegeneration)
+        {
+            if(doPixels)//go ahead and take the allocate hit here
+            {
+                if(!fbo.isAllocated() ||
+                   fbo.getWidth() != width ||
+                   fbo.getHeight() != height)
+                {
+                    fbo.allocate(width, height, GL_RGBA);
+                }
+            }
+            
+            
+            texture.allocate(width, height, GL_RGBA);
+            texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+            textureID = texture.getTextureData().textureID;
+        }
+        
+        glEnable(GL_TEXTURE_2D);
+        
+        // setup first texture
+        int dataSize = width * height * 4;
+        
+        if (pixels && needsRegeneration)
+        {
+            delete[] pixels;
+            pixels = NULL;
+        }
+        
+        if (pixels == NULL)
+        {
+            pixels = new unsigned char[dataSize];
+        }
+        
+        //memset(pixels, 0xff, dataSize);  // white texture, opaque
+        
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        
+        
+        if (eglImage && needsRegeneration)
+        {
+            destroyEGLImage();
+        }
+        
+        // Create EGL Image
+        eglImage = eglCreateImageKHR(
+                                     display,
+                                     context,
+                                     EGL_GL_TEXTURE_2D_KHR,
+                                     (EGLClientBuffer)textureID,
+                                     NULL);
+        glDisable(GL_TEXTURE_2D);
+
+    }
+    
+    
+    void destroyEGLImage()
+    {
+        
+        if (eglImage)
+        {
+            eglDestroyImageKHR(display, eglImage);
+            eglImage = NULL;
+        }
+    }
     
 #if 0
     

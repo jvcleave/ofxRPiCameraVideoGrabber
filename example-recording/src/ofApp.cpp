@@ -128,10 +128,6 @@ void ofApp::keyPressed  (int key)
 		videoGrabber.toggleLED();
 	}
     
-    if(key == 'm')
-    {
-        videoGrabber.printMeteringMode();
-    }
     
 }
 
