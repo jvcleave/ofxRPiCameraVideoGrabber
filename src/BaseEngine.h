@@ -37,15 +37,14 @@ public:
     bool isRecording() {return isCurrentlyRecording;};
     void stopRecording();
     OMX_HANDLETYPE camera;
-    EngineType engineType;
-    OMX_STRING engineTypeString;
+
     bool isOpen;
-    int renderInputPort;
+
     OMX_ERRORTYPE setupDisplay();
     EGLImageKHR eglImage;
 
     int renderedFrameCounter; 
-protected:
+private:
 	OMXCameraSettings omxCameraSettings;
 
 	OMX_ERRORTYPE configureCameraResolution();
@@ -77,6 +76,10 @@ protected:
 	OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
 	
 	int recordedFrameCounter;
+    
+    EngineType engineType;
+    OMX_STRING engineTypeString;
+    int renderInputPort;
     
 	static OMX_ERRORTYPE 
     splitterEventHandlerCallback(OMX_HANDLETYPE hComponent, 

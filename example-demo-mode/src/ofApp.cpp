@@ -75,11 +75,6 @@ void ofApp::setup()
      
     
     */
-    for(int i=-5; i<5; i++)
-    {
-        cout << 65536 * i << endl;
-    }
-  
     
     doNextDemo = false;
     currentDemoID =0;

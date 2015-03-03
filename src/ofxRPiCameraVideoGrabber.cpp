@@ -586,17 +586,23 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
             frameCounter  = engine->getFrameCounter();
         }
         
+       if(isTextureEnabled())
+       {
+           if (frameCounter > updateFrameCounter) 
+           {
+               updateFrameCounter = frameCounter;
+               hasNewFrame = true;
+               
+           }else
+           {
+               hasNewFrame = false;
+           } 
+       }else
+       {
+           //no way of currently telling with non-texure - assuming true
+           hasNewFrame = true;
+       }
         
-        if (frameCounter > updateFrameCounter) 
-        {
-            updateFrameCounter = frameCounter;
-            hasNewFrame = true;
-            
-        }else
-        {
-            hasNewFrame = false;
-        }
-        hasNewFrame = true;
         if (hasNewFrame) 
         {
             updatePixels();

@@ -25,61 +25,45 @@ BaseEngine::BaseEngine()
     
     eglBuffer	= NULL;
     eglImage = NULL;
+
 }   
 
 
 int BaseEngine::getFrameCounter()
 {
     return renderedFrameCounter;
-}
-
-
-#if 0
-int TextureEngine::getFrameCounter()
-{
-    return renderedFrameCounter;
+    if(!isOpen) return 0;
     
-}
- 
- int frameCounter;
- int getFrameCounter();
- 
- int NonTextureEngine::getFrameCounter()
- {
- 
- if (!isOpen) 
- {
- return 0;
- }
- OMX_CONFIG_BRCMPORTSTATSTYPE stats;
- 
- OMX_INIT_STRUCTURE(stats);
- stats.nPortIndex = VIDEO_RENDER_INPUT_PORT;
- OMX_ERRORTYPE error =OMX_GetParameter(render, OMX_IndexConfigBrcmPortStats, &stats);
- if (error == OMX_ErrorNone)
- {
- /*OMX_U32 nImageCount;
- OMX_U32 nBufferCount;
- OMX_U32 nFrameCount;
- OMX_U32 nFrameSkips;
- OMX_U32 nDiscards;
- OMX_U32 nEOS;
- OMX_U32 nMaxFrameSize;
- 
- OMX_TICKS nByteCount;
- OMX_TICKS nMaxTimeDelta;
- OMX_U32 nCorruptMBs;*/
-//ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
-frameCounter = stats.nFrameCount;
-}else
-{		
-    ofLogError(__func__) << "error OMX_CONFIG_BRCMPORTSTATSTYPE FAIL " << omxErrorToString(error);
-    //frameCounter = 0;
-}
-return frameCounter;
-}
+    if(engineType == TEXTURE_ENGINE)
+    {
+        return renderedFrameCounter;
+    }
+#if 0
+    //used to work?
+    OMX_CONFIG_BRCMCAMERASTATSTYPE stats;
+    OMX_INIT_STRUCTURE(stats);
+    //stats.nPortIndex = CAMERA_OUTPUT_PORT;
+    OMX_ERRORTYPE error =OMX_GetParameter(render, OMX_IndexConfigBrcmCameraStats, &stats);
+    OMX_TRACE(error);
+    if (error == OMX_ErrorNone)
+    {
+        /*OMX_U32 nImageCount;
+         OMX_U32 nBufferCount;
+         OMX_U32 nFrameCount;
+         OMX_U32 nFrameSkips;
+         OMX_U32 nDiscards;
+         OMX_U32 nEOS;
+         OMX_U32 nMaxFrameSize;
+         
+         OMX_TICKS nByteCount;
+         OMX_TICKS nMaxTimeDelta;
+         OMX_U32 nCorruptMBs;*/
+        //ofLogVerbose(__func__) << "nFrameCount: " << stats.nFrameCount;
+        return stats.nOutFrameCount;
+    }
 #endif
-
+    return 0;
+}
 void BaseEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
     omxCameraSettings = omxCameraSettings_;
@@ -110,7 +94,6 @@ void BaseEngine::setup(OMXCameraSettings& omxCameraSettings_)
     configureCameraResolution();
     
 }
-
 OMX_ERRORTYPE BaseEngine::egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
     BaseEngine *grabber = static_cast<BaseEngine*>(pAppData);
