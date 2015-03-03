@@ -4,7 +4,7 @@ ofxRPiCameraVideoGrabber
 STATUS: PERPETUAL DEVELOPMENT
 
 DESCRIPTION:   
-openFrameworks addon to control the Raspberry Pi Camera Module. This does provide still camera functionality.
+openFrameworks addon to control the Raspberry Pi Camera Module. This does _not_ provide still camera functionality.
 
 
 REQUIREMENTS:
