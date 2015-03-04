@@ -38,10 +38,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     
     forceEGLReuse = false;
 }
-#if 0
+
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
-    
+   
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
     if(engine)
     {
@@ -65,7 +65,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }
     
     
-    
+     
     addExitHandler();
     if(!hasOMXInit)
     {
@@ -80,7 +80,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     omxCameraSettings = omxCameraSettings_;
     omxCameraSettings.applyPreset();
     isTextureMode = omxCameraSettings.isUsingTexture;
-    
+
     if (omxCameraSettings.enablePixels) 
     {
         enablePixels();
@@ -99,8 +99,8 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     
     setDefaultValues();
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    ofLogVerbose() << "isTextureMode: " << isTextureMode;
 }
-#endif
 
 void ofxRPiCameraVideoGrabber::setDefaultValues()
 {
@@ -309,7 +309,8 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
     }
     return texture;
 }
-#if 0
+
+inline
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
     int startTime = ofGetElapsedTimeMillis();
@@ -429,7 +430,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 
 }
 
-
+inline
 void ofxRPiCameraVideoGrabber::destroyEGLImage()
 {
     
@@ -447,12 +448,13 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
     }
     
 }
-#endif
+
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
     return isTextureMode;
 }
 
+inline
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
     if (!doPixels && !doSaveImage) 
@@ -569,6 +571,7 @@ void ofxRPiCameraVideoGrabber::saveRawImage()
     doSaveImage = true;
 }
 
+inline
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
     if(doStartRecording)
@@ -714,6 +717,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(string meteringType)
     return applyCurrentMeteringMode();    
 }
 
+inline
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -764,6 +768,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
     return error;
 }
 
+inline
 void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
 {
     currentMeteringMode.exposurevalue               = omxExposureValue;
@@ -787,6 +792,7 @@ string ofxRPiCameraVideoGrabber::getMeteringType()
 {
     return OMX_Maps::getInstance().getMetering(currentMeteringMode.exposurevalue.eMetering);
 }
+
 /*
 string ofxRPiCameraVideoGrabber::meteringModetoString()
 {
@@ -1024,11 +1030,13 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::updateSensorCrop()
 {
     return setSensorCrop(cropRectangle);
 }
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSensorCrop(int left, int top, int width, int height)
 {
     cropRectangle.set(left, top, width, height);
     return updateSensorCrop();
 }
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSensorCrop(ofRectangle& rectangle)
 {
    
@@ -1069,6 +1077,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setZoomLevelNormalized(float value)
     zoomLevel = (int) ofMap(value, 0.0f, 1.0f, 0, zoomLevels.size());
     return setDigitalZoom();
 }
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::resetZoom()
 {
     zoomLevel = 0;
@@ -1171,11 +1180,13 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
     mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
     return applyMirror();
 }
+
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror)
 {
     return setMirror(OMX_Maps::getInstance().getMirror(mirror));
 }
 
+inline
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
 {
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonMirror, &mirrorConfig);
@@ -1208,6 +1219,7 @@ int ofxRPiCameraVideoGrabber::getRotation()
     return rotationConfig.nRotation;
 }
 
+inline
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyRotation()
 {
     
@@ -1387,9 +1399,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::disableSoftwareSaturation()
 }
 
 
-
-
-
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
     
@@ -1472,12 +1481,15 @@ if(omx_err != OMX_ErrorNone)
 #endif
 
 bool doExit = false;
+
+inline
 void signal_handler(int signum)
 {
     cout << "ofxRPiCameraVideoGrabber caught signal " << signum;
     doExit = true;
 }
 
+inline
 void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
 {
     if (doExit)
@@ -1488,6 +1500,7 @@ void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
     }
 }
 
+inline
 void ofxRPiCameraVideoGrabber::addExitHandler()
 {
     if(hasExitHandler) return;
