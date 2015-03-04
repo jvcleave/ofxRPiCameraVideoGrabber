@@ -163,17 +163,17 @@ public:
     OMX_ERRORTYPE setImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE setImageFilter(string);
     
-    OMX_ERRORTYPE setSharpness(int sharpness); //-100 to 100
-    OMX_ERRORTYPE setSharpnessNormalized(int sharpnessNormalized);
+    OMX_ERRORTYPE setSharpness(int); //-100 to 100
+    OMX_ERRORTYPE setSharpnessNormalized(float);
     
-    OMX_ERRORTYPE setContrast(int contrast); //-100 to 100
-    OMX_ERRORTYPE setContrastNormalized(int contrastNormalized);
+    OMX_ERRORTYPE setContrast(int); //-100 to 100
+    OMX_ERRORTYPE setContrastNormalized(float);
     
-    OMX_ERRORTYPE setBrightness(int brightness); //0 to 100
-    OMX_ERRORTYPE setBrightnessNormalized(int brightnessNormalized);
+    OMX_ERRORTYPE setBrightness(int); //0 to 100
+    OMX_ERRORTYPE setBrightnessNormalized(float);
     
-    OMX_ERRORTYPE setSaturation(int saturation); //-100 to 100
-    OMX_ERRORTYPE setSaturationNormalized(int saturationNormalized);
+    OMX_ERRORTYPE setSaturation(int); //-100 to 100
+    OMX_ERRORTYPE setSaturationNormalized(float);
     
     OMX_ERRORTYPE setFrameStabilization(bool doStabilization);
     

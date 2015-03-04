@@ -939,9 +939,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpness(int sharpness) //-100 to 10
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpnessNormalized(int sharpnessNormalized)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSharpnessNormalized(float sharpnessNormalized)
 {
-    return setSharpness(ofMap(sharpnessNormalized, 0, 1, -100, 100)); 
+    return setSharpness(ofMap(sharpnessNormalized, 0.0f, 1.0f, -100, 100)); 
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrast(int contrast ) //-100 to 100 
@@ -953,9 +953,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrast(int contrast ) //-100 to 100
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrastNormalized(int contrastNormalized )
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setContrastNormalized(float contrastNormalized )
 {
-    return setContrast(ofMap(contrastNormalized, 0, 1, -100, 100)); 
+    return setContrast(ofMap(contrastNormalized, 0.0f, 1.0f, -100, 100)); 
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 100
@@ -968,9 +968,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightness(int brightness ) //0 to 10
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightnessNormalized(int brightnessNormalized ) //0 to 100
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setBrightnessNormalized(float brightnessNormalized ) //0 to 100
 {
-    return setBrightness(ofMap(brightnessNormalized, 0, 1, 0, 100));
+    return setBrightness(ofMap(brightnessNormalized, 0.0f, 1.0f, 0, 100));
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 100
@@ -983,10 +983,10 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturation(int saturation) //-100 to 
     return error;
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturationNormalized(int saturationNormalized)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSaturationNormalized(float saturationNormalized)
 {
     
-    OMX_ERRORTYPE error = setSaturation(ofMap(saturationNormalized, 0, 1, -100, 100));
+    OMX_ERRORTYPE error = setSaturation(ofMap(saturationNormalized, 0.0f, 1.0f, -100, 100));
     OMX_TRACE(error);
     return error;
 }
