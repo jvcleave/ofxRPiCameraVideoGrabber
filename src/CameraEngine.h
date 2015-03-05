@@ -10,15 +10,10 @@
 
 #include "ofMain.h"
 
-#include <IL/OMX_Core.h>
-#include <IL/OMX_Component.h>
-#include <IL/OMX_Index.h>
-#include <IL/OMX_Image.h>
-#include <IL/OMX_Video.h>
-#include <IL/OMX_Broadcom.h>
 
-#include "OMXCameraSettings.h"
 #include "OMXCameraUtils.h"
+#include "OMXCameraSettings.h"
+
 
 enum EngineType {
 	TEXTURE_ENGINE,
@@ -124,6 +119,9 @@ private:
                           OMX_IN OMX_PTR pAppData,
                           OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
     
-
-	
 };
+
+
+
+
+

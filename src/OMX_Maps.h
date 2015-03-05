@@ -131,11 +131,10 @@ public:
         return exposurePresets[name];
     }
     
+    vector<string> mirrorNames;
     map<string, OMX_MIRRORTYPE> mirrors;
     map<OMX_MIRRORTYPE, string> mirrorTypes;
-    vector<string> mirrorNames;
-    
-    
+   
     string getMirror(OMX_MIRRORTYPE type)
     {
         return mirrorTypes[type];
@@ -146,24 +145,60 @@ public:
         return mirrors[name];
     }
     
-    
-    
 	vector<string> videoCodingNames;
 	map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
+    map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
     vector<string>& getVideoCodingNames()
     {
         return videoCodingNames;
     }
     
+    string getVideoCoding(OMX_VIDEO_CODINGTYPE type)
+    {
+        return videoCodingTypes[type];
+    }
+    
+    OMX_VIDEO_CODINGTYPE getVideoCoding(string name)
+    {
+        return videoCoding[name];
+    }
 	
 	vector<string> colorFormatNames;
 	map<string, OMX_COLOR_FORMATTYPE> colorFormats;
+    map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
     vector<string>& getColorFormatNames()
     {
         return colorFormatNames;
     }
- 
+    string getColorFormat(OMX_COLOR_FORMATTYPE type)
+    {
+        return colorFormatTypes[type];
+    }
+    
+    OMX_COLOR_FORMATTYPE getColorFormat(string name)
+    {
+        return colorFormats[name];
+    }
 	
+    
+    vector<string> workingColorFormatNames;
+    map<string, OMX_COLOR_FORMATTYPE> workingColorFormats;
+    map<OMX_COLOR_FORMATTYPE, string> workingColorFormatTypes;
+    vector<string>& getWorkingColorFormatNames()
+    {
+        return workingColorFormatNames;
+    }
+    string getWorkingColorFormat(OMX_COLOR_FORMATTYPE type)
+    {
+        return workingColorFormatTypes[type];
+    }
+    
+    OMX_COLOR_FORMATTYPE getWorkingColorFormat(string name)
+    {
+        return workingColorFormats[name];
+    }
+    
+    
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
     map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithmTypes;
@@ -172,10 +207,10 @@ public:
         return algorithmNames;
     }
     
-    map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
+    
     
 	map<OMX_EVENTTYPE, string> eventTypes;
-	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
+	
     
     map<OMX_ERRORTYPE, string> omxErrors;
     
@@ -347,7 +382,70 @@ private:
 
 
         collectNames<OMX_COLOR_FORMATTYPE>(colorFormats, colorFormatNames, colorFormatTypes);
+                 
+        /*workingColorFormats["Unused"] = OMX_COLOR_FormatUnused;
+        workingColorFormats["Monochrome"] = OMX_COLOR_FormatMonochrome;
+        workingColorFormats["8bitRGB332"] = OMX_COLOR_Format8bitRGB332;
+        workingColorFormats["12bitRGB444"] = OMX_COLOR_Format12bitRGB444;
+        workingColorFormats["16bitARGB4444"] = OMX_COLOR_Format16bitARGB4444;
+        workingColorFormats["16bitARGB1555"] = OMX_COLOR_Format16bitARGB1555;
+        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format16bitRGB565;
+        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format16bitBGR565;
+        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format18bitRGB666;
+        workingColorFormats["18bitARGB1665"] = OMX_COLOR_Format18bitARGB1665;
+        workingColorFormats["19bitARGB1666"] = OMX_COLOR_Format19bitARGB1666; 
+        workingColorFormats["24bitRGB888"] = OMX_COLOR_Format24bitRGB888;
+        workingColorFormats["24bitBGR888"] = OMX_COLOR_Format24bitBGR888;
+        workingColorFormats["24bitARGB1887"] = OMX_COLOR_Format24bitARGB1887;
+        workingColorFormats["25bitARGB1888"] = OMX_COLOR_Format25bitARGB1888;
+        workingColorFormats["32bitBGRA8888"] = OMX_COLOR_Format32bitBGRA8888;
+        workingColorFormats["32bitARGB8888"] = OMX_COLOR_Format32bitARGB8888;
+        workingColorFormats["YUV411Planar"] = OMX_COLOR_FormatYUV411Planar;
+        workingColorFormats["YUV411PackedPlanar"] = OMX_COLOR_FormatYUV411PackedPlanar;
+        workingColorFormats["YUV420Planar"] = OMX_COLOR_FormatYUV420Planar;
+        workingColorFormats["YUV420PackedPlanar"] = OMX_COLOR_FormatYUV420PackedPlanar;
+        workingColorFormats["YUV420SemiPlanar"] = OMX_COLOR_FormatYUV420SemiPlanar;
+        workingColorFormats["YUV422Planar"] = OMX_COLOR_FormatYUV422Planar;
+        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
+        workingColorFormats["YUV422SemiPlanar"] = OMX_COLOR_FormatYUV422SemiPlanar;
+        workingColorFormats["YCbYCr"] = OMX_COLOR_FormatYCbYCr;
+        workingColorFormats["YCrYCb"] = OMX_COLOR_FormatYCrYCb;
+        workingColorFormats["CbYCrY"] = OMX_COLOR_FormatCbYCrY;
+        workingColorFormats["CrYCbY"] = OMX_COLOR_FormatCrYCbY;
+        workingColorFormats["YUV444Interleaved"] = OMX_COLOR_FormatYUV444Interleaved;
+        workingColorFormats["RawBayer8bit"] = OMX_COLOR_FormatRawBayer8bit;
+        workingColorFormats["RawBayer10bit"] = OMX_COLOR_FormatRawBayer10bit;
+        workingColorFormats["RawBayer8bitcompressed"] = OMX_COLOR_FormatRawBayer8bitcompressed;
+        workingColorFormats["L2"] = OMX_COLOR_FormatL2; 
+        workingColorFormats["L4"] = OMX_COLOR_FormatL4; 
+        workingColorFormats["L8"] = OMX_COLOR_FormatL8; 
+        workingColorFormats["L16"] = OMX_COLOR_FormatL16; 
+        workingColorFormats["L24"] = OMX_COLOR_FormatL24; 
+        workingColorFormats["L32"] = OMX_COLOR_FormatL32;
+        workingColorFormats["YUV420PackedSemiPlanar"] = OMX_COLOR_FormatYUV420PackedSemiPlanar;
+        workingColorFormats["YUV422PackedSemiPlanar"] = OMX_COLOR_FormatYUV422PackedSemiPlanar;
+        workingColorFormats["18BitBGR666"] = OMX_COLOR_Format18BitBGR666;
+        workingColorFormats["24BitARGB6666"] = OMX_COLOR_Format24BitARGB6666;
+        workingColorFormats["24BitABGR6666"] = OMX_COLOR_Format24BitABGR6666;
+        workingColorFormats["32bitABGR8888"] = OMX_COLOR_Format32bitABGR8888;
+        workingColorFormats["8bitPalette"] = OMX_COLOR_Format8bitPalette;
+        workingColorFormats["YUVUV128"] = OMX_COLOR_FormatYUVUV128;
+        workingColorFormats["RawBayer12bit"] = OMX_COLOR_FormatRawBayer12bit;
+        workingColorFormats["BRCMEGL"] = OMX_COLOR_FormatBRCMEGL;
+        workingColorFormats["BRCMOpaque"] = OMX_COLOR_FormatBRCMOpaque;
+        workingColorFormats["YVU420PackedPlanar"] = OMX_COLOR_FormatYVU420PackedPlanar;
+        workingColorFormats["YVU420PackedSemiPlanar"] = OMX_COLOR_FormatYVU420PackedSemiPlanar;*/
 
+        workingColorFormats["YUV420PackedPlanar"] = OMX_COLOR_FormatYUV420PackedPlanar;
+        workingColorFormats["YUV420PackedSemiPlanar"] = OMX_COLOR_FormatYUV420PackedSemiPlanar;
+        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
+        workingColorFormats["YCbYCr"] = OMX_COLOR_FormatYCbYCr;
+        workingColorFormats["YCrYCb"] = OMX_COLOR_FormatYCrYCb;
+        workingColorFormats["CbYCrY"] = OMX_COLOR_FormatCbYCrY;
+        workingColorFormats["CrYCbY"] = OMX_COLOR_FormatCrYCbY;
+
+        collectNames<OMX_COLOR_FORMATTYPE>(workingColorFormats, workingColorFormatNames, workingColorFormatTypes);
+        
 
         videoCoding["Unused"] = OMX_VIDEO_CodingUnused;
         videoCoding["AutoDetect"] = OMX_VIDEO_CodingAutoDetect;

@@ -78,6 +78,8 @@ string omxErrorToString(OMX_ERRORTYPE error)
     return OMX_Maps::getInstance().omxErrors[error];
 }
 
+#define ENABLE_OMX_TRACE
+
 #define OMX_LOG_LEVEL_DEV 1
 #define OMX_LOG_LEVEL_ERROR_ONLY 2
 #define OMX_LOG_LEVEL_VERBOSE 3
@@ -138,9 +140,12 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
 #define GET_OMX_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
 #define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
 
-#ifdef ENABLE_OMX_TRACE
+#if defined (ENABLE_OMX_TRACE)
+    #warning enabling OMX_TRACE
     #define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 #else
+    #warning  disabling OMX_TRACE
+    #warning  disabling -Wunused-but-set-variable -Wunused-variable
     #define OMX_TRACE(...)
     #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
     #pragma GCC diagnostic ignored "-Wunused-variable"

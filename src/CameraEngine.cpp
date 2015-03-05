@@ -200,13 +200,49 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
 
         cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
 
+        
+        
+        
         //below works but leaving it at default 0
         //cameraOutputPortDefinition.format.video.nSliceHeight	= round(omxCameraSettings.height / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
         OMX_TRACE(error);
+        
+        
 	}
-	
+#if 0
+    for (size_t i=0; i<OMX_Maps::getInstance().getWorkingColorFormatNames().size(); ++i) 
+    {
+        string& currentName = OMX_Maps::getInstance().getWorkingColorFormatNames()[i];
+        ofLogVerbose() << "currentName: " << currentName;
+        cameraOutputPortDefinition.format.video.eColorFormat = OMX_Maps::getInstance().getWorkingColorFormat(currentName);
+        //ofLogVerbose(__func__) << "eColorFormat: " << OMX_Maps::getInstance().getColorFormat(cameraOutputPortDefinition.format.video.eColorFormat);
+        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
+        if(error == OMX_ErrorNone)
+        {
+            ofLogVerbose() << "currentName WORKED: << " << currentName;
+        }
+        OMX_TRACE(error);
+        ofSleepMillis(50);
+    }
+    
+
+    typedef struct OMX_VIDEO_PORTDEFINITIONTYPE {
+        OMX_STRING cMIMEType;
+        OMX_NATIVE_DEVICETYPE pNativeRender;
+        OMX_U32 nFrameWidth;
+        OMX_U32 nFrameHeight;
+        OMX_S32 nStride;
+        OMX_U32 nSliceHeight;
+        OMX_U32 nBitrate;
+        OMX_U32 xFramerate;
+        OMX_BOOL bFlagErrorConcealment;
+        OMX_VIDEO_CODINGTYPE eCompressionFormat;
+        OMX_COLOR_FORMATTYPE eColorFormat;
+        OMX_NATIVE_WINDOWTYPE pNativeWindow;
+    } OMX_VIDEO_PORTDEFINITIONTYPE;
+#endif
     return error;
 }
 
@@ -377,6 +413,29 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     OMX_GetHandle(&render, engineTypeString, this , &renderCallbacks);
     DisableAllPortsForComponent(&render);
     
+    
+#if 0
+    if (engineType == TEXTURE_ENGINE)
+    {
+        OMX_PARAM_PORTDEFINITIONTYPE eglRenderInputPortDefinition;
+        OMX_INIT_STRUCTURE(eglRenderInputPortDefinition);
+        eglRenderInputPortDefinition.nPortIndex = EGL_RENDER_INPUT_PORT;
+        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &eglRenderInputPortDefinition);
+        OMX_TRACE(error);
+        ofLog(OF_LOG_VERBOSE, 
+              "nBufferCountMin(%u)					\n \
+              nBufferCountActual(%u)				\n \
+              nBufferSize(%u)						\n \
+              nBufferAlignmen(%u) \n", 
+              eglRenderInputPortDefinition.nBufferCountMin, 
+              eglRenderInputPortDefinition.nBufferCountActual, 
+              eglRenderInputPortDefinition.nBufferSize, 
+              eglRenderInputPortDefinition.nBufferAlignment);
+        error =  OMX_AllocateBuffer(render, &eglBuffer, EGL_RENDER_INPUT_PORT, NULL, eglRenderInputPortDefinition.nBufferSize);
+        OMX_TRACE(error, "eglBuffer, OMX_AllocateBuffer");
+    }
+#endif
+    
     //Set renderer to Idle
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
@@ -455,6 +514,8 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
         //Enable render output port
         error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
         OMX_TRACE(error);
+        
+
     }
  
     
@@ -467,19 +528,21 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     /*
      Boolean parameter to enable/disable EGL discard mode. With discard mode enabled (default), EGL render will only buffer up to one image. If a new image is received while an image is waiting to be processed, the old image will be dropped. With discard mode disabled, 32 VC images (used in tunnelled mode) can be buffered. Once the buffer is full, the upstream component is notified and should attempt to send the image again later. Non-discard mode only applies to the tunnelled case (it does not apply when called internally).
      */
-    /*   
-     bool disableDiscardMode = true;
-     if(disableDiscardMode)
-     {
-     OMX_CONFIG_PORTBOOLEANTYPE discardMode;
-     OMX_INIT_STRUCTURE(discardMode);
-     discardMode.nPortIndex = EGL_RENDER_INPUT_PORT;
-     discardMode.bEnabled = OMX_FALSE; //default true
-     error = OMX_SetParameter(render, OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);
-     OMX_TRACE(error);
-     
-     }
-     */
+    if (engineType == TEXTURE_ENGINE)
+    {  
+         bool disableDiscardMode = true;
+         if(disableDiscardMode)
+         {
+             OMX_CONFIG_PORTBOOLEANTYPE discardMode;
+             OMX_INIT_STRUCTURE(discardMode);
+             discardMode.nPortIndex = EGL_RENDER_INPUT_PORT;
+             discardMode.bEnabled = OMX_FALSE; //default true
+             error = OMX_SetParameter(render, OMX_IndexParamBrcmVideoEGLRenderDiscardMode, &discardMode);
+             OMX_TRACE(error);
+         
+         }
+    }
+
     
     if(omxCameraSettings.doRecording)
     {
@@ -526,6 +589,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
     if (engineType == TEXTURE_ENGINE)
     {
+        
         //Set renderer to use texture
         error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImage);
         OMX_TRACE(error);
@@ -816,3 +880,7 @@ void CameraEngine::closeEngine()
     didOpen = false;
 
 }
+
+
+
+
