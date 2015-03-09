@@ -26,6 +26,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     appEGLWindow = NULL;
     pixels = NULL;
     eglImage = NULL;
+    display = NULL;
+    context = NULL;
+    surface = NULL;
+    eglConfig = NULL;
     isTextureMode = false;
     doPixels = false;
     textureID	= 0;
@@ -36,7 +40,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     doRawSave = false;
     doStartRecording = false;
     
-    forceEGLReuse = false;
+    forceEGLReuse = true;
 }
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
@@ -49,7 +53,27 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         engine = NULL;
         
     }
-    
+    if (appEGLWindow == NULL)
+    {
+        appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+    }
+    if (display == NULL)
+    {
+        display = appEGLWindow->getEglDisplay();
+    }
+    if (context == NULL)
+    {
+        context = appEGLWindow->getEglContext();
+    }
+    if(surface == NULL)
+    {
+        surface = appEGLWindow->getEglSurface();
+    }
+    if(eglConfig == NULL)
+    {
+        eglConfig = appEGLWindow->getEglConfig();
+    }
+
     /*
      In certain cases you can get away with not destroyEGLImage
      but texture allocation is fairly quick 
@@ -307,83 +331,95 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
       
         //ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
     }
-    return texture;
+    return fbo.getTextureReference();
 }
+
+EGLSurface ofxRPiCameraVideoGrabber::create_shared_pixmap(int width, int height) 
+{
+    
+    EGLint pixel_format = EGL_PIXEL_FORMAT_ARGB_8888_BRCM;
+    EGLint rt;
+    eglGetConfigAttrib(display, eglConfig, EGL_RENDERABLE_TYPE, &rt);
+    
+    if (rt & EGL_OPENGL_ES_BIT) {
+        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GLES_BRCM;
+        pixel_format |= EGL_PIXEL_FORMAT_GLES_TEXTURE_BRCM;
+    }
+    if (rt & EGL_OPENGL_ES2_BIT) {
+        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GLES2_BRCM;
+        pixel_format |= EGL_PIXEL_FORMAT_GLES2_TEXTURE_BRCM;
+    }
+    if (rt & EGL_OPENVG_BIT) {
+        pixel_format |= EGL_PIXEL_FORMAT_RENDER_VG_BRCM;
+        pixel_format |= EGL_PIXEL_FORMAT_VG_IMAGE_BRCM;
+    }
+    if (rt & EGL_OPENGL_BIT) {
+        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GL_BRCM;
+    }
+    global_image[0] = 0;
+    global_image[1] = 0;
+    global_image[2] = width;
+    global_image[3] = height;
+    global_image[4] = pixel_format;
+    
+    eglCreateGlobalImageBRCM(width, height, global_image[4], 0, width*4, global_image);
+    EGL_TRACE(eglGetError());
+    EGLint attrs[] = {
+        EGL_VG_COLORSPACE, EGL_VG_COLORSPACE_sRGB,
+        EGL_VG_ALPHA_FORMAT, pixel_format & EGL_PIXEL_FORMAT_ARGB_8888_PRE_BRCM ? EGL_VG_ALPHA_FORMAT_PRE : EGL_VG_ALPHA_FORMAT_NONPRE,
+        EGL_NONE
+    };
+    
+    return eglCreatePixmapSurface(display, eglConfig, (EGLNativePixmapType)global_image, attrs);
+    //return eglCreatePbufferSurface(display, eglConfig, attrs);
+    
+}
+
 
 inline
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
     int startTime = ofGetElapsedTimeMillis();
     bool needsRegeneration = false;
-   
+    
     if(!eglImage)
     {
         needsRegeneration = true;
     }
-    if (!texture.isAllocated())
+    if (!fbo.isAllocated())
     {
         needsRegeneration = true;
     }
     
-    if (texture.getWidth() != width)
+    if (fbo.getWidth() != width)
     {
         needsRegeneration = true;
     }
-    if (texture.getHeight() != height)
+    if (fbo.getHeight() != height)
     {
         needsRegeneration = true;
     }
     
     if(!needsRegeneration)
     {
-        texture.clear();
+        fbo.begin();
+            ofClear(0, 0, 0);
+        fbo.end();
         ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
         return;
     }
     
-    if (appEGLWindow == NULL)
+        
+    if (eglImage && needsRegeneration)
     {
-        appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+        destroyEGLImage();
     }
-    
-    if (appEGLWindow == NULL)
-    {
-        ofLogError(__func__) << "appEGLWindow is NULL - RETURNING";
-        return;
-    }
-    if (display == NULL)
-    {
-        display = appEGLWindow->getEglDisplay();
-    }
-    if (context == NULL)
-    {
-        context = appEGLWindow->getEglContext();
-    }
-    
-    
     
     if (needsRegeneration)
     {
-        if(doPixels)//go ahead and take the allocate hit here
-        {
-            if(!fbo.isAllocated() ||
-               fbo.getWidth() != width ||
-               fbo.getHeight() != height)
-            {
-                fbo.allocate(width, height, GL_RGBA);
-            }
-        }
-           
-
-        texture.allocate(width, height, GL_RGBA);
-        texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-        textureID = texture.getTextureData().textureID;
+        fbo.allocate(width, height);
+        textureID = fbo.getTextureReference().getTextureData().textureID;
     }
-    
-    glEnable(GL_TEXTURE_2D);
-    
-    // setup first texture
-    int dataSize = width * height * 4;
     
     if (pixels && needsRegeneration)
     {
@@ -392,42 +428,77 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     }
     
     if (pixels == NULL)
-    {
+    {   int dataSize = width * height * 4;
         pixels = new unsigned char[dataSize];
     }
     
-    //memset(pixels, 0xff, dataSize);  // white texture, opaque
-    
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    
-    
-    if (eglImage && needsRegeneration)
-    {
-        destroyEGLImage();
-    }
-    
-    // Create EGL Image
-    eglImage = eglCreateImageKHR(
+    fbo.bind();
+        /*
+        EGLint eglImageAttributes[] = {
+                                        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+                                        EGL_NONE};
+        // Create EGL Image
+        eglImage = eglCreateImageKHR(
+                                     display,
+                                     context,
+                                     EGL_GL_TEXTURE_2D_KHR,
+                                     (EGLClientBuffer)fbo.getTextureReference().getTextureData().textureID,
+                                     eglImageAttributes);
+         */
+        
+        EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+                                        EGL_NONE};
+        eglImage = eglCreateImageKHR(
                                  display,
                                  context,
                                  EGL_GL_TEXTURE_2D_KHR,
-                                 (EGLClientBuffer)textureID,
-                                 NULL);
-    glDisable(GL_TEXTURE_2D);
-    if (eglImage == EGL_NO_IMAGE_KHR)
+                                 (EGLClientBuffer)fbo.getTextureReference().getTextureData().textureID,
+                                 eglImageAttributes);
+    
+        
+
+        if (eglImage == EGL_NO_IMAGE_KHR)
+        {
+            ofLogError()	<< "Create EGLImage FAIL <---------------- :(";
+            EGL_TRACE(eglGetError());
+        }
+        else
+        {
+            ofLogVerbose()	<< "Create EGLImage PASS <---------------- :)";
+            
+        }
+    
+    fbo.unbind();
+    sharedSurface = create_shared_pixmap(width, height);
+    EGL_TRACE(eglGetError());
+    
+    EGLint eglImageAPixelsAttributes[] = {
+                                        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+                                        EGL_NONE};
+    
+    eglImagePixels = eglCreateImageKHR(display, 
+                                       EGL_NO_CONTEXT, 
+                                       EGL_NATIVE_PIXMAP_KHR, 
+                                       (EGLClientBuffer)global_image, 
+                                       eglImageAPixelsAttributes);
+    if (eglImagePixels == EGL_NO_IMAGE_KHR)
     {
-        ofLogError()	<< "Create EGLImage FAIL <---------------- :(";
+        ofLogError()	<< "Create eglImagePixels FAIL <---------------- :(";
     }
     else
     {
-        ofLogVerbose()	<< "Create EGLImage PASS <---------------- :)";
+        ofLogVerbose()	<< "Create eglImagePixels PASS <---------------- :)";
         
     }
+    
+
+    secondaryTexture.allocate(width, height, GL_RGBA);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
+    EGL_TRACE(eglGetError(), "glEGLImageTargetTexture2DOES");
     int endTime = ofGetElapsedTimeMillis();
     ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
-
+    
 }
 
 inline
@@ -438,23 +509,70 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
     {
         if (eglDestroyImageKHR(display, eglImage))
         {
-            ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+            ofLogVerbose(__func__) << "eglDestroyImageKHR eglImage PASS <---------------- :)";
         }
         else
         {
-            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+            ofLogError(__func__) << "eglDestroyImageKHR eglImage FAIL <---------------- :(";
         }
         eglImage = NULL;
     }
-    
+    if (eglImagePixels)
+    {
+        if (eglDestroyImageKHR(display, eglImagePixels))
+        {
+            ofLogVerbose(__func__) << "eglDestroyImageKHR eglImagePixels PASS <---------------- :)";
+        }
+        else
+        {
+            ofLogError(__func__) << "eglDestroyImageKHR eglImagePixels FAIL <---------------- :(";
+        }
+        eglImagePixels = NULL;
+    }
 }
 
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
     return isTextureMode;
 }
+#if 0
+EGLBoolean eglQueryImageFSL(EGLDisplay dpy, EGLImageKHR img, EGLint attribute, EGLint* value)
+{
+    egl_display_t const * const dp = get_display(dpy);
+    if (dp == 0) {
+        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
+    }
+    
+    ImageRef _i(img);
+    if (!_i.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
+    
+    egl_image_t* image = get_image(img);
+    bool success = false;
+    for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
+        egl_connection_t* const cnx = &gEGLImpl[i];
+        if (image->images[i] != EGL_NO_IMAGE_KHR) {
+            if (cnx->dso) {
+                if (cnx->egl.eglCreateImageKHR) {
+                    if (cnx->egl.eglQueryImageFSL(
+                                                  dp->disp[i].dpy, image->images[i], attribute, value)) {
+                        success = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!success)
+        return EGL_FALSE;
+    
+    return EGL_TRUE;
+}
 
-inline
+EGLAPI EGLBoolean EGLAPIENTRY eglLockSurfaceKHR (EGLDisplay display, EGLSurface surface, const EGLint *attrib_list);
+EGLAPI EGLBoolean EGLAPIENTRY eglUnlockSurfaceKHR (EGLDisplay display, EGLSurface surface);
+#endif
+
+
+
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
     if (!doPixels && !doSaveImage) 
@@ -463,21 +581,29 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     }
     int width = getWidth();
     int height = getHeight();
-    if (!fbo.isAllocated()) 
-    {
-        fbo.allocate(width, height, GL_RGBA);
-    }
     int dataSize = width * height * 4;
     if (pixels == NULL)
     {
         pixels = new unsigned char[dataSize];
     }
-    fbo.begin();
-        ofClear(0, 0, 0, 0);
-        texture.draw(0, 0);
-        glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
-    fbo.end();
+//    eglQueryGlobalImageBRCM(global_image, global_image+2);
+//    EGL_TRACE(eglGetError());
+    EGLint eglAttributes[] = {EGL_NONE };
     
+    fbo.bind();
+        eglFlushBRCM();
+        EGL_TRACE(eglGetError());
+        //eglLockSurfaceKHR(display, sharedSurface, eglAttributes);
+        //EGL_TRACE(eglGetError());
+        glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        //memcpy(pixels, eglImagePixels, width*height*4);
+        //eglUnlockSurfaceKHR(display, sharedSurface);
+        //EGL_TRACE(eglGetError());
+    fbo.unbind();
+    //eglFlushBRCM();
+    //EGL_TRACE(eglGetError());
+    //eglSwapBuffers(display, sharedSurface);
+    //EGL_TRACE(eglGetError());
     if(doSaveImage)
     {
         stringstream fileName;
@@ -515,7 +641,6 @@ void ofxRPiCameraVideoGrabber::updatePixels()
 
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
-    
     doPixels = true;
 }
 
@@ -627,7 +752,29 @@ void ofxRPiCameraVideoGrabber::draw()
     {
         return;
     }
-    texture.draw(0, 0);
+    fbo.draw(0, 0);
+    /*eglQueryGlobalImageBRCM(global_image, global_image+2);
+    EGL_TRACE(eglGetError());
+    eglFlushBRCM();
+     EGL_TRACE(eglGetError());
+    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
+     EGL_TRACE(eglGetError());
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+     EGL_TRACE(eglGetError());*/
+    /*
+    
+    glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP_TO_EDGE);
+    
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, tid);*/
+    //secondaryTexture.draw(0, 0);
+     //EGL_TRACE(eglGetError());
+    
 }
 
 ofxRPiCameraVideoGrabber::EXPOSURE_MODE
