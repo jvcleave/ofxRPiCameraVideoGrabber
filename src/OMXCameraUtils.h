@@ -132,6 +132,35 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
     
 }
 
+extern inline  
+string eglErrorToString(EGLint error)
+{
+    return OMX_Maps::getInstance().eglErrors[error];
+}
+
+extern inline  
+void logEGLError(EGLint error, string comments="", string functionName="", int lineNumber=0)
+{
+    string commentLine = " ";
+    if(!comments.empty())
+    {
+        commentLine = " " + comments + " ";
+    }
+    
+    
+    /*if(error != EGL_SUCCESS)
+    {
+        ofLogError(functionName) << lineNumber << commentLine << eglErrorToString(error);
+    }else
+    {
+        ofLogVerbose(functionName) << lineNumber << commentLine << eglErrorToString(error);
+    }*/
+    ofLogVerbose(functionName) << lineNumber << commentLine << eglErrorToString(error);
+
+}
+
+
+
 
 #define OMX_TRACE_1_ARGS(error)                      logOMXError(error, "", __func__, __LINE__);
 #define OMX_TRACE_2_ARGS(error, comments)            logOMXError(error, comments, __func__, __LINE__);
@@ -149,6 +178,28 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
     #define OMX_TRACE(...)
     #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
     #pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
+
+#define EGL_TRACE_1_ARGS(error)                      logEGLError(error, "", __func__, __LINE__);
+#define EGL_TRACE_2_ARGS(error, comments)            logEGLError(error, comments, __func__, __LINE__);
+#define EGL_TRACE_3_ARGS(error, comments, whatever)  logEGLError(error, comments, __func__, __LINE__);
+
+#define GET_EGL_TRACE_4TH_ARG(arg1, arg2, arg3, arg4, ...) arg4
+#define EGL_TRACE_MACRO_CHOOSER(...) GET_EGL_TRACE_4TH_ARG(__VA_ARGS__, EGL_TRACE_3_ARGS, EGL_TRACE_2_ARGS, EGL_TRACE_1_ARGS, )
+
+
+#define ENABLE_EGL_TRACE
+
+#if defined (ENABLE_EGL_TRACE)
+#warning enabling EGL_TRACE
+#define EGL_TRACE(...) EGL_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+#else
+#warning  disabling EGL_TRACE
+#warning  disabling -Wunused-but-set-variable -Wunused-variable
+#define EGL_TRACE(...)
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #endif
 
 extern inline 
@@ -246,5 +297,8 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
     
     return error;
 }
+
+
+
 
 #endif

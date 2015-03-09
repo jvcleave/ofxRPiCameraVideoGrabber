@@ -216,12 +216,14 @@ public:
     
  
     map<OMX_STATETYPE, string>omxStateNames;
-
+    map<EGLint, string> eglErrors;
     
 private:	
     OMX_Maps()
     {
- 
+
+        
+
         focusControls["On"] = OMX_IMAGE_FocusControlOn;
         focusControls["Off"] = OMX_IMAGE_FocusControlOff;
         focusControls["Auto"] = OMX_IMAGE_FocusControlAuto;
@@ -383,66 +385,12 @@ private:
 
         collectNames<OMX_COLOR_FORMATTYPE>(colorFormats, colorFormatNames, colorFormatTypes);
                  
-        /*workingColorFormats["Unused"] = OMX_COLOR_FormatUnused;
-        workingColorFormats["Monochrome"] = OMX_COLOR_FormatMonochrome;
-        workingColorFormats["8bitRGB332"] = OMX_COLOR_Format8bitRGB332;
-        workingColorFormats["12bitRGB444"] = OMX_COLOR_Format12bitRGB444;
-        workingColorFormats["16bitARGB4444"] = OMX_COLOR_Format16bitARGB4444;
-        workingColorFormats["16bitARGB1555"] = OMX_COLOR_Format16bitARGB1555;
-        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format16bitRGB565;
-        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format16bitBGR565;
-        workingColorFormats["16bitRGB565"] = OMX_COLOR_Format18bitRGB666;
-        workingColorFormats["18bitARGB1665"] = OMX_COLOR_Format18bitARGB1665;
-        workingColorFormats["19bitARGB1666"] = OMX_COLOR_Format19bitARGB1666; 
-        workingColorFormats["24bitRGB888"] = OMX_COLOR_Format24bitRGB888;
-        workingColorFormats["24bitBGR888"] = OMX_COLOR_Format24bitBGR888;
-        workingColorFormats["24bitARGB1887"] = OMX_COLOR_Format24bitARGB1887;
-        workingColorFormats["25bitARGB1888"] = OMX_COLOR_Format25bitARGB1888;
-        workingColorFormats["32bitBGRA8888"] = OMX_COLOR_Format32bitBGRA8888;
-        workingColorFormats["32bitARGB8888"] = OMX_COLOR_Format32bitARGB8888;
-        workingColorFormats["YUV411Planar"] = OMX_COLOR_FormatYUV411Planar;
-        workingColorFormats["YUV411PackedPlanar"] = OMX_COLOR_FormatYUV411PackedPlanar;
-        workingColorFormats["YUV420Planar"] = OMX_COLOR_FormatYUV420Planar;
+        workingColorFormats["Unused"] = OMX_COLOR_FormatUnused;
         workingColorFormats["YUV420PackedPlanar"] = OMX_COLOR_FormatYUV420PackedPlanar;
-        workingColorFormats["YUV420SemiPlanar"] = OMX_COLOR_FormatYUV420SemiPlanar;
-        workingColorFormats["YUV422Planar"] = OMX_COLOR_FormatYUV422Planar;
-        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
-        workingColorFormats["YUV422SemiPlanar"] = OMX_COLOR_FormatYUV422SemiPlanar;
-        workingColorFormats["YCbYCr"] = OMX_COLOR_FormatYCbYCr;
-        workingColorFormats["YCrYCb"] = OMX_COLOR_FormatYCrYCb;
-        workingColorFormats["CbYCrY"] = OMX_COLOR_FormatCbYCrY;
-        workingColorFormats["CrYCbY"] = OMX_COLOR_FormatCrYCbY;
-        workingColorFormats["YUV444Interleaved"] = OMX_COLOR_FormatYUV444Interleaved;
-        workingColorFormats["RawBayer8bit"] = OMX_COLOR_FormatRawBayer8bit;
-        workingColorFormats["RawBayer10bit"] = OMX_COLOR_FormatRawBayer10bit;
-        workingColorFormats["RawBayer8bitcompressed"] = OMX_COLOR_FormatRawBayer8bitcompressed;
-        workingColorFormats["L2"] = OMX_COLOR_FormatL2; 
-        workingColorFormats["L4"] = OMX_COLOR_FormatL4; 
-        workingColorFormats["L8"] = OMX_COLOR_FormatL8; 
-        workingColorFormats["L16"] = OMX_COLOR_FormatL16; 
-        workingColorFormats["L24"] = OMX_COLOR_FormatL24; 
-        workingColorFormats["L32"] = OMX_COLOR_FormatL32;
         workingColorFormats["YUV420PackedSemiPlanar"] = OMX_COLOR_FormatYUV420PackedSemiPlanar;
-        workingColorFormats["YUV422PackedSemiPlanar"] = OMX_COLOR_FormatYUV422PackedSemiPlanar;
-        workingColorFormats["18BitBGR666"] = OMX_COLOR_Format18BitBGR666;
-        workingColorFormats["24BitARGB6666"] = OMX_COLOR_Format24BitARGB6666;
-        workingColorFormats["24BitABGR6666"] = OMX_COLOR_Format24BitABGR6666;
-        workingColorFormats["32bitABGR8888"] = OMX_COLOR_Format32bitABGR8888;
-        workingColorFormats["8bitPalette"] = OMX_COLOR_Format8bitPalette;
-        workingColorFormats["YUVUV128"] = OMX_COLOR_FormatYUVUV128;
-        workingColorFormats["RawBayer12bit"] = OMX_COLOR_FormatRawBayer12bit;
-        workingColorFormats["BRCMEGL"] = OMX_COLOR_FormatBRCMEGL;
-        workingColorFormats["BRCMOpaque"] = OMX_COLOR_FormatBRCMOpaque;
+        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
         workingColorFormats["YVU420PackedPlanar"] = OMX_COLOR_FormatYVU420PackedPlanar;
-        workingColorFormats["YVU420PackedSemiPlanar"] = OMX_COLOR_FormatYVU420PackedSemiPlanar;*/
-
-        workingColorFormats["YUV420PackedPlanar"] = OMX_COLOR_FormatYUV420PackedPlanar;
-        workingColorFormats["YUV420PackedSemiPlanar"] = OMX_COLOR_FormatYUV420PackedSemiPlanar;
-        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
-        workingColorFormats["YCbYCr"] = OMX_COLOR_FormatYCbYCr;
-        workingColorFormats["YCrYCb"] = OMX_COLOR_FormatYCrYCb;
-        workingColorFormats["CbYCrY"] = OMX_COLOR_FormatCbYCrY;
-        workingColorFormats["CrYCbY"] = OMX_COLOR_FormatCrYCbY;
+        workingColorFormats["YVU420PackedSemiPlanar"] = OMX_COLOR_FormatYVU420PackedSemiPlanar;
 
         collectNames<OMX_COLOR_FORMATTYPE>(workingColorFormats, workingColorFormatNames, workingColorFormatTypes);
         
@@ -550,6 +498,23 @@ private:
         eventTypes[OMX_EventKhronosExtensions] = "OMX_EventKhronosExtensions";
         eventTypes[OMX_EventVendorStartUnused] = "OMX_EventVendorStartUnused";
         eventTypes[OMX_EventParamOrConfigChanged] = "OMX_EventParamOrConfigChanged";
+        
+        
+        eglErrors[EGL_SUCCESS]="EGL_SUCCESS";
+        eglErrors[EGL_NOT_INITIALIZED]="EGL_NOT_INITIALIZED";
+        eglErrors[EGL_BAD_ACCESS]="EGL_BAD_ACCESS";
+        eglErrors[EGL_BAD_ALLOC]="EGL_BAD_ALLOC";
+        eglErrors[EGL_BAD_ATTRIBUTE]="EGL_BAD_ATTRIBUTE";
+        eglErrors[EGL_BAD_CONFIG]="EGL_BAD_CONFIG";
+        eglErrors[EGL_BAD_CONTEXT]="EGL_BAD_CONTEXT";
+        eglErrors[EGL_BAD_CURRENT_SURFACE]="EGL_BAD_CURRENT_SURFACE";
+        eglErrors[EGL_BAD_DISPLAY]="EGL_BAD_DISPLAY";
+        eglErrors[EGL_BAD_MATCH]="EGL_BAD_MATCH";
+        eglErrors[EGL_BAD_NATIVE_PIXMAP]="EGL_BAD_NATIVE_PIXMAP";
+        eglErrors[EGL_BAD_NATIVE_WINDOW]="EGL_BAD_NATIVE_WINDOW";
+        eglErrors[EGL_BAD_PARAMETER]="EGL_BAD_PARAMETER";
+        eglErrors[EGL_BAD_SURFACE]="EGL_BAD_SURFACE";
+        eglErrors[EGL_CONTEXT_LOST]="EGL_CONTEXT_LOST";
         
         //~3MS
 

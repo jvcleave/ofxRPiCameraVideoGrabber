@@ -199,52 +199,37 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
         cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16;
 
         cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
-
-        
-        
-        
         //below works but leaving it at default 0
         //cameraOutputPortDefinition.format.video.nSliceHeight	= round(omxCameraSettings.height / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
         OMX_TRACE(error);
-        
-        
 	}
-#if 0
-    for (size_t i=0; i<OMX_Maps::getInstance().getWorkingColorFormatNames().size(); ++i) 
-    {
-        string& currentName = OMX_Maps::getInstance().getWorkingColorFormatNames()[i];
-        ofLogVerbose() << "currentName: " << currentName;
-        cameraOutputPortDefinition.format.video.eColorFormat = OMX_Maps::getInstance().getWorkingColorFormat(currentName);
-        //ofLogVerbose(__func__) << "eColorFormat: " << OMX_Maps::getInstance().getColorFormat(cameraOutputPortDefinition.format.video.eColorFormat);
-        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-        if(error == OMX_ErrorNone)
-        {
-            ofLogVerbose() << "currentName WORKED: << " << currentName;
-        }
-        OMX_TRACE(error);
-        ofSleepMillis(50);
-    }
-    
-
-    typedef struct OMX_VIDEO_PORTDEFINITIONTYPE {
-        OMX_STRING cMIMEType;
-        OMX_NATIVE_DEVICETYPE pNativeRender;
-        OMX_U32 nFrameWidth;
-        OMX_U32 nFrameHeight;
-        OMX_S32 nStride;
-        OMX_U32 nSliceHeight;
-        OMX_U32 nBitrate;
-        OMX_U32 xFramerate;
-        OMX_BOOL bFlagErrorConcealment;
-        OMX_VIDEO_CODINGTYPE eCompressionFormat;
-        OMX_COLOR_FORMATTYPE eColorFormat;
-        OMX_NATIVE_WINDOWTYPE pNativeWindow;
-    } OMX_VIDEO_PORTDEFINITIONTYPE;
-#endif
+#if 0    
+    error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
+    OMX_TRACE(error);
+    ofLogVerbose(__func__) << OMX_Maps::getInstance().getVideoCoding(cameraOutputPortDefinition.format.video.eCompressionFormat);
+#endif    
     return error;
 }
+
+
+#if 0
+typedef struct OMX_VIDEO_PORTDEFINITIONTYPE {
+    OMX_STRING cMIMEType;
+    OMX_NATIVE_DEVICETYPE pNativeRender;
+    OMX_U32 nFrameWidth;
+    OMX_U32 nFrameHeight;
+    OMX_S32 nStride;
+    OMX_U32 nSliceHeight;
+    OMX_U32 nBitrate;
+    OMX_U32 xFramerate;
+    OMX_BOOL bFlagErrorConcealment;
+    OMX_VIDEO_CODINGTYPE eCompressionFormat;
+    OMX_COLOR_FORMATTYPE eColorFormat;
+    OMX_NATIVE_WINDOWTYPE pNativeWindow;
+} OMX_VIDEO_PORTDEFINITIONTYPE;
+#endif
 
 inline
 OMX_ERRORTYPE CameraEngine::configureEncoder()
@@ -417,22 +402,18 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
 #if 0
     if (engineType == TEXTURE_ENGINE)
     {
-        OMX_PARAM_PORTDEFINITIONTYPE eglRenderInputPortDefinition;
-        OMX_INIT_STRUCTURE(eglRenderInputPortDefinition);
-        eglRenderInputPortDefinition.nPortIndex = EGL_RENDER_INPUT_PORT;
-        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &eglRenderInputPortDefinition);
-        OMX_TRACE(error);
-        ofLog(OF_LOG_VERBOSE, 
-              "nBufferCountMin(%u)					\n \
-              nBufferCountActual(%u)				\n \
-              nBufferSize(%u)						\n \
-              nBufferAlignmen(%u) \n", 
-              eglRenderInputPortDefinition.nBufferCountMin, 
-              eglRenderInputPortDefinition.nBufferCountActual, 
-              eglRenderInputPortDefinition.nBufferSize, 
-              eglRenderInputPortDefinition.nBufferAlignment);
-        error =  OMX_AllocateBuffer(render, &eglBuffer, EGL_RENDER_INPUT_PORT, NULL, eglRenderInputPortDefinition.nBufferSize);
-        OMX_TRACE(error, "eglBuffer, OMX_AllocateBuffer");
+        OMX_PARAM_PORTDEFINITIONTYPE iPort;
+        OMX_INIT_STRUCTURE(iPort);
+        iPort.nPortIndex = EGL_RENDER_INPUT_PORT;
+        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &iPort);
+        ofLogVerbose(__func__) << "INPUT COLOR: " <<  OMX_Maps::getInstance().getColorFormat(iPort.format.video.eColorFormat);
+        
+        OMX_PARAM_PORTDEFINITIONTYPE oPort;
+        OMX_INIT_STRUCTURE(oPort);
+        oPort.nPortIndex = EGL_RENDER_OUTPUT_PORT;
+        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &oPort);
+        ofLogVerbose(__func__) << "OUTPUT COLOR: " <<  OMX_Maps::getInstance().getColorFormat(oPort.format.video.eColorFormat);
+
     }
 #endif
     
@@ -880,7 +861,4 @@ void CameraEngine::closeEngine()
     didOpen = false;
 
 }
-
-
-
 

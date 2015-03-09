@@ -123,8 +123,7 @@ public:
     void stopRecording();
 
     ofFbo fbo;
-    ofTexture texture;
-    int getTextureID() { return (int)textureID; }
+    int getTextureID() { return fbo.getTextureReference().getTextureData().textureID; }
     bool forceEGLReuse;
     
     void enablePixels();
@@ -313,9 +312,14 @@ private:
     EGLDisplay display;
     EGLContext context;
     EGLImageKHR eglImage;
-    
+    EGLImageKHR eglImagePixels;
+    EGLSurface surface;
+    EGLConfig eglConfig;
     bool doPixels;
     
+    EGLSurface create_shared_pixmap(int width, int height);
+    EGLSurface sharedSurface;    
+    EGLint global_image[5];    
     GLuint textureID;
     
     
