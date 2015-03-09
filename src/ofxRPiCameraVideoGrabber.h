@@ -275,7 +275,7 @@ public:
     OMX_ERRORTYPE enableBurstMode();
     OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
 
-    
+    ofTexture secondaryTexture;
     
 private:
     bool isTextureMode;

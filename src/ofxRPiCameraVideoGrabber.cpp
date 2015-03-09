@@ -490,8 +490,12 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         ofLogVerbose()	<< "Create eglImagePixels PASS <---------------- :)";
         
     }
-    glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER, eglImagePixels);
-    EGL_TRACE(eglGetError(), "glEGLImageTargetRenderbufferStorageOES");
+    
+
+    secondaryTexture.allocate(width, height, GL_RGBA);
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
+    EGL_TRACE(eglGetError(), "glEGLImageTargetTexture2DOES");
     int endTime = ofGetElapsedTimeMillis();
     ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
     
@@ -585,13 +589,15 @@ void ofxRPiCameraVideoGrabber::updatePixels()
 //    eglQueryGlobalImageBRCM(global_image, global_image+2);
 //    EGL_TRACE(eglGetError());
     EGLint eglAttributes[] = {EGL_NONE };
+    
     fbo.bind();
         eglFlushBRCM();
-        eglLockSurfaceKHR(display, sharedSurface, eglAttributes);
         EGL_TRACE(eglGetError());
-        //glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        //eglLockSurfaceKHR(display, sharedSurface, eglAttributes);
+        //EGL_TRACE(eglGetError());
+        glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
         //memcpy(pixels, eglImagePixels, width*height*4);
-        eglUnlockSurfaceKHR(display, sharedSurface);
+        //eglUnlockSurfaceKHR(display, sharedSurface);
         //EGL_TRACE(eglGetError());
     fbo.unbind();
     //eglFlushBRCM();
@@ -747,6 +753,28 @@ void ofxRPiCameraVideoGrabber::draw()
         return;
     }
     fbo.draw(0, 0);
+    /*eglQueryGlobalImageBRCM(global_image, global_image+2);
+    EGL_TRACE(eglGetError());
+    eglFlushBRCM();
+     EGL_TRACE(eglGetError());
+    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
+     EGL_TRACE(eglGetError());
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
+     EGL_TRACE(eglGetError());*/
+    /*
+    
+    glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP_TO_EDGE);
+    
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, tid);*/
+    //secondaryTexture.draw(0, 0);
+     //EGL_TRACE(eglGetError());
+    
 }
 
 ofxRPiCameraVideoGrabber::EXPOSURE_MODE
