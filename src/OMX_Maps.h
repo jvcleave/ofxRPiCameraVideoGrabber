@@ -131,11 +131,10 @@ public:
         return exposurePresets[name];
     }
     
+    vector<string> mirrorNames;
     map<string, OMX_MIRRORTYPE> mirrors;
     map<OMX_MIRRORTYPE, string> mirrorTypes;
-    vector<string> mirrorNames;
-    
-    
+   
     string getMirror(OMX_MIRRORTYPE type)
     {
         return mirrorTypes[type];
@@ -146,24 +145,60 @@ public:
         return mirrors[name];
     }
     
-    
-    
 	vector<string> videoCodingNames;
 	map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
+    map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
     vector<string>& getVideoCodingNames()
     {
         return videoCodingNames;
     }
     
+    string getVideoCoding(OMX_VIDEO_CODINGTYPE type)
+    {
+        return videoCodingTypes[type];
+    }
+    
+    OMX_VIDEO_CODINGTYPE getVideoCoding(string name)
+    {
+        return videoCoding[name];
+    }
 	
 	vector<string> colorFormatNames;
 	map<string, OMX_COLOR_FORMATTYPE> colorFormats;
+    map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
     vector<string>& getColorFormatNames()
     {
         return colorFormatNames;
     }
- 
+    string getColorFormat(OMX_COLOR_FORMATTYPE type)
+    {
+        return colorFormatTypes[type];
+    }
+    
+    OMX_COLOR_FORMATTYPE getColorFormat(string name)
+    {
+        return colorFormats[name];
+    }
 	
+    
+    vector<string> workingColorFormatNames;
+    map<string, OMX_COLOR_FORMATTYPE> workingColorFormats;
+    map<OMX_COLOR_FORMATTYPE, string> workingColorFormatTypes;
+    vector<string>& getWorkingColorFormatNames()
+    {
+        return workingColorFormatNames;
+    }
+    string getWorkingColorFormat(OMX_COLOR_FORMATTYPE type)
+    {
+        return workingColorFormatTypes[type];
+    }
+    
+    OMX_COLOR_FORMATTYPE getWorkingColorFormat(string name)
+    {
+        return workingColorFormats[name];
+    }
+    
+    
 	vector<string> algorithmNames;
 	map<string, OMX_CAMERADISABLEALGORITHMTYPE> algorithms;
     map<OMX_CAMERADISABLEALGORITHMTYPE, string> algorithmTypes;
@@ -172,21 +207,23 @@ public:
         return algorithmNames;
     }
     
-    map<OMX_COLOR_FORMATTYPE, string> colorFormatTypes;
+    
     
 	map<OMX_EVENTTYPE, string> eventTypes;
-	map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
+	
     
     map<OMX_ERRORTYPE, string> omxErrors;
     
  
     map<OMX_STATETYPE, string>omxStateNames;
-
+    map<EGLint, string> eglErrors;
     
 private:	
     OMX_Maps()
     {
- 
+
+        
+
         focusControls["On"] = OMX_IMAGE_FocusControlOn;
         focusControls["Off"] = OMX_IMAGE_FocusControlOff;
         focusControls["Auto"] = OMX_IMAGE_FocusControlAuto;
@@ -347,7 +384,16 @@ private:
 
 
         collectNames<OMX_COLOR_FORMATTYPE>(colorFormats, colorFormatNames, colorFormatTypes);
+                 
+        workingColorFormats["Unused"] = OMX_COLOR_FormatUnused;
+        workingColorFormats["YUV420PackedPlanar"] = OMX_COLOR_FormatYUV420PackedPlanar;
+        workingColorFormats["YUV420PackedSemiPlanar"] = OMX_COLOR_FormatYUV420PackedSemiPlanar;
+        workingColorFormats["YUV422PackedPlanar"] = OMX_COLOR_FormatYUV422PackedPlanar;
+        workingColorFormats["YVU420PackedPlanar"] = OMX_COLOR_FormatYVU420PackedPlanar;
+        workingColorFormats["YVU420PackedSemiPlanar"] = OMX_COLOR_FormatYVU420PackedSemiPlanar;
 
+        collectNames<OMX_COLOR_FORMATTYPE>(workingColorFormats, workingColorFormatNames, workingColorFormatTypes);
+        
 
         videoCoding["Unused"] = OMX_VIDEO_CodingUnused;
         videoCoding["AutoDetect"] = OMX_VIDEO_CodingAutoDetect;
@@ -452,6 +498,23 @@ private:
         eventTypes[OMX_EventKhronosExtensions] = "OMX_EventKhronosExtensions";
         eventTypes[OMX_EventVendorStartUnused] = "OMX_EventVendorStartUnused";
         eventTypes[OMX_EventParamOrConfigChanged] = "OMX_EventParamOrConfigChanged";
+        
+        
+        eglErrors[EGL_SUCCESS]="EGL_SUCCESS";
+        eglErrors[EGL_NOT_INITIALIZED]="EGL_NOT_INITIALIZED";
+        eglErrors[EGL_BAD_ACCESS]="EGL_BAD_ACCESS";
+        eglErrors[EGL_BAD_ALLOC]="EGL_BAD_ALLOC";
+        eglErrors[EGL_BAD_ATTRIBUTE]="EGL_BAD_ATTRIBUTE";
+        eglErrors[EGL_BAD_CONFIG]="EGL_BAD_CONFIG";
+        eglErrors[EGL_BAD_CONTEXT]="EGL_BAD_CONTEXT";
+        eglErrors[EGL_BAD_CURRENT_SURFACE]="EGL_BAD_CURRENT_SURFACE";
+        eglErrors[EGL_BAD_DISPLAY]="EGL_BAD_DISPLAY";
+        eglErrors[EGL_BAD_MATCH]="EGL_BAD_MATCH";
+        eglErrors[EGL_BAD_NATIVE_PIXMAP]="EGL_BAD_NATIVE_PIXMAP";
+        eglErrors[EGL_BAD_NATIVE_WINDOW]="EGL_BAD_NATIVE_WINDOW";
+        eglErrors[EGL_BAD_PARAMETER]="EGL_BAD_PARAMETER";
+        eglErrors[EGL_BAD_SURFACE]="EGL_BAD_SURFACE";
+        eglErrors[EGL_CONTEXT_LOST]="EGL_CONTEXT_LOST";
         
         //~3MS
 
