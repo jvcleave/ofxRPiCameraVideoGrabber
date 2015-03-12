@@ -334,48 +334,6 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
     return fbo.getTextureReference();
 }
 
-EGLSurface ofxRPiCameraVideoGrabber::create_shared_pixmap(int width, int height) 
-{
-    
-    EGLint pixel_format = EGL_PIXEL_FORMAT_ARGB_8888_BRCM;
-    EGLint rt;
-    eglGetConfigAttrib(display, eglConfig, EGL_RENDERABLE_TYPE, &rt);
-    
-    if (rt & EGL_OPENGL_ES_BIT) {
-        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GLES_BRCM;
-        pixel_format |= EGL_PIXEL_FORMAT_GLES_TEXTURE_BRCM;
-    }
-    if (rt & EGL_OPENGL_ES2_BIT) {
-        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GLES2_BRCM;
-        pixel_format |= EGL_PIXEL_FORMAT_GLES2_TEXTURE_BRCM;
-    }
-    if (rt & EGL_OPENVG_BIT) {
-        pixel_format |= EGL_PIXEL_FORMAT_RENDER_VG_BRCM;
-        pixel_format |= EGL_PIXEL_FORMAT_VG_IMAGE_BRCM;
-    }
-    if (rt & EGL_OPENGL_BIT) {
-        pixel_format |= EGL_PIXEL_FORMAT_RENDER_GL_BRCM;
-    }
-    global_image[0] = 0;
-    global_image[1] = 0;
-    global_image[2] = width;
-    global_image[3] = height;
-    global_image[4] = pixel_format;
-    
-    eglCreateGlobalImageBRCM(width, height, global_image[4], 0, width*4, global_image);
-    EGL_TRACE(eglGetError());
-    EGLint attrs[] = {
-        EGL_VG_COLORSPACE, EGL_VG_COLORSPACE_sRGB,
-        EGL_VG_ALPHA_FORMAT, pixel_format & EGL_PIXEL_FORMAT_ARGB_8888_PRE_BRCM ? EGL_VG_ALPHA_FORMAT_PRE : EGL_VG_ALPHA_FORMAT_NONPRE,
-        EGL_NONE
-    };
-    
-    return eglCreatePixmapSurface(display, eglConfig, (EGLNativePixmapType)global_image, attrs);
-    //return eglCreatePbufferSurface(display, eglConfig, attrs);
-    
-}
-
-
 inline
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
@@ -433,21 +391,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     }
     
     fbo.bind();
-        /*
-        EGLint eglImageAttributes[] = {
-                                        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-                                        EGL_NONE};
-        // Create EGL Image
-        eglImage = eglCreateImageKHR(
-                                     display,
-                                     context,
-                                     EGL_GL_TEXTURE_2D_KHR,
-                                     (EGLClientBuffer)fbo.getTextureReference().getTextureData().textureID,
-                                     eglImageAttributes);
-         */
-        
-        EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-                                        EGL_NONE};
+        EGLint eglImageAttributes[] = {EGL_NONE};
         eglImage = eglCreateImageKHR(
                                  display,
                                  context,
@@ -469,35 +413,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         }
     
     fbo.unbind();
-    sharedSurface = create_shared_pixmap(width, height);
-    EGL_TRACE(eglGetError());
-    
-    EGLint eglImageAPixelsAttributes[] = {
-                                        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-                                        EGL_NONE};
-    
-    eglImagePixels = eglCreateImageKHR(display, 
-                                       EGL_NO_CONTEXT, 
-                                       EGL_NATIVE_PIXMAP_KHR, 
-                                       (EGLClientBuffer)global_image, 
-                                       eglImageAPixelsAttributes);
-    if (eglImagePixels == EGL_NO_IMAGE_KHR)
-    {
-        ofLogError()	<< "Create eglImagePixels FAIL <---------------- :(";
-    }
-    else
-    {
-        ofLogVerbose()	<< "Create eglImagePixels PASS <---------------- :)";
-        
-    }
-    
-
-    secondaryTexture.allocate(width, height, GL_RGBA);
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
-    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
-    EGL_TRACE(eglGetError(), "glEGLImageTargetTexture2DOES");
-    int endTime = ofGetElapsedTimeMillis();
-    ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
+    ofLogVerbose(__func__) << "TOOK " << ofGetElapsedTimeMillis()-startTime << " MILLISECONDS";
     
 }
 
@@ -517,61 +433,12 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
         }
         eglImage = NULL;
     }
-    if (eglImagePixels)
-    {
-        if (eglDestroyImageKHR(display, eglImagePixels))
-        {
-            ofLogVerbose(__func__) << "eglDestroyImageKHR eglImagePixels PASS <---------------- :)";
-        }
-        else
-        {
-            ofLogError(__func__) << "eglDestroyImageKHR eglImagePixels FAIL <---------------- :(";
-        }
-        eglImagePixels = NULL;
-    }
 }
 
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
     return isTextureMode;
 }
-#if 0
-EGLBoolean eglQueryImageFSL(EGLDisplay dpy, EGLImageKHR img, EGLint attribute, EGLint* value)
-{
-    egl_display_t const * const dp = get_display(dpy);
-    if (dp == 0) {
-        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    }
-    
-    ImageRef _i(img);
-    if (!_i.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-    
-    egl_image_t* image = get_image(img);
-    bool success = false;
-    for (int i=0 ; i<IMPL_NUM_IMPLEMENTATIONS ; i++) {
-        egl_connection_t* const cnx = &gEGLImpl[i];
-        if (image->images[i] != EGL_NO_IMAGE_KHR) {
-            if (cnx->dso) {
-                if (cnx->egl.eglCreateImageKHR) {
-                    if (cnx->egl.eglQueryImageFSL(
-                                                  dp->disp[i].dpy, image->images[i], attribute, value)) {
-                        success = true;
-                    }
-                }
-            }
-        }
-    }
-    if (!success)
-        return EGL_FALSE;
-    
-    return EGL_TRUE;
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY eglLockSurfaceKHR (EGLDisplay display, EGLSurface surface, const EGLint *attrib_list);
-EGLAPI EGLBoolean EGLAPIENTRY eglUnlockSurfaceKHR (EGLDisplay display, EGLSurface surface);
-#endif
-
-
 
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
@@ -586,24 +453,10 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     {
         pixels = new unsigned char[dataSize];
     }
-//    eglQueryGlobalImageBRCM(global_image, global_image+2);
-//    EGL_TRACE(eglGetError());
-    EGLint eglAttributes[] = {EGL_NONE };
-    
     fbo.bind();
-        eglFlushBRCM();
-        EGL_TRACE(eglGetError());
-        //eglLockSurfaceKHR(display, sharedSurface, eglAttributes);
-        //EGL_TRACE(eglGetError());
         glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-        //memcpy(pixels, eglImagePixels, width*height*4);
-        //eglUnlockSurfaceKHR(display, sharedSurface);
-        //EGL_TRACE(eglGetError());
     fbo.unbind();
-    //eglFlushBRCM();
-    //EGL_TRACE(eglGetError());
-    //eglSwapBuffers(display, sharedSurface);
-    //EGL_TRACE(eglGetError());
+
     if(doSaveImage)
     {
         stringstream fileName;
