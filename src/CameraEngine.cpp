@@ -164,7 +164,7 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
 {
     
     OMX_ERRORTYPE error;
-    error = DisableAllPortsForComponent(&camera, "camera");
+    error = DisableAllPortsForComponent(&camera);
 	OMX_TRACE(error);
     
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
@@ -237,7 +237,7 @@ OMX_ERRORTYPE CameraEngine::configureEncoder()
 		
     OMX_ERRORTYPE error;
     
-    error = DisableAllPortsForComponent(&encoder, "encoder");
+    error = DisableAllPortsForComponent(&encoder);
     OMX_TRACE(error);
 
 	// Encoder input port definition is done automatically upon tunneling
@@ -352,28 +352,13 @@ void CameraEngine::threadedFunction()
 	}
 }
 
-void checkForZeroCopy(OMX_HANDLETYPE* handle, int port)
-{
-    OMX_ERRORTYPE error;
-    
-    ofLogVerbose(__func__) << "port : " << port;
-    OMX_CONFIG_PORTBOOLEANTYPE ePort;
-    OMX_INIT_STRUCTURE(ePort);
-    ePort.nPortIndex = port;
-    error =OMX_GetParameter(*handle, OMX_IndexParamBrcmZeroCopy, &ePort);
-    OMX_TRACE(error);
-    ofLogVerbose() << "port: " << port << " ENABLED: " << ePort.bEnabled;
-}
 inline
 OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
 {
     
-    OMX_ERRORTYPE error;
-  
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
     
-    //checkForZeroCopy(&camera, CAMERA_OUTPUT_PORT);
     //Enable Camera Output Port
     OMX_CONFIG_PORTBOOLEANTYPE cameraport;
     OMX_INIT_STRUCTURE(cameraport);
@@ -387,12 +372,14 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     {
         //Set up video splitter
         OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , NULL);
-        DisableAllPortsForComponent(&splitter, "splitter");
+        DisableAllPortsForComponent(&splitter);
         
         //Set splitter to Idle
         error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
         OMX_TRACE(error);
     }
+    
+    
     
     //Set up texture renderer
     OMX_CALLBACKTYPE renderCallbacks;
@@ -409,26 +396,9 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
 
     OMX_GetHandle(&render, engineTypeString, this , &renderCallbacks);
-    DisableAllPortsForComponent(&render, "render");
+    DisableAllPortsForComponent(&render);
     
     
-#if 0
-    if (engineType == TEXTURE_ENGINE)
-    {
-        OMX_PARAM_PORTDEFINITIONTYPE iPort;
-        OMX_INIT_STRUCTURE(iPort);
-        iPort.nPortIndex = EGL_RENDER_INPUT_PORT;
-        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &iPort);
-        ofLogVerbose(__func__) << "INPUT COLOR: " <<  OMX_Maps::getInstance().getColorFormat(iPort.format.video.eColorFormat);
-        
-        OMX_PARAM_PORTDEFINITIONTYPE oPort;
-        OMX_INIT_STRUCTURE(oPort);
-        oPort.nPortIndex = EGL_RENDER_OUTPUT_PORT;
-        error =OMX_GetParameter(render, OMX_IndexParamPortDefinition, &oPort);
-        ofLogVerbose(__func__) << "OUTPUT COLOR: " <<  OMX_Maps::getInstance().getColorFormat(oPort.format.video.eColorFormat);
-
-    }
-#endif
     
     //Set renderer to Idle
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
@@ -505,9 +475,6 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
     if (engineType == TEXTURE_ENGINE)
     {
-     
-      
-        
         //Enable render output port
         error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
         OMX_TRACE(error);

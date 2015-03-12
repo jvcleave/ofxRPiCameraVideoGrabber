@@ -276,8 +276,6 @@ public:
     OMX_ERRORTYPE setHDR(bool doHDR); //doesn't seem to do anything
 
     ofTexture secondaryTexture;
-    EGLint sharedAttributes[3];
-
     
 private:
     bool isTextureMode;
@@ -318,7 +316,6 @@ private:
     EGLConfig eglConfig;
     bool doPixels;
     
-
     GLuint textureID;
     
     

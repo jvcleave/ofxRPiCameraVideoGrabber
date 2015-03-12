@@ -276,31 +276,8 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
                     }
                 }
                 
-                /*
-                 
-                 OMX_CONFIG_BRCMUSEPROPRIETARYCALLBACKTYPE cbType;
-                 OMX_INIT_STRUCTURE(cbType);
-                 cbType.nPortIndex = ports.nStartPortNumber+j;
-                 error = OMX_GetParameter(*handle, OMX_IndexConfigBrcmUseProprietaryCallback, &cbType);
-                 ofLogVerbose()<<  componentName << " PORT # " << ports.nStartPortNumber+j << " PROPRIETARY CALLBACK ENABLED: " << fromOMXBool(cbType.bEnable);
-                 
-                 
-                
-             
-                
                 error = OMX_SendCommand(*handle, OMX_CommandPortDisable, ports.nStartPortNumber+j, NULL);
                 OMX_TRACE(error, componentName + " PORT # " + ofToString(ports.nStartPortNumber+j) + " DISABLED")
-                
-                OMX_CONFIG_PORTBOOLEANTYPE ePort;
-                OMX_INIT_STRUCTURE(ePort);
-                ePort.nPortIndex = ports.nStartPortNumber+j;
-                error =OMX_GetParameter(*handle, OMX_IndexParamBrcmZeroCopy, &ePort);
-                OMX_TRACE(error, "ZERO COPY CHECK");
-                if(error != OMX_ErrorUnsupportedIndex)
-                {
-                    ofLogVerbose() << componentName << " port: " << ports.nStartPortNumber+j << " ZERO COPY POSSIBLE";
-                }
-                */
                 
                 
             }

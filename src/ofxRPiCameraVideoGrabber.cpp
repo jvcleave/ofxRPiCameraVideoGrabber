@@ -334,6 +334,8 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
     return fbo.getTextureReference();
 }
 
+
+
 inline
 void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
 {
@@ -391,14 +393,15 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     }
     
     fbo.bind();
-        EGLint eglImageAttributes[] = {EGL_NONE};
+       EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+                                        EGL_NONE};
         eglImage = eglCreateImageKHR(
                                  display,
                                  context,
                                  EGL_GL_TEXTURE_2D_KHR,
                                  (EGLClientBuffer)fbo.getTextureReference().getTextureData().textureID,
-                                 eglImageAttributes);
-    
+                                 NULL);
+
         
 
         if (eglImage == EGL_NO_IMAGE_KHR)
@@ -413,7 +416,8 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         }
     
     fbo.unbind();
-    ofLogVerbose(__func__) << "TOOK " << ofGetElapsedTimeMillis()-startTime << " MILLISECONDS";
+    int endTime = ofGetElapsedTimeMillis();
+    ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
     
 }
 
@@ -440,6 +444,9 @@ bool ofxRPiCameraVideoGrabber::isTextureEnabled()
     return isTextureMode;
 }
 
+
+
+
 void ofxRPiCameraVideoGrabber::updatePixels()
 {
     if (!doPixels && !doSaveImage) 
@@ -452,9 +459,13 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     if (pixels == NULL)
     {
         pixels = new unsigned char[dataSize];
-    }
+    }    
     fbo.bind();
+        //eglFlushBRCM();
+        //EGL_TRACE(eglGetError());
+
         glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
     fbo.unbind();
 
     if(doSaveImage)
@@ -606,28 +617,6 @@ void ofxRPiCameraVideoGrabber::draw()
         return;
     }
     fbo.draw(0, 0);
-    /*eglQueryGlobalImageBRCM(global_image, global_image+2);
-    EGL_TRACE(eglGetError());
-    eglFlushBRCM();
-     EGL_TRACE(eglGetError());
-    glBindTexture(GL_TEXTURE_2D, secondaryTexture.getTextureData().textureID);
-     EGL_TRACE(eglGetError());
-    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
-     EGL_TRACE(eglGetError());*/
-    /*
-    
-    glDrawArrays( GL_TRIANGLE_STRIP, 0, 4 );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP_TO_EDGE);
-    
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glBindTexture(GL_TEXTURE_2D, tid);*/
-    //secondaryTexture.draw(0, 0);
-     //EGL_TRACE(eglGetError());
-    
 }
 
 ofxRPiCameraVideoGrabber::EXPOSURE_MODE
