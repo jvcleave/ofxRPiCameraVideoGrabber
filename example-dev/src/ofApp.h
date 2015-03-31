@@ -25,13 +25,13 @@ public:
     void onCharacterReceived(KeyListenerEventData& e);
     TerminalListener consoleListener;
     
-    OMXCameraSettings omxCameraSettings;
+    SessionConfig sessionConfig;
     ofxRPiCameraVideoGrabber videoGrabber;
     
     vector<CameraDemo*> demos;
     int currentDemoID;
     CameraDemo* currentDemo;
     bool doNextDemo;
-    vector<OMXCameraSettings::Preset> presets;
+    vector<SessionConfig::Preset> presets;
     int currentPreset;
 };

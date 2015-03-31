@@ -19,7 +19,7 @@
 #include <IL/OMX_Broadcom.h>
 
 #include "OMXCameraUtils.h"
-#include "OMXCameraSettings.h"
+#include "SessionConfig.h"
 
 #include "CameraEngine.h"
 
@@ -93,13 +93,13 @@ public:
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
     
-    OMXCameraSettings omxCameraSettings;
+    SessionConfig sessionConfig;
 	
-	void setup(OMXCameraSettings);
+	void setup(SessionConfig);
     void close();
     void setDefaultValues();
     void saveState();
-    void resetToCommonState();
+    void resetToDefaultSettings();
     void draw();
 	
     bool isReady();
@@ -256,7 +256,7 @@ public:
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
     
     void loadStateFromFile(string filePath="");
-    void saveCurrentStateToFile(string filePath="");
+    void saveCameraSettingsToFile(string filePath="");
     
     //fixed aperture - no effect
     OMX_ERRORTYPE setAutoAperture(bool);
@@ -355,46 +355,7 @@ private:
     
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
-    
-#if 0
-    
-
-    
-    //OMX_CONFIG_ROTATIONTYPE OMX_IndexConfigCommonRotate
-    //OMX_CONFIG_MIRRORTYPE OMX_IndexConfigCommonMirror
-    
-    OMX_PARAM_U32TYPE OMX_IndexConfigCameraIsoReferenceValue
-    OMX_CONFIG_ZEROSHUTTERLAGTYPE OMX_IndexParamCameraZeroShutterLag
-    OMX_CONFIG_BRCMFOVTYPE OMX_IndexConfigFieldOfView
-    //OMX_CONFIG_CAMERAINFOTYPE OMX_IndexConfigCameraInfo
-    
-    //OMX_IMAGE_CONFIG_FOCUSCONTROLTYPE OMX_IndexConfigFocusControl
-    OMX_CONFIG_REDEYEREMOVALTYPE OMX_IndexConfigCommonRedEyeRemoval
-    
-    OMX_PARAM_CAPTURESTATETYPE OMX_IndexParamCaptureStatus
-    OMX_CONFIG_FACEDETECTIONCONTROLTYPE OMX_IndexConfigCommonFaceDetectionControl
-    OMX_CONFIG_BOOLEANTYPE OMX_IndexConfigDrawBoxAroundFaces
-    OMX_IMAGE_PARAM_QFACTORTYPE OMX_IndexParamQFactor
-    OMX_PARAM_BRCMTHUMBNAILTYPE OMX_IndexParamBrcmThumbnail
-    OMX_PARAM_TIMESTAMPMODETYPE OMX_IndexParamCommonUseStcTimestamps
-    
-    //OMX_CONFIG_SCALEFACTORTYPE OMX_IndexConfigCommonDigitalZoom
-    //OMX_CONFIG_FRAMESTABTYPE OMX_IndexConfigCommonFrameStabilisation
-    //OMX_CONFIG_INPUTCROPTYPE OMX_IndexConfigInputCropPercentages
-    OMX_PARAM_BRCMCONFIGFILETYPE OMX_IndexParamBrcmConfigFileRegisters
-    OMX_PARAM_BRCMCONFIGFILECHUNKTYPE OMX_IndexParamBrcmConfigFileChunkRegisters
-    
-    OMX_PARAM_BRCMFRAMERATERANGETYPE OMX_IndexParamBrcmFpsRange
-    //OMX_IndexParamSWSharpenDisable
-   // OMX_IndexParamSWSaturationDisable
- 
-#endif
-    //OMX_CameraDisableAlgorithmDynamicRangeExpansion
-    //OMX_CameraDisableAlgorithmHighDynamicRange
-    //https://gist.github.com/jvcleave/83bbef779c0cde9589ab
-    //https://github.com/raspberrypi/userland/blob/master/interface/mmal/openmaxil/
-    
-    
+       
     void initStructures()
     {
         OMX_INIT_STRUCTURE(exposurePresetConfig);

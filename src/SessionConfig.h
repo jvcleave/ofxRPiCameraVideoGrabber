@@ -2,11 +2,10 @@
 
 #include "ofMain.h"
 
-#define MEGABYTE_IN_BITS 8388608
 
 
 
-class CameraState
+class CameraSettings
 {
 public:
     
@@ -35,7 +34,7 @@ public:
     bool disableSoftwareSharpen;
     bool disableSoftwareSaturation;
     
-    CameraState()
+    CameraSettings()
     {
         exposurePreset = "Auto";
         meteringType="OMX_MeteringModeAverage";
@@ -141,11 +140,11 @@ public:
         ofLogVerbose(__func__) << state.str();
         if(filePath.empty())
         {
-            filePath = ofToDataPath("CameraState.ini", true);
+            filePath = ofToDataPath("CameraSettings.ini", true);
             ofFile file(filePath);
             if(file.exists())
             {
-                //file.renameTo(ofGetTimestampString()+"CameraState.ini", false);
+                //file.renameTo(ofGetTimestampString()+"CameraSettings.ini", false);
             }
         }
         ofBuffer buffer(state.str());
@@ -158,7 +157,7 @@ public:
         
         if(filePath.empty())
         {
-            filePath = ofToDataPath("CameraState.ini", true);
+            filePath = ofToDataPath("CameraSettings.ini", true);
         
         }
         ofFile file(filePath);
@@ -185,10 +184,14 @@ public:
 
 };
 
-class OMXCameraSettings
+class SessionConfig
 {
 public:
-    
+    enum MODE
+    {
+        MODE_TEXTURE,
+        MODE_NONTEXTURE
+    };
     enum Preset 
     {
         PRESET_NONE,
@@ -233,32 +236,36 @@ public:
     int framerate;
     bool doRecording;
     
-    bool isUsingTexture;
     bool enablePixels;
     string recordingFilePath;
     
     Preset preset;
-    CameraState state;
-    OMXCameraSettings()
+    CameraSettings cameraSettings;
+    MODE mode;
+    SessionConfig()
     {
         width = 1280;
         height = 720;
         framerate = 30;
-        isUsingTexture = true;
+        mode=MODE_TEXTURE;
         enablePixels = false;
         doRecording = false;
         recordingFilePath = "";
         preset = PRESET_NONE;
         //doFlipTexture = false;
     }
-    vector<OMXCameraSettings::Preset> getAllPresets()
+    bool isUsingTexture()
     {
-        vector<OMXCameraSettings::Preset> presets;
-        for ( int preset = OMXCameraSettings::PRESET_NONE; preset != OMXCameraSettings::PRESET_480P_30FPS; ++preset )
+        return (mode==MODE_TEXTURE);
+    }
+    vector<SessionConfig::Preset> getAllPresets()
+    {
+        vector<SessionConfig::Preset> presets;
+        for ( int preset = SessionConfig::PRESET_NONE; preset != SessionConfig::PRESET_480P_30FPS; ++preset )
         {
-            if(preset != OMXCameraSettings::PRESET_NONE)
+            if(preset != SessionConfig::PRESET_NONE)
             {
-                presets.push_back((OMXCameraSettings::Preset)preset);
+                presets.push_back((SessionConfig::Preset)preset);
             }
             
         }
@@ -278,7 +285,7 @@ public:
                 width = 1920;
                 height = 1080;
                 framerate = 30;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }
                 
@@ -288,7 +295,7 @@ public:
                 width = 1920;
                 height = 1080;
                 framerate = 30;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             }
             
@@ -306,7 +313,7 @@ public:
                 width = 1280;
                 height = 720;
                 framerate = 40;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }
                 
@@ -315,7 +322,7 @@ public:
                 width = 1280;
                 height = 720;
                 framerate = 40;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             }
                 
@@ -341,7 +348,7 @@ public:
                 width = 1280;
                 height = 720;
                 framerate = 30;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }
                 
@@ -350,7 +357,7 @@ public:
                 width = 1280;
                 height = 720;
                 framerate = 30;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             }
                 
@@ -359,7 +366,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 90;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             } 
             case PRESET_480P_60FPS_TEXTURE :
@@ -367,7 +374,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 60;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }    
                 
@@ -376,7 +383,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 40;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }    
             
@@ -386,7 +393,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 30;
-                isUsingTexture = true;
+                mode=MODE_TEXTURE;
                 break;
             }
                 
@@ -395,7 +402,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 90;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             } 
             case PRESET_480P_60FPS_NONTEXTURE :
@@ -403,7 +410,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 60;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             } 
             case PRESET_480P_40FPS_NONTEXTURE :
@@ -411,7 +418,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 40;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             } 
             
@@ -420,7 +427,7 @@ public:
                 width = 640;
                 height = 480;
                 framerate = 30;
-                isUsingTexture = false;
+                mode=MODE_NONTEXTURE;
                 break;
             }
                 

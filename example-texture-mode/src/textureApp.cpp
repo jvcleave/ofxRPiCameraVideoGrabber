@@ -11,19 +11,18 @@ void textureApp::setup()
 	consoleListener.setup(this);
 	
 	
-	omxCameraSettings.width = 1280; //default 1280
-	omxCameraSettings.height = 720; //default 720
-	omxCameraSettings.isUsingTexture = true; //default true
-	omxCameraSettings.doRecording = false;   //default false
+	sessionConfig.width = 1280; //default 1280
+	sessionConfig.height = 720; //default 720
+	sessionConfig.doRecording = false;   //default false
 	
-	if (omxCameraSettings.doRecording) 
+	if (sessionConfig.doRecording) 
 	{
-		omxCameraSettings.recordingFilePath = ""; //default "" will self-generate
+		sessionConfig.recordingFilePath = ""; //default "" will self-generate
 		
 	}
 
 	//pass in the settings and it will start the camera
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(sessionConfig);
 	
 	//ImageFilterCollection (filterCollection here) is helper class to iterate through available OpenMax filters
 	filterCollection.setup();
@@ -50,9 +49,9 @@ void textureApp::draw(){
 	videoGrabber.draw();
 	
 	//draw a smaller version via the getTextureReference() method
-	int drawWidth = omxCameraSettings.width/4;
-	int drawHeight = omxCameraSettings.height/4;
-	videoGrabber.getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
+	int drawWidth = sessionConfig.width/4;
+	int drawHeight = sessionConfig.height/4;
+	videoGrabber.getTextureReference().draw(sessionConfig.width-drawWidth, sessionConfig.height-drawHeight, drawWidth, drawHeight);
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
@@ -63,7 +62,7 @@ void textureApp::draw(){
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
-	if (omxCameraSettings.doRecording) 
+	if (sessionConfig.doRecording) 
 	{
 		info << "Press q to stop recording" << "\n";
 	}

@@ -66,11 +66,11 @@ int CameraEngine::getFrameCounter()
 }
 
 
-void CameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
+void CameraEngine::setup(SessionConfig& sessionConfig_)
 {
-    omxCameraSettings = omxCameraSettings_;
+    sessionConfig = sessionConfig_;
     
-    if(omxCameraSettings.isUsingTexture)
+    if(sessionConfig.isUsingTexture())
     {
         engineType = TEXTURE_ENGINE;
         engineTypeString = OMX_EGL_RENDER;
@@ -194,13 +194,13 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
     OMX_TRACE(error);
 	if(error == OMX_ErrorNone) 
 	{
-        cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
-        cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
-        cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16;
+        cameraOutputPortDefinition.format.video.nFrameWidth		= sessionConfig.width;
+        cameraOutputPortDefinition.format.video.nFrameHeight	= sessionConfig.height;
+        cameraOutputPortDefinition.format.video.xFramerate		= sessionConfig.framerate << 16;
 
-        cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
+        cameraOutputPortDefinition.format.video.nStride			= sessionConfig.width;
         //below works but leaving it at default 0
-        //cameraOutputPortDefinition.format.video.nSliceHeight	= round(omxCameraSettings.height / 16) * 16;
+        //cameraOutputPortDefinition.format.video.nSliceHeight	= round(sessionConfig.height / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
         OMX_TRACE(error);
@@ -368,7 +368,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Set up video splitter
         OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , NULL);
@@ -405,7 +405,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Create encoder
         
@@ -424,7 +424,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
     
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Create camera->splitter Tunnel
         error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
@@ -454,7 +454,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Enable splitter input port
         error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
@@ -508,7 +508,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     }
 
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Enable encoder input port
         error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
@@ -565,7 +565,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         //Start encoder
         error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
@@ -594,7 +594,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     }
     
     
-    if(omxCameraSettings.doRecording)
+    if(sessionConfig.doRecording)
     {
         error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
@@ -628,8 +628,8 @@ OMX_ERRORTYPE CameraEngine::setupDisplay()
     
     region.dest_rect.x_offset = 0;
     region.dest_rect.y_offset = 0;
-    region.dest_rect.width	= omxCameraSettings.width;
-    region.dest_rect.height = omxCameraSettings.height;
+    region.dest_rect.width	= sessionConfig.width;
+    region.dest_rect.height = sessionConfig.height;
     
     OMX_ERRORTYPE error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
     
@@ -661,9 +661,9 @@ bool CameraEngine::writeFile()
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
-	fileName << omxCameraSettings.width << "x";
-	fileName << omxCameraSettings.height << "_";
-	fileName << omxCameraSettings.framerate << "fps_";
+	fileName << sessionConfig.width << "x";
+	fileName << sessionConfig.height << "_";
+	fileName << sessionConfig.framerate << "fps_";
 	
 	fileName << numMBps << "MBps_";
 	
@@ -687,12 +687,12 @@ bool CameraEngine::writeFile()
 	
 	string filePath;
 	
-	if (omxCameraSettings.recordingFilePath == "") 
+	if (sessionConfig.recordingFilePath == "") 
 	{
 		filePath = ofToDataPath(fileName.str(), true);
 	}else
 	{
-		filePath = omxCameraSettings.recordingFilePath;
+		filePath = sessionConfig.recordingFilePath;
 	}
 	
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);

@@ -23,7 +23,7 @@ class pixelsApp : public ofBaseApp, public KeyListener{
 	
 	bool doDrawInfo;
 	ofTexture videoTexture;
-	OMXCameraSettings omxCameraSettings;
+	SessionConfig sessionConfig;
 	bool doPixels;
 	bool doReloadPixels;
 };

@@ -11,18 +11,18 @@ void nonTextureApp::setup()
 		
 	consoleListener.setup(this);
 	
-	OMXCameraSettings omxCameraSettings;
-	omxCameraSettings.width					= 1280;
-	omxCameraSettings.height				= 720;
-	omxCameraSettings.isUsingTexture		= false;
-	omxCameraSettings.doRecording			= false;		//default: false
-	if (omxCameraSettings.doRecording) 
+	SessionConfig sessionConfig;
+	sessionConfig.width					= 1280;
+	sessionConfig.height				= 720;
+    sessionConfig.MODE = SessionConfig::MODE_NONTEXTURE;
+	sessionConfig.doRecording			= false;		//default: false
+	if (sessionConfig.doRecording) 
 	{		
-		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
+		sessionConfig.recordingFilePath		= "";		//will self generate if left blank
 	}
 	
 	
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(sessionConfig);
 	filterCollection.setup();
 	
 

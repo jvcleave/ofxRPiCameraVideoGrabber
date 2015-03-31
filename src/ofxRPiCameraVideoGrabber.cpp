@@ -43,7 +43,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     forceEGLReuse = true;
 }
 
-void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
+void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig_)
 {
    
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
@@ -101,24 +101,24 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         }  
     }
     
-    omxCameraSettings = omxCameraSettings_;
-    omxCameraSettings.applyPreset();
-    isTextureMode = omxCameraSettings.isUsingTexture;
+    sessionConfig = sessionConfig_;
+    sessionConfig.applyPreset();
+    isTextureMode = (sessionConfig.mode == SessionConfig::MODE_TEXTURE);
 
-    if (omxCameraSettings.enablePixels) 
+    if (sessionConfig.enablePixels) 
     {
         enablePixels();
     }
     if (isTextureEnabled()) 
     {
-        generateEGLImage(omxCameraSettings.width, omxCameraSettings.height);
+        generateEGLImage(sessionConfig.width, sessionConfig.height);
     }
     engine = new CameraEngine();
     if (isTextureEnabled()) 
     {
         engine->eglImage = eglImage;
     }
-    engine->setup(omxCameraSettings);
+    engine->setup(sessionConfig);
     camera = engine->camera;
     
     setDefaultValues();
@@ -128,40 +128,40 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 
 void ofxRPiCameraVideoGrabber::setDefaultValues()
 {
-    CameraState& currentState = omxCameraSettings.state;
-    currentState.validate();
+    CameraSettings& cameraSettings = sessionConfig.cameraSettings;
+    cameraSettings.validate();
    
-    setExposurePreset(currentState.exposurePreset); 
+    setExposurePreset(cameraSettings.exposurePreset); 
     CameraMeteringMode cameraMeteringMode;
-    cameraMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(currentState.meteringType);
-    cameraMeteringMode.evCompensation = currentState.evCompensation;
-    cameraMeteringMode.autoShutter = currentState.autoShutter;
-    cameraMeteringMode.shutterSpeedMicroSeconds = currentState.shutterSpeedMicroSeconds;
-    cameraMeteringMode.autoAperture = currentState.autoAperture;
-    cameraMeteringMode.aperture = currentState.aperture;
-    cameraMeteringMode.autoISO = currentState.autoISO;
-    cameraMeteringMode.ISO = currentState.ISO;
+    cameraMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(cameraSettings.meteringType);
+    cameraMeteringMode.evCompensation = cameraSettings.evCompensation;
+    cameraMeteringMode.autoShutter = cameraSettings.autoShutter;
+    cameraMeteringMode.shutterSpeedMicroSeconds = cameraSettings.shutterSpeedMicroSeconds;
+    cameraMeteringMode.autoAperture = cameraSettings.autoAperture;
+    cameraMeteringMode.aperture = cameraSettings.aperture;
+    cameraMeteringMode.autoISO = cameraSettings.autoISO;
+    cameraMeteringMode.ISO = cameraSettings.ISO;
     applyCurrentMeteringMode();
     
     
-    setSharpness(currentState.sharpness);
-    setContrast(currentState.contrast);
-    setBrightness(currentState.brightness);
-    setSaturation(currentState.saturation);
-    setFrameStabilization(currentState.framestabilization);
-    setWhiteBalance(currentState.whiteBalance);
-    setImageFilter(currentState.imageFilter);
+    setSharpness(cameraSettings.sharpness);
+    setContrast(cameraSettings.contrast);
+    setBrightness(cameraSettings.brightness);
+    setSaturation(cameraSettings.saturation);
+    setFrameStabilization(cameraSettings.framestabilization);
+    setWhiteBalance(cameraSettings.whiteBalance);
+    setImageFilter(cameraSettings.imageFilter);
     setColorEnhancement(false);	 //TODO implement
-    setDRE(currentState.dreLevel);
-    cropRectangle = currentState.cropRectangle;
+    setDRE(cameraSettings.dreLevel);
+    cropRectangle = cameraSettings.cropRectangle;
     setSensorCrop(cropRectangle);
-    zoomLevel = currentState.zoomLevel;
+    zoomLevel = cameraSettings.zoomLevel;
     setDigitalZoom();
-    setRotation(currentState.rotation);
-    setMirror(currentState.mirror);
+    setRotation(cameraSettings.rotation);
+    setMirror(cameraSettings.mirror);
     
-    setSoftwareSharpening(currentState.disableSoftwareSharpen);
-    setSoftwareSaturation(currentState.disableSoftwareSaturation);
+    setSoftwareSharpening(cameraSettings.disableSoftwareSharpen);
+    setSoftwareSaturation(cameraSettings.disableSoftwareSaturation);
     //Requires gpio program provided via wiringPi
     //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
@@ -179,7 +179,7 @@ void ofxRPiCameraVideoGrabber::setDefaultValues()
 }
 void ofxRPiCameraVideoGrabber::saveState()
 {
-    CameraState state;
+    CameraSettings state;
  
     state.exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
     state.meteringType=currentMeteringMode.getMeteringTypeAsString();
@@ -207,26 +207,26 @@ void ofxRPiCameraVideoGrabber::saveState()
     state.zoomLevel=zoomLevel;
     state.rotation=rotationConfig.nRotation;
     state.mirror = getMirror();
-    omxCameraSettings.state = state;
+    sessionConfig.cameraSettings = state;
         
 }
 
 void ofxRPiCameraVideoGrabber::loadStateFromFile(string filePath)
 {
-    omxCameraSettings.state.loadFromFile(filePath);
+    sessionConfig.cameraSettings.loadFromFile(filePath);
 }
 
-void ofxRPiCameraVideoGrabber::saveCurrentStateToFile(string filePath)
+void ofxRPiCameraVideoGrabber::saveCameraSettingsToFile(string filePath)
 {
     saveState();
-    omxCameraSettings.state.saveToFile(filePath);
+    sessionConfig.cameraSettings.saveToFile(filePath);
     
 }
 
-void ofxRPiCameraVideoGrabber::resetToCommonState()
+void ofxRPiCameraVideoGrabber::resetToDefaultSettings()
 {
-    CameraState state;
-    omxCameraSettings.state = state;
+    CameraSettings state;
+    sessionConfig.cameraSettings = state;
     setDefaultValues();
 }
 
@@ -311,17 +311,17 @@ bool ofxRPiCameraVideoGrabber::isReady()
 
 int ofxRPiCameraVideoGrabber::getWidth()
 {
-    return omxCameraSettings.width;
+    return sessionConfig.width;
 }
 
 int ofxRPiCameraVideoGrabber::getHeight()
 {
-    return omxCameraSettings.height;
+    return sessionConfig.height;
 }
 
 int ofxRPiCameraVideoGrabber::getFrameRate()
 {
-    return omxCameraSettings.framerate;
+    return sessionConfig.framerate;
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
@@ -566,8 +566,8 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     if(doStartRecording)
     {
         ofLogVerbose(__func__) << "doStartRecording REQUESTED";
-        omxCameraSettings.doRecording = true;
-        setup(omxCameraSettings);
+        sessionConfig.doRecording = true;
+        setup(sessionConfig);
         doStartRecording = false;
     }else
     {

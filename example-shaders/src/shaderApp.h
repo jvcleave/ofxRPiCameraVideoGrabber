@@ -27,6 +27,6 @@ class shaderApp : public ofBaseApp, public KeyListener{
 	ofShader shader;
 	bool doShader;
 		
-	OMXCameraSettings omxCameraSettings;
+	SessionConfig sessionConfig;
 };
 

@@ -21,7 +21,7 @@ class ofApp : public ofBaseApp, public KeyListener{
 	
 	ImageFilterCollection filterCollection;
 	
-	OMXCameraSettings omxCameraSettings;
+	SessionConfig sessionConfig;
 	bool doDrawInfo;
 		
 };

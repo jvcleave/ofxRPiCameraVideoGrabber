@@ -15,6 +15,9 @@
 
 
 
+#define MEGABYTE_IN_BITS 8388608
+
+
 #define OMX_INIT_STRUCTURE(a) \
 memset(&(a), 0, sizeof(a)); \
 (a).nSize = sizeof(a); \

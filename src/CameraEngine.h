@@ -12,7 +12,7 @@
 
 
 #include "OMXCameraUtils.h"
-#include "OMXCameraSettings.h"
+#include "SessionConfig.h"
 
 
 enum EngineType {
@@ -25,7 +25,7 @@ class CameraEngine: public ofThread
 public:
 	CameraEngine();
     ~CameraEngine();
-    void setup(OMXCameraSettings& omxCameraSettings_);
+    void setup(SessionConfig& sessionConfig_);
     
 	int getFrameCounter();
     void closeEngine();
@@ -42,7 +42,7 @@ private:
     bool didOpen;
     int renderedFrameCounter; 
     OMX_ERRORTYPE setupDisplay();
-	OMXCameraSettings omxCameraSettings;
+	SessionConfig sessionConfig;
 
 	OMX_ERRORTYPE configureCameraResolution();
 	OMX_ERRORTYPE configureEncoder();
