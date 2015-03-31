@@ -115,8 +115,8 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
-        videoGrabber.saveState();
-        videoGrabber.setDefaultValues();
+        videoGrabber.cameraSettings.saveState();
+        videoGrabber.cameraSettings.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
     }else
@@ -213,18 +213,18 @@ void ofApp::keyPressed  (int key)
         }
         case 'r' :
         {
-            videoGrabber.resetToDefaultSettings();
+            //videoGrabber.resetToDefaultSettings();
             break;
         }
             
         case 'S' :
         {
-            videoGrabber.saveCameraSettingsToFile();
+            videoGrabber.cameraSettings.saveCameraSettingsToFile();
             break;
         }
         case 'L' :
         {
-            videoGrabber.loadStateFromFile();
+            videoGrabber.cameraSettings.loadStateFromFile();
             break;
         }
         case '8' :

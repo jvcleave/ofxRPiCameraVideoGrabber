@@ -20,7 +20,7 @@ public:
     {
         if (ofGetFrameNum() % 100 == 0) 
         {
-            videoGrabber->setImageFilter(filterCollection.getNextFilter());
+            videoGrabber->cameraSettings.setImageFilter(filterCollection.getNextFilter());
         }
     };
     
@@ -60,7 +60,7 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == 'e')
         {
-            videoGrabber->setImageFilter(filterCollection.getNextFilter());
+            videoGrabber->cameraSettings.setImageFilter(filterCollection.getNextFilter());
         }
         
         if (key == 'g')

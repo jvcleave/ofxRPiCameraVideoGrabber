@@ -122,8 +122,8 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
-        videoGrabber.saveState();
-        videoGrabber.setDefaultValues();
+        videoGrabber.cameraSettings.saveState();
+        videoGrabber.cameraSettings.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
         ofLogVerbose() << "isTextureEnabled: " << videoGrabber.isTextureEnabled();
@@ -182,32 +182,32 @@ void ofApp::keyPressed  (int key)
         }
         case 'S' :
         {
-            videoGrabber.saveCameraSettingsToFile();
+            videoGrabber.cameraSettings.saveCameraSettingsToFile();
             break;
         }
         case 'L' :
         {
-            videoGrabber.loadStateFromFile();
+            videoGrabber.cameraSettings.loadStateFromFile();
             break;
         }
         case '0' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_NONE);
+            videoGrabber.setMirror(CameraSettings::MIRROR_NONE);
             break;
         }
         case '1' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_VERTICAL);
+            videoGrabber.setMirror(CameraSettings::MIRROR_VERTICAL);
             break;
         }
         case '2' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_HORIZONTAL);
+            videoGrabber.setMirror(CameraSettings::MIRROR_HORIZONTAL);
             break;
         }
         case '3' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_BOTH);
+            videoGrabber.setMirror(CameraSettings::MIRROR_BOTH);
             break;
         }    
         case '4' :

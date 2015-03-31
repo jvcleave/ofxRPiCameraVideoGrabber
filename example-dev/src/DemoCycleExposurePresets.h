@@ -37,7 +37,7 @@ public:
             }
             currentExposureName = exposurePresetNames[exposurePresetIndex];
             
-            videoGrabber->setExposurePreset(ExposurePresets[currentExposureName]);
+            videoGrabber->cameraSettings.setExposurePreset(ExposurePresets[currentExposureName]);
             //videoGrabber->printMeteringMode();
             //ofLogVerbose() << "currentExposureName: " << currentExposureName;
         }
@@ -60,10 +60,10 @@ public:
         info << name << "\n";
         info << "App FPS: " << ofGetFrameRate() << "\n";
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n";
-        info << "getSharpness(): "      << videoGrabber->getSharpness()              << "\n";
-        info << "getContrast(): "       << videoGrabber->getContrast()               << "\n";
-        info << "getBrightness(): "     << videoGrabber->getBrightness()             << "\n";
-        info << "getSaturation(): "      << videoGrabber->getSaturation()             << "\n";
+        info << "getSharpness(): "      << videoGrabber->cameraSettings.getSharpness()              << "\n";
+        info << "getContrast(): "       << videoGrabber->cameraSettings.getContrast()               << "\n";
+        info << "getBrightness(): "     << videoGrabber->cameraSettings.getBrightness()             << "\n";
+        info << "getSaturation(): "      << videoGrabber->cameraSettings.getSaturation()             << "\n";
         
         info << "\n";
         info << "currentExposureName: " << currentExposureName << "\n";
@@ -92,15 +92,15 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if(key == 'z')
         {
-            videoGrabber->setAutoShutter(!videoGrabber->getAutoShutter());
+            videoGrabber->cameraSettings.setAutoShutter(!videoGrabber->getAutoShutter());
         }
         if(key == 'x')
         {
-            videoGrabber->setAutoISO(!videoGrabber->getAutoISO());
+            videoGrabber->cameraSettings.setAutoISO(!videoGrabber->getAutoISO());
         }
         if(key == 'c')
         {
-            videoGrabber->setAutoAperture(!videoGrabber->getAutoAperture());
+            videoGrabber->cameraSettings.setAutoAperture(!videoGrabber->getAutoAperture());
         }
         
         

@@ -34,12 +34,12 @@ public:
             }
             currentExposureName = OMX_Maps::getInstance().getExposurePresetNames()[exposurePresetIndex];
             
-            videoGrabber->setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
+            videoGrabber->cameraSettings.setExposurePreset(OMX_Maps::getInstance().exposurePresets[currentExposureName]);
             changePreset = false;
         }
         stringstream info;
 
-        info << "Press 1 to change Exposure Preset: " << videoGrabber->getExposurePreset() << "\n";
+        info << "Press 1 to change Exposure Preset: " << videoGrabber->cameraSettings.getExposurePreset() << "\n";
 
         infoString = info.str();
     };
