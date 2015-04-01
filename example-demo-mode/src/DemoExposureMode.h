@@ -19,19 +19,19 @@ public:
     {
         if (doSwitchModes) 
         {
-            if(videoGrabber->cameraSettings.getExposureMode() == CameraSettings::EXPOSURE_MODE_AUTO)
+            if(videoGrabber->getCameraSettings().getExposureMode() == CameraSettings::EXPOSURE_MODE_AUTO)
             {
-                videoGrabber->cameraSettings.enableManualExposure();
+                videoGrabber->getCameraSettings().enableManualExposure();
             }else
             {
-                videoGrabber->cameraSettings.enableAutoExposure();
+                videoGrabber->getCameraSettings().enableAutoExposure();
             }
             doSwitchModes = false;
         }
         
         string currentModeString = "UNKNOWN";
         
-        int currentMode = videoGrabber->cameraSettings.getExposureMode();
+        int currentMode = videoGrabber->getCameraSettings().getExposureMode();
         switch(currentMode)
         {
             case CameraSettings::EXPOSURE_MODE_AUTO:
@@ -67,7 +67,6 @@ public:
     
     void onKey(int key)
     {
-        ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == '1')
         {
             doSwitchModes = !doSwitchModes;

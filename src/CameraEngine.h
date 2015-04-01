@@ -25,7 +25,7 @@ class CameraEngine: public ofThread
 public:
 	CameraEngine();
     ~CameraEngine();
-    void setup(SessionConfig& sessionConfig_);
+    void setup(SessionConfig* sessionConfig_);
     
 	int getFrameCounter();
     void closeEngine();
@@ -42,7 +42,7 @@ private:
     bool didOpen;
     int renderedFrameCounter; 
     OMX_ERRORTYPE setupDisplay();
-	SessionConfig sessionConfig;
+	SessionConfig* sessionConfig;
 
 	OMX_ERRORTYPE configureCameraResolution();
 	OMX_ERRORTYPE configureEncoder();

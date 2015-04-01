@@ -17,7 +17,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     updateFrameCounter = 0;
     frameCounter = 0;
     hasNewFrame = false;
-    
+    sessionConfig = NULL;
     camera = NULL;
     engine = NULL;
     appEGLWindow = NULL;
@@ -28,7 +28,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     surface = NULL;
     eglConfig = NULL;
     doPixels = false;
-    textureID	= 0;
+    textureID	= -1;
     
     
     doSaveImage = false;
@@ -36,9 +36,21 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     doStartRecording = false;
     
     forceEGLReuse = true;
+    
+    fbo = NULL;
 }
 
-void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig_)
+
+CameraSettings& ofxRPiCameraVideoGrabber::getCameraSettings()
+{
+    return sessionConfig->getCameraSettings();
+}
+
+void ofxRPiCameraVideoGrabber::setup(SessionConfig& sessionConfig_)
+{
+    setup(&sessionConfig_);
+}
+void ofxRPiCameraVideoGrabber::setup(SessionConfig* sessionConfig_)
 {
    
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
@@ -46,6 +58,7 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig_)
     {
         delete engine;
         engine = NULL;
+        camera = NULL;
         
     }
     if (appEGLWindow == NULL)
@@ -97,15 +110,15 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig_)
     }
     
     sessionConfig = sessionConfig_;
-    sessionConfig.applyPreset();
+    sessionConfig->applyPreset();
 
-    if (sessionConfig.enablePixels) 
+    if (sessionConfig->enablePixels) 
     {
         enablePixels();
     }
     if (isTextureEnabled()) 
     {
-        generateEGLImage(sessionConfig.width, sessionConfig.height);
+        generateEGLImage(sessionConfig->width, sessionConfig->height);
     }
     engine = new CameraEngine();
     if (isTextureEnabled()) 
@@ -114,13 +127,21 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig_)
     }
     engine->setup(sessionConfig);
     camera = engine->camera;
-    sessionConfig.cameraSettings.camera = camera;
-    sessionConfig.cameraSettings.setDefaultValues();
-    cameraSettings = sessionConfig.cameraSettings;
+    getCameraSettings().camera = camera;
+    getCameraSettings().applyAllSettings();
+    
     ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
 }
 
+void ofxRPiCameraVideoGrabber::loadCameraSettingsFromFile(string filePath)
+{
+    getCameraSettings().loadFromFile(filePath);
+}
 
+void ofxRPiCameraVideoGrabber::saveCameraSettingsToFile(string filePath)
+{
+    getCameraSettings().saveToFile(filePath);    
+}
 
 CameraEngine* ofxRPiCameraVideoGrabber::getEngine()
 {
@@ -143,17 +164,17 @@ bool ofxRPiCameraVideoGrabber::isReady()
 
 int ofxRPiCameraVideoGrabber::getWidth()
 {
-    return sessionConfig.width;
+    return sessionConfig->width;
 }
 
 int ofxRPiCameraVideoGrabber::getHeight()
 {
-    return sessionConfig.height;
+    return sessionConfig->height;
 }
 
 int ofxRPiCameraVideoGrabber::getFrameRate()
 {
-    return sessionConfig.framerate;
+    return sessionConfig->framerate;
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
@@ -163,7 +184,7 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
       
         //ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
     }
-    return fbo.getTextureReference();
+    return fbo->getTextureReference();
 }
 
 
@@ -178,25 +199,32 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     {
         needsRegeneration = true;
     }
-    if (!fbo.isAllocated())
+    if(!fbo)
     {
         needsRegeneration = true;
-    }
-    
-    if (fbo.getWidth() != width)
+    }else
     {
-        needsRegeneration = true;
+        if (!fbo->isAllocated())
+        {
+            needsRegeneration = true;
+        }
+        
+        if (fbo->getWidth() != width)
+        {
+            needsRegeneration = true;
+        }
+        if (fbo->getHeight() != height)
+        {
+            needsRegeneration = true;
+        }
+
     }
-    if (fbo.getHeight() != height)
-    {
-        needsRegeneration = true;
-    }
-    
+        
     if(!needsRegeneration)
     {
-        fbo.begin();
+        fbo->begin();
             ofClear(0, 0, 0);
-        fbo.end();
+        fbo->end();
         ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
         return;
     }
@@ -209,8 +237,14 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     
     if (needsRegeneration)
     {
-        fbo.allocate(width, height);
-        textureID = fbo.getTextureReference().getTextureData().textureID;
+        if(fbo)
+        {
+            delete fbo;
+            fbo = NULL;
+        }
+        fbo = new ofFbo();
+        fbo->allocate(width, height);
+        textureID = fbo->getTextureReference().getTextureData().textureID;
     }
     
     if (pixels && needsRegeneration)
@@ -224,14 +258,14 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         pixels = new unsigned char[dataSize];
     }
     
-    fbo.bind();
+    fbo->bind();
        EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
                                         EGL_NONE};
         eglImage = eglCreateImageKHR(
                                  display,
                                  context,
                                  EGL_GL_TEXTURE_2D_KHR,
-                                 (EGLClientBuffer)fbo.getTextureReference().getTextureData().textureID,
+                                 (EGLClientBuffer)textureID,
                                  NULL);
 
         
@@ -247,7 +281,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
             
         }
     
-    fbo.unbind();
+    fbo->unbind();
     int endTime = ofGetElapsedTimeMillis();
     ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
     
@@ -273,7 +307,7 @@ void ofxRPiCameraVideoGrabber::destroyEGLImage()
 
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
-    return (sessionConfig.mode == SessionConfig::MODE_TEXTURE);
+    return (sessionConfig->mode == SessionConfig::MODE_TEXTURE);
 }
 
 
@@ -292,13 +326,13 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     {
         pixels = new unsigned char[dataSize];
     }    
-    fbo.bind();
+    fbo->bind();
         //eglFlushBRCM();
         //EGL_TRACE(eglGetError());
 
         glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-    fbo.unbind();
+    fbo->unbind();
 
     if(doSaveImage)
     {
@@ -366,7 +400,7 @@ void ofxRPiCameraVideoGrabber::startRecording()
     {
         stopRecording();
     }
-    cameraSettings.saveState();
+    //getCameraSettings().saveState();
     doStartRecording = true;
 }
 
@@ -398,7 +432,7 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     if(doStartRecording)
     {
         ofLogVerbose(__func__) << "doStartRecording REQUESTED";
-        sessionConfig.doRecording = true;
+        sessionConfig->doRecording = true;
         setup(sessionConfig);
         doStartRecording = false;
     }else
@@ -448,23 +482,21 @@ void ofxRPiCameraVideoGrabber::draw()
     {
         return;
     }
-    fbo.draw(0, 0);
+    fbo->draw(0, 0);
 }
 
 
-bool doExit = false;
+bool ofxRPiCameraVideoGrabber::doExit = false;
 
-inline
-void signal_handler(int signum)
+void ofxRPiCameraVideoGrabber::signal_handler(int signum)
 {
-    cout << "ofxRPiCameraVideoGrabber caught signal " << signum;
-    doExit = true;
+    ofxRPiCameraVideoGrabber::doExit = true;
 }
 
 inline
 void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
 {
-    if (doExit)
+    if (ofxRPiCameraVideoGrabber::doExit)
     {
         ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
         close();
@@ -488,7 +520,7 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
         
         //Struct for the new action associated to the SIGNAL_TO_BLOCK
         struct sigaction new_action;
-        new_action.sa_handler = signal_handler;
+        new_action.sa_handler = ofxRPiCameraVideoGrabber::signal_handler;
         
         //Empty the sa_mask. This means that no signal is blocked while the signal_handler runs.
         sigemptyset(&new_action.sa_mask);
@@ -524,7 +556,15 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
         delete[] pixels;
         pixels = NULL;
     }
-
+    if(sessionConfig)
+    {
+        sessionConfig = NULL;
+    }
+    if(fbo)
+    {
+        delete fbo;
+        fbo = NULL;
+    }
 }
 
 void ofxRPiCameraVideoGrabber::close()
@@ -536,11 +576,6 @@ void ofxRPiCameraVideoGrabber::close()
         engine = NULL;
     }
     destroyEGLImage();
-    /*if(eglImage)
-    {
-        destroyEGLImage();
-        eglImage = NULL;
-    }*/
 }
 
 

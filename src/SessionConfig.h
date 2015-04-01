@@ -61,7 +61,7 @@ public:
     string recordingFilePath;
     
     Preset preset;
-    CameraSettings cameraSettings;
+    
     MODE mode;
     SessionConfig()
     {
@@ -74,6 +74,10 @@ public:
         recordingFilePath = "";
         preset = PRESET_NONE;
         //doFlipTexture = false;
+    }
+    CameraSettings& getCameraSettings()
+    {
+        return cameraSettings;
     }
     bool isUsingTexture()
     {
@@ -296,4 +300,6 @@ public:
                 
         }
     }
+private:
+    CameraSettings cameraSettings;
 };

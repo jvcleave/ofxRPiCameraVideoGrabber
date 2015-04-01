@@ -40,16 +40,13 @@ struct CameraMeteringMode
         ISO=0;
     };
     
-    string getMeteringTypeAsString()
-    {
-        return OMX_Maps::getInstance().meteringTypes[meteringType];
-    };
+    
     
     string toString()
     {
+
         stringstream ss;
-        
-        ss << getMeteringTypeAsString() << "\n";
+        ss << OMX_Maps::getInstance().getMetering(meteringType) << "\n";
         ss << "evCompensation: " << evCompensation << "\n";
         
         ss << "autoShutter: " << autoShutter << "\n";
@@ -71,6 +68,8 @@ class CameraSettings
 {
 public:
     
+    CameraSettings();
+    
     enum ROTATION
     {
         ROTATION_0=0,
@@ -85,6 +84,13 @@ public:
         MIRROR_VERTICAL=OMX_MirrorVertical,
         MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
         MIRROR_BOTH=OMX_MirrorBoth,
+    };
+    
+    enum EXPOSURE_MODE
+    {
+        EXPOSURE_MODE_AUTO,
+        EXPOSURE_MODE_MANUAL,
+        EXPOSURE_MODE_INVALID,
     };
     
     string exposurePreset;
@@ -112,6 +118,7 @@ public:
     bool doDisableSoftwareSharpen;
     bool doDisableSoftwareSaturation;
     
+    void resetValues();
     
     int getSharpness()  { return sharpnessConfig.nSharpness; }
     int getContrast()   { return contrastConfig.nContrast;	}
@@ -136,6 +143,7 @@ public:
     
     OMX_ERRORTYPE setImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE setImageFilter(string);
+    string getImageFilter();
     
     OMX_ERRORTYPE setSharpness(int); //-100 to 100
     OMX_ERRORTYPE setSharpnessNormalized(float);
@@ -179,9 +187,6 @@ public:
     OMX_ERRORTYPE setZoomLevelNormalized(float);
     float getZoomLevelNormalized();
     
-    
-    
-    
     OMX_ERRORTYPE setRotation(int);
     OMX_ERRORTYPE setRotation(ROTATION);
     int getRotation();
@@ -189,8 +194,7 @@ public:
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
-    
-    
+
     OMX_ERRORTYPE setMirror(int);
     OMX_ERRORTYPE setMirror(string);
     string getMirror();
@@ -200,14 +204,7 @@ public:
     OMX_ERRORTYPE disableSoftwareSharpening();
     bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
     
-    
-    enum EXPOSURE_MODE
-    {
-        EXPOSURE_MODE_AUTO,
-        EXPOSURE_MODE_MANUAL,
-        EXPOSURE_MODE_INVALID,
-    };
-    
+
     EXPOSURE_MODE getExposureMode();
     
     OMX_ERRORTYPE enableAutoExposure();
@@ -217,9 +214,7 @@ public:
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
-    
-    void loadStateFromFile(string filePath="");
-    void saveCameraSettingsToFile(string filePath="");
+
     
     //fixed aperture - no effect
     OMX_ERRORTYPE setAutoAperture(bool);
@@ -273,7 +268,7 @@ public:
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
     OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
     
-    CameraSettings();
+    
     
     void processKeyValues(vector<string>& keyValues);
     
@@ -298,7 +293,7 @@ public:
     
     OMX_HANDLETYPE camera;
     
-    void resetToDefaults();
+    void resetCameraToDefaultSettings();
     
     void disableImageEffects();
     void enableImageEffects();
@@ -307,7 +302,7 @@ public:
     bool getLEDState() { return LED_CURRENT_STATE; }
     bool setLEDState(bool turnLEDOn);
     
-    void setDefaultValues();
+    void applyAllSettings();
     
     
 };

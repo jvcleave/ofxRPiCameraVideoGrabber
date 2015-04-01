@@ -27,14 +27,16 @@
 
 class ofxRPiCameraVideoGrabber
 {
-public:
 
+public:
+    
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
     
-    SessionConfig sessionConfig;
-    CameraSettings cameraSettings;
-	void setup(SessionConfig);
+    SessionConfig* sessionConfig;
+    CameraSettings& getCameraSettings();
+	void setup(SessionConfig&);
+    void setup(SessionConfig*);
     void close();
     
     void draw();
@@ -48,17 +50,16 @@ public:
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
-    
-    
-    
+
     bool isTextureEnabled();
     
     bool isRecording();
     void startRecording();
     void stopRecording();
 
-    ofFbo fbo;
-    int getTextureID() { return fbo.getTextureReference().getTextureData().textureID; }
+    ofFbo& getFbo();
+    
+    int getTextureID() { return textureID; }
     bool forceEGLReuse;
     
     void enablePixels();
@@ -70,11 +71,12 @@ public:
     void saveImage();
     void saveRawImage();
         
-	
-        
+    void loadCameraSettingsFromFile(string filePath="");
+    void saveCameraSettingsToFile(string filePath="");
+
 private:
     bool doStartRecording;
-    
+    ofFbo* fbo;
     
     bool hasExitHandler;
     bool hasOMXInit;
@@ -112,7 +114,7 @@ private:
     void destroyEGLImage();
     
  
-    
-    
+    static bool doExit;
+    static void signal_handler(int signum);
 	
 };

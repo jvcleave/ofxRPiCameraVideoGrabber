@@ -122,8 +122,8 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
-        videoGrabber.cameraSettings.saveState();
-        videoGrabber.cameraSettings.setDefaultValues();
+//        videoGrabber.saveState();
+//videoGrabber.getCameraSettings().applyAllSettings();
         doNextDemo = false;
         doPrintInfo = true;
         ofLogVerbose() << "isTextureEnabled: " << videoGrabber.isTextureEnabled();
@@ -182,12 +182,12 @@ void ofApp::keyPressed  (int key)
         }
         case 'S' :
         {
-            videoGrabber.cameraSettings.saveCameraSettingsToFile();
+            videoGrabber.saveCameraSettingsToFile();
             break;
         }
         case 'L' :
         {
-            videoGrabber.cameraSettings.loadStateFromFile();
+           // videoGrabber.loadCameraSettingsFromFile();
             break;
         }
         case '0' :

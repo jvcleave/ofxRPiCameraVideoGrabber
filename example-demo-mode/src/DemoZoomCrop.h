@@ -32,7 +32,7 @@ public:
     {
         if(resetCrop)
         {
-            videoGrabber->cameraSettings.setSensorCrop(0, 0,  100, 100);
+            videoGrabber->getCameraSettings().setSensorCrop(0, 0,  100, 100);
             resetCrop = false;
         }
         
@@ -40,39 +40,39 @@ public:
         {
             
             int randomPercentage = ofRandom(25, 100);
-            videoGrabber->cameraSettings.setSensorCrop(0, 0,  randomPercentage, randomPercentage);
+            videoGrabber->getCameraSettings().setSensorCrop(0, 0,  randomPercentage, randomPercentage);
             doCrop = false;
         }
         
         if(doZoomIn)
         {
-            videoGrabber->cameraSettings.zoomIn();
+            videoGrabber->getCameraSettings().zoomIn();
             doZoomIn = false;
         }
         if(doZoomOut)
         {
-            videoGrabber->cameraSettings.zoomOut();
+            videoGrabber->getCameraSettings().zoomOut();
             doZoomOut = false;
         }
         if (doRandomZoom) 
         {
             doRandomZoom = false;
-            videoGrabber->cameraSettings.setZoomLevelNormalized(ofRandom(0.0, 1.0f));
+            videoGrabber->getCameraSettings().setZoomLevelNormalized(ofRandom(0.0, 1.0f));
         }
         
         if(resetZoom)
         {
-            videoGrabber->cameraSettings.setZoomLevelNormalized(0);
+            videoGrabber->getCameraSettings().setZoomLevelNormalized(0);
             resetZoom = false;
         }
         
         stringstream info;
         
-        info << "Crop LEFT %: "      << videoGrabber->cameraSettings.getCropRectangle().getLeft()    <<  "\n";
-        info << "Crop TOP %: "       << videoGrabber->cameraSettings.getCropRectangle().getTop()     <<  "\n";
-        info << "Crop WIDTH %: "     << videoGrabber->cameraSettings.getCropRectangle().getWidth()   <<  "\n";
-        info << "Crop HEIGHT %: "    << videoGrabber->cameraSettings.getCropRectangle().getHeight()  <<  "\n";
-        info << "CURRENT ZOOM LEVEL: "      <<  videoGrabber->cameraSettings.getZoomLevelNormalized() << "\n";
+        info << "Crop LEFT %: "      << videoGrabber->getCameraSettings().getCropRectangle().getLeft()    <<  "\n";
+        info << "Crop TOP %: "       << videoGrabber->getCameraSettings().getCropRectangle().getTop()     <<  "\n";
+        info << "Crop WIDTH %: "     << videoGrabber->getCameraSettings().getCropRectangle().getWidth()   <<  "\n";
+        info << "Crop HEIGHT %: "    << videoGrabber->getCameraSettings().getCropRectangle().getHeight()  <<  "\n";
+        info << "CURRENT ZOOM LEVEL: "      <<  videoGrabber->getCameraSettings().getZoomLevelNormalized() << "\n";
         info << "\n";
         
         info << "Press 1 to randomize Crop" <<  "\n";

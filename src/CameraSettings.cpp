@@ -11,6 +11,33 @@
 
 CameraSettings::CameraSettings()
 {
+    resetValues();    
+    int zoomStepsSource[61] = 
+    {
+        65536,  68157,  70124,  72745,
+        75366,  77988,  80609,  83231,
+        86508,  89784,  92406,  95683,
+        99615,  102892, 106168, 110100,
+        114033, 117965, 122552, 126484,
+        131072, 135660, 140247, 145490,
+        150733, 155976, 161219, 167117,
+        173015, 178913, 185467, 192020,
+        198574, 205783, 212992, 220201,
+        228065, 236585, 244449, 252969,
+        262144, 271319, 281149, 290980,
+        300810, 311951, 322437, 334234,
+        346030, 357827, 370934, 384041,
+        397148, 411566, 425984, 441057,
+        456131, 472515, 488899, 506593,
+        524288
+    };
+    vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
+    zoomLevels = converted;
+    
+}
+void CameraSettings::resetValues()
+{
+    ofLogVerbose(__func__) << endl << endl << endl << endl<< endl << endl<< endl << endl;
     exposurePreset = "Auto";
     meteringType="OMX_MeteringModeAverage";
     evCompensation=0;
@@ -90,31 +117,8 @@ CameraSettings::CameraSettings()
     
     OMX_INIT_STRUCTURE(flickerCancelConfig);
     flickerCancelConfig.nPortIndex = OMX_ALL;
-    
-    int zoomStepsSource[61] = 
-    {
-        65536,  68157,  70124,  72745,
-        75366,  77988,  80609,  83231,
-        86508,  89784,  92406,  95683,
-        99615,  102892, 106168, 110100,
-        114033, 117965, 122552, 126484,
-        131072, 135660, 140247, 145490,
-        150733, 155976, 161219, 167117,
-        173015, 178913, 185467, 192020,
-        198574, 205783, 212992, 220201,
-        228065, 236585, 244449, 252969,
-        262144, 271319, 281149, 290980,
-        300810, 311951, 322437, 334234,
-        346030, 357827, 370934, 384041,
-        397148, 411566, 425984, 441057,
-        456131, 472515, 488899, 506593,
-        524288
-    };
-    vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
-    zoomLevels = converted;
-    
-}
 
+}
 void CameraSettings::saveToFile(string filePath)
 {
     
@@ -229,7 +233,7 @@ void CameraSettings::processKeyValues(vector<string>& keyValues)
     
 }
 
-void CameraSettings::setDefaultValues()
+void CameraSettings::applyAllSettings()
 {
     
     setExposurePreset(exposurePreset); 
@@ -254,9 +258,7 @@ void CameraSettings::setDefaultValues()
     setImageFilter(imageFilter);
     setColorEnhancement(false);	 //TODO implement
     setDRE(dreLevel);
-    cropRectangle = cropRectangle;
     setSensorCrop(cropRectangle);
-    zoomLevel = zoomLevel;
     setDigitalZoom();
     setRotation(rotation);
     setMirror(mirror);
@@ -279,60 +281,18 @@ void CameraSettings::setDefaultValues()
 
     
 }
-void CameraSettings::saveState()
-{
-    
-    exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
-    meteringType=currentMeteringMode.getMeteringTypeAsString();
-    evCompensation=currentMeteringMode.evCompensation;
-    autoShutter=currentMeteringMode.autoShutter;
-    shutterSpeedMicroSeconds=currentMeteringMode.shutterSpeedMicroSeconds;
-    autoAperture=currentMeteringMode.autoAperture;
-    aperture=currentMeteringMode.aperture;
-    autoISO=currentMeteringMode.autoISO;
-    ISO=currentMeteringMode.ISO;
-    
-    sharpness=getSharpness();
-    contrast=getContrast();
-    brightness=getBrightness();
-    saturation=getSaturation();
-    
-    framestabilization=fromOMXBool(framestabilizationConfig.bStab);
-    
-    whiteBalance=OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
-    
-    imageFilter=OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
-    
-    dreLevel=OMX_Maps::getInstance().dreTypes[dreConfig.eMode];
-    cropRectangle=cropRectangle;
-    zoomLevel=zoomLevel;
-    rotation=rotationConfig.nRotation;
-    mirror = getMirror();    
-}
 
-void CameraSettings::loadStateFromFile(string filePath)
+void CameraSettings::resetCameraToDefaultSettings()
 {
-    loadFromFile(filePath);
-}
-
-void CameraSettings::saveCameraSettingsToFile(string filePath)
-{
-    saveState();
-    saveToFile(filePath);
-    
-}
-
-void CameraSettings::resetToDefaults()
-{
-    setDefaultValues();
+    resetValues();
+    applyAllSettings();
 }
 
 
 string CameraSettings::getMirror()
 {
     
-    return OMX_Maps::getInstance().mirrorTypes[mirrorConfig.eMirror];
-    
+    return OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);    
 }
 
 
@@ -419,18 +379,22 @@ OMX_ERRORTYPE CameraSettings::enableManualExposure()
 }
 
 
-OMX_ERRORTYPE CameraSettings::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposurePreset)
+OMX_ERRORTYPE CameraSettings::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposurePreset_)
 {
-    exposurePresetConfig.eExposureControl = exposurePreset;
+    exposurePresetConfig.eExposureControl = exposurePreset_;
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposurePresetConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePreset_);
+    }
     return error;
 }
 
-OMX_ERRORTYPE CameraSettings::setExposurePreset(string exposurePreset)
+OMX_ERRORTYPE CameraSettings::setExposurePreset(string exposurePreset_)
 {
-    return setExposurePreset(OMX_Maps::getInstance().getExposurePreset(exposurePreset));
+    return setExposurePreset(OMX_Maps::getInstance().getExposurePreset(exposurePreset_));
 }
 
 
@@ -550,32 +514,6 @@ string CameraSettings::getMeteringType()
     return OMX_Maps::getInstance().getMetering(currentMeteringMode.exposurevalue.eMetering);
 }
 
-/*
- string CameraSettings::meteringModetoString()
- {
- OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
- OMX_TRACE(error);
- 
- stringstream ss;
- 
- ss << "OMX_METERINGTYPE: "      <<  currentMeteringMode.getMeteringTypeAsString()  << "\n";
- ss << "xEVCompensation: Q16"    <<  currentMeteringMode.exposurevalue.xEVCompensation       << "\n";
- ss << "nApertureFNumber Q16: "  <<  currentMeteringMode.exposurevalue.nApertureFNumber      << "\n";
- ss << "bAutoAperture: "         <<  currentMeteringMode.exposurevalue.bAutoAperture         << "\n";
- ss << "nShutterSpeedMsec: "     <<  currentMeteringMode.exposurevalue.nShutterSpeedMsec     << "\n";
- ss << "bAutoShutterSpeed: "     <<  currentMeteringMode.exposurevalue.bAutoShutterSpeed     << "\n";
- ss << "nSensitivity: "          <<  currentMeteringMode.exposurevalue.nSensitivity          << "\n";
- ss << "bAutoSensitivity: "      <<  currentMeteringMode.exposurevalue.bAutoSensitivity      << "\n";
- 
- ss << "\n";
- ss << currentMeteringMode.toString() << "\n";
- 
- 
- return ss.str();
- }
- 
- */
-
 
 OMX_ERRORTYPE CameraSettings::setAutoAperture(bool doAutoAperture)
 {
@@ -684,15 +622,24 @@ OMX_ERRORTYPE CameraSettings::setFrameStabilization(bool doStabilization)
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
     OMX_TRACE(error);
+    
+    if(error == OMX_ErrorNone)
+    {
+        framestabilization = doStabilization;
+    }
     return error;
 }
 
-OMX_ERRORTYPE CameraSettings::setSharpness(int sharpness) //-100 to 100
+OMX_ERRORTYPE CameraSettings::setSharpness(int sharpness_) //-100 to 100
 {
-    sharpnessConfig.nSharpness = sharpness; 
+    sharpnessConfig.nSharpness = sharpness_; 
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpnessConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        sharpness = sharpness_;
+    }
     return error;
 }
 
@@ -701,12 +648,16 @@ OMX_ERRORTYPE CameraSettings::setSharpnessNormalized(float sharpnessNormalized)
     return setSharpness(ofMap(sharpnessNormalized, 0.0f, 1.0f, -100, 100)); 
 }
 
-OMX_ERRORTYPE CameraSettings::setContrast(int contrast ) //-100 to 100 
+OMX_ERRORTYPE CameraSettings::setContrast(int contrast_ ) //-100 to 100 
 {
-    contrastConfig.nContrast = contrast; 
+    contrastConfig.nContrast = contrast_; 
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrastConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        contrast = contrast_;
+    }
     return error;
 }
 
@@ -715,13 +666,17 @@ OMX_ERRORTYPE CameraSettings::setContrastNormalized(float contrastNormalized )
     return setContrast(ofMap(contrastNormalized, 0.0f, 1.0f, -100, 100)); 
 }
 
-OMX_ERRORTYPE CameraSettings::setBrightness(int brightness ) //0 to 100
+OMX_ERRORTYPE CameraSettings::setBrightness(int brightness_ ) //0 to 100
 {
     
-    brightnessConfig.nBrightness = brightness;
+    brightnessConfig.nBrightness = brightness_;
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightnessConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        brightness = brightness_;
+    }
     return error;
 }
 
@@ -730,13 +685,17 @@ OMX_ERRORTYPE CameraSettings::setBrightnessNormalized(float brightnessNormalized
     return setBrightness(ofMap(brightnessNormalized, 0.0f, 1.0f, 0, 100));
 }
 
-OMX_ERRORTYPE CameraSettings::setSaturation(int saturation) //-100 to 100
+OMX_ERRORTYPE CameraSettings::setSaturation(int saturation_) //-100 to 100
 {
     
-    saturationConfig.nSaturation = saturation; 
+    saturationConfig.nSaturation = saturation_; 
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturationConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        saturation = saturation_;
+    }
     return error;
 }
 
@@ -748,12 +707,16 @@ OMX_ERRORTYPE CameraSettings::setSaturationNormalized(float saturationNormalized
     return error;
 }
 
-OMX_ERRORTYPE CameraSettings::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
+OMX_ERRORTYPE CameraSettings::setWhiteBalance(OMX_WHITEBALCONTROLTYPE whiteBalance_)
 {	
-    whiteBalanceConfig.eWhiteBalControl = controlType;
+    whiteBalanceConfig.eWhiteBalControl = whiteBalance_;
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &whiteBalanceConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        whiteBalance = whiteBalance_;
+    }
     return error;
 }
 
@@ -880,6 +843,10 @@ OMX_ERRORTYPE CameraSettings::setDigitalZoom()
         
         OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonDigitalZoom, &digitalZoomConfig);
         OMX_TRACE(error);
+        if (error == OMX_ErrorNone) 
+        {
+            zoomLevel = value;
+        }
         return error;
     }
     return OMX_ErrorNone;
@@ -948,6 +915,10 @@ OMX_ERRORTYPE CameraSettings::applyMirror()
 {
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonMirror, &mirrorConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        mirror = OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);
+    }
     return error;
 }
 
@@ -982,6 +953,10 @@ OMX_ERRORTYPE CameraSettings::applyRotation()
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonRotate, &rotationConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        rotation = getRotation();
+    }
     return error;
 }
 
@@ -1032,18 +1007,27 @@ void CameraSettings::disableImageEffects()
     toggleImageEffects(false);
 }
 
-OMX_ERRORTYPE CameraSettings::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
+OMX_ERRORTYPE CameraSettings::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter_)
 {
     
-    imagefilterConfig.eImageFilter = imageFilter;
+    imagefilterConfig.eImageFilter = imageFilter_;
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
     OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        imageFilter = OMX_Maps::getInstance().getImageFilter(imageFilter_);
+    }
     return error;
 }
 
-OMX_ERRORTYPE CameraSettings::setImageFilter(string imageFilter)
+OMX_ERRORTYPE CameraSettings::setImageFilter(string imageFilter_)
 {
-    return setImageFilter(OMX_Maps::getInstance().getImageFilter(imageFilter));
+    return setImageFilter(OMX_Maps::getInstance().getImageFilter(imageFilter_));
+}
+
+string CameraSettings::getImageFilter()
+{
+    return OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
 }
 
 
@@ -1084,7 +1068,10 @@ OMX_ERRORTYPE CameraSettings::setDRE(int level)
     dreConfig.eMode = type;
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &dreConfig);
     OMX_TRACE(error);
-    
+    if(error == OMX_ErrorNone)
+    {
+        dreLevel = level;
+    }
     return error;
 }
 
@@ -1116,7 +1103,11 @@ OMX_ERRORTYPE CameraSettings::setSoftwareSharpening(bool state)
         disableSoftwareSharpenConfig.bEnabled = toOMXBool(state);
         
         error = OMX_SetConfig(camera, OMX_IndexParamSWSharpenDisable, &disableSoftwareSharpenConfig);
-        OMX_TRACE(error);        
+        OMX_TRACE(error);   
+        if(error == OMX_ErrorNone)
+        {
+            doDisableSoftwareSharpen = state;
+        }
     }
     return error;
 }
@@ -1139,7 +1130,12 @@ OMX_ERRORTYPE CameraSettings::setSoftwareSaturation(bool state)
         disableSoftwareSaturationConfig.bEnabled = toOMXBool(state);
         
         error = OMX_SetConfig(camera, OMX_IndexParamSWSaturationDisable, &disableSoftwareSaturationConfig);
-        OMX_TRACE(error);        
+        OMX_TRACE(error); 
+        OMX_TRACE(error);   
+        if(error == OMX_ErrorNone)
+        {
+            doDisableSoftwareSaturation = state;
+        }
     }
     
     return error;
