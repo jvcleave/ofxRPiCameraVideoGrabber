@@ -26,6 +26,9 @@ CameraEngine::CameraEngine()
     eglBuffer	= NULL;
     eglImage = NULL;
     sessionConfig = NULL;
+    cameraOutputPort = CAMERA_OUTPUT_PORT;
+    //cameraOutputPort = CAMERA_PREVIEW_PORT;
+
 }   
 
 
@@ -167,6 +170,12 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
     error = DisableAllPortsForComponent(&camera);
 	OMX_TRACE(error);
     
+    OMX_PARAM_TIMESTAMPMODETYPE timestampConfig;
+    OMX_INIT_STRUCTURE(timestampConfig);
+    timestampConfig.eTimestampMode = OMX_TimestampModeResetStc;
+    error =  OMX_SetParameter(camera, OMX_IndexParamCommonUseStcTimestamps, &timestampConfig);
+    OMX_TRACE(error);
+    
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
 	cameraCallback.nPortIndex	=	OMX_ALL;
@@ -188,7 +197,7 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE cameraOutputPortDefinition;
 	OMX_INIT_STRUCTURE(cameraOutputPortDefinition);
-	cameraOutputPortDefinition.nPortIndex = CAMERA_OUTPUT_PORT;
+	cameraOutputPortDefinition.nPortIndex = cameraOutputPort;
 	
 	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
     OMX_TRACE(error);
@@ -205,6 +214,42 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
         OMX_TRACE(error);
 	}
+    
+#if 0    
+    OMX_PARAM_TIMESTAMPMODETYPE timestampConfig;
+    OMX_INIT_STRUCTURE(timestampConfig);
+
+    error =  OMX_GetParameter(camera, OMX_IndexParamCommonUseStcTimestamps, &timestampConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        stringstream info;
+        switch (timestampConfig.eTimestampMode) 
+        {
+            case OMX_TimestampModeZero:
+            {
+                info << "OMX_TimestampModeZero";
+                break;
+            }
+            case OMX_TimestampModeRawStc:
+            {
+                info << "OMX_TimestampModeRawStc";
+                break;
+            } 
+            case OMX_TimestampModeResetStc:
+            {
+                info << "OMX_TimestampModeResetStc";
+                break;
+            } 
+        }
+        ofLogVerbose(__func__) << "info: " << info.str();
+        
+    }
+#endif  
+
+    
+  
+
 #if 0    
     error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
     OMX_TRACE(error);
@@ -362,7 +407,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     //Enable Camera Output Port
     OMX_CONFIG_PORTBOOLEANTYPE cameraport;
     OMX_INIT_STRUCTURE(cameraport);
-    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
+    cameraport.nPortIndex = cameraOutputPort;
     cameraport.bEnabled = OMX_TRUE;
     
     error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
@@ -372,7 +417,8 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     {
         OMX_CALLBACKTYPE splitterCallbacks;
         splitterCallbacks.EventHandler      = &CameraEngine::nullEventHandlerCallback;
-        //splitterCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
+        splitterCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
+        splitterCallbacks.FillBufferDone	= &CameraEngine::nullFillBufferDone;
         //Set up video splitter
         error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this, &splitterCallbacks);
         OMX_TRACE(error);
@@ -431,7 +477,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     if(sessionConfig->doRecording)
     {
         //Create camera->splitter Tunnel
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+        error = OMX_SetupTunnel(camera, cameraOutputPort, splitter, VIDEO_SPLITTER_INPUT_PORT);
         OMX_TRACE(error);
         
         
@@ -447,7 +493,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     }else 
     {
         //Create camera->render Tunnel
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, renderInputPort);
+        error = OMX_SetupTunnel(camera, cameraOutputPort, render, renderInputPort);
         OMX_TRACE(error);
         
     }
@@ -455,7 +501,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
     
     //Enable camera output port
-    error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
+    error = OMX_SendCommand(camera, OMX_CommandPortEnable, cameraOutputPort, NULL);
     OMX_TRACE(error);
     
     if(sessionConfig->doRecording)
@@ -498,7 +544,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
      */
     if (engineType == TEXTURE_ENGINE)
     {  
-         bool disableDiscardMode = true;
+         bool disableDiscardMode = false;
          if(disableDiscardMode)
          {
              OMX_CONFIG_PORTBOOLEANTYPE discardMode;
@@ -724,7 +770,7 @@ void CameraEngine::closeEngine()
     }
     
     OMX_ERRORTYPE error;
-    error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    error =  OMX_SendCommand(camera, OMX_CommandFlush, cameraOutputPort, NULL);
     OMX_TRACE(error, "camera: OMX_CommandFlush");
     
     if(encoder)
