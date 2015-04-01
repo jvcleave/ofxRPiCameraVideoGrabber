@@ -15,6 +15,9 @@
 
 
 
+#define MEGABYTE_IN_BITS 8388608
+
+
 #define OMX_INIT_STRUCTURE(a) \
 memset(&(a), 0, sizeof(a)); \
 (a).nSize = sizeof(a); \
@@ -170,7 +173,7 @@ void logEGLError(EGLint error, string comments="", string functionName="", int l
 #define OMX_TRACE_MACRO_CHOOSER(...) GET_OMX_TRACE_4TH_ARG(__VA_ARGS__, OMX_TRACE_3_ARGS, OMX_TRACE_2_ARGS, OMX_TRACE_1_ARGS, )
 
 #if defined (ENABLE_OMX_TRACE)
-    #warning enabling OMX_TRACE
+    //#warning enabling OMX_TRACE
     #define OMX_TRACE(...) OMX_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 #else
     #warning  disabling OMX_TRACE
@@ -192,7 +195,7 @@ void logEGLError(EGLint error, string comments="", string functionName="", int l
 #define ENABLE_EGL_TRACE
 
 #if defined (ENABLE_EGL_TRACE)
-#warning enabling EGL_TRACE
+//#warning enabling EGL_TRACE
 #define EGL_TRACE(...) EGL_TRACE_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
 #else
 #warning  disabling EGL_TRACE

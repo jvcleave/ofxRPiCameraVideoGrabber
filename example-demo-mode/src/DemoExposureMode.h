@@ -19,32 +19,32 @@ public:
     {
         if (doSwitchModes) 
         {
-            if(videoGrabber->getExposureMode() == ofxRPiCameraVideoGrabber::EXPOSURE_MODE_AUTO)
+            if(videoGrabber->getCameraSettings().getExposureMode() == CameraSettings::EXPOSURE_MODE_AUTO)
             {
-                videoGrabber->enableManualExposure();
+                videoGrabber->getCameraSettings().enableManualExposure();
             }else
             {
-                videoGrabber->enableAutoExposure();
+                videoGrabber->getCameraSettings().enableAutoExposure();
             }
             doSwitchModes = false;
         }
         
         string currentModeString = "UNKNOWN";
         
-        int currentMode = videoGrabber->getExposureMode();
+        int currentMode = videoGrabber->getCameraSettings().getExposureMode();
         switch(currentMode)
         {
-            case ofxRPiCameraVideoGrabber::EXPOSURE_MODE_AUTO:
+            case CameraSettings::EXPOSURE_MODE_AUTO:
             {
                 currentModeString = "AUTO";
                 break;
             }
-            case ofxRPiCameraVideoGrabber::EXPOSURE_MODE_MANUAL:
+            case CameraSettings::EXPOSURE_MODE_MANUAL:
             {
                 currentModeString = "MANUAL";
                 break;
             }
-            case ofxRPiCameraVideoGrabber::EXPOSURE_MODE_INVALID:
+            case CameraSettings::EXPOSURE_MODE_INVALID:
             {
                 currentModeString = "INVALID";
                 break;
@@ -67,7 +67,6 @@ public:
     
     void onKey(int key)
     {
-        ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == '1')
         {
             doSwitchModes = !doSwitchModes;

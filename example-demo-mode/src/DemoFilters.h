@@ -19,12 +19,12 @@ public:
     {
         if (doChangeFilter) 
         {
-            videoGrabber->setImageFilter(filterCollection.getNextFilter());
+            videoGrabber->getCameraSettings().setImageFilter(filterCollection.getNextFilter());
             doChangeFilter = false;
         }
         
         stringstream info;
-        info << "CURRENT FILTER: "      << filterCollection.getCurrentFilterName()  << "\n";
+        info << "CURRENT FILTER: "      << videoGrabber->getCameraSettings().getImageFilter()  << "\n";
         info << "\n";
         info << "Press 1 to increment filter" << "\n";
         infoString = info.str();

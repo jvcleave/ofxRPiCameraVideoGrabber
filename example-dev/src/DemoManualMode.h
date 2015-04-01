@@ -22,9 +22,9 @@ public:
         if (ofGetFrameNum() % 100 == 0) 
         {
             doAutoMode = !doAutoMode;
-            videoGrabber->setAutoAperture(doAutoMode);
-            videoGrabber->setAutoShutter(doAutoMode);
-            videoGrabber->setAutoISO(doAutoMode);
+            videoGrabber->getCameraSettings().setAutoAperture(doAutoMode);
+            videoGrabber->getCameraSettings().setAutoShutter(doAutoMode);
+            videoGrabber->getCameraSettings().setAutoISO(doAutoMode);
         }
     };
     
@@ -64,7 +64,7 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == 'e')
         {
-            videoGrabber->setImageFilter(filterCollection.getNextFilter());
+            videoGrabber->getCameraSettings().setImageFilter(filterCollection.getNextFilter());
         }
         
         if (key == 'g')

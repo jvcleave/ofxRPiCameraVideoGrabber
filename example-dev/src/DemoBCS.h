@@ -33,20 +33,20 @@ public:
     
     void update()
     {
-        videoGrabber->setAutoAperture(doAutoMode);
-        videoGrabber->setAutoShutter(doAutoMode);
-        videoGrabber->setAutoISO(doAutoMode);
+        videoGrabber->getCameraSettings().setAutoAperture(doAutoMode);
+        videoGrabber->getCameraSettings().setAutoShutter(doAutoMode);
+        videoGrabber->getCameraSettings().setAutoISO(doAutoMode);
         if(doValueResetToZero)
         {
-            videoGrabber->setSharpness(0);
-            videoGrabber->setContrast(0);
-            videoGrabber->setBrightness(0);
-            videoGrabber->setSaturation(0);
+            videoGrabber->getCameraSettings().setSharpness(0);
+            videoGrabber->getCameraSettings().setContrast(0);
+            videoGrabber->getCameraSettings().setBrightness(0);
+            videoGrabber->getCameraSettings().setSaturation(0);
             doValueResetToZero = false;
         }
         if(doValueReset)
         {
-            videoGrabber->setDefaultValues();
+            videoGrabber->getCameraSettings().applyAllSettings();
             doValueReset = false;
             doAutoMode = true;
         }else
@@ -54,7 +54,7 @@ public:
             
             if (doSharpness) 
             {
-                sharpness = videoGrabber->getSharpness();
+                sharpness = videoGrabber->getCameraSettings().getSharpness();
                 if(sharpness+1 < 100)
                 {
                     sharpness++;
@@ -62,11 +62,11 @@ public:
                 {
                     sharpness = -100;
                 }
-                videoGrabber->setSharpness(sharpness);
+                videoGrabber->getCameraSettings().setSharpness(sharpness);
             }
             if(doContrast)
             {
-                contrast = videoGrabber->getContrast();
+                contrast = videoGrabber->getCameraSettings().getContrast();
                 if(contrast+1 < 100)
                 {
                     contrast++;
@@ -74,14 +74,14 @@ public:
                 {
                     contrast = -100;
                 }
-                videoGrabber->setContrast(contrast);
+                videoGrabber->getCameraSettings().setContrast(contrast);
                 
             }
             
  
             if(doBrightness)
             {                
-                brightness = videoGrabber->getBrightness();
+                brightness = videoGrabber->getCameraSettings().getBrightness();
                 if(brightness+1 < 100)
                 {
                     brightness++;
@@ -89,13 +89,13 @@ public:
                 {
                     brightness = 0;
                 }
-                videoGrabber->setBrightness(brightness);
+                videoGrabber->getCameraSettings().setBrightness(brightness);
             }
             
             
             if(doSaturation)
             {  
-                saturation = videoGrabber->getSaturation();
+                saturation = videoGrabber->getCameraSettings().getSaturation();
                 if(saturation+1 < 100)
                 {
                     saturation++;
@@ -103,7 +103,7 @@ public:
                 {
                     saturation = -100;
                 }
-                videoGrabber->setSaturation(saturation);
+                videoGrabber->getCameraSettings().setSaturation(saturation);
             }
         }
    
@@ -126,10 +126,10 @@ public:
         info << videoGrabber->meteringModetoString() << "\n";
         
         info << "\n";
-        info << "sharpness: "   << videoGrabber->getSharpness()    << "\n";
-        info << "contrast: "    << videoGrabber->getContrast()     << "\n";
-        info << "brightness: "  << videoGrabber->getBrightness()   << "\n";
-        info << "saturation: "  << videoGrabber->getSaturation()   << "\n";
+        info << "sharpness: "   << videoGrabber->getCameraSettings().getSharpness()    << "\n";
+        info << "contrast: "    << videoGrabber->getCameraSettings().getContrast()     << "\n";
+        info << "brightness: "  << videoGrabber->getCameraSettings().getBrightness()   << "\n";
+        info << "saturation: "  << videoGrabber->getCameraSettings().getSaturation()   << "\n";
         
         info << "doAutoMode: "  << doAutoMode   << "\n";
         

@@ -20,37 +20,37 @@ void ofApp::setup()
     
     
     //new preset option
-    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_720P_30FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
-   /* presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_TEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_1080P_30FPS_NONTEXTURE);*/
-    presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
-    presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_TEXTURE);
-    //presets.push_back(OMXCameraSettings::PRESET_480P_90FPS_NONTEXTURE);
+    presets.push_back(SessionConfig::PRESET_1080P_30FPS_TEXTURE);
+    presets.push_back(SessionConfig::PRESET_1080P_30FPS_NONTEXTURE);
+    presets.push_back(SessionConfig::PRESET_720P_30FPS_TEXTURE);
+    presets.push_back(SessionConfig::PRESET_480P_90FPS_NONTEXTURE);
+   /* presets.push_back(SessionConfig::PRESET_1080P_30FPS_TEXTURE);
+    presets.push_back(SessionConfig::PRESET_480P_90FPS_TEXTURE);
+    presets.push_back(SessionConfig::PRESET_1080P_30FPS_NONTEXTURE);*/
+    presets.push_back(SessionConfig::PRESET_480P_30FPS_NONTEXTURE);
+    presets.push_back(SessionConfig::PRESET_480P_30FPS_TEXTURE);
+    //presets.push_back(SessionConfig::PRESET_480P_90FPS_NONTEXTURE);
     
-    // presets.push_back(OMXCameraSettings::PRESET_480P_30FPS_NONTEXTURE);
+    // presets.push_back(SessionConfig::PRESET_480P_30FPS_NONTEXTURE);
     
     presets.clear();
     
-    for ( int preset = OMXCameraSettings::PRESET_NONE; preset != OMXCameraSettings::PRESET_480P_30FPS; preset++ )
+    for ( int preset = SessionConfig::PRESET_NONE; preset != SessionConfig::PRESET_480P_30FPS; preset++ )
     {
-        if(preset != OMXCameraSettings::PRESET_NONE)
+        if(preset != SessionConfig::PRESET_NONE)
         {
-            presets.push_back((OMXCameraSettings::Preset)preset);
+            presets.push_back((SessionConfig::Preset)preset);
         }
         
     }
     
     
     currentPreset = 0;
-    omxCameraSettings.preset = presets[currentPreset];
-    omxCameraSettings.enablePixels = true;
+    sessionConfig.preset = presets[currentPreset];
+    sessionConfig.enablePixels = true;
     
     //pass in the settings and it will start the camera
-    videoGrabber.setup(omxCameraSettings);
+    videoGrabber.setup(sessionConfig);
     
     DemoCycleExposurePresets* demo1 = new DemoCycleExposurePresets();
     demo1->setup(&videoGrabber);
@@ -102,13 +102,13 @@ void ofApp::update()
         {
             currentPreset = 0;
         }
-        OMXCameraSettings* settings = new OMXCameraSettings();
+        SessionConfig* settings = new SessionConfig();
         
         settings->preset = presets[currentPreset];
-        omxCameraSettings = *settings;
+        sessionConfig = *settings;
         
         //pass in the settings and it will start the camera
-        videoGrabber.setup(omxCameraSettings);
+        videoGrabber.setup(sessionConfig);
         doPresetChange = false;
     }
     
@@ -122,8 +122,8 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
-        videoGrabber.saveState();
-        videoGrabber.setDefaultValues();
+//        videoGrabber.saveState();
+//videoGrabber.getCameraSettings().applyAllSettings();
         doNextDemo = false;
         doPrintInfo = true;
         ofLogVerbose() << "isTextureEnabled: " << videoGrabber.isTextureEnabled();
@@ -182,32 +182,32 @@ void ofApp::keyPressed  (int key)
         }
         case 'S' :
         {
-            videoGrabber.saveCurrentStateToFile();
+            videoGrabber.saveCameraSettingsToFile();
             break;
         }
         case 'L' :
         {
-            videoGrabber.loadStateFromFile();
+           // videoGrabber.loadCameraSettingsFromFile();
             break;
         }
         case '0' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_NONE);
+            videoGrabber.setMirror(CameraSettings::MIRROR_NONE);
             break;
         }
         case '1' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_VERTICAL);
+            videoGrabber.setMirror(CameraSettings::MIRROR_VERTICAL);
             break;
         }
         case '2' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_HORIZONTAL);
+            videoGrabber.setMirror(CameraSettings::MIRROR_HORIZONTAL);
             break;
         }
         case '3' :
         {
-            videoGrabber.setMirror(ofxRPiCameraVideoGrabber::MIRROR_BOTH);
+            videoGrabber.setMirror(CameraSettings::MIRROR_BOTH);
             break;
         }    
         case '4' :

@@ -45,7 +45,7 @@ public:
                 dreLevel = 0;
             }
             ofLogVerbose() << "dreLevel: " << dreLevel;
-            videoGrabber->setDRE(dreLevel);
+            videoGrabber->getCameraSettings().setDRE(dreLevel);
             doDRE = false;
         }
         if (doCrop) 
@@ -56,12 +56,12 @@ public:
             //int randomHeight = ofRandom(videoGrabber->getHeight()/2, videoGrabber->getHeight());
             //int randomHeightPercentage = ofMap(randomHeight, 0, videoGrabber->getHeight(), 0, 100);
             
-            videoGrabber->setSensorCrop(0, 0,  randomPercentage, randomPercentage);
+            videoGrabber->getCameraSettings().setSensorCrop(0, 0,  randomPercentage, randomPercentage);
             //doCrop = false;
         }
         if (doHDR) 
         {
-            videoGrabber->setHDR(hdrState);
+            videoGrabber->getCameraSettings().setHDR(hdrState);
             doHDR = false;
             
         }
@@ -69,16 +69,16 @@ public:
         {
             if(doZoomIn)
             {
-                videoGrabber->zoomIn();
+                videoGrabber->getCameraSettings().zoomIn();
             }else
             {
-                videoGrabber->zoomOut();
+                videoGrabber->getCameraSettings().zoomOut();
             }
         }
         if (doRandomZoom) 
         {
             doRandomZoom = false;
-            videoGrabber->setZoomLevelNormalized(ofRandom(0.0, 1.0f));
+            videoGrabber->getCameraSettings().setZoomLevelNormalized(ofRandom(0.0, 1.0f));
         }
     };
     
@@ -98,10 +98,10 @@ public:
         info << "Camera Resolution: "   << videoGrabber->getWidth() << "x" << videoGrabber->getHeight()	<< " @ "<< videoGrabber->getFrameRate() <<"FPS"<< "\n\n";
 
         info << "\n";
-        info << "Crop LEFT %: "      << videoGrabber->getCropRectangle().getLeft()    <<  "\n";
-        info << "Crop TOP %: "       << videoGrabber->getCropRectangle().getTop()     <<  "\n";
-        info << "Crop WIDTH %: "     << videoGrabber->getCropRectangle().getWidth()   <<  "\n";
-        info << "Crop HEIGHT %: "    << videoGrabber->getCropRectangle().getHeight()  <<  "\n";
+        info << "Crop LEFT %: "      << videoGrabber->getCameraSettings().getCropRectangle().getLeft()    <<  "\n";
+        info << "Crop TOP %: "       << videoGrabber->getCameraSettings().getCropRectangle().getTop()     <<  "\n";
+        info << "Crop WIDTH %: "     << videoGrabber->getCameraSettings().getCropRectangle().getWidth()   <<  "\n";
+        info << "Crop HEIGHT %: "    << videoGrabber->getCameraSettings().getCropRectangle().getHeight()  <<  "\n";
         
         info << "\n";
         info << "Press z to increment DRC: "    << dreLevel << "\n";
@@ -110,7 +110,7 @@ public:
         info << "Press c to toggle Digital Zoom: " << doDigitalZoom <<  "\n";
         info << "Press v to toggle Digital Zoom Direction: " <<  doZoomIn << "\n";
         info << "Press b for random Zoom" <<  "\n";
-        info << "getZoomLevelNormalized: " <<  videoGrabber->getZoomLevelNormalized() << "\n";
+        info << "getZoomLevelNormalized: " <<  videoGrabber->getCameraSettings().getZoomLevelNormalized() << "\n";
         info << "\n";
         
         info << "Press n to toggle HDR: " <<  hdrState  << "\n";

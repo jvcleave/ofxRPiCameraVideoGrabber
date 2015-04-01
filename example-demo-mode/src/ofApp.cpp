@@ -14,14 +14,14 @@ void ofApp::setup()
     consoleListener.setup(this);
     
 
-    presets = omxCameraSettings.getAllPresets();
+    presets = sessionConfig.getAllPresets();
     
     currentPreset = 0;
-    //omxCameraSettings.preset = presets[currentPreset];
-    omxCameraSettings.preset = OMXCameraSettings::PRESET_720P_30FPS_TEXTURE;
+    //sessionConfig.preset = presets[currentPreset];
+    sessionConfig.preset = SessionConfig::PRESET_720P_30FPS_TEXTURE;
     
     //pass in the settings and it will start the camera
-    videoGrabber.setup(omxCameraSettings);
+    videoGrabber.setup(sessionConfig);
     
     
    
@@ -95,12 +95,12 @@ void ofApp::update()
         {
             currentPreset = 0;
         }
-        OMXCameraSettings* settings = new OMXCameraSettings();
+        SessionConfig* settings = new SessionConfig();
         
         settings->preset = presets[currentPreset];
-        omxCameraSettings = *settings;
+        sessionConfig = *settings;
         
-        videoGrabber.setup(omxCameraSettings);
+        videoGrabber.setup(sessionConfig);
         doPresetChange = false;
         doPrintInfo = true;
     }
@@ -115,8 +115,6 @@ void ofApp::update()
             currentDemoID = 0;
         }
         currentDemo = demos[currentDemoID];
-        videoGrabber.saveState();
-        videoGrabber.setDefaultValues();
         doNextDemo = false;
         doPrintInfo = true;
     }else
@@ -213,18 +211,18 @@ void ofApp::keyPressed  (int key)
         }
         case 'r' :
         {
-            videoGrabber.resetToCommonState();
+            videoGrabber.getCameraSettings().resetCameraToDefaultSettings();
             break;
         }
             
         case 'S' :
         {
-            videoGrabber.saveCurrentStateToFile();
+            videoGrabber.saveCameraSettingsToFile();
             break;
         }
         case 'L' :
         {
-            videoGrabber.loadStateFromFile();
+            //videoGrabber.cameraSettings.loadCameraSettingsFromFile();
             break;
         }
         case '8' :

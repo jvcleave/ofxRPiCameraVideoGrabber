@@ -20,7 +20,7 @@ public:
         stringstream info;
         
         info << "\n";
-        info << "CURRENT MIRROR MODE: " << videoGrabber->getMirror() << "\n";
+        info << "CURRENT MIRROR MODE: " << videoGrabber->getCameraSettings().getMirror() << "\n";
         info << "Press 1 for 0"     << "\n";
         info << "Press 2 for 90"    << "\n";
         info << "Press 3 for 180"   << "\n";
@@ -46,22 +46,22 @@ public:
                 
             case '1':
             {
-                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_0);
+                videoGrabber->getCameraSettings().setRotation(CameraSettings::ROTATION_0);
                 break;
             }
             case '2':
             {
-                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_90);
+                videoGrabber->getCameraSettings().setRotation(CameraSettings::ROTATION_90);
                 break;
             }
             case '3':
             {
-                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_180);
+                videoGrabber->getCameraSettings().setRotation(CameraSettings::ROTATION_180);
                 break;
             }
             case '4':
             {
-                videoGrabber->setRotation(ofxRPiCameraVideoGrabber::ROTATION_270);
+                videoGrabber->getCameraSettings().setRotation(CameraSettings::ROTATION_270);
                 break;
             }
             default:
