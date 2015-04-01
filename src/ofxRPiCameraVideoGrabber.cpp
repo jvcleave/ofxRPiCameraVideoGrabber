@@ -36,8 +36,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     doStartRecording = false;
     
     forceEGLReuse = true;
-    
-    fbo = NULL;
 }
 
 
@@ -110,6 +108,7 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig* sessionConfig_)
     }
     
     sessionConfig = sessionConfig_;
+    ofLogVerbose() << "RESET??????????????????";
     sessionConfig->applyPreset();
 
     if (sessionConfig->enablePixels) 
@@ -184,7 +183,7 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
       
         //ofLogWarning(__func__) << "You are in non-texture mode but asking for a texture";
     }
-    return fbo->getTextureReference();
+    return fbo.getTextureReference();
 }
 
 
@@ -199,32 +198,25 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     {
         needsRegeneration = true;
     }
-    if(!fbo)
+    if (!fbo.isAllocated())
     {
         needsRegeneration = true;
-    }else
+    }
+    
+    if (fbo.getWidth() != width)
     {
-        if (!fbo->isAllocated())
-        {
-            needsRegeneration = true;
-        }
-        
-        if (fbo->getWidth() != width)
-        {
-            needsRegeneration = true;
-        }
-        if (fbo->getHeight() != height)
-        {
-            needsRegeneration = true;
-        }
-
+        needsRegeneration = true;
+    }
+    if (fbo.getHeight() != height)
+    {
+        needsRegeneration = true;
     }
         
     if(!needsRegeneration)
     {
-        fbo->begin();
+        fbo.begin();
             ofClear(0, 0, 0);
-        fbo->end();
+        fbo.end();
         ofLogVerbose(__func__) << "NO CHANGES NEEDED - RETURNING EARLY";
         return;
     }
@@ -237,14 +229,9 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
     
     if (needsRegeneration)
     {
-        if(fbo)
-        {
-            delete fbo;
-            fbo = NULL;
-        }
-        fbo = new ofFbo();
-        fbo->allocate(width, height);
-        textureID = fbo->getTextureReference().getTextureData().textureID;
+        
+        fbo.allocate(width, height);
+        textureID = fbo.getTextureReference().getTextureData().textureID;
     }
     
     if (pixels && needsRegeneration)
@@ -258,9 +245,9 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
         pixels = new unsigned char[dataSize];
     }
     
-    fbo->bind();
-       EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-                                        EGL_NONE};
+    fbo.bind();
+       /*EGLint eglImageAttributes[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
+                                        EGL_NONE};*/
         eglImage = eglCreateImageKHR(
                                  display,
                                  context,
@@ -281,7 +268,7 @@ void ofxRPiCameraVideoGrabber::generateEGLImage(int width, int height)
             
         }
     
-    fbo->unbind();
+    fbo.unbind();
     int endTime = ofGetElapsedTimeMillis();
     ofLogVerbose(__func__) << "TOOK " << endTime -startTime << " MILLISECONDS";
     
@@ -326,13 +313,13 @@ void ofxRPiCameraVideoGrabber::updatePixels()
     {
         pixels = new unsigned char[dataSize];
     }    
-    fbo->bind();
+    fbo.bind();
         //eglFlushBRCM();
         //EGL_TRACE(eglGetError());
 
         glReadPixels(0,0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-    fbo->unbind();
+    fbo.unbind();
 
     if(doSaveImage)
     {
@@ -482,7 +469,7 @@ void ofxRPiCameraVideoGrabber::draw()
     {
         return;
     }
-    fbo->draw(0, 0);
+    fbo.draw(0, 0);
 }
 
 
@@ -560,11 +547,6 @@ ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
     {
         sessionConfig = NULL;
     }
-    if(fbo)
-    {
-        delete fbo;
-        fbo = NULL;
-    }
 }
 
 void ofxRPiCameraVideoGrabber::close()
@@ -576,6 +558,336 @@ void ofxRPiCameraVideoGrabber::close()
         engine = NULL;
     }
     destroyEGLImage();
+}
+
+
+#pragma mark INTERFACE TO CAMERA SETTINGS
+bool ofxRPiCameraVideoGrabber::setAutoAperture(bool b)
+{
+    return getCameraSettings().setAutoAperture(b) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setMeteringMode(CameraMeteringMode m )
+{
+    return getCameraSettings().setMeteringMode(m) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setMeteringType(OMX_METERINGTYPE m )
+{
+    return getCameraSettings().setMeteringType(m) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setMeteringType(string s)
+{
+    return getCameraSettings().setMeteringType(s) == OMX_ErrorNone;
+}
+
+string ofxRPiCameraVideoGrabber::getMeteringType()
+{
+    return getCameraSettings().getMeteringType();
+}
+
+bool ofxRPiCameraVideoGrabber::setAutoShutter(bool b)
+{
+    return getCameraSettings().setAutoShutter(b) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::getAutoShutter()
+{
+    return getCameraSettings().getAutoShutter();
+}
+
+int ofxRPiCameraVideoGrabber::getShutterSpeed()
+{
+    return getCameraSettings().getShutterSpeed();
+}
+
+bool ofxRPiCameraVideoGrabber::setShutterSpeed(int shutterSpeedMicroSeconds)
+{ 
+    return getCameraSettings().setShutterSpeed(shutterSpeedMicroSeconds) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setEvCompensation(int n)
+{
+    return getCameraSettings().setEvCompensation(n) == OMX_ErrorNone;
+}
+
+int ofxRPiCameraVideoGrabber::getEvCompensation()
+{
+    return getCameraSettings().getEvCompensation();
+}
+
+bool ofxRPiCameraVideoGrabber::setImageFilter(OMX_IMAGEFILTERTYPE t)
+{
+    return getCameraSettings().setImageFilter(t) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setImageFilter(string t)
+{
+    return getCameraSettings().setImageFilter(t) == OMX_ErrorNone;
+}
+
+string ofxRPiCameraVideoGrabber::getImageFilter()
+{
+    return getCameraSettings().getImageFilter();
+}
+
+int ofxRPiCameraVideoGrabber::getSharpness()
+{
+    return getCameraSettings().getSharpness();
+}
+
+bool ofxRPiCameraVideoGrabber::setSharpness(int n)
+{
+    return getCameraSettings().setSharpness(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setSharpnessNormalized(float f)
+{
+    return getCameraSettings().setSharpnessNormalized(f) == OMX_ErrorNone;
+}
+
+
+int ofxRPiCameraVideoGrabber::getContrast()
+{
+    return getCameraSettings().getContrast();
+}
+
+bool ofxRPiCameraVideoGrabber::setContrast(int n)
+{
+    return getCameraSettings().setContrast(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setContrastNormalized(float f)
+{
+    return getCameraSettings().setContrastNormalized(f) == OMX_ErrorNone;
+}
+
+
+int ofxRPiCameraVideoGrabber::getBrightness()
+{
+    return getCameraSettings().getBrightness();
+}
+
+bool ofxRPiCameraVideoGrabber::setBrightness(int n)
+{
+    return getCameraSettings().setBrightness(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setBrightnessNormalized(float f)
+{
+    return getCameraSettings().setBrightnessNormalized(f) == OMX_ErrorNone;
+}
+
+
+int ofxRPiCameraVideoGrabber::getSaturation()
+{
+    return getCameraSettings().getSaturation();
+}
+
+bool ofxRPiCameraVideoGrabber::setSaturation(int n)
+{
+    return getCameraSettings().setSaturation(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setSaturationNormalized(float f)
+{
+    return getCameraSettings().setSaturationNormalized(f) == OMX_ErrorNone;
+}
+
+
+bool ofxRPiCameraVideoGrabber::getFrameStabilization()
+{
+    return getCameraSettings().framestabilization;
+}
+
+bool ofxRPiCameraVideoGrabber::setFrameStabilization(bool b)
+{
+    return getCameraSettings().setFrameStabilization(b) == OMX_ErrorNone;
+}
+
+
+string ofxRPiCameraVideoGrabber::getExposurePreset()
+{
+    return getCameraSettings().getExposurePreset();
+}
+
+bool ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYPE t)
+{
+    return getCameraSettings().setExposurePreset(t) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setExposurePreset(string s)
+{
+    return getCameraSettings().setExposurePreset(s) == OMX_ErrorNone;
+}
+
+string ofxRPiCameraVideoGrabber::getWhiteBalance()
+{
+    return getCameraSettings().getWhiteBalance();
+}
+
+bool ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE t)
+{
+    return getCameraSettings().setWhiteBalance(t) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setWhiteBalance(string s)
+{
+    return getCameraSettings().setWhiteBalance(s) == OMX_ErrorNone;
+}
+
+//int getDRE();
+bool ofxRPiCameraVideoGrabber::setDRE(int n)
+{
+    return getCameraSettings().setDRE(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setSensorCrop(ofRectangle& rectangle)
+{
+    return getCameraSettings().setSensorCrop(rectangle) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setSensorCrop(int left, int top, int width, int height)
+{
+    return getCameraSettings().setSensorCrop(left, top, width, height) == OMX_ErrorNone;
+}
+
+ofRectangle& ofxRPiCameraVideoGrabber::getCropRectangle()
+{
+    return getCameraSettings().getCropRectangle();
+}
+
+bool ofxRPiCameraVideoGrabber::updateSensorCrop()
+{
+    return getCameraSettings().updateSensorCrop() == OMX_ErrorNone;
+}
+
+
+bool ofxRPiCameraVideoGrabber::zoomIn()
+{
+    return getCameraSettings().zoomIn() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::zoomOut()
+{
+    return getCameraSettings().zoomOut() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::resetZoom()
+{
+    return getCameraSettings().resetZoom() == OMX_ErrorNone;
+}
+
+
+bool ofxRPiCameraVideoGrabber::setZoomLevelNormalized(float f)
+{
+    return getCameraSettings().setZoomLevelNormalized(f) == OMX_ErrorNone;
+}
+
+float ofxRPiCameraVideoGrabber::getZoomLevelNormalized()
+{
+    return getCameraSettings().getZoomLevelNormalized();
+}
+
+
+bool ofxRPiCameraVideoGrabber::setRotation(int n)
+{
+    return getCameraSettings().setRotation(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setRotation(CameraSettings::ROTATION r)
+{
+    return getCameraSettings().setRotation(r) == OMX_ErrorNone;
+}
+
+int ofxRPiCameraVideoGrabber::getRotation()
+{
+    return getCameraSettings().getRotation();
+}
+
+
+bool ofxRPiCameraVideoGrabber::rotateClockwise()
+{
+    return getCameraSettings().rotateClockwise() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::rotateCounterClockwise()
+{
+    return getCameraSettings().rotateCounterClockwise() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setMirror(int n)
+{
+    return getCameraSettings().setMirror(n) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::setMirror(string s)
+{
+    return getCameraSettings().setMirror(s) == OMX_ErrorNone;
+}
+
+string ofxRPiCameraVideoGrabber::getMirror()
+{
+    return getCameraSettings().getMirror();
+}
+
+bool ofxRPiCameraVideoGrabber::setSoftwareSharpening(bool b)
+{
+    return getCameraSettings().setSoftwareSharpening(b) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::enableSoftwareSharpening()
+{
+    return getCameraSettings().enableSoftwareSharpening() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::disableSoftwareSharpening()
+{
+    return getCameraSettings().disableSoftwareSharpening() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::isSoftwareSharpeningEnabled()
+{
+    return getCameraSettings().isSoftwareSharpeningEnabled();
+}
+
+
+CameraSettings::EXPOSURE_MODE ofxRPiCameraVideoGrabber::getExposureMode()
+{
+    return getCameraSettings().getExposureMode();
+}
+
+
+bool ofxRPiCameraVideoGrabber::enableAutoExposure()
+{
+    return getCameraSettings().enableAutoExposure() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::enableManualExposure()
+{
+    return getCameraSettings().enableManualExposure() == OMX_ErrorNone;
+}
+
+
+bool ofxRPiCameraVideoGrabber::setSoftwareSaturation(bool b)
+{
+    return getCameraSettings().setSoftwareSaturation(b) == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::enableSoftwareSaturation()
+{
+    return getCameraSettings().enableSoftwareSaturation() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::disableSoftwareSaturation()
+{
+    return getCameraSettings().disableSoftwareSaturation() == OMX_ErrorNone;
+}
+
+bool ofxRPiCameraVideoGrabber::isSoftwareSaturationEnabled()
+{
+    return getCameraSettings().isSoftwareSaturationEnabled();
 }
 
 

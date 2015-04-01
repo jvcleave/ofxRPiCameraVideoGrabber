@@ -19,19 +19,19 @@ public:
     {
         if (doSwitchModes) 
         {
-            if(videoGrabber->getCameraSettings().getExposureMode() == CameraSettings::EXPOSURE_MODE_AUTO)
+            if(videoGrabber->getExposureMode() == CameraSettings::EXPOSURE_MODE_AUTO)
             {
-                videoGrabber->getCameraSettings().enableManualExposure();
+                videoGrabber->enableManualExposure();
             }else
             {
-                videoGrabber->getCameraSettings().enableAutoExposure();
+                videoGrabber->enableAutoExposure();
             }
             doSwitchModes = false;
         }
         
         string currentModeString = "UNKNOWN";
         
-        int currentMode = videoGrabber->getCameraSettings().getExposureMode();
+        int currentMode = videoGrabber->getExposureMode();
         switch(currentMode)
         {
             case CameraSettings::EXPOSURE_MODE_AUTO:

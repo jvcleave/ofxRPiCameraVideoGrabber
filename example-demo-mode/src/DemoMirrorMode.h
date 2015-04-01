@@ -20,7 +20,7 @@ public:
         stringstream info;
         
         info << "\n";
-        info << "CURRENT MIRROR MODE: " << videoGrabber->getCameraSettings().getMirror() << "\n";
+        info << "CURRENT MIRROR MODE: " << videoGrabber->getMirror() << "\n";
         info << "Press 1 for MIRROR_NONE"       << "\n";
         info << "Press 2 for MIRROR_VERTICAL"   << "\n";
         info << "Press 3 for MIRROR_HORIZONTAL" << "\n";
@@ -46,22 +46,22 @@ public:
         
             case '1':
             {
-                videoGrabber->getCameraSettings().setMirror(CameraSettings::MIRROR_NONE);
+                videoGrabber->setMirror(CameraSettings::MIRROR_NONE);
                 break;
             }
             case '2':
             {
-                videoGrabber->getCameraSettings().setMirror(CameraSettings::MIRROR_VERTICAL);
+                videoGrabber->setMirror(CameraSettings::MIRROR_VERTICAL);
                 break;
             }
             case '3':
             {
-                videoGrabber->getCameraSettings().setMirror(CameraSettings::MIRROR_HORIZONTAL);
+                videoGrabber->setMirror(CameraSettings::MIRROR_HORIZONTAL);
                 break;
             }
             case '4':
             {
-                videoGrabber->getCameraSettings().setMirror(CameraSettings::MIRROR_BOTH);
+                videoGrabber->setMirror(CameraSettings::MIRROR_BOTH);
                 break;
             }
             default:

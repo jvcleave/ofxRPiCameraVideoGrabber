@@ -138,11 +138,11 @@ public:
                 currentMeteringMode = 0;
             }
             doChangeMeteringMode = false;
-            videoGrabber->getCameraSettings().setMeteringMode(meteringModes[currentMeteringMode]);
+            videoGrabber->setMeteringMode(meteringModes[currentMeteringMode]);
         }
         if(doShutterSpeed)
         {
-            int currentShutterSpeed = videoGrabber->getCameraSettings().getShutterSpeed();
+            int currentShutterSpeed = videoGrabber->getShutterSpeed();
             if(currentShutterSpeed+1000 < 33300)
             {
                 currentShutterSpeed+=1000;
@@ -150,7 +150,7 @@ public:
             {
                 currentShutterSpeed = 0;
             }
-            videoGrabber->getCameraSettings().setShutterSpeed(currentShutterSpeed);
+            videoGrabber->setShutterSpeed(currentShutterSpeed);
         }
         if(doAperture)
         {
@@ -162,7 +162,7 @@ public:
             {
                 currentAperture = 0;
             }
-            videoGrabber->getCameraSettings().setAperture(currentAperture);
+            videoGrabber->setAperture(currentAperture);
         }
         if(doISO)
         {
@@ -174,7 +174,7 @@ public:
             {
                 currentISO = 0;
             }
-            videoGrabber->getCameraSettings().setISO(currentISO);
+            videoGrabber->setISO(currentISO);
         }
         
     };
@@ -199,7 +199,7 @@ public:
         
         info << "\n";
         info << "Press z to increment Metering Mode: " << currentMeteringMode << "\n";
-        info << "Press x to toggle Shutter Speed increase: " << videoGrabber->getCameraSettings().getShutterSpeed() << "\n";
+        info << "Press x to toggle Shutter Speed increase: " << videoGrabber->getShutterSpeed() << "\n";
         info << "Press c to increment aperture: " << videoGrabber->getAperture() << "\n";
         info << "Press v to increment ISO +50: " << videoGrabber->getISO() << "\n";
         
@@ -219,7 +219,7 @@ public:
         ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
         if (key == 'e')
         {
-            videoGrabber->getCameraSettings().setImageFilter(filterCollection.getNextFilter());
+            videoGrabber->setImageFilter(filterCollection.getNextFilter());
         }
         
         if (key == 'g')

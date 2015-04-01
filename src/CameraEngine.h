@@ -77,7 +77,7 @@ private:
     EngineType engineType;
     OMX_STRING engineTypeString;
     int renderInputPort;
-    
+    int cameraOutputPort;
     
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 

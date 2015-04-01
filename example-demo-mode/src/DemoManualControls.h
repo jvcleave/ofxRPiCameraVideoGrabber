@@ -30,10 +30,10 @@ public:
     
     void update()
     {
-        if(videoGrabber->getCameraSettings().getExposureMode() != CameraSettings::EXPOSURE_MODE_MANUAL)
+        if(videoGrabber->getExposureMode() != CameraSettings::EXPOSURE_MODE_MANUAL)
         {
-            videoGrabber->getCameraSettings().enableManualExposure();
-            string currentWhiteBalanceName = videoGrabber->getCameraSettings().getWhiteBalance();
+            videoGrabber->enableManualExposure();
+            string currentWhiteBalanceName = videoGrabber->getWhiteBalance();
             for(size_t i =0; i<OMX_Maps::getInstance().getWhiteBalanceNames().size(); ++i)
             {
                 if(currentWhiteBalanceName == OMX_Maps::getInstance().getWhiteBalanceNames()[i])
@@ -45,7 +45,7 @@ public:
         if(doCycleShutterSpeed)
         {
             doStepShutterSpeed = false;
-            unsigned int currentShutterSpeed = videoGrabber->getCameraSettings().getShutterSpeed();
+            unsigned int currentShutterSpeed = videoGrabber->getShutterSpeed();
             if(currentShutterSpeed == 0)
             {
                 currentShutterSpeed =100;
@@ -59,13 +59,13 @@ public:
                     currentShutterSpeed = 100;
                 }
             }
-            videoGrabber->getCameraSettings().setShutterSpeed(currentShutterSpeed); 
+            videoGrabber->setShutterSpeed(currentShutterSpeed); 
             //doStepShutterSpeed = false;
         }
         if(doStepShutterSpeed)
         {
             doCycleShutterSpeed = false;
-            unsigned int currentShutterSpeed = videoGrabber->getCameraSettings().getShutterSpeed();
+            unsigned int currentShutterSpeed = videoGrabber->getShutterSpeed();
             if(currentShutterSpeed == 0)
             {
                 currentShutterSpeed =100;
@@ -79,7 +79,7 @@ public:
                     currentShutterSpeed = 100;
                 }
             }
-            videoGrabber->getCameraSettings().setShutterSpeed(currentShutterSpeed); 
+            videoGrabber->setShutterSpeed(currentShutterSpeed); 
             doStepShutterSpeed = false;
         }
         
@@ -93,12 +93,12 @@ public:
                 currentWhiteBalanceIndex = 0;
             }
             string whiteBalanceName = OMX_Maps::getInstance().getWhiteBalanceNames()[currentWhiteBalanceIndex];
-            videoGrabber->getCameraSettings().setWhiteBalance(whiteBalanceName);
+            videoGrabber->setWhiteBalance(whiteBalanceName);
             doChangeWhiteBalance = false;
         }
         if(doEvCompensation)
         {
-            int ev = videoGrabber->getCameraSettings().getEvCompensation();
+            int ev = videoGrabber->getEvCompensation();
             
             if(ev+1 <= 4)
             {
@@ -107,7 +107,7 @@ public:
             {
                 ev = -4;
             }
-            videoGrabber->getCameraSettings().setEvCompensation(ev);
+            videoGrabber->setEvCompensation(ev);
             doEvCompensation = false;
         }
         if(doMeteringChange)
@@ -119,20 +119,20 @@ public:
             {
                 currentMeteringTypeIndex = 0;
             }
-            videoGrabber->getCameraSettings().setMeteringType(OMX_Maps::getInstance().meteringNames[currentMeteringTypeIndex]);
+            videoGrabber->setMeteringType(OMX_Maps::getInstance().meteringNames[currentMeteringTypeIndex]);
             doMeteringChange = false;
         }
         
         stringstream info;
         
-        info << "CURRENT SHUTTER SPEED (Microseconds): " <<videoGrabber->getCameraSettings().getShutterSpeed() << "\n";
+        info << "CURRENT SHUTTER SPEED (Microseconds): " <<videoGrabber->getShutterSpeed() << "\n";
         info << "\n";
         info << "Press 1 to Step Shutter Speed x2"          <<  "\n";
         info << "Press 2 to Cycle Shutter Speed +100"       <<  "\n";
         info << "Press 3 to Reset Shutter to 100"           <<  "\n";
-        info << "Press 4 to Change White Balance: "     << videoGrabber->getCameraSettings().getWhiteBalance()      <<  "\n";
-        info << "Press 5 to Change EV Compensation: "   << videoGrabber->getCameraSettings().getEvCompensation()    <<  "\n";
-        info << "Press 6 to Change Metering Type: "     << videoGrabber->getCameraSettings().getMeteringType()      <<  "\n";
+        info << "Press 4 to Change White Balance: "     << videoGrabber->getWhiteBalance()      <<  "\n";
+        info << "Press 5 to Change EV Compensation: "   << videoGrabber->getEvCompensation()    <<  "\n";
+        info << "Press 6 to Change Metering Type: "     << videoGrabber->getMeteringType()      <<  "\n";
         infoString = info.str();
         
     };
@@ -163,7 +163,7 @@ public:
             }
             case '3':
             {
-                videoGrabber->getCameraSettings().setShutterSpeed(100);
+                videoGrabber->setShutterSpeed(100);
                 break;
             }
             case '4':
