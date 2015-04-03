@@ -1,5 +1,5 @@
 /*
- *  ofxRPiCameraVideoGrabber.h
+ *  ofxRPiCameraPhotoGrabber.h
  *
  *  Created by jason van cleave on 6/1/13.
  *
@@ -21,56 +21,32 @@
 #include "OMXCameraUtils.h"
 #include "SessionConfig.h"
 
-#include "VideoCameraEngine.h"
+#include "StillCameraEngine.h"
 
 
 
-class ofxRPiCameraVideoGrabber
+class ofxRPiCameraPhotoGrabber
 {
 
 public:
     
-	ofxRPiCameraVideoGrabber();
-    ~ofxRPiCameraVideoGrabber();
+	ofxRPiCameraPhotoGrabber();
+    ~ofxRPiCameraPhotoGrabber();
     
     SessionConfig* sessionConfig;
     CameraSettings& getCameraSettings();
 	void setup(SessionConfig&);
     void setup(SessionConfig*);
     void close();
-    
-    void draw();
-	
+    	
     bool isReady();
-    bool isFrameNew();
    
-    VideoCameraEngine* getEngine();
-    ofTexture& getTextureReference();
+    StillCameraEngine* getEngine();
     
 	int getWidth();
 	int getHeight();
 	int getFrameRate();
 
-    bool isTextureEnabled();
-    
-    bool isRecording();
-    void startRecording();
-    void stopRecording();
-
-    ofFbo& getFbo();
-    
-    int getTextureID() { return textureID; }
-    bool forceEGLReuse;
-    
-    void enablePixels();
-    void disablePixels();
-    
-    unsigned char * pixels;
-    unsigned char * getPixels();
-
-    void saveImage();
-    void saveRawImage();
-        
     void loadCameraSettingsFromFile(string filePath="");
     void saveCameraSettingsToFile(string filePath="");
 
@@ -167,45 +143,21 @@ public:
     
     
 private:
-    bool doStartRecording;
-    ofFbo fbo;
     
     bool hasExitHandler;
     bool hasOMXInit;
     
     
     void addExitHandler();
-    void onUpdate(ofEventArgs & args);
     void onUpdateDuringExit(ofEventArgs& args);
-    void updatePixels();
     
-    bool hasNewFrame;
-    int updateFrameCounter;
-    int frameCounter;
 
     OMX_HANDLETYPE camera;
     
 
 		
-	VideoCameraEngine* engine;
+	StillCameraEngine* engine;
     
-    bool doSaveImage;
-    bool doRawSave;
-    ofAppEGLWindow *appEGLWindow;
-    EGLDisplay display;
-    EGLContext context;
-    EGLImageKHR eglImage;
-    EGLSurface surface;
-    EGLConfig eglConfig;
-    bool doPixels;
-    
-    GLuint textureID;
-    
-    
-    void generateEGLImage(int, int);
-    void destroyEGLImage();
-    
- 
     static bool doExit;
     static void signal_handler(int signum);
 	

@@ -1,5 +1,5 @@
 /*
- *  CameraEngine.h
+ *  VideoCameraEngine.h
  *
  *  Created by jason van cleave on 2/10/14.
  *  Copyright 2014 jasonvancleave.com. All rights reserved.
@@ -20,11 +20,11 @@ enum EngineType {
 	NON_TEXTURE_ENGINE
 };
 
-class CameraEngine: public ofThread
+class VideoCameraEngine: public ofThread
 {
 public:
-	CameraEngine();
-    ~CameraEngine();
+	VideoCameraEngine();
+    ~VideoCameraEngine();
     void setup(SessionConfig* sessionConfig_);
     
 	int getFrameCounter();
