@@ -245,7 +245,7 @@ OMX_ERRORTYPE VideoCameraEngine::configureEncoder()
 	// Configure video format emitted by encoder output port
 	OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 	OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-	encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
+	encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
     OMX_TRACE(error);
     //OMX_VIDEO_AVCProfileHigh
@@ -282,7 +282,7 @@ OMX_ERRORTYPE VideoCameraEngine::configureEncoder()
 	//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
 	
 	encodingBitrate.nTargetBitrate = recordingBitRate;
-	encodingBitrate.nPortIndex = ENCODER_OUTPUT_PORT;
+	encodingBitrate.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
     OMX_TRACE(error);
@@ -290,7 +290,7 @@ OMX_ERRORTYPE VideoCameraEngine::configureEncoder()
 	// Configure encoding format
 	OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
 	OMX_INIT_STRUCTURE(encodingFormat);
-	encodingFormat.nPortIndex = ENCODER_OUTPUT_PORT;
+	encodingFormat.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
     
@@ -298,7 +298,7 @@ OMX_ERRORTYPE VideoCameraEngine::configureEncoder()
     
     OMX_VIDEO_PARAM_AVCTYPE avcConfig;
     OMX_INIT_STRUCTURE(avcConfig);
-    avcConfig.nPortIndex = ENCODER_OUTPUT_PORT;
+    avcConfig.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
     error = OMX_SetParameter(encoder, OMX_IndexParamVideoAvc, &avcConfig);
     OMX_TRACE(error);
 
@@ -550,7 +550,7 @@ OMX_ERRORTYPE VideoCameraEngine::onCameraEventParamOrConfigChanged()
         
         
         // Tunnel splitter2 output port and encoder input port
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, ENCODER_INPUT_PORT);
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODER_INPUT_PORT);
         OMX_TRACE(error);
         
         
@@ -629,12 +629,12 @@ OMX_ERRORTYPE VideoCameraEngine::onCameraEventParamOrConfigChanged()
     if(sessionConfig->doRecording)
     {
         //Enable encoder input port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODER_INPUT_PORT, NULL);
         OMX_TRACE(error);
         
         
         //Enable encoder output port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODER_OUTPUT_PORT, NULL);
         OMX_TRACE(error);
         
         
@@ -645,7 +645,7 @@ OMX_ERRORTYPE VideoCameraEngine::onCameraEventParamOrConfigChanged()
         // Configure encoder output buffer
         OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
         OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-        encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
+        encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
         error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
         if (error != OMX_ErrorNone) 
         {
@@ -665,7 +665,7 @@ OMX_ERRORTYPE VideoCameraEngine::onCameraEventParamOrConfigChanged()
             
         }
         
-        error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
+        error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error);
     }
     
@@ -843,10 +843,10 @@ void VideoCameraEngine::closeEngine()
     
     if(encoder)
     {
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_INPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush ENCODER_INPUT_PORT");
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush ENCODER_OUTPUT_PORT");
+        error =  OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODER_INPUT_PORT, NULL);
+        OMX_TRACE(error, "encoder: OMX_CommandFlush VIDEO_ENCODER_INPUT_PORT");
+        error =  OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODER_OUTPUT_PORT, NULL);
+        OMX_TRACE(error, "encoder: OMX_CommandFlush VIDEO_ENCODER_OUTPUT_PORT");
     }
     
     //DisableAllPortsForComponent
@@ -889,8 +889,8 @@ void VideoCameraEngine::closeEngine()
     //OMX_FreeBuffer
     if(encoder)
     {
-        error = OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT, encoderOutputBuffer);
-        OMX_TRACE(error, "OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT");
+        error = OMX_FreeBuffer(encoder, VIDEO_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_TRACE(error, "OMX_FreeBuffer(encoder, VIDEO_ENCODER_OUTPUT_PORT");
     }
     
     

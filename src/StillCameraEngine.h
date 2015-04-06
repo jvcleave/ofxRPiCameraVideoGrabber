@@ -15,11 +15,6 @@
 #include "SessionConfig.h"
 
 
-enum EngineType {
-	TEXTURE_ENGINE,
-	NON_TEXTURE_ENGINE
-};
-
 class StillCameraEngine: public ofThread
 {
 public:
@@ -27,57 +22,29 @@ public:
     ~StillCameraEngine();
     void setup(SessionConfig* sessionConfig_);
     
-	int getFrameCounter();
     void closeEngine();
-    bool isRecording() {return isCurrentlyRecording;};
-    void stopRecording();
     OMX_HANDLETYPE camera;
 
     
-    EGLImageKHR eglImage;
     bool isOpen(){return didOpen;}
     
 private:
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
-    int renderedFrameCounter; 
-    OMX_ERRORTYPE setupDisplay();
 	SessionConfig* sessionConfig;
 
 	OMX_ERRORTYPE configureCameraResolution();
-	OMX_ERRORTYPE configureEncoder();
-    
-	
-	OMX_HANDLETYPE splitter;
-	OMX_HANDLETYPE encoder;
-	OMX_HANDLETYPE render;
-    OMX_BUFFERHEADERTYPE* eglBuffer;
-
+    OMX_ERRORTYPE configureEncoder();
 	
 	bool didWriteFile;
 	
-	int recordingBitRate;
-	float numMBps;
-	
-	bool stopRequested;
-	bool isStopping;
-	int isKeyframeValid;
-	bool doFillBuffer;
-	bool bufferAvailable;
-    bool isCurrentlyRecording;
-    
 	void threadedFunction();
-	bool writeFile();
 	
-	ofBuffer recordingFileBuffer;
-	OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
-	
-	int recordedFrameCounter;
-    
-    EngineType engineType;
-    OMX_STRING engineTypeString;
-    int renderInputPort;
-    int cameraOutputPort;
+    OMX_HANDLETYPE render;
+    OMX_HANDLETYPE encoder;    
+    OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
+
+    OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
     
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
@@ -99,11 +66,6 @@ private:
                                  OMX_U32 nData2, 
                                  OMX_PTR pEventData)
                                 {return OMX_ErrorNone;};
-
-    static OMX_ERRORTYPE 
-    egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, 
-                             OMX_PTR pAppData, 
-                             OMX_BUFFERHEADERTYPE* pBuffer);
     
     
     static OMX_ERRORTYPE 
@@ -114,11 +76,11 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     
+  
     static OMX_ERRORTYPE
     encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
                           OMX_IN OMX_PTR pAppData,
                           OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
-    
 };
 
 
