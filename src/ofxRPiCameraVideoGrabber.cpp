@@ -119,7 +119,7 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig* sessionConfig_)
     {
         generateEGLImage(sessionConfig->width, sessionConfig->height);
     }
-    engine = new CameraEngine();
+    engine = new VideoCameraEngine();
     if (isTextureEnabled()) 
     {
         engine->eglImage = eglImage;
@@ -142,7 +142,7 @@ void ofxRPiCameraVideoGrabber::saveCameraSettingsToFile(string filePath)
     getCameraSettings().saveToFile(filePath);    
 }
 
-CameraEngine* ofxRPiCameraVideoGrabber::getEngine()
+VideoCameraEngine* ofxRPiCameraVideoGrabber::getEngine()
 {
     if (engine) 
     {

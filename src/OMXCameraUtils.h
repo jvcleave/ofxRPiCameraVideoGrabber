@@ -31,10 +31,15 @@ memset(&(a), 0, sizeof(a)); \
 #define OMX_CAMERA (OMX_STRING)"OMX.broadcom.camera"
 #define CAMERA_PREVIEW_PORT		70
 #define CAMERA_OUTPUT_PORT		71
+#define CAMERA_STILL_OUTPUT_PORT 72
+
+#define OMX_IMAGE_ENCODER (OMX_STRING)"OMX.broadcom.image_encode"
+#define IMAGE_ENCODER_INPUT_PORT 340
+#define IMAGE_ENCODER_OUTPUT_PORT 341
 
 #define OMX_VIDEO_ENCODER (OMX_STRING)"OMX.broadcom.video_encode"
-#define ENCODER_INPUT_PORT 200
-#define ENCODER_OUTPUT_PORT 201
+#define VIDEO_ENCODER_INPUT_PORT 200
+#define VIDEO_ENCODER_OUTPUT_PORT 201
 
 #define OMX_VIDEO_DECODER (OMX_STRING)"OMX.broadcom.video_decode"
 #define VIDEO_DECODE_INPUT_PORT 130
@@ -89,7 +94,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_SILENT 9
 
 #ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_DEV
 #endif
 
 extern inline  

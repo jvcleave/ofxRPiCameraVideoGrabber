@@ -145,6 +145,25 @@ public:
         return mirrors[name];
     }
     
+    
+    vector<string> imageCodingNames;
+    map<string, OMX_IMAGE_CODINGTYPE> imageCoding;
+    map<OMX_IMAGE_CODINGTYPE, string> imageCodingTypes;
+    vector<string>& getImageCodingNames()
+    {
+        return imageCodingNames;
+    }
+    
+    string getImageCoding(OMX_IMAGE_CODINGTYPE type)
+    {
+        return imageCodingTypes[type];
+    }
+    
+    OMX_IMAGE_CODINGTYPE getImageCoding(string name)
+    {
+        return imageCoding[name];
+    }
+    
 	vector<string> videoCodingNames;
 	map<string, OMX_VIDEO_CODINGTYPE> videoCoding;
     map<OMX_VIDEO_CODINGTYPE, string> videoCodingTypes;
@@ -414,7 +433,22 @@ private:
 
 
         collectNames<OMX_VIDEO_CODINGTYPE>(videoCoding, videoCodingNames, videoCodingTypes);
-
+        
+        
+        imageCoding["Unused"] = OMX_IMAGE_CodingUnused;
+        imageCoding["AutoDetect"] = OMX_IMAGE_CodingAutoDetect;
+        imageCoding["JPEG"] = OMX_IMAGE_CodingJPEG;
+        imageCoding["JPEG2K"] = OMX_IMAGE_CodingJPEG2K;
+        imageCoding["EXIF"] = OMX_IMAGE_CodingEXIF;
+        imageCoding["TIFF"] = OMX_IMAGE_CodingTIFF;
+        imageCoding["GIF"] = OMX_IMAGE_CodingGIF;
+        imageCoding["PNG"] = OMX_IMAGE_CodingPNG;
+        imageCoding["LZW"] = OMX_IMAGE_CodingLZW;
+        imageCoding["BMP"] = OMX_IMAGE_CodingBMP; 
+        imageCoding["TGA"] = OMX_IMAGE_CodingTGA;
+        imageCoding["PPM"] = OMX_IMAGE_CodingPPM;
+       
+        collectNames<OMX_IMAGE_CODINGTYPE>(imageCoding, imageCodingNames, imageCodingTypes);
 
         algorithms["Facetracking"] = OMX_CameraDisableAlgorithmFacetracking;
         algorithms["RedEyeReduction"] = OMX_CameraDisableAlgorithmRedEyeReduction;

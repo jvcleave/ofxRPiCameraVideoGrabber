@@ -1,7 +1,7 @@
-#include "CameraEngine.h"
+#include "VideoCameraEngine.h"
 
 
-CameraEngine::CameraEngine()
+VideoCameraEngine::VideoCameraEngine()
 {
 	didOpen		= false;
 	
@@ -32,7 +32,7 @@ CameraEngine::CameraEngine()
 }   
 
 
-int CameraEngine::getFrameCounter()
+int VideoCameraEngine::getFrameCounter()
 {
     return renderedFrameCounter;
     if(!didOpen) return 0;
@@ -69,7 +69,7 @@ int CameraEngine::getFrameCounter()
 }
 
 
-void CameraEngine::setup(SessionConfig* sessionConfig_)
+void VideoCameraEngine::setup(SessionConfig* sessionConfig_)
 {
     sessionConfig = sessionConfig_;
     
@@ -88,9 +88,9 @@ void CameraEngine::setup(SessionConfig* sessionConfig_)
     
     OMX_CALLBACKTYPE cameraCallbacks;
     
-    cameraCallbacks.EventHandler    = &CameraEngine::cameraEventHandlerCallback;
-    cameraCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
-    cameraCallbacks.FillBufferDone	= &CameraEngine::nullFillBufferDone;
+    cameraCallbacks.EventHandler    = &VideoCameraEngine::cameraEventHandlerCallback;
+    cameraCallbacks.EmptyBufferDone	= &VideoCameraEngine::nullEmptyBufferDone;
+    cameraCallbacks.FillBufferDone	= &VideoCameraEngine::nullFillBufferDone;
     
     error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     if(error != OMX_ErrorNone) 
@@ -103,20 +103,20 @@ void CameraEngine::setup(SessionConfig* sessionConfig_)
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE VideoCameraEngine::egl_renderFillBufferDone(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
+    VideoCameraEngine *grabber = static_cast<VideoCameraEngine*>(pAppData);
     grabber->renderedFrameCounter++;
     OMX_ERRORTYPE error = OMX_FillThisBuffer(hComponent, pBuffer);
     return error;
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE VideoCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
                                                 OMX_PTR pAppData,
                                                 OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
+    VideoCameraEngine *grabber = static_cast<VideoCameraEngine*>(pAppData);
     grabber->lock();
     //ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
     grabber->bufferAvailable = true;
@@ -126,7 +126,7 @@ OMX_ERRORTYPE CameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
+OMX_ERRORTYPE VideoCameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
                                                      OMX_PTR pAppData,
                                                      OMX_EVENTTYPE eEvent,
                                                      OMX_U32 nData1,
@@ -136,7 +136,7 @@ OMX_ERRORTYPE CameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent
     /*ofLog(OF_LOG_VERBOSE, 
      "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
      __func__, eEvent, nData1, nData2, pEventData);*/
-    CameraEngine *grabber = static_cast<CameraEngine*>(pAppData);
+    VideoCameraEngine *grabber = static_cast<VideoCameraEngine*>(pAppData);
     //ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
     switch (eEvent) 
     {
@@ -163,12 +163,15 @@ OMX_ERRORTYPE CameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::configureCameraResolution()
+OMX_ERRORTYPE VideoCameraEngine::configureCameraResolution()
 {
     
     OMX_ERRORTYPE error;
     error = DisableAllPortsForComponent(&camera);
 	OMX_TRACE(error);
+    
+    
+  
     
     OMX_PARAM_TIMESTAMPMODETYPE timestampConfig;
     OMX_INIT_STRUCTURE(timestampConfig);
@@ -215,69 +218,21 @@ OMX_ERRORTYPE CameraEngine::configureCameraResolution()
         OMX_TRACE(error);
 	}
     
-#if 0    
-    OMX_PARAM_TIMESTAMPMODETYPE timestampConfig;
-    OMX_INIT_STRUCTURE(timestampConfig);
-
-    error =  OMX_GetParameter(camera, OMX_IndexParamCommonUseStcTimestamps, &timestampConfig);
-    OMX_TRACE(error);
-    if(error == OMX_ErrorNone)
-    {
-        stringstream info;
-        switch (timestampConfig.eTimestampMode) 
-        {
-            case OMX_TimestampModeZero:
-            {
-                info << "OMX_TimestampModeZero";
-                break;
-            }
-            case OMX_TimestampModeRawStc:
-            {
-                info << "OMX_TimestampModeRawStc";
-                break;
-            } 
-            case OMX_TimestampModeResetStc:
-            {
-                info << "OMX_TimestampModeResetStc";
-                break;
-            } 
-        }
-        ofLogVerbose(__func__) << "info: " << info.str();
-        
-    }
-#endif  
-
     
-  
-
-#if 0    
+        
+#if 1    
     error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
     OMX_TRACE(error);
-    ofLogVerbose(__func__) << OMX_Maps::getInstance().getVideoCoding(cameraOutputPortDefinition.format.video.eCompressionFormat);
+    ofLogVerbose(__func__) <<   "Compression Format: "  << OMX_Maps::getInstance().getVideoCoding(cameraOutputPortDefinition.format.video.eCompressionFormat);
+    ofLogVerbose(__func__) <<   "Color Format: "        << OMX_Maps::getInstance().getColorFormat(cameraOutputPortDefinition.format.video.eColorFormat);
 #endif    
     return error;
 }
 
-
-#if 0
-typedef struct OMX_VIDEO_PORTDEFINITIONTYPE {
-    OMX_STRING cMIMEType;
-    OMX_NATIVE_DEVICETYPE pNativeRender;
-    OMX_U32 nFrameWidth;
-    OMX_U32 nFrameHeight;
-    OMX_S32 nStride;
-    OMX_U32 nSliceHeight;
-    OMX_U32 nBitrate;
-    OMX_U32 xFramerate;
-    OMX_BOOL bFlagErrorConcealment;
-    OMX_VIDEO_CODINGTYPE eCompressionFormat;
-    OMX_COLOR_FORMATTYPE eColorFormat;
-    OMX_NATIVE_WINDOWTYPE pNativeWindow;
-} OMX_VIDEO_PORTDEFINITIONTYPE;
-#endif
+//OMX_COLOR_FormatBRCMOpaque
 
 inline
-OMX_ERRORTYPE CameraEngine::configureEncoder()
+OMX_ERRORTYPE VideoCameraEngine::configureEncoder()
 {
 		
     OMX_ERRORTYPE error;
@@ -290,23 +245,25 @@ OMX_ERRORTYPE CameraEngine::configureEncoder()
 	// Configure video format emitted by encoder output port
 	OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 	OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-	encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
+	encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
     OMX_TRACE(error);
-
+    //OMX_VIDEO_AVCProfileHigh
+    //OMX_VIDEO_CodingAVC
 	if (error == OMX_ErrorNone) 
 	{
         
-        stringstream bufferInfo;
-        bufferInfo << "BUFFER INFO:\n";
-        bufferInfo << "nBufferCountMin: "       << encoderOutputPortDefinition.nBufferCountMin      << "\n";
-        bufferInfo << "nBufferCountActual: "    << encoderOutputPortDefinition.nBufferCountActual   << "\n";
-        bufferInfo << "nBufferSize: "           << encoderOutputPortDefinition.nBufferSize          << "\n";
-        bufferInfo << "nBufferAlignment: "      << encoderOutputPortDefinition.nBufferAlignment     << "\n";
+        stringstream encoderPortInfo;
+        encoderPortInfo << "ENCODER PORT INFO:\n";
+        encoderPortInfo << "nBufferCountMin: "       << encoderOutputPortDefinition.nBufferCountMin      << "\n";
+        encoderPortInfo << "nBufferCountActual: "    << encoderOutputPortDefinition.nBufferCountActual   << "\n";
+        encoderPortInfo << "nBufferSize: "           << encoderOutputPortDefinition.nBufferSize          << "\n";
+        encoderPortInfo << "nBufferAlignment: "      << encoderOutputPortDefinition.nBufferAlignment     << "\n";
+        encoderPortInfo << "Compression Format: "    << OMX_Maps::getInstance().getVideoCoding(encoderOutputPortDefinition.format.video.eCompressionFormat) << "\n";
 
-        bufferInfo << "ColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat] << "\n";
+        encoderPortInfo << "Color Format: " << OMX_Maps::getInstance().getColorFormat(encoderOutputPortDefinition.format.video.eColorFormat) << "\n";
          
-        ofLogVerbose(__func__) << bufferInfo.str();
+        ofLogVerbose(__func__) << encoderPortInfo.str();
         
 	}
 	
@@ -325,7 +282,7 @@ OMX_ERRORTYPE CameraEngine::configureEncoder()
 	//encodingBitrate.eControlRate = OMX_Video_ControlRateConstant;
 	
 	encodingBitrate.nTargetBitrate = recordingBitRate;
-	encodingBitrate.nPortIndex = ENCODER_OUTPUT_PORT;
+	encodingBitrate.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
     OMX_TRACE(error);
@@ -333,17 +290,85 @@ OMX_ERRORTYPE CameraEngine::configureEncoder()
 	// Configure encoding format
 	OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
 	OMX_INIT_STRUCTURE(encodingFormat);
-	encodingFormat.nPortIndex = ENCODER_OUTPUT_PORT;
+	encodingFormat.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
 	encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
-	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
+    
+    
+    
+    OMX_VIDEO_PARAM_AVCTYPE avcConfig;
+    OMX_INIT_STRUCTURE(avcConfig);
+    avcConfig.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
+    error = OMX_SetParameter(encoder, OMX_IndexParamVideoAvc, &avcConfig);
     OMX_TRACE(error);
+
+#if 0
+    stringstream avcConfigInfo;
+    avcConfigInfo << "AVC INFO:\n";
+    avcConfigInfo << "nBufferCountMin: "       << encoderOutputPortDefinition.nBufferCountMin      << "\n";
+    avcConfigInfo << "nBufferCountActual: "    << encoderOutputPortDefinition.nBufferCountActual   << "\n";
+    avcConfigInfo << "nBufferSize: "           << encoderOutputPortDefinition.nBufferSize          << "\n";
+    avcConfigInfo << "nBufferAlignment: "      << encoderOutputPortDefinition.nBufferAlignment     << "\n";
+    avcConfigInfo << "Compression Format: "    << OMX_Maps::getInstance().getVideoCoding(encoderOutputPortDefinition.format.video.eCompressionFormat) << "\n";
+    
+    encoderPortInfo << "Color Format: " << OMX_Maps::getInstance().getColorFormat(encoderOutputPortDefinition.format.video.eColorFormat) << "\n";
+    
+    ofLogVerbose(__func__) << encoderPortInfo.str();
+ 
+
+    typedef struct OMX_VIDEO_PARAM_AVCTYPE {
+        OMX_U32 nSize;                 
+        OMX_VERSIONTYPE nVersion;      
+        OMX_U32 nPortIndex;            
+        OMX_U32 nSliceHeaderSpacing;  
+        OMX_U32 nPFrames;     
+        OMX_U32 nBFrames;     
+        OMX_BOOL bUseHadamard;
+        OMX_U32 nRefFrames;  
+        OMX_U32 nRefIdx10ActiveMinus1;
+        OMX_U32 nRefIdx11ActiveMinus1;
+        OMX_BOOL bEnableUEP;  
+        OMX_BOOL bEnableFMO;  
+        OMX_BOOL bEnableASO;  
+        OMX_BOOL bEnableRS;   
+        OMX_VIDEO_AVCPROFILETYPE eProfile;
+        OMX_VIDEO_AVCLEVELTYPE eLevel; 
+        OMX_U32 nAllowedPictureTypes;  
+        OMX_BOOL bFrameMBsOnly;        									
+        OMX_BOOL bMBAFF;               
+        OMX_BOOL bEntropyCodingCABAC;  
+        OMX_BOOL bWeightedPPrediction; 
+        OMX_U32 nWeightedBipredicitonMode; 
+        OMX_BOOL bconstIpred ;
+        OMX_BOOL bDirect8x8Inference;  
+        OMX_BOOL bDirectSpatialTemporal;
+        OMX_U32 nCabacInitIdc;
+        OMX_VIDEO_AVCLOOPFILTERTYPE eLoopFilterMode;
+    } OMX_VIDEO_PARAM_AVCTYPE;
+#endif
+    
+#if 0   
+    for(size_t i=0; i<OMX_Maps::getInstance().getColorFormatNames().size(); ++i)
+    {
+        string currentName = OMX_Maps::getInstance().getColorFormatNames()[i];
+        
+        encodingFormat.eColorFormat = OMX_Maps::getInstance().getColorFormat(currentName);
+        error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone)
+        {
+            ofLogVerbose() << currentName << " SUPPORTED!";
+        }
+        
+    }
+#endif    
+    
     return error;
 
 }
 
 inline
-void CameraEngine::threadedFunction()
+void VideoCameraEngine::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
@@ -398,11 +423,54 @@ void CameraEngine::threadedFunction()
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
+OMX_ERRORTYPE VideoCameraEngine::onCameraEventParamOrConfigChanged()
 {
     
     OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
+
+
+    OMX_CONFIG_CAMERASENSORMODETYPE sensorConfig;
+    OMX_INIT_STRUCTURE(sensorConfig);
+    sensorConfig.nPortIndex = OMX_ALL;
+    //sensorConfig.nModeIndex = 0;
+    error =  OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        stringstream sensorInfo;
+        sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+        sensorInfo << "nNumModes: "  << sensorConfig.nNumModes << endl;
+        sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+        sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+        sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+        sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+        sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+        sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+        
+        ofLogVerbose(__func__) << "sensorInfo: \n" << sensorInfo.str();
+    }
+    
+    
+    
+    int numModes = sensorConfig.nNumModes;
+    for (int i = 0; i < numModes; i++) 
+    {
+        sensorConfig.nModeIndex = i;
+        error = OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+        OMX_TRACE(error);
+        stringstream sensorInfo;
+        sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+        sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+        sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+        sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+        sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+        sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+        sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+        sensorInfo << "FrameRateMax: " << (sensorConfig.nFrameRateMax / 256.0f) << endl;
+        sensorInfo << "FrameRateMin: " << (sensorConfig.nFrameRateMin / 256.0f) << endl;
+        ofLogVerbose(__func__) << "sensorInfo "<< i << " : \n" << sensorInfo.str();
+    }
     
     //Enable Camera Output Port
     OMX_CONFIG_PORTBOOLEANTYPE cameraport;
@@ -416,9 +484,9 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     if(sessionConfig->doRecording)
     {
         OMX_CALLBACKTYPE splitterCallbacks;
-        splitterCallbacks.EventHandler      = &CameraEngine::nullEventHandlerCallback;
-        splitterCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
-        splitterCallbacks.FillBufferDone	= &CameraEngine::nullFillBufferDone;
+        splitterCallbacks.EventHandler      = &VideoCameraEngine::nullEventHandlerCallback;
+        splitterCallbacks.EmptyBufferDone	= &VideoCameraEngine::nullEmptyBufferDone;
+        splitterCallbacks.FillBufferDone	= &VideoCameraEngine::nullFillBufferDone;
         //Set up video splitter
         error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this, &splitterCallbacks);
         OMX_TRACE(error);
@@ -433,14 +501,14 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     
     //Set up texture renderer
     OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler	= &CameraEngine::nullEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
+    renderCallbacks.EventHandler	= &VideoCameraEngine::nullEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone	= &VideoCameraEngine::nullEmptyBufferDone;
     if(engineType == TEXTURE_ENGINE)
     {
-        renderCallbacks.FillBufferDone	= &CameraEngine::egl_renderFillBufferDone;
+        renderCallbacks.FillBufferDone	= &VideoCameraEngine::egl_renderFillBufferDone;
     }else
     {
-        renderCallbacks.FillBufferDone	= &CameraEngine::nullFillBufferDone;
+        renderCallbacks.FillBufferDone	= &VideoCameraEngine::nullFillBufferDone;
 
     }
     
@@ -460,9 +528,9 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
         //Create encoder
         
         OMX_CALLBACKTYPE encoderCallbacks;
-        encoderCallbacks.EventHandler		= &CameraEngine::nullEventHandlerCallback;
-        encoderCallbacks.EmptyBufferDone	= &CameraEngine::nullEmptyBufferDone;
-        encoderCallbacks.FillBufferDone		= &CameraEngine::encoderFillBufferDone;
+        encoderCallbacks.EventHandler		= &VideoCameraEngine::nullEventHandlerCallback;
+        encoderCallbacks.EmptyBufferDone	= &VideoCameraEngine::nullEmptyBufferDone;
+        encoderCallbacks.FillBufferDone		= &VideoCameraEngine::encoderFillBufferDone;
         
         error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
@@ -482,7 +550,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
         
         
         // Tunnel splitter2 output port and encoder input port
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, ENCODER_INPUT_PORT);
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODER_INPUT_PORT);
         OMX_TRACE(error);
         
         
@@ -561,12 +629,12 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
     if(sessionConfig->doRecording)
     {
         //Enable encoder input port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_INPUT_PORT, NULL);
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODER_INPUT_PORT, NULL);
         OMX_TRACE(error);
         
         
         //Enable encoder output port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, ENCODER_OUTPUT_PORT, NULL);
+        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODER_OUTPUT_PORT, NULL);
         OMX_TRACE(error);
         
         
@@ -577,7 +645,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
         // Configure encoder output buffer
         OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
         OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-        encoderOutputPortDefinition.nPortIndex = ENCODER_OUTPUT_PORT;
+        encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODER_OUTPUT_PORT;
         error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
         if (error != OMX_ErrorNone) 
         {
@@ -597,7 +665,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
             
         }
         
-        error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
+        error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODER_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
         OMX_TRACE(error);
     }
     
@@ -663,7 +731,7 @@ OMX_ERRORTYPE CameraEngine::onCameraEventParamOrConfigChanged()
 }
 
 inline
-OMX_ERRORTYPE CameraEngine::setupDisplay()
+OMX_ERRORTYPE VideoCameraEngine::setupDisplay()
 {
     
     OMX_CONFIG_DISPLAYREGIONTYPE region;
@@ -690,7 +758,7 @@ OMX_ERRORTYPE CameraEngine::setupDisplay()
     
 }
 
-void CameraEngine::stopRecording()
+void VideoCameraEngine::stopRecording()
 {
 	
 	if(isCurrentlyRecording)
@@ -703,7 +771,7 @@ void CameraEngine::stopRecording()
 }
 
 inline
-bool CameraEngine::writeFile()
+bool VideoCameraEngine::writeFile()
 {
 
 	stopThread();
@@ -752,7 +820,7 @@ bool CameraEngine::writeFile()
     return didWriteFile;
 }
 
-CameraEngine::~CameraEngine()
+VideoCameraEngine::~VideoCameraEngine()
 {
     if(didOpen)
     {
@@ -761,7 +829,7 @@ CameraEngine::~CameraEngine()
 }
 
 inline
-void CameraEngine::closeEngine()
+void VideoCameraEngine::closeEngine()
 {
     if(isCurrentlyRecording && !didWriteFile)
     {
@@ -775,10 +843,10 @@ void CameraEngine::closeEngine()
     
     if(encoder)
     {
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_INPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush ENCODER_INPUT_PORT");
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, ENCODER_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush ENCODER_OUTPUT_PORT");
+        error =  OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODER_INPUT_PORT, NULL);
+        OMX_TRACE(error, "encoder: OMX_CommandFlush VIDEO_ENCODER_INPUT_PORT");
+        error =  OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODER_OUTPUT_PORT, NULL);
+        OMX_TRACE(error, "encoder: OMX_CommandFlush VIDEO_ENCODER_OUTPUT_PORT");
     }
     
     //DisableAllPortsForComponent
@@ -821,8 +889,8 @@ void CameraEngine::closeEngine()
     //OMX_FreeBuffer
     if(encoder)
     {
-        error = OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT, encoderOutputBuffer);
-        OMX_TRACE(error, "OMX_FreeBuffer(encoder, ENCODER_OUTPUT_PORT");
+        error = OMX_FreeBuffer(encoder, VIDEO_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_TRACE(error, "OMX_FreeBuffer(encoder, VIDEO_ENCODER_OUTPUT_PORT");
     }
     
     
