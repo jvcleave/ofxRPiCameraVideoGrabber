@@ -82,6 +82,14 @@ bool ofxRPiCameraPhotoGrabber::isReady()
     return false;
 }
 
+void ofxRPiCameraPhotoGrabber::takePhoto()
+{
+    if (engine) 
+    {
+        engine->writeFile();
+    }
+}
+
 int ofxRPiCameraPhotoGrabber::getWidth()
 {
     return sessionConfig->width;

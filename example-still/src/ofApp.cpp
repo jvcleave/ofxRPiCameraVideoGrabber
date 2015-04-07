@@ -56,7 +56,7 @@ void ofApp::keyPressed  (int key)
 	}
 	if (key == 't')
 	{
-		//photoGrabber.toggleLED();
+		photoGrabber.takePhoto();
 	}
 }
 

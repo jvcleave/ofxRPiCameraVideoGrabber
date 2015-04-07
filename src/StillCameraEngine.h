@@ -27,19 +27,21 @@ public:
 
     
     bool isOpen(){return didOpen;}
-    
+    bool writeFile();
 private:
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
 	SessionConfig* sessionConfig;
-
+    
 	OMX_ERRORTYPE configureCameraResolution();
     OMX_ERRORTYPE configureEncoder();
-	
-	bool didWriteFile;
-	
+    bool writeFileOnNextPass;
+    bool doWriteFile;
+    bool bufferAvailable;
+    bool doFillBuffer;
 	void threadedFunction();
-	
+    ofBuffer recordingFileBuffer;
+
     OMX_HANDLETYPE render;
     OMX_HANDLETYPE encoder;    
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;

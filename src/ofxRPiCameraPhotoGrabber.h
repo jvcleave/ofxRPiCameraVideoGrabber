@@ -49,7 +49,8 @@ public:
 
     void loadCameraSettingsFromFile(string filePath="");
     void saveCameraSettingsToFile(string filePath="");
-
+    
+    void takePhoto();
     
     //interface
     bool  setAutoAperture(bool);

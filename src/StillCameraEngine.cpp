@@ -4,8 +4,10 @@
 StillCameraEngine::StillCameraEngine()
 {
 	didOpen		= false;
-	
-	
+    doWriteFile = false;
+    writeFileOnNextPass = false;
+    doFillBuffer = false;
+    bufferAvailable = false;
     render = NULL;
     camera = NULL;
     encoder = NULL;
@@ -18,15 +20,15 @@ inline
 OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent,
                                                        OMX_PTR pAppData,
                                                        OMX_BUFFERHEADERTYPE* pBuffer)
-{	ofLogVerbose(__func__);
+{	
+    ofLogVerbose(__func__);
+    OMX_ERRORTYPE error = OMX_ErrorNone;
     
     StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
     grabber->lock();
-    //ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
-    //grabber->bufferAvailable = true;
-    //grabber->recordedFrameCounter++;
+    grabber->bufferAvailable = true;
     grabber->unlock();
-    return OMX_ErrorNone;
+    return error;
 }
 
 
@@ -165,6 +167,42 @@ void StillCameraEngine::threadedFunction()
 {
 	while (isThreadRunning()) 
 	{
+        if(bufferAvailable)
+        {
+            
+            
+            
+            recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, 
+                                       encoderOutputBuffer->nFilledLen);
+            
+            
+            ofLogVerbose(__func__) << recordingFileBuffer.size();
+            bool endOfFrame = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME);
+            bool endOfStream = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_EOS);
+            
+            ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME: " << endOfFrame;
+            ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
+            
+            if(endOfStream)
+            {
+                doFillBuffer = false;
+                writeFile();
+            }else
+            {
+                doFillBuffer = true;
+            }
+            
+        }
+        if(doFillBuffer)
+        {
+            doFillBuffer	= false;
+            bufferAvailable = false;
+            OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+            OMX_TRACE(error);
+        }
+        
+       
+        
         
     }
 }
@@ -231,7 +269,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     OMX_INIT_STRUCTURE(region);
     region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
     
-    region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
+    region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN);
     
     region.fullscreen = OMX_FALSE;
     region.noaspect = OMX_TRUE;
@@ -261,7 +299,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     
     configureEncoder();
     
- 
+    
     
     
     //Create camera->render Tunnel
@@ -300,7 +338,6 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     
-
     //Start renderer
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
@@ -314,12 +351,28 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     
+   
+    
+    bool doThreadBlocking	= true;
+    startThread(doThreadBlocking);
     
     error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    
+    OMX_TRACE(error);
     
     didOpen = true;
     return error;
 }
+
+bool StillCameraEngine::writeFile()
+{
+    
+    bool result = ofBufferToFile(ofToDataPath(ofGetTimestampString()+".jpg", true), recordingFileBuffer);
+    doWriteFile = false;
+    stopThread();
+    return result;
+}
+
 
 inline
 OMX_ERRORTYPE StillCameraEngine::configureEncoder()
@@ -371,19 +424,18 @@ inline
 void StillCameraEngine::closeEngine()
 {
     
-    
+    if(isThreadRunning())
+    {
+        stopThread();
+    }
     OMX_ERRORTYPE error;
     error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_STILL_OUTPUT_PORT, NULL);
     OMX_TRACE(error, "camera: OMX_CommandFlush");
     
-    //DisableAllPortsForComponent
     error = DisableAllPortsForComponent(&camera, "camera");
     OMX_TRACE(error, "DisableAllPortsForComponent: camera");
     
-   
-    
-        
-    
+
     //OMX_StateIdle
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
@@ -392,6 +444,25 @@ void StillCameraEngine::closeEngine()
     OMX_TRACE(error, "render->OMX_StateIdle");
     
    
+    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
+    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
+    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_OUTPUT_PORT, NULL);
+    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
+    
+    error = DisableAllPortsForComponent(&encoder, "encoder");
+    OMX_TRACE(error, "DisableAllPortsForComponent encoder");
+    
+    error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
+    OMX_TRACE(error, "encoder->OMX_StateIdle");
+    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error, "encoder->OMX_StateIdle");
+    
+    
+    OMX_STATETYPE encoderState;
+    error = OMX_GetState(encoder, &encoderState);
+    OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
+ 
+
     
     //OMX_StateLoaded
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
@@ -400,7 +471,10 @@ void StillCameraEngine::closeEngine()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateLoaded, NULL);
     OMX_TRACE(error, "render->OMX_StateLoaded");
     
- 
+    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    OMX_TRACE(error, "encoder->OMX_StateLoaded");
+
+    
     //OMX_FreeHandle
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error, "OMX_FreeHandle(camera)");
@@ -408,6 +482,9 @@ void StillCameraEngine::closeEngine()
     error =  OMX_FreeHandle(render);
     OMX_TRACE(error, "OMX_FreeHandle(render)");
    
+    error = OMX_FreeHandle(encoder);
+    OMX_TRACE(error, "OMX_FreeHandle(encoder)"); 
+    
     sessionConfig = NULL;
     didOpen = false;
 
