@@ -83,7 +83,7 @@ string getStateString(OMX_STATETYPE state)
 extern inline  
 string omxErrorToString(OMX_ERRORTYPE error)
 {
-    return OMX_Maps::getInstance().omxErrors[error];
+    return OMX_Maps::getInstance().getOMXError(error);
 }
 
 #define ENABLE_OMX_TRACE
@@ -119,7 +119,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
             }
             break;
         }
-        case 2:
+        case OMX_LOG_LEVEL_ERROR_ONLY:
         {
             if(error != OMX_ErrorNone)
             {
@@ -127,7 +127,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
             }
             break;
         }
-        case 3:
+        case OMX_LOG_LEVEL_VERBOSE:
         {
             ofLogError(functionName)  << commentLine << omxErrorToString(error);
             break;
@@ -213,7 +213,7 @@ void logEGLError(EGLint error, string comments="", string functionName="", int l
 extern inline 
 const char* omxErrorToCString(OMX_ERRORTYPE error)
 {
-    return OMX_Maps::getInstance().omxErrors[error].c_str();
+    return OMX_Maps::getInstance().getOMXError(error).c_str();
 }
 
 extern inline 
@@ -295,7 +295,72 @@ OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string compone
     
     return error;
 }
+class OMXCameraUtils
+{
+public:
+    static void printSensorModes(OMX_HANDLETYPE camera)
+    {
+        OMX_ERRORTYPE error;
+        
+        OMX_CONFIG_CAMERASENSORMODETYPE sensorConfig;
+        OMX_INIT_STRUCTURE(sensorConfig);
+        sensorConfig.nPortIndex = OMX_ALL;
+        //sensorConfig.nModeIndex = 0;
+        error =  OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone)
+        {
+            stringstream sensorInfo;
+            sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+            sensorInfo << "nNumModes: "  << sensorConfig.nNumModes << endl;
+            sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+            sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+            sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+            sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+            sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+            sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+            
+            ofLogVerbose(__func__) << "sensorInfo: \n" << sensorInfo.str();
+        }
+        
+        
+        
+        int numModes = sensorConfig.nNumModes;
+        for (int i = 0; i < numModes; i++) 
+        {
+            sensorConfig.nModeIndex = i;
+            error = OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+            OMX_TRACE(error);
+            stringstream sensorInfo;
+            sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+            sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+            sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+            sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+            sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+            sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+            sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+            sensorInfo << "FrameRateMax: " << (sensorConfig.nFrameRateMax / 256.0f) << endl;
+            sensorInfo << "FrameRateMin: " << (sensorConfig.nFrameRateMin / 256.0f) << endl;
+            ofLogVerbose(__func__) << "sensorInfo "<< i << " : \n" << sensorInfo.str();
+        }
+    }
+    
+    static string printPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDef)
+    {
+        stringstream info;
+        info << "nFrameWidth: "  << portDef.format.image.nFrameWidth << endl;
+        info << "nFrameHeight: "  << portDef.format.image.nFrameHeight << endl;
+        info << "nStride: "  << portDef.format.image.nStride << endl;
+        info << "nSliceHeight: "  << portDef.format.image.nSliceHeight << endl;
+        info << "bFlagErrorConcealment: "  << portDef.format.image.bFlagErrorConcealment << endl;
+        info << "Color Format: " << OMX_Maps::getInstance().getColorFormat(portDef.format.image.eColorFormat) << endl;
+        info << "Compression Format: "    << OMX_Maps::getInstance().getImageCoding(portDef.format.image.eCompressionFormat) << "\n";
+        
+        ofLogVerbose(__func__) << "info: \n" << info.str();
+        return info.str();
+    }
 
+};
 
 
 

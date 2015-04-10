@@ -86,7 +86,7 @@ void ofxRPiCameraPhotoGrabber::takePhoto()
 {
     if (engine) 
     {
-        engine->writeFile();
+        engine->startCapture();
     }
 }
 

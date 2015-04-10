@@ -27,12 +27,17 @@ public:
 
     
     bool isOpen(){return didOpen;}
-    bool writeFile();
+    
+    void startCapture();
 private:
+    OMX_U32 encoderBufferSize;
+    OMX_ERRORTYPE buildNonCapturePipeline();
+    OMX_ERRORTYPE destroyEncoder();
+    
+    bool writeFile();
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
-	SessionConfig* sessionConfig;
-    
+	SessionConfig sessionConfig;
 	OMX_ERRORTYPE configureCameraResolution();
     OMX_ERRORTYPE configureEncoder();
     bool writeFileOnNextPass;
@@ -46,7 +51,6 @@ private:
     OMX_HANDLETYPE encoder;    
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
 
-    OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
     
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
@@ -78,7 +82,13 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     
-  
+    static OMX_ERRORTYPE 
+    encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                               OMX_PTR pAppData,  
+                               OMX_EVENTTYPE eEvent, 
+                               OMX_U32 nData1, 
+                               OMX_U32 nData2, 
+                               OMX_PTR pEventData);
     static OMX_ERRORTYPE
     encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
                           OMX_IN OMX_PTR pAppData,

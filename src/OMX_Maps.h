@@ -227,12 +227,43 @@ public:
     }
     
     
-    
+    vector<string> eventNames;
+	map<string, OMX_EVENTTYPE> events;
 	map<OMX_EVENTTYPE, string> eventTypes;
-	
+    vector<string>& getEventNames()
+    {
+        return eventNames;
+    }
     
-    map<OMX_ERRORTYPE, string> omxErrors;
+    string getEvent(OMX_EVENTTYPE type)
+    {
+        return eventTypes[type];
+    }
     
+    OMX_EVENTTYPE getEvent(string name)
+    {
+        return events[name];
+    }
+
+    
+    vector<string> omxErrorNames;
+    map<string, OMX_ERRORTYPE> omxErrors;
+    map<OMX_ERRORTYPE, string> omxErrorTypes;
+    vector<string>& getOMXErrorNames()
+    {
+        return omxErrorNames;
+    }
+    
+    string getOMXError(OMX_ERRORTYPE type)
+    {
+        return omxErrorTypes[type];
+    }
+    
+    OMX_ERRORTYPE getOMXError(string name)
+    {
+        return omxErrors[name];
+    }
+
  
     map<OMX_STATETYPE, string>omxStateNames;
     map<EGLint, string> eglErrors;
@@ -467,7 +498,8 @@ private:
 
 
         collectNames<OMX_CAMERADISABLEALGORITHMTYPE>(algorithms, algorithmNames, algorithmTypes);
-
+        
+        
 
         omxStateNames[OMX_StateInvalid] = "OMX_StateInvalid";
         omxStateNames[OMX_StateLoaded] = "OMX_StateLoaded";
@@ -475,52 +507,55 @@ private:
         omxStateNames[OMX_StateExecuting] = "OMX_StateExecuting";
         omxStateNames[OMX_StatePause] = "OMX_StatePause";
 
-        omxErrors[OMX_ErrorNone] =  "OMX_ErrorNone";
-        omxErrors[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";
-        omxErrors[OMX_ErrorUndefined] =  "OMX_ErrorUndefined";
-        omxErrors[OMX_ErrorInvalidComponentName] =  "OMX_ErrorInvalidComponentName";
-        omxErrors[OMX_ErrorComponentNotFound] =  "OMX_ErrorComponentNotFound";
-        omxErrors[OMX_ErrorInvalidComponent] =  "OMX_ErrorInvalidComponent";
-        omxErrors[OMX_ErrorBadParameter] =  "OMX_ErrorBadParameter";
-        omxErrors[OMX_ErrorNotImplemented] =  "OMX_ErrorNotImplemented";
-        omxErrors[OMX_ErrorUnderflow] =  "OMX_ErrorUnderflow";
-        omxErrors[OMX_ErrorOverflow] =  "OMX_ErrorOverflow";
-        omxErrors[OMX_ErrorHardware] =  "OMX_ErrorHardware";
-        omxErrors[OMX_ErrorInvalidState] =  "OMX_ErrorInvalidState";
-        omxErrors[OMX_ErrorStreamCorrupt] =  "OMX_ErrorStreamCorrupt";
-        omxErrors[OMX_ErrorPortsNotCompatible] =  "OMX_ErrorPortsNotCompatible";
-        omxErrors[OMX_ErrorResourcesLost] =  "OMX_ErrorResourcesLost";
-        omxErrors[OMX_ErrorNoMore] =  "OMX_ErrorNoMore";
-        omxErrors[OMX_ErrorVersionMismatch] =  "OMX_ErrorVersionMismatch";
-        omxErrors[OMX_ErrorNotReady] =  "OMX_ErrorNotReady";
-        omxErrors[OMX_ErrorTimeout] =  "OMX_ErrorTimeout";
-        omxErrors[OMX_ErrorSameState] =  "OMX_ErrorSameState";
-        omxErrors[OMX_ErrorResourcesPreempted] =  "OMX_ErrorResourcesPreempted";
-        omxErrors[OMX_ErrorPortUnresponsiveDuringAllocation] =  "OMX_ErrorPortUnresponsiveDuringAllocation";
-        omxErrors[OMX_ErrorPortUnresponsiveDuringDeallocation] =  "OMX_ErrorPortUnresponsiveDuringDeallocation";
-        omxErrors[OMX_ErrorPortUnresponsiveDuringStop] =  "OMX_ErrorPortUnresponsiveDuringStop";
-        omxErrors[OMX_ErrorIncorrectStateTransition] =  "OMX_ErrorIncorrectStateTransition";
-        omxErrors[OMX_ErrorIncorrectStateOperation] =  "OMX_ErrorIncorrectStateOperation";
-        omxErrors[OMX_ErrorUnsupportedSetting] =  "OMX_ErrorUnsupportedSetting";
-        omxErrors[OMX_ErrorUnsupportedIndex] =  "OMX_ErrorUnsupportedIndex";
-        omxErrors[OMX_ErrorBadPortIndex] =  "OMX_ErrorBadPortIndex";
-        omxErrors[OMX_ErrorPortUnpopulated] =  "OMX_ErrorPortUnpopulated";
-        omxErrors[OMX_ErrorComponentSuspended] =  "OMX_ErrorComponentSuspended";
-        omxErrors[OMX_ErrorDynamicResourcesUnavailable] =  "OMX_ErrorDynamicResourcesUnavailable";
-        omxErrors[OMX_ErrorMbErrorsInFrame] =  "OMX_ErrorMbErrorsInFrame";
-        omxErrors[OMX_ErrorFormatNotDetected] =  "OMX_ErrorFormatNotDetected";
-        omxErrors[OMX_ErrorContentPipeOpenFailed] =  "OMX_ErrorContentPipeOpenFailed";
-        omxErrors[OMX_ErrorContentPipeCreationFailed] =  "OMX_ErrorContentPipeCreationFailed";
-        omxErrors[OMX_ErrorSeperateTablesUsed] =  "OMX_ErrorSeperateTablesUsed";
-        omxErrors[OMX_ErrorTunnelingUnsupported] =  "OMX_ErrorTunnelingUnsupported";
-        omxErrors[OMX_ErrorKhronosExtensions] =  "OMX_ErrorKhronosExtensions";
-        omxErrors[OMX_ErrorVendorStartUnused] =  "OMX_ErrorVendorStartUnused";
-        omxErrors[OMX_ErrorDiskFull] =  "OMX_ErrorDiskFull";
-        omxErrors[OMX_ErrorMaxFileSize] =  "OMX_ErrorMaxFileSize";
-        omxErrors[OMX_ErrorDrmUnauthorised] =  "OMX_ErrorDrmUnauthorised";
-        omxErrors[OMX_ErrorDrmExpired] =  "OMX_ErrorDrmExpired";
-        omxErrors[OMX_ErrorDrmGeneral] =  "OMX_ErrorDrmGeneral";
+        omxErrorTypes[OMX_ErrorNone] =  "OMX_ErrorNone";
+        omxErrorTypes[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";
+        omxErrorTypes[OMX_ErrorUndefined] =  "OMX_ErrorUndefined";
+        omxErrorTypes[OMX_ErrorInvalidComponentName] =  "OMX_ErrorInvalidComponentName";
+        omxErrorTypes[OMX_ErrorComponentNotFound] =  "OMX_ErrorComponentNotFound";
+        omxErrorTypes[OMX_ErrorInvalidComponent] =  "OMX_ErrorInvalidComponent";
+        omxErrorTypes[OMX_ErrorBadParameter] =  "OMX_ErrorBadParameter";
+        omxErrorTypes[OMX_ErrorNotImplemented] =  "OMX_ErrorNotImplemented";
+        omxErrorTypes[OMX_ErrorUnderflow] =  "OMX_ErrorUnderflow";
+        omxErrorTypes[OMX_ErrorOverflow] =  "OMX_ErrorOverflow";
+        omxErrorTypes[OMX_ErrorHardware] =  "OMX_ErrorHardware";
+        omxErrorTypes[OMX_ErrorInvalidState] =  "OMX_ErrorInvalidState";
+        omxErrorTypes[OMX_ErrorStreamCorrupt] =  "OMX_ErrorStreamCorrupt";
+        omxErrorTypes[OMX_ErrorPortsNotCompatible] =  "OMX_ErrorPortsNotCompatible";
+        omxErrorTypes[OMX_ErrorResourcesLost] =  "OMX_ErrorResourcesLost";
+        omxErrorTypes[OMX_ErrorNoMore] =  "OMX_ErrorNoMore";
+        omxErrorTypes[OMX_ErrorVersionMismatch] =  "OMX_ErrorVersionMismatch";
+        omxErrorTypes[OMX_ErrorNotReady] =  "OMX_ErrorNotReady";
+        omxErrorTypes[OMX_ErrorTimeout] =  "OMX_ErrorTimeout";
+        omxErrorTypes[OMX_ErrorSameState] =  "OMX_ErrorSameState";
+        omxErrorTypes[OMX_ErrorResourcesPreempted] =  "OMX_ErrorResourcesPreempted";
+        omxErrorTypes[OMX_ErrorPortUnresponsiveDuringAllocation] =  "OMX_ErrorPortUnresponsiveDuringAllocation";
+        omxErrorTypes[OMX_ErrorPortUnresponsiveDuringDeallocation] =  "OMX_ErrorPortUnresponsiveDuringDeallocation";
+        omxErrorTypes[OMX_ErrorPortUnresponsiveDuringStop] =  "OMX_ErrorPortUnresponsiveDuringStop";
+        omxErrorTypes[OMX_ErrorIncorrectStateTransition] =  "OMX_ErrorIncorrectStateTransition";
+        omxErrorTypes[OMX_ErrorIncorrectStateOperation] =  "OMX_ErrorIncorrectStateOperation";
+        omxErrorTypes[OMX_ErrorUnsupportedSetting] =  "OMX_ErrorUnsupportedSetting";
+        omxErrorTypes[OMX_ErrorUnsupportedIndex] =  "OMX_ErrorUnsupportedIndex";
+        omxErrorTypes[OMX_ErrorBadPortIndex] =  "OMX_ErrorBadPortIndex";
+        omxErrorTypes[OMX_ErrorPortUnpopulated] =  "OMX_ErrorPortUnpopulated";
+        omxErrorTypes[OMX_ErrorComponentSuspended] =  "OMX_ErrorComponentSuspended";
+        omxErrorTypes[OMX_ErrorDynamicResourcesUnavailable] =  "OMX_ErrorDynamicResourcesUnavailable";
+        omxErrorTypes[OMX_ErrorMbErrorsInFrame] =  "OMX_ErrorMbErrorsInFrame";
+        omxErrorTypes[OMX_ErrorFormatNotDetected] =  "OMX_ErrorFormatNotDetected";
+        omxErrorTypes[OMX_ErrorContentPipeOpenFailed] =  "OMX_ErrorContentPipeOpenFailed";
+        omxErrorTypes[OMX_ErrorContentPipeCreationFailed] =  "OMX_ErrorContentPipeCreationFailed";
+        omxErrorTypes[OMX_ErrorSeperateTablesUsed] =  "OMX_ErrorSeperateTablesUsed";
+        omxErrorTypes[OMX_ErrorTunnelingUnsupported] =  "OMX_ErrorTunnelingUnsupported";
+        omxErrorTypes[OMX_ErrorKhronosExtensions] =  "OMX_ErrorKhronosExtensions";
+        omxErrorTypes[OMX_ErrorVendorStartUnused] =  "OMX_ErrorVendorStartUnused";
+        omxErrorTypes[OMX_ErrorDiskFull] =  "OMX_ErrorDiskFull";
+        omxErrorTypes[OMX_ErrorMaxFileSize] =  "OMX_ErrorMaxFileSize";
+        omxErrorTypes[OMX_ErrorDrmUnauthorised] =  "OMX_ErrorDrmUnauthorised";
+        omxErrorTypes[OMX_ErrorDrmExpired] =  "OMX_ErrorDrmExpired";
+        omxErrorTypes[OMX_ErrorDrmGeneral] =  "OMX_ErrorDrmGeneral";
 
+        
+        collectNames<OMX_ERRORTYPE>(omxErrors, omxErrorNames, omxErrorTypes);
+        
         eventTypes[OMX_EventError] = "OMX_EventError";
         eventTypes[OMX_EventCmdComplete] = "OMX_EventCmdComplete";
         eventTypes[OMX_EventMark] = "OMX_EventMark";
@@ -533,6 +568,7 @@ private:
         eventTypes[OMX_EventVendorStartUnused] = "OMX_EventVendorStartUnused";
         eventTypes[OMX_EventParamOrConfigChanged] = "OMX_EventParamOrConfigChanged";
         
+        collectNames<OMX_EVENTTYPE>(events, eventNames, eventTypes);
         
         eglErrors[EGL_SUCCESS]="EGL_SUCCESS";
         eglErrors[EGL_NOT_INITIALIZED]="EGL_NOT_INITIALIZED";

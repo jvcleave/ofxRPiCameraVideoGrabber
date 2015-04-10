@@ -12,10 +12,8 @@ void ofApp::setup()
 	consoleListener.setup(this);
 	
 	SessionConfig sessionConfig;
-	sessionConfig.width					= 1280;
-	sessionConfig.height				= 720;
-    sessionConfig.mode = SessionConfig::MODE_NONTEXTURE;
-	
+	sessionConfig.width					= 2592;
+	sessionConfig.height				= 1944;
 	
 	photoGrabber.setup(sessionConfig);
 	filterCollection.setup();
