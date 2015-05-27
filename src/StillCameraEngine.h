@@ -30,6 +30,7 @@ public:
     
     void startCapture();
 private:
+    bool hasCreatedRenderTunnel;
     OMX_U32 encoderBufferSize;
     OMX_ERRORTYPE buildNonCapturePipeline();
     OMX_ERRORTYPE destroyEncoder();

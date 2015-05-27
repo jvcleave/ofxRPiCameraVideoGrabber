@@ -12,6 +12,7 @@ StillCameraEngine::StillCameraEngine()
     camera = NULL;
     encoder = NULL;
     encoderOutputBuffer = NULL;
+    hasCreatedRenderTunnel = false;
 }   
 
 
@@ -195,6 +196,8 @@ void StillCameraEngine::threadedFunction()
             if(endOfStream || endOfFrame)
             {
                 doFillBuffer = false;
+                //encoderOutputBuffer->nFilledLen = 0;
+                //encoderOutputBuffer->nFlags = 0;
                 writeFile();
             }else
             {
@@ -234,7 +237,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
 
-    OMXCameraUtils::printSensorModes(camera);
+    //OMXCameraUtils::printSensorModes(camera);
     
     OMX_FRAMESIZETYPE frameSizeConfig;
     OMX_INIT_STRUCTURE(frameSizeConfig);
@@ -260,13 +263,6 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     error =  OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
     OMX_TRACE(error);
 
-    OMX_CONFIG_PORTBOOLEANTYPE cameraOutputPortConfig;
-    OMX_INIT_STRUCTURE(cameraOutputPortConfig);
-    cameraOutputPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
-    cameraOutputPortConfig.bEnabled = OMX_TRUE;
-    
-    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraOutputPortConfig);	
-    OMX_TRACE(error);
     
     OMX_CONFIG_PORTBOOLEANTYPE cameraStillOutputPortConfig;
     OMX_INIT_STRUCTURE(cameraStillOutputPortConfig);
@@ -312,7 +308,6 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     
     OMX_TRACE(error, "render OMX_IndexConfigDisplayRegion");
     
-    //configureEncoder();
     error = buildNonCapturePipeline();
         
 
@@ -330,9 +325,14 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
     
-    //Create camera->render Tunnel
-    error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
-    OMX_TRACE(error);
+    if(!hasCreatedRenderTunnel)
+    {
+        //Create camera->render Tunnel
+        error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
+        OMX_TRACE(error);
+        hasCreatedRenderTunnel = true;
+    }
+    
     
     //Enable camera preview port
     error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
@@ -363,6 +363,9 @@ void StillCameraEngine::startCapture()
     error = configureEncoder();
     OMX_TRACE(error);
     
+    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+    
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
     
@@ -382,9 +385,6 @@ void StillCameraEngine::startCapture()
     error = OMX_SendCommand(encoder, OMX_CommandPortEnable, IMAGE_ENCODER_OUTPUT_PORT, NULL);
     OMX_TRACE(error); 
     
-    //Set encoder to Idle
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error);
     
     error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, IMAGE_ENCODER_OUTPUT_PORT, NULL, encoderBufferSize);
     OMX_TRACE(error, "encode OMX_AllocateBuffer");
@@ -422,12 +422,8 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
     error = OMX_SendCommand(encoder, OMX_CommandPortDisable, IMAGE_ENCODER_INPUT_PORT, NULL);
     OMX_TRACE(error);
     
-    //Destroy camera->encoder Tunnel
-    //error = OMX_SetupTunnel(camera, CAMERA_STILL_OUTPUT_PORT, NULL, 0);
-   // OMX_TRACE(error);
-    
-    //error = OMX_SetupTunnel(encoder, IMAGE_ENCODER_INPUT_PORT, NULL, 0);
-    //OMX_TRACE(error);
+    error = OMX_SetupTunnel(encoder, IMAGE_ENCODER_INPUT_PORT, NULL, 0);
+    OMX_TRACE(error);
     
     error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
     OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
@@ -438,9 +434,10 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
     
   
     
-    /*error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
+    error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
     OMX_TRACE(error, "encoder->OMX_FreeBuffer");
-    encoderOutputBuffer = NULL;*/
+    encoderOutputBuffer = NULL;
+    
     OMX_STATETYPE encoderState;
     error = OMX_GetState(encoder, &encoderState);
     OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
@@ -459,9 +456,9 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
 bool StillCameraEngine::writeFile()
 {
     stopThread();
+    
     destroyEncoder();
-    encoderOutputBuffer->nFilledLen = 0;
-    encoderOutputBuffer->nFlags = 0;
+ 
     buildNonCapturePipeline();
     
     bool result = false;
@@ -581,8 +578,6 @@ void StillCameraEngine::closeEngine()
         OMX_STATETYPE encoderState;
         error = OMX_GetState(encoder, &encoderState);
         OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
-        
-
     }
    
     
