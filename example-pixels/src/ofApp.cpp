@@ -46,7 +46,10 @@ void ofApp::update()
 	
 	if(doReloadPixels)
 	{
-		videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+        if (videoGrabber.isFrameNew()) 
+        {
+            videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+        }
 
 	}
 
