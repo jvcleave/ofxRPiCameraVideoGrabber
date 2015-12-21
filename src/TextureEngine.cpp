@@ -80,6 +80,7 @@ void TextureEngine::disablePixels()
 
 void TextureEngine::updatePixels()
 {
+    ofLogVerbose() << "doPixels: " << doPixels;
 	if (!doPixels) 
 	{
 		return;
