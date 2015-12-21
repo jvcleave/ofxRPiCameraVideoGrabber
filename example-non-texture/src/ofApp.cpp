@@ -1,7 +1,7 @@
-#include "nonTextureApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void nonTextureApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -31,20 +31,20 @@ void nonTextureApp::setup()
 }
 
 //--------------------------------------------------------------
-void nonTextureApp::update()
+void ofApp::update()
 {
 	
 }
 
 
 //--------------------------------------------------------------
-void nonTextureApp::draw(){
+void ofApp::draw(){
 	//Nothing really to do here as the output is rendered directly to full screen
 	
 }
 
 //--------------------------------------------------------------
-void nonTextureApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
@@ -69,7 +69,7 @@ void nonTextureApp::keyPressed  (int key)
 	}
 }
 
-void nonTextureApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

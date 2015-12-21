@@ -55,7 +55,11 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 	{
 		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
 	}
-	
+    if (omxCameraSettings.enablePixels) 
+    {
+        enablePixels();
+        updatePixels();
+    }
 	configureCameraResolution();
 	
 }

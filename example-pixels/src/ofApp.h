@@ -6,8 +6,7 @@
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-
-class nonTextureApp : public ofBaseApp, public KeyListener{
+class ofApp : public ofBaseApp, public KeyListener{
 
 	public:
 
@@ -23,6 +22,9 @@ class nonTextureApp : public ofBaseApp, public KeyListener{
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
-
+	ofTexture videoTexture;
+	OMXCameraSettings omxCameraSettings;
+	bool doPixels;
+	bool doReloadPixels;
 };
 

@@ -1,7 +1,7 @@
-#include "textureApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void textureApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
     ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -49,7 +49,7 @@ void textureApp::setup()
 }
 
 //--------------------------------------------------------------
-void textureApp::update()
+void ofApp::update()
 {
 	//not working yet
 	/*if (videoGrabber.isFrameNew())
@@ -61,7 +61,7 @@ void textureApp::update()
 
 
 //--------------------------------------------------------------
-void textureApp::draw(){
+void ofApp::draw(){
 
 	//draws at camera resolution
 	videoGrabber.draw();
@@ -92,7 +92,7 @@ void textureApp::draw(){
 }
 
 //--------------------------------------------------------------
-void textureApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
@@ -119,7 +119,7 @@ void textureApp::keyPressed  (int key)
 	}
 }
 
-void textureApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

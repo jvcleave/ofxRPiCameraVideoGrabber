@@ -1,4 +1,4 @@
-#include "pixelsApp.h"
+#include "ofApp.h"
 
 //Pixel access is not implemented in the player
 //so here is how to do it yourself
@@ -6,7 +6,7 @@
 //it should be implemented along with an "isFrameNew" but that isn't working yet
 
 //--------------------------------------------------------------
-void pixelsApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -37,7 +37,7 @@ void pixelsApp::setup()
 }	
 
 //--------------------------------------------------------------
-void pixelsApp::update()
+void ofApp::update()
 {
 	if (!doPixels)
 	{
@@ -46,7 +46,10 @@ void pixelsApp::update()
 	
 	if(doReloadPixels)
 	{
-		videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+        if (videoGrabber.isFrameNew()) 
+        {
+            videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+        }
 
 	}
 
@@ -55,7 +58,7 @@ void pixelsApp::update()
 
 
 //--------------------------------------------------------------
-void pixelsApp::draw(){
+void ofApp::draw(){
 	
 	videoGrabber.draw();
 	if(doPixels && doReloadPixels)
@@ -85,7 +88,7 @@ void pixelsApp::draw(){
 }
 
 //--------------------------------------------------------------
-void pixelsApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
@@ -114,7 +117,7 @@ void pixelsApp::keyPressed  (int key)
 	}
 }
 
-void pixelsApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }

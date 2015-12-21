@@ -1,7 +1,7 @@
-#include "shaderApp.h"
+#include "ofApp.h"
 
 //--------------------------------------------------------------
-void shaderApp::setup()
+void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofSetLogLevel("ofThread", OF_LOG_ERROR);
@@ -33,7 +33,7 @@ void shaderApp::setup()
 }	
 
 //--------------------------------------------------------------
-void shaderApp::update()
+void ofApp::update()
 {
 	if (!doShader || !videoGrabber.isFrameNew())
 	{
@@ -53,7 +53,7 @@ void shaderApp::update()
 
 
 //--------------------------------------------------------------
-void shaderApp::draw(){
+void ofApp::draw(){
 	
 	if (doShader)
 	{
@@ -84,7 +84,7 @@ void shaderApp::draw(){
 }
 
 //--------------------------------------------------------------
-void shaderApp::keyPressed  (int key)
+void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
@@ -105,7 +105,7 @@ void shaderApp::keyPressed  (int key)
 
 }
 
-void shaderApp::onCharacterReceived(KeyListenerEventData& e)
+void ofApp::onCharacterReceived(KeyListenerEventData& e)
 {
 	keyPressed((int)e.character);
 }
