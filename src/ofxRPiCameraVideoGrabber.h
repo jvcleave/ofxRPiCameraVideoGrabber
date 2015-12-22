@@ -84,6 +84,9 @@ public:
 	void disablePixels();
 	unsigned char * getPixels();
 	
+    TextureEngine* textureEngine;
+    NonTextureEngine* engine;
+    
 private:
 	
 	void onUpdate(ofEventArgs & args);
@@ -105,8 +108,7 @@ private:
 	
 	OMXCameraUtils omxCameraUtils;
 	
-	TextureEngine* textureEngine;
-	NonTextureEngine* engine;
+
 	
 	int frameCounter;
 	

@@ -2,8 +2,7 @@
 
 #include "ofMain.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
-#include "ofxRPiVideoGrabber.h"
+#include "RPiVideoGrabber.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
 
@@ -16,14 +15,14 @@ class ofApp : public ofBaseApp, public KeyListener{
 
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
-	ofxRPiVideoGrabber vidGrabber;
+    
+    //wrapper class for drop-in replacement of ofVideoGrabber
+	RPiVideoGrabber vidGrabber;
 	
     ofPixels videoInverted;
     ofTexture videoTexture;
     int camWidth;
     int camHeight;
-    
-    bool doDrawInfo;
-		
+    		
 };
 

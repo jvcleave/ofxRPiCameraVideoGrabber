@@ -2,9 +2,7 @@
 
 //--------------------------------------------------------------
 void ofApp::setup()
-{
-	doDrawInfo	= true;
-	
+{	
 	//allows keys to be entered via terminal remotely (ssh)
 	consoleListener.setup(this);
 	
@@ -25,11 +23,19 @@ void ofApp::update()
     
     if(vidGrabber.isFrameNew())
     {
-        ofPixels & pixels = vidGrabber.getPixels();
-        ofLogVerbose() << "pixels.size(): " << pixels.size();
-        for(int i = 0; i < pixels.size(); i++){
-            videoInverted[i] = pixels[i];
+        ofPixels& pixels = vidGrabber.getPixels();
+        for (int i=0; i<pixels.getWidth(); i++) 
+        { 
+            for (int j=0; j<pixels.getHeight(); j++)
+            {
+                int pos = (j * pixels.getWidth() + i);
+                videoInverted.getData()[pos * 4]   =	255-pixels.getData()[pos * 4];
+                videoInverted.getData()[pos * 4+1] =	255-pixels.getData()[pos * 4+1];
+                videoInverted.getData()[pos * 4+2] =	255-pixels.getData()[pos * 4+2];
+                videoInverted.getData()[pos * 4+3] =	255;
+            }	
         }
+        
         videoTexture.loadData(videoInverted);
     }
 
@@ -39,57 +45,28 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    ofSetHexColor(0xffffff);
-    vidGrabber.draw(20, 20);
-    videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
+    ofSetColor(ofColor::white);
+    ofPushMatrix();
+    ofTranslate(20, 20);
+    vidGrabber.draw(0, 0);
+    videoTexture.draw(camWidth, 0, camWidth, camHeight);
     
-#if 0	
-	//draw a smaller version via the getTextureReference() method
-	int drawWidth = omxCameraSettings.width/4;
-	int drawHeight = omxCameraSettings.height/4;
-	vidGrabber.getTextureReference().draw(omxCameraSettings.width-drawWidth, 
-                                          omxCameraSettings.height-drawHeight, 
-                                          drawWidth, 
-                                          drawHeight);
-#endif
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";
 	info << "Camera Resolution: " << vidGrabber.getWidth() << "x" << vidGrabber.getHeight()	<< " @ "<< vidGrabber.getFrameRate() <<"FPS"<< "\n";
 	
-	if (doDrawInfo) 
-	{
-		ofDrawBitmapStringHighlight(info.str(), 100, vidGrabber.getHeight(), ofColor::black, ofColor::yellow);
-	}
-
+	ofDrawBitmapStringHighlight(info.str(), 0, vidGrabber.getHeight(), ofColor::black, ofColor::yellow);
+    
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
-	
-#if 0	
-	if (key == 'e')
-	{
-		vidGrabber.applyImageFilter(filterCollection.getNextFilter());
-	}
-	
-	if (key == 'g')
-	{
-		doDrawInfo = !doDrawInfo;
-	}
-	
-	if (key == 'q')
-	{
-		ofLogVerbose(__func__) << "STOPPING RECORDING";
-		vidGrabber.stopRecording();
-	}
-	
-	if (key == 't')
-	{
-		vidGrabber.toggleLED();
-	}
-#endif
+    if (key == 'e')
+    {
+    }
 }
 
 void ofApp::onCharacterReceived(KeyListenerEventData& e)

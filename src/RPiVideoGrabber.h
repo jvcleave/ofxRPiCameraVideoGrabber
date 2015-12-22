@@ -1,14 +1,12 @@
 #pragma once 
 
-#include "ofMain.h"
 #include "ofxRPiCameraVideoGrabber.h"
-#include "ofBaseTypes.h"
 
 
-class ofxRPiVideoGrabber: public ofBaseVideoGrabber
+class RPiVideoGrabber: public ofBaseVideoGrabber
 {
 public:
-    ofxRPiVideoGrabber();
+    RPiVideoGrabber();
     
     bool setup(int w, int h);
     bool initGrabber(int w, int h);
@@ -35,10 +33,11 @@ public:
     float cameraWidth;
     float cameraHeight;
     bool didInit;
-    mutable ofPixelFormat internalPixelFormat;
     ofPixels pixels;
     
     bool hasNewFrame;
     
     OMXCameraSettings omxCameraSettings;
+    
+    vector<ofVideoDevice> unused;
 };
