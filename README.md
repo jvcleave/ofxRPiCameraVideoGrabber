@@ -8,7 +8,7 @@ openFrameworks addon to control the Raspberry Pi Camera Module. This does _not_ 
 
 
 REQUIREMENTS:
-openFrameworks .8 or higher [Setup Guide](http://openframeworks.cc/setup/raspberrypi/)   
+openFrameworks .9 or higher [Setup Guide](http://openframeworks.cc/setup/raspberrypi/)   
 Developed with GPU memory set at 256, overclock to medium but 128/default should work as well   
 Desktop Mode (X11 enabled) may work but untested
 
@@ -57,6 +57,8 @@ Press the "s" key to toggle shader
 example-pixels:   
 Demonstrates how to get pixels (needed for OpenCv operations). 
 
+example-wrapper:
+NEW: drop-in replacement for ofVideoGrabber (texture-mode only)
 
 THANKS:
 Thanks to @tjormola for sharing his demos and exploration - especially in regards to recording
