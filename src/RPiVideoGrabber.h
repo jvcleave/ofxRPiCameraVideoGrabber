@@ -27,7 +27,7 @@ public:
     bool isInitialized() const;
     
     void draw(int x, int y);
-    
+    void draw(int x, int y, int width, int height); 
     ofxRPiCameraVideoGrabber videoGrabber;
     
     float cameraWidth;

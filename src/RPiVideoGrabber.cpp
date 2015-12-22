@@ -48,6 +48,11 @@ bool RPiVideoGrabber::isFrameNew() const
     return hasNewFrame;
 }
 
+void RPiVideoGrabber::setDesiredFrameRate(int framerate)
+{
+    omxCameraSettings.framerate = framerate;
+}
+
 int RPiVideoGrabber::getFrameRate()
 {
     return omxCameraSettings.framerate;
@@ -73,25 +78,14 @@ void RPiVideoGrabber::draw(int x, int y)
     videoGrabber.getTextureReference().draw(x, y);
 }
 
+void RPiVideoGrabber::draw(int x, int y, int width, int height)
+{
+    videoGrabber.getTextureReference().draw(x, y, width, height);
+}
+
 ofTexture* RPiVideoGrabber::getTexturePtr()
 {
     return &videoGrabber.textureEngine->fbo.getTexture(); 
-}
-
-vector<ofVideoDevice> RPiVideoGrabber::listDevices() const
-{
-    ofLogError(__func__) << "you don't need to call this";
-    return unused;
-}
-
-void RPiVideoGrabber::setDesiredFrameRate(int framerate)
-{
-    omxCameraSettings.framerate = framerate;
-}
-
-void RPiVideoGrabber::videoSettings()
-{
-    ofLogError(__func__) << "not used";
 }
 
 bool RPiVideoGrabber::isInitialized() const
@@ -128,3 +122,15 @@ void RPiVideoGrabber::close()
 {
     videoGrabber.close();
 }
+
+vector<ofVideoDevice> RPiVideoGrabber::listDevices() const
+{
+    ofLogError(__func__) << "you don't need to call this";
+    return unused;
+}
+
+void RPiVideoGrabber::videoSettings()
+{
+    ofLogError(__func__) << "not used";
+}
+
