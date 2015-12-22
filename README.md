@@ -57,7 +57,7 @@ Press the "s" key to toggle shader
 example-pixels:   
 Demonstrates how to get pixels (needed for OpenCv operations). 
 
-example-wrapper:
+example-wrapper:   
 NEW: drop-in replacement for ofVideoGrabber (texture-mode only)
 
 THANKS:
