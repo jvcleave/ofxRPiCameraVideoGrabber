@@ -99,6 +99,14 @@ enum MIRROR
     MIRROR_BOTH=OMX_MirrorBoth,
 };
 
+enum ROTATION
+{
+    ROTATION_0=0,
+    ROTATION_90=90,
+    ROTATION_180=180,
+    ROTATION_270=270,
+};
+
 class ofxRPiCameraVideoGrabber
 {
 
@@ -197,8 +205,17 @@ public:
     string getMirror();
     OMX_ERRORTYPE applyMirror();
     string mirror; 
+    
+    OMX_CONFIG_ROTATIONTYPE rotationConfig;
+    int rotation;
+    OMX_ERRORTYPE setRotation(int);
+    OMX_ERRORTYPE setRotation(ROTATION);
+    int getRotation();
+    OMX_ERRORTYPE applyRotation();
 
-
+    OMX_ERRORTYPE rotateClockwise();
+    OMX_ERRORTYPE rotateCounterClockwise();
+    
 private:
 	
 	void onUpdate(ofEventArgs & args);

@@ -99,6 +99,11 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     mirrorConfig.nPortIndex = CAMERA_OUTPUT_PORT;
     mirror="MIRROR_NONE";
 
+    
+    OMX_INIT_STRUCTURE(rotationConfig);
+    rotationConfig.nPortIndex = CAMERA_OUTPUT_PORT;
+
+    
     cropRectangle.set(0,0,100,100);
 
 	updateFrameCounter = 0;
@@ -917,6 +922,76 @@ ofxRPiCameraVideoGrabber::applyMirror()
     }
     return error;
 }
+
+#pragma mark ROTATION
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setRotation(int value)
+{
+    return setRotation((ROTATION) value);
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setRotation(ROTATION value)
+{
+    switch (value)
+    {
+        case ROTATION_0: {rotationConfig.nRotation=0;} break;
+        case ROTATION_90: {rotationConfig.nRotation=90;} break;
+        case ROTATION_180: {rotationConfig.nRotation=180;} break;
+        case ROTATION_270: {rotationConfig.nRotation=270;} break;
+        default: {rotationConfig.nRotation=0;} break;
+    }
+    return applyRotation();
+}
+
+int 
+ofxRPiCameraVideoGrabber::getRotation()
+{
+    return rotationConfig.nRotation;
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::applyRotation()
+{
+    
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonRotate, &rotationConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        rotation = getRotation();
+    }
+    return error;
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::rotateClockwise()
+{
+    int currentRotation  = getRotation();
+    if(currentRotation+90<360)
+    {
+        rotationConfig.nRotation+=90;
+    }else{
+        rotationConfig.nRotation = 0;
+    }
+    
+    return applyRotation();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::rotateCounterClockwise()
+{
+    int currentRotation  = getRotation();
+    if(currentRotation-90>=0)
+    {
+        rotationConfig.nRotation-=90;
+    }else{
+        rotationConfig.nRotation = 270;
+    }
+    
+    return applyRotation();
+}
+
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
