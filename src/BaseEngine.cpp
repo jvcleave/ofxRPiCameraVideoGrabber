@@ -31,7 +31,7 @@ void BaseEngine::configureCameraResolution()
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
+	DisableAllPortsForComponent(&camera);
 	
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
@@ -55,13 +55,8 @@ void BaseEngine::configureCameraResolution()
 	cameraOutputPortDefinition.nPortIndex = CAMERA_OUTPUT_PORT;
 	
 	error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-	}else 
-	{
-		ofLogVerbose(__func__) << "camera OMX_GetParameter OMX_IndexParamPortDefinition PASS";
-	}
+    OMX_TRACE(error);
+
 	
 	cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
     cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
@@ -70,14 +65,8 @@ void BaseEngine::configureCameraResolution()
 	//cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
 	
 	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "cameraOutputPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition PASS";
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "cameraOutputPortDefinition OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		
-	}
+    OMX_TRACE(error);
+
 	
 	//camera color spaces
 	/*
@@ -110,7 +99,7 @@ void BaseEngine::configureEncoder()
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
-	OMXCameraUtils::disableAllPortsForComponent(&encoder);
+	DisableAllPortsForComponent(&encoder);
 	
 	// Encoder input port definition is done automatically upon tunneling
 	
@@ -118,24 +107,22 @@ void BaseEngine::configureEncoder()
 	OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 	OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
 	encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-	error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-	if (error != OMX_ErrorNone) 
+	error = OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
+    OMX_TRACE(error);
+    if (error == OMX_ErrorNone) 
 	{
-		ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-	}else 
-	{
-		ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
-		ofLog(OF_LOG_VERBOSE, 
-			  "nBufferCountMin(%u)					\n \
-			  nBufferCountActual(%u)				\n \
-			  nBufferSize(%u)						\n \
-			  nBufferAlignmen(%u) \n", 
-			  encoderOutputPortDefinition.nBufferCountMin, 
-			  encoderOutputPortDefinition.nBufferCountActual, 
-			  encoderOutputPortDefinition.nBufferSize, 
-			  encoderOutputPortDefinition.nBufferAlignment);
-		
-		ofLogVerbose(__func__) << "encoderOutputPortDefinition.format.video.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
+        ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
+        ofLog(OF_LOG_VERBOSE, 
+              "nBufferCountMin(%u)					\n \
+              nBufferCountActual(%u)				\n \
+              nBufferSize(%u)						\n \
+              nBufferAlignmen(%u) \n", 
+              encoderOutputPortDefinition.nBufferCountMin, 
+              encoderOutputPortDefinition.nBufferCountActual, 
+              encoderOutputPortDefinition.nBufferSize, 
+              encoderOutputPortDefinition.nBufferAlignment);
+        
+        ofLogVerbose(__func__) << "encoderOutputPortDefinition.format.video.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encoderOutputPortDefinition.format.video.eColorFormat];
 	}
 	
 	
@@ -144,12 +131,8 @@ void BaseEngine::configureEncoder()
 	recordingBitRate = MEGABYTE_IN_BITS * numMBps;
 	encoderOutputPortDefinition.format.video.nBitrate = recordingBitRate;
 	error = OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		
-	}
+    OMX_TRACE(error);
+
 	
 	
 	
@@ -163,12 +146,8 @@ void BaseEngine::configureEncoder()
 	encodingBitrate.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoBitrate, &encodingBitrate);
-	
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoBitrate FAIL error: 0x%08x", error);
-		
-	}
+    OMX_TRACE(error);
+
 	// Configure encoding format
 	OMX_VIDEO_PARAM_PORTFORMATTYPE encodingFormat;
 	OMX_INIT_STRUCTURE(encodingFormat);
@@ -176,17 +155,11 @@ void BaseEngine::configureEncoder()
 	encodingFormat.eCompressionFormat = OMX_VIDEO_CodingAVC;
 	
 	error = OMX_SetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "encoder OMX_SetParameter OMX_IndexParamVideoPortFormat FAIL error: 0x%08x", error);
-		
-	}
-	error = OMX_GetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "CHECK: encodingFormat.eColorFormat: " << OMX_Maps::getInstance().colorFormatTypes[encodingFormat.eColorFormat];
+    OMX_TRACE(error);
 
-	}
+	error = OMX_GetParameter(encoder, OMX_IndexParamVideoPortFormat, &encodingFormat);
+    OMX_TRACE(error);
+
 
 }
 void BaseEngine::threadedFunction()
@@ -286,9 +259,9 @@ void BaseEngine::close()
 	
 	if(omxCameraSettings.doRecording)
 	{
-		OMXCameraUtils::disableAllPortsForComponent(&encoder);
+		DisableAllPortsForComponent(&encoder);
 	}
-	OMXCameraUtils::disableAllPortsForComponent(&camera);
+	DisableAllPortsForComponent(&camera);
 	
 	if(omxCameraSettings.doRecording)
 	{

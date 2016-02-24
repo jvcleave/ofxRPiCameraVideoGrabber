@@ -24,6 +24,67 @@
 #include "TextureEngine.h"
 #include "NonTextureEngine.h"
 
+struct CameraMeteringMode
+{
+    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
+    
+    OMX_METERINGTYPE meteringType;
+    float evCompensation;
+    
+    
+    bool autoShutter;
+    int shutterSpeedMicroSeconds;
+    
+    bool autoAperture;
+    int aperture;
+    
+    bool autoISO;
+    int ISO;
+    
+    CameraMeteringMode()
+    {
+        OMX_INIT_STRUCTURE(exposurevalue);
+        exposurevalue.nPortIndex = OMX_ALL;
+        meteringType = OMX_MeteringModeAverage;
+        
+        
+        evCompensation=0; //-4 to +4
+        
+        autoShutter = true;
+        shutterSpeedMicroSeconds = 0;
+        
+        autoAperture = true;
+        aperture = 0;
+        
+        autoISO = true;
+        ISO=0;
+    };
+    
+    
+    
+    string toString()
+    {
+        
+        stringstream ss;
+        ss << OMX_Maps::getInstance().getMetering(meteringType) << "\n";
+        ss << "evCompensation: " << evCompensation << "\n";
+        
+        ss << "autoShutter: " << autoShutter << "\n";
+        ss << "shutterSpeedMicroSeconds: " << shutterSpeedMicroSeconds << "\n";
+        
+        ss << "autoAperture: " << autoAperture << "\n";
+        ss << "aperture: " << aperture << "\n";
+        
+        ss << "autoISO: " << autoISO << "\n";
+        ss << "ISO: " << ISO << "\n";
+        return ss.str();
+        
+    }
+    
+};
+
+
+
 class ofxRPiCameraVideoGrabber
 {
 
@@ -80,7 +141,8 @@ public:
 	int getSaturation()		{ return saturation; }
 	int getDRE()            { return dreLevel; }
 	OMXCameraSettings omxCameraSettings;
-	
+    CameraMeteringMode currentMeteringMode;
+
 	void stopRecording();
 	void enablePixels();
 	void disablePixels();
@@ -110,6 +172,8 @@ private:
 	
 	OMXCameraUtils omxCameraUtils;
 	
+    OMX_ERRORTYPE applyCurrentMeteringMode();
+    void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
 
 	
 	int frameCounter;

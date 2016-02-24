@@ -261,15 +261,8 @@ void ofxRPiCameraVideoGrabber::enableBurstMode()
 	OMX_INIT_STRUCTURE(doBurstMode);
 	doBurstMode.bEnabled = OMX_TRUE;
 	OMX_ERRORTYPE error =  OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &doBurstMode);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "BURST MODE ENABLED PASS";
-		
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "BURST MODE ENABLED  FAIL error: 0x%08x", error);
-		
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
@@ -287,17 +280,8 @@ void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
 
 	
 	error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &controlType);
-	
-	
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "toggleImageEffects PASS";
-		
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "toggleImageEffects FAIL error: 0x%08x", error);
-		
-	}
+    OMX_TRACE(error);
+
 	
 }
 
@@ -320,7 +304,9 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 	controlType.nPortIndex = OMX_ALL;
 	
 	OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
-	if(error == OMX_ErrorNone) 
+    OMX_TRACE(error);
+
+    if(error == OMX_ErrorNone) 
 	{
 		ofLogVerbose(__func__) << "camera OMX_GetConfig OMX_IndexConfigCommonFlickerCancellation PASS ";
 		switch (controlType.eFlickerCancel) 
@@ -349,23 +335,12 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYP
 				break;
 		}
 		
-	}else
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
-		
 	}
 
 	controlType.eFlickerCancel = eFlickerCancel;
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &controlType);
-	if(error == OMX_ErrorNone) 
-	{
-		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonFlickerCancellation OMX_COMMONFLICKERCANCEL_AUTO PASS ";
+    OMX_TRACE(error);
 
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig FAIL OMX_IndexConfigCommonFlickerCancellation error: 0x%08x", error);
-
-	}
 }
 
 int ofxRPiCameraVideoGrabber::getWidth()
@@ -450,13 +425,8 @@ void ofxRPiCameraVideoGrabber::setExposureMode(OMX_EXPOSURECONTROLTYPE exposureM
 	exposure.eExposureControl = exposureMode;
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposure, &exposure);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SetConfig OMX_IndexConfigCommonExposure FAIL error: 0x%08x", error);
-	}else 
-	{
-		ofLogVerbose(__func__) << "camera OMX_SetConfig OMX_IndexConfigCommonExposure PASS";
-	}
+    OMX_TRACE(error);
+
 
 }
 
@@ -494,10 +464,8 @@ void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType,
 	exposurevalue.eMetering = meteringType; 
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR,	"camera setMeteringMode FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setSharpness(int sharpness_) //-100 to 100
@@ -512,10 +480,8 @@ void ofxRPiCameraVideoGrabber::setSharpness(int sharpness_) //-100 to 100
 	sharpnessConfig.nSharpness = sharpness; 
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpnessConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setSharpness FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
@@ -535,10 +501,8 @@ void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
 	}
 
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setFrameStabilization FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setContrast(int contrast_ ) //-100 to 100 
@@ -553,10 +517,8 @@ void ofxRPiCameraVideoGrabber::setContrast(int contrast_ ) //-100 to 100
 	contrastConfig.nContrast = contrast; 
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrastConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setContrast FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setBrightness(int brightness_ ) //0 to 100
@@ -571,10 +533,8 @@ void ofxRPiCameraVideoGrabber::setBrightness(int brightness_ ) //0 to 100
 	brightnessConfig.nBrightness = brightness;
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightnessConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setBrightness FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setSaturation(int saturation_) //-100 to 100
@@ -589,10 +549,8 @@ void ofxRPiCameraVideoGrabber::setSaturation(int saturation_) //-100 to 100
 	saturationConfig.nSaturation	= saturation_; 
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturationConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setSaturation FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType)
@@ -605,10 +563,8 @@ void ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlTy
 	awb.eWhiteBalControl = controlType;
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &awb);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setWhiteBalance FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
@@ -631,10 +587,8 @@ void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, i
 	color.nCustomizedV = V;
 	
 	error = OMX_SetConfig(camera, OMX_IndexConfigCommonColorEnhancement, &color);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setColorEnhancement FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 void ofxRPiCameraVideoGrabber::setDRE(int level)
@@ -673,15 +627,84 @@ void ofxRPiCameraVideoGrabber::setDRE(int level)
     OMX_INIT_STRUCTURE(dreConfig);
     dreConfig.eMode = type;
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &dreConfig);
-    if(error != OMX_ErrorNone) 
-    {
-        ofLog(OF_LOG_ERROR, "camera setDRE FAIL error: 0x%08x", error);
-    }
+    OMX_TRACE(error);
+
     if(error == OMX_ErrorNone)
     {
         dreLevel = level;
     }
 }
+
+void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
+{
+    currentMeteringMode.exposurevalue               = omxExposureValue;
+    
+    currentMeteringMode.meteringType                = omxExposureValue.eMetering;
+    currentMeteringMode.evCompensation              = fromQ16(omxExposureValue.xEVCompensation);
+    
+    currentMeteringMode.autoShutter                 = fromOMXBool(omxExposureValue.bAutoShutterSpeed);
+    currentMeteringMode.shutterSpeedMicroSeconds    = omxExposureValue.nShutterSpeedMsec;
+    
+    currentMeteringMode.autoAperture                = fromOMXBool(omxExposureValue.bAutoAperture);
+    currentMeteringMode.aperture                    = fromQ16(omxExposureValue.nApertureFNumber);
+    
+    currentMeteringMode.autoISO                     = fromOMXBool(omxExposureValue.bAutoSensitivity);
+    currentMeteringMode.ISO                         = omxExposureValue.nSensitivity;
+    
+    
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    
+    error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    OMX_TRACE(error);
+    
+    /*
+     
+     weird this is backwards from what is expected
+     
+     from : http://www.raspberrypi.org/forums/viewtopic.php?t=71915&p=519003
+     "EV has a range of +/- 4 in steps of 1/6ths (because some people want steps of 1/3s, and others 1/2s). 
+     It's MMAL that is awkward as it hasn't taken that into account and just uses an index counting in 1/6ths (ie 10 = 10/6 = +1 2/3).
+     Do bear in mind that it the values will be clipped by the exposure mode and max analogue gain,
+     so if you have a dark scene where the AGC algo has already turned everything up to max, 
+     then selecting EV +4 isn't going to give you any further gain as there isn't any available."
+     
+     "For genuine EV +1, MMAL would take 6 (yuck! Really should fix that), and IL will take 65536.
+     MMAL = Genuine * 6
+     IL = Genuine * 65536
+     
+     In the GPU MMAL/RIL wrapper, we have param.xEVCompensation = (mmal_param->value << 16) / 6;
+     Just watch out for rounding errors on your conversions - those 1/6ths don't always go the way you want."
+     
+     */
+    
+    currentMeteringMode.exposurevalue.eMetering         =   currentMeteringMode.meteringType; 
+    currentMeteringMode.exposurevalue.xEVCompensation   =   toQ16(currentMeteringMode.evCompensation); 
+    
+    currentMeteringMode.exposurevalue.bAutoShutterSpeed =   toOMXBool(currentMeteringMode.autoShutter);
+    currentMeteringMode.exposurevalue.nShutterSpeedMsec =   currentMeteringMode.shutterSpeedMicroSeconds;
+    
+    currentMeteringMode.exposurevalue.bAutoAperture     =   toOMXBool(currentMeteringMode.autoAperture);
+    currentMeteringMode.exposurevalue.nApertureFNumber  =   toQ16(currentMeteringMode.aperture);
+    
+    currentMeteringMode.exposurevalue.bAutoSensitivity  =   toOMXBool(currentMeteringMode.autoISO);
+    currentMeteringMode.exposurevalue.nSensitivity      =   currentMeteringMode.ISO;
+    
+    error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        updateCurrentMeteringMode(currentMeteringMode.exposurevalue); 
+    }
+    
+    return error;
+}
+
 
 
 void ofxRPiCameraVideoGrabber::toggleLED()
@@ -719,10 +742,8 @@ void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 	imagefilterConfig.eImageFilter = imageFilter;
 	
 	OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera applyImageFilter FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 }
 
 
