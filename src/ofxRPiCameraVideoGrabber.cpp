@@ -70,6 +70,33 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
 	//appEGLWindow->setThreadTimeout(1000);
 	OMX_Maps::getInstance();
+    int zoomStepsSource[61] = 
+    {
+        65536,  68157,  70124,  72745,
+        75366,  77988,  80609,  83231,
+        86508,  89784,  92406,  95683,
+        99615,  102892, 106168, 110100,
+        114033, 117965, 122552, 126484,
+        131072, 135660, 140247, 145490,
+        150733, 155976, 161219, 167117,
+        173015, 178913, 185467, 192020,
+        198574, 205783, 212992, 220201,
+        228065, 236585, 244449, 252969,
+        262144, 271319, 281149, 290980,
+        300810, 311951, 322437, 334234,
+        346030, 357827, 370934, 384041,
+        397148, 411566, 425984, 441057,
+        456131, 472515, 488899, 506593,
+        524288
+    };
+    vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
+    zoomLevels = converted;
+    zoomLevel = 0;
+    OMX_INIT_STRUCTURE(digitalZoomConfig);
+    digitalZoomConfig.nPortIndex = OMX_ALL;
+
+    cropRectangle.set(0,0,100,100);
+
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -741,6 +768,120 @@ ofxRPiCameraVideoGrabber::getExposureMode()
     return EXPOSURE_MODE_INVALID;
 }
 
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::updateSensorCrop()
+{
+    return setSensorCrop(cropRectangle);
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setSensorCrop(int left, int top, int width, int height)
+{
+    cropRectangle.set(left, top, width, height);
+    return updateSensorCrop();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setSensorCrop(ofRectangle& rectangle)
+{
+    OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
+    OMX_INIT_STRUCTURE(sensorCropConfig);
+    sensorCropConfig.nPortIndex = OMX_ALL;
+
+    sensorCropConfig.xLeft   = ((uint32_t)rectangle.getLeft()   << 16)/100;
+    sensorCropConfig.xTop    = ((uint32_t)rectangle.getTop()    << 16)/100;
+    sensorCropConfig.xWidth  = ((uint32_t)rectangle.getWidth()  << 16)/100;
+    sensorCropConfig.xHeight = ((uint32_t)rectangle.getHeight() << 16)/100;
+    
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigInputCropPercentages, &sensorCropConfig);
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
+    {
+        ofLogError(__func__) << omxErrorToString(error);
+        if(error == OMX_ErrorBadParameter)
+        {
+            ofLogWarning(__func__) << "resetting cropRectangle to known good params (0, 0, 100, 100)";
+            cropRectangle.set(0, 0, 100, 100);
+            return updateSensorCrop(); 
+        }
+        
+    }
+    return error;
+    
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setZoomLevelNormalized(float value)
+{
+    if(value<0 || value>1)
+    {
+        ofLogError(__func__) << value << "MUST BE BETWEEN 0.0 - 1.0";
+        return OMX_ErrorBadParameter;
+    }
+    zoomLevel = (int) ofMap(value, 0.0f, 1.0f, 0, zoomLevels.size());
+    return setDigitalZoom();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::resetZoom()
+{
+    zoomLevel = 0;
+    return setDigitalZoom();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::zoomIn()
+{
+    if((unsigned int)zoomLevel+1 < zoomLevels.size())
+    {
+        zoomLevel++;
+    }
+    return setDigitalZoom();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::zoomOut()
+{
+    zoomLevel--;
+    if(zoomLevel<0)
+    {
+        zoomLevel = 0;
+    }
+    
+    return setDigitalZoom();
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setDigitalZoom()
+{
+    
+    if(zoomLevel<0 || (unsigned int) zoomLevel>zoomLevels.size())
+    {
+        
+        ofLogError(__func__) << "BAD zoomLevel: " << zoomLevel << " SETTING TO 0" << " zoomLevels.size(): " << zoomLevels.size();
+        zoomLevel = 0;
+    }
+    
+    
+    int value = zoomLevels[zoomLevel];
+    if(digitalZoomConfig.xWidth != value && digitalZoomConfig.xHeight != value)
+    {
+        digitalZoomConfig.xWidth  = value;
+        digitalZoomConfig.xHeight = value;
+        
+        OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonDigitalZoom, &digitalZoomConfig);
+        OMX_TRACE(error);
+        return error;
+    }
+    return OMX_ErrorNone;
+    
+}
+
+float 
+ofxRPiCameraVideoGrabber::getZoomLevelNormalized()
+{
+    return ofMap(zoomLevel, 0, zoomLevels.size(), 0.0f, 1.0f);
+}
 
 
 void ofxRPiCameraVideoGrabber::toggleLED()

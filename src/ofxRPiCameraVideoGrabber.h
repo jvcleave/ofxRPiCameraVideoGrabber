@@ -164,6 +164,24 @@ public:
     void  enableAutoExposure();
     void  enableManualExposure();
     EXPOSURE_MODE getExposureMode();
+    
+    vector<int> zoomLevels;
+    OMX_ERRORTYPE setDigitalZoom();
+    
+    ofRectangle cropRectangle;
+    OMX_ERRORTYPE setSensorCrop(ofRectangle&);
+    ofRectangle& getCropRectangle() { return cropRectangle; }
+    OMX_ERRORTYPE updateSensorCrop();
+    OMX_ERRORTYPE setSensorCrop(int left, int top, int width, int height);
+    
+    OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
+
+    int zoomLevel;
+    OMX_ERRORTYPE zoomIn();
+    OMX_ERRORTYPE zoomOut();
+    OMX_ERRORTYPE resetZoom();
+    OMX_ERRORTYPE setZoomLevelNormalized(float);
+    float getZoomLevelNormalized();
 
 private:
 	
