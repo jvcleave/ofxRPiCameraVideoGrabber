@@ -77,8 +77,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	textureEngine = NULL;
 	engine = NULL;
 	pixelsRequested = false;
-	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
-    
+	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 }
 
 ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
@@ -105,6 +104,20 @@ void ofxRPiCameraVideoGrabber::close()
     
     cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
 }
+
+bool ofxRPiCameraVideoGrabber::isTextureEnabled()
+{
+    bool result = false;
+    if(textureEngine)
+    {
+        result = true;
+    }else
+    {
+        result = false;
+    }
+    return result;
+}
+
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
 	if(textureEngine)
@@ -212,6 +225,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 	setBrightness(50);
 	setSaturation(0);
 	setFrameStabilization(false);
+    setDRE(0);
 	setWhiteBalance(OMX_WhiteBalControlAuto);
 	applyImageFilter(OMX_ImageFilterNone);
 	setColorEnhancement(false);	 
@@ -622,6 +636,53 @@ void ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, i
 		ofLog(OF_LOG_ERROR, "camera setColorEnhancement FAIL error: 0x%08x", error);
 	}
 }
+
+void ofxRPiCameraVideoGrabber::setDRE(int level)
+{
+    OMX_DYNAMICRANGEEXPANSIONMODETYPE type = OMX_DynRangeExpOff;
+    switch (level) 
+    {
+        case 0:
+        {
+            type = OMX_DynRangeExpOff;
+            break;
+        }
+        case 1:
+        {
+            type = OMX_DynRangeExpLow;
+            break;
+        }
+        case 2:
+        {
+            type = OMX_DynRangeExpMedium;
+            break;
+        }
+        case 3:
+        {
+            type = OMX_DynRangeExpHigh;
+            break;
+        }
+        default:
+        {
+            type = OMX_DynRangeExpOff;
+            break;
+        }
+            
+    }
+    OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE dreConfig;
+    OMX_INIT_STRUCTURE(dreConfig);
+    dreConfig.eMode = type;
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigDynamicRangeExpansion, &dreConfig);
+    if(error != OMX_ErrorNone) 
+    {
+        ofLog(OF_LOG_ERROR, "camera setDRE FAIL error: 0x%08x", error);
+    }
+    if(error == OMX_ErrorNone)
+    {
+        dreLevel = level;
+    }
+}
+
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {

@@ -53,6 +53,8 @@ public:
 	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
 	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
 	void setLEDState(bool status);
+    void setDRE(int level);
+
 	bool LED_CURRENT_STATE;
 	void toggleLED();
 	
@@ -68,7 +70,7 @@ public:
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
-		
+    bool isTextureEnabled();	
 	
 	void enableBurstMode();
 	
@@ -76,7 +78,7 @@ public:
 	int getContrast()		{ return contrast;	}
 	int getBrightness()		{ return brightness; }
 	int getSaturation()		{ return saturation; }
-	
+	int getDRE()            { return dreLevel; }
 	OMXCameraSettings omxCameraSettings;
 	
 	void stopRecording();
@@ -101,7 +103,7 @@ private:
 	int contrast;	//  -100 to 100 
 	int brightness; //     0 to 100
 	int saturation; //  -100 to 100 
-	
+    int dreLevel; 
 	//void close();
 	
 	void toggleImageEffects(bool doDisable);
