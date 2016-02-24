@@ -91,6 +91,14 @@ enum EXPOSURE_MODE
     EXPOSURE_MODE_INVALID
 };
 
+enum MIRROR
+{
+    MIRROR_NONE=OMX_MirrorNone,
+    MIRROR_VERTICAL=OMX_MirrorVertical,
+    MIRROR_HORIZONTAL=OMX_MirrorHorizontal,
+    MIRROR_BOTH=OMX_MirrorBoth,
+};
+
 class ofxRPiCameraVideoGrabber
 {
 
@@ -182,6 +190,14 @@ public:
     OMX_ERRORTYPE resetZoom();
     OMX_ERRORTYPE setZoomLevelNormalized(float);
     float getZoomLevelNormalized();
+    
+    OMX_CONFIG_MIRRORTYPE mirrorConfig;
+    OMX_ERRORTYPE setMirror(int);
+    OMX_ERRORTYPE setMirror(string);
+    string getMirror();
+    OMX_ERRORTYPE applyMirror();
+    string mirror; 
+
 
 private:
 	

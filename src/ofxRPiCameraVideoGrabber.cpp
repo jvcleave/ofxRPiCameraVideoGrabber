@@ -94,6 +94,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     zoomLevel = 0;
     OMX_INIT_STRUCTURE(digitalZoomConfig);
     digitalZoomConfig.nPortIndex = OMX_ALL;
+    
+    OMX_INIT_STRUCTURE(mirrorConfig);
+    mirrorConfig.nPortIndex = CAMERA_OUTPUT_PORT;
+    mirror="MIRROR_NONE";
 
     cropRectangle.set(0,0,100,100);
 
@@ -883,6 +887,36 @@ ofxRPiCameraVideoGrabber::getZoomLevelNormalized()
     return ofMap(zoomLevel, 0, zoomLevels.size(), 0.0f, 1.0f);
 }
 
+#pragma mark MIRROR
+
+string ofxRPiCameraVideoGrabber::getMirror()
+{
+    
+    return OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);    
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
+{
+    mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
+    return applyMirror();
+}
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror)
+{
+    return setMirror(OMX_Maps::getInstance().getMirror(mirror));
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::applyMirror()
+{
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonMirror, &mirrorConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        mirror = OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);
+    }
+    return error;
+}
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
