@@ -68,7 +68,6 @@ void ofxRPiCameraVideoGrabber::addExitHandler()
 
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
 	//appEGLWindow->setThreadTimeout(1000);
 	OMX_Maps::getInstance();
 	updateFrameCounter = 0;
@@ -655,7 +654,8 @@ void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALU
 }
 
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -703,6 +703,42 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
     }
     
     return error;
+}
+
+void 
+ofxRPiCameraVideoGrabber::enableAutoExposure()
+{
+    currentMeteringMode.autoShutter = true;
+    currentMeteringMode.autoAperture = true;
+    currentMeteringMode.autoISO = true;
+    OMX_ERRORTYPE error = applyCurrentMeteringMode();
+    OMX_TRACE(error);
+
+}
+
+void 
+ofxRPiCameraVideoGrabber::enableManualExposure()
+{
+    currentMeteringMode.autoShutter = false;
+    currentMeteringMode.autoAperture = false;
+    currentMeteringMode.autoISO = false;
+    OMX_ERRORTYPE error = applyCurrentMeteringMode();
+    OMX_TRACE(error);
+
+}
+
+EXPOSURE_MODE
+ofxRPiCameraVideoGrabber::getExposureMode()
+{
+    if(currentMeteringMode.autoShutter && currentMeteringMode.autoAperture)
+    {
+        return EXPOSURE_MODE_AUTO;
+    }
+    if(!currentMeteringMode.autoShutter && !currentMeteringMode.autoAperture)
+    {
+        return EXPOSURE_MODE_MANUAL;
+    }
+    return EXPOSURE_MODE_INVALID;
 }
 
 

@@ -84,6 +84,12 @@ struct CameraMeteringMode
 };
 
 
+enum EXPOSURE_MODE
+{
+    EXPOSURE_MODE_AUTO,
+    EXPOSURE_MODE_MANUAL,
+    EXPOSURE_MODE_INVALID
+};
 
 class ofxRPiCameraVideoGrabber
 {
@@ -91,7 +97,8 @@ class ofxRPiCameraVideoGrabber
 public:
 	
 	
-	
+    
+    
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
     void addExitHandler();
@@ -125,7 +132,7 @@ public:
 	int getHeight();
 	int getFrameRate();
 	bool isReady();
-	
+
 	
 	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
 	void disableImageEffects();
@@ -151,6 +158,13 @@ public:
     TextureEngine* textureEngine;
     NonTextureEngine* engine;
     
+    
+    
+   
+    void  enableAutoExposure();
+    void  enableManualExposure();
+    EXPOSURE_MODE getExposureMode();
+
 private:
 	
 	void onUpdate(ofEventArgs & args);
