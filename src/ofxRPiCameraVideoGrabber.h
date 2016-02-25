@@ -237,28 +237,17 @@ public:
     OMX_ERRORTYPE disableSoftwareSaturation();
     bool isSoftwareSaturationEnabled() {return doDisableSoftwareSaturation;}
     
+    void setBurstMode(bool);
+    bool isBurstModeEnabled(){ return burstModeEnabled;}
 private:
 
-    void addExitHandler();
-    
-    OMX_ERRORTYPE applyMirror();
-    void applyImageFilter(OMX_IMAGEFILTERTYPE);
-    OMX_ERRORTYPE applyRotation();
-    
-    void resetValues();
-    void applyAllSettings();
-	void onUpdate(ofEventArgs & args);
-    void onUpdateDuringExit(ofEventArgs& args);
-
-	bool hasNewFrame;
-	
-	int updateFrameCounter;
-	OMX_HANDLETYPE camera;
-	
-	int sharpness;	//	-100 to 100
-	int contrast;	//  -100 to 100 
-	int brightness; //     0 to 100
-	int saturation; //  -100 to 100 
+    OMX_HANDLETYPE camera;
+    OMXCameraUtils omxCameraUtils;
+    bool hasNewFrame;
+    int sharpness;	//	-100 to 100
+    int contrast;	//  -100 to 100 
+    int brightness; //     0 to 100
+    int saturation; //  -100 to 100 
     int dreLevel; 
     ofRectangle cropRectangle;
     int zoomLevel;
@@ -276,18 +265,25 @@ private:
     bool autoISO;
     int ISO;
     bool LED_CURRENT_STATE;
-	//void close();
-		
-	OMXCameraUtils omxCameraUtils;
-	
+    int updateFrameCounter;
+    int frameCounter;
+    bool pixelsRequested;
+    bool burstModeEnabled;
+    void addExitHandler();
+    
+    void checkBurstMode();
+    OMX_ERRORTYPE applyMirror();
+    void applyImageFilter(OMX_IMAGEFILTERTYPE);
+    OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
     void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
-
-	OMX_ERRORTYPE updateSensorCrop();
-	int frameCounter;
-	
-	bool pixelsRequested;
+    OMX_ERRORTYPE updateSensorCrop();
     
+    void resetValues();
+    void applyAllSettings();
+	void onUpdate(ofEventArgs & args);
+    void onUpdateDuringExit(ofEventArgs& args);
+
     OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;
     
     OMX_CONFIG_SHARPNESSTYPE sharpnessConfig;
@@ -299,7 +295,7 @@ private:
     OMX_CONFIG_COLORENHANCEMENTTYPE colorEnhancementConfig;
     OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
     
-    //OMX_CONFIG_BOOLEANTYPE burstModeConfig;
+    OMX_CONFIG_BOOLEANTYPE burstModeConfig;
     OMX_CONFIG_BOOLEANTYPE hdrConfig;
     OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
     

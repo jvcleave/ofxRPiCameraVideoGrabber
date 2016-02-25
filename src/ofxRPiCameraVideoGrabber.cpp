@@ -130,7 +130,8 @@ void ofxRPiCameraVideoGrabber::resetValues()
     OMX_INIT_STRUCTURE(dreConfig);
     
     OMX_INIT_STRUCTURE(hdrConfig);
-    
+    OMX_INIT_STRUCTURE(burstModeConfig);
+
     
     
     /*
@@ -187,7 +188,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
         engine->setup(omxCameraSettings);
         camera = engine->camera;
     }
-    
+    checkBurstMode();
     applyAllSettings();
 }
 
@@ -584,6 +585,33 @@ void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
     OMX_TRACE(error);
     
 }
+
+void ofxRPiCameraVideoGrabber::checkBurstMode()
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBrcmHighDynamicRange, &burstModeConfig);
+    OMX_TRACE(error);
+    burstModeEnabled = fromOMXBool(burstModeConfig.bEnabled);
+}
+
+void ofxRPiCameraVideoGrabber::setBurstMode(bool doBurstMode)
+{
+    if(doBurstMode)
+    {
+        burstModeConfig.bEnabled = OMX_TRUE;  
+    }else
+    {
+        burstModeConfig.bEnabled = OMX_FALSE;  
+
+    }
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        burstModeEnabled = doBurstMode;
+    }
+    ofLogVerbose() << "burstModeEnabled: " << burstModeEnabled;
+}
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
