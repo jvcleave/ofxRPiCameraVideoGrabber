@@ -40,7 +40,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     cropRectangle.set(0,0,100,100);
 
 
-
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -71,7 +70,7 @@ void ofxRPiCameraVideoGrabber::resetValues()
     contrast=-10;
     brightness=50;
     saturation=0;
-    framestabilization=false;
+    frameStabilization=false;
     whiteBalance="Auto";
     imageFilter="None";
     dreLevel=0;
@@ -81,6 +80,7 @@ void ofxRPiCameraVideoGrabber::resetValues()
     mirror="MIRROR_NONE";
     doDisableSoftwareSharpen = false;
     doDisableSoftwareSaturation = false;
+
     OMX_INIT_STRUCTURE(exposurePresetConfig);
     exposurePresetConfig.nPortIndex = OMX_ALL;
     
@@ -132,8 +132,27 @@ void ofxRPiCameraVideoGrabber::resetValues()
     OMX_INIT_STRUCTURE(hdrConfig);
     
     
-    OMX_INIT_STRUCTURE(cameraDisableAlgorithmConfig);
     
+    /*
+     OMX_CameraDisableAlgorithmFacetracking,
+     OMX_CameraDisableAlgorithmRedEyeReduction,
+     OMX_CameraDisableAlgorithmVideoStabilisation,
+     OMX_CameraDisableAlgorithmWriteRaw,
+     OMX_CameraDisableAlgorithmVideoDenoise,
+     OMX_CameraDisableAlgorithmStillsDenoise,
+     OMX_CameraDisableAlgorithmAntiShake,
+     OMX_CameraDisableAlgorithmImageEffects,
+     OMX_CameraDisableAlgorithmDarkSubtract,
+     OMX_CameraDisableAlgorithmDynamicRangeExpansion,
+     OMX_CameraDisableAlgorithmFaceRecognition,
+     OMX_CameraDisableAlgorithmFaceBeautification,
+     OMX_CameraDisableAlgorithmSceneDetection,
+     OMX_CameraDisableAlgorithmHighDynamicRange,
+     */
+    
+
+    
+
     OMX_INIT_STRUCTURE(flickerCancelConfig);
     flickerCancelConfig.nPortIndex = OMX_ALL;
     
@@ -191,7 +210,7 @@ void ofxRPiCameraVideoGrabber::applyAllSettings()
     setContrast(contrast);
     setBrightness(brightness);
     setSaturation(saturation);
-    setFrameStabilization(framestabilization);
+    setFrameStabilization(frameStabilization);
     setWhiteBalance(whiteBalance);
     setImageFilter(imageFilter);
     setColorEnhancement(false);	 //TODO implement
@@ -557,6 +576,11 @@ void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
     }
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
+    if(error == OMX_ErrorNone) 
+    {
+        frameStabilization = doStabilization;
+    }
+    
     OMX_TRACE(error);
     
 }
@@ -1059,30 +1083,6 @@ void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
     OMX_TRACE(error);
     
-}
-
-
-#pragma mark IMAGE EFFECTS
-
-void ofxRPiCameraVideoGrabber::toggleImageEffects(bool doDisable)
-{
-
-    cameraDisableAlgorithmConfig.eAlgorithm = OMX_CameraDisableAlgorithmImageEffects;
-    
-    cameraDisableAlgorithmConfig.bDisabled = toOMXBool(doDisable);
-    
-    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexParamCameraDisableAlgorithm, &cameraDisableAlgorithmConfig);
-    OMX_TRACE(error);
-}
-
-void ofxRPiCameraVideoGrabber::enableImageEffects()
-{
-    toggleImageEffects(true);
-}
-
-void ofxRPiCameraVideoGrabber::disableImageEffects()
-{
-    toggleImageEffects(false);
 }
 
 
