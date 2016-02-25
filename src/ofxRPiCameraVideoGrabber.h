@@ -130,11 +130,13 @@ public:
 	void setSaturation(int saturation_);
 	
 	void setFrameStabilization(bool doStabilization);
-	void setMeteringMode(OMX_METERINGTYPE meteringType, int evCompensation=0, int sensitivity = 100, bool autoSensitivity = false);
-	void setExposureMode(OMX_EXPOSURECONTROLTYPE exposureMode);
+    /*
+	void setMeteringMode(OMX_METERINGTYPE meteringType, 
+                         int evCompensation=0, 
+                         int sensitivity = 100, 
+                         bool autoSensitivity = false);*/
 	
-	void setWhiteBalance(OMX_WHITEBALCONTROLTYPE controlType);
-	void setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
+	OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
 	void setLEDState(bool status);
     void setDRE(int level);
 
@@ -149,14 +151,12 @@ public:
 	bool isReady();
 
 	
-	void setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel);
+	OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE);
 	void disableImageEffects();
 	void enableImageEffects();
 	bool isFrameNew();
     bool isTextureEnabled();	
-	
-	void enableBurstMode();
-	
+		
 	int getSharpness()		{ return sharpness; }
 	int getContrast()		{ return contrast;	}
 	int getBrightness()		{ return brightness; }
@@ -173,9 +173,6 @@ public:
     TextureEngine* textureEngine;
     NonTextureEngine* engine;
     
-    
-    
-   
     void  enableAutoExposure();
     void  enableManualExposure();
     EXPOSURE_MODE getExposureMode();
@@ -189,7 +186,6 @@ public:
     OMX_ERRORTYPE updateSensorCrop();
     OMX_ERRORTYPE setSensorCrop(int left, int top, int width, int height);
     
-    OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
 
     int zoomLevel;
     OMX_ERRORTYPE zoomIn();
@@ -198,14 +194,14 @@ public:
     OMX_ERRORTYPE setZoomLevelNormalized(float);
     float getZoomLevelNormalized();
     
-    OMX_CONFIG_MIRRORTYPE mirrorConfig;
+
     OMX_ERRORTYPE setMirror(int);
     OMX_ERRORTYPE setMirror(string);
     string getMirror();
     OMX_ERRORTYPE applyMirror();
     string mirror; 
     
-    OMX_CONFIG_ROTATIONTYPE rotationConfig;
+
     int rotation;
     OMX_ERRORTYPE setRotation(int);
     OMX_ERRORTYPE setRotation(ROTATION);
@@ -215,7 +211,7 @@ public:
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
     
-    OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+
     OMX_ERRORTYPE setImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE setImageFilter(string);
     string getImageFilter();
@@ -223,9 +219,62 @@ public:
     
     void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
     
+
+    OMX_ERRORTYPE setExposurePreset(OMX_EXPOSURECONTROLTYPE);
+    OMX_ERRORTYPE setExposurePreset(string);
+    string getExposurePreset();
+    string exposurePreset;
+
+    OMX_ERRORTYPE setEvCompensation(int); //-4 to 4
+    int getEvCompensation();
+    int evCompensation;
     
+    OMX_ERRORTYPE setWhiteBalance(OMX_WHITEBALCONTROLTYPE);
+    OMX_ERRORTYPE setWhiteBalance(string);
+    string getWhiteBalance();
+    string whiteBalance;
+
+    
+    OMX_ERRORTYPE setAutoShutter(bool);
+    bool getAutoShutter(){return currentMeteringMode.autoShutter;}
+    int getShutterSpeed();
+    
+    OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
+    
+    OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
+    OMX_ERRORTYPE setMeteringType(OMX_METERINGTYPE);
+    OMX_ERRORTYPE setMeteringType(string);
+    string getMeteringType();
+    string meteringType;
+
+    
+    
+    bool autoShutter;
+    int shutterSpeedMicroSeconds;
+    bool autoAperture;
+    int aperture;
+    bool autoISO;
+    int ISO;
+    bool framestabilization;
+    
+    bool doDisableSoftwareSharpen;
+    bool doDisableSoftwareSaturation;
+    OMX_ERRORTYPE setSoftwareSharpening(bool);
+    OMX_ERRORTYPE enableSoftwareSharpening();
+    OMX_ERRORTYPE disableSoftwareSharpening();
+    bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
+    
+    OMX_ERRORTYPE setSoftwareSaturation(bool);
+    OMX_ERRORTYPE enableSoftwareSaturation();
+    OMX_ERRORTYPE disableSoftwareSaturation();
+    bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
+
+    void reset();
+ 
 private:
-	
+
+    void resetValues();
+    void applyAllSettings();
 	void onUpdate(ofEventArgs & args);
     void onUpdateDuringExit(ofEventArgs& args);
 
@@ -252,5 +301,36 @@ private:
 	int frameCounter;
 	
 	bool pixelsRequested;
+    
+    OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;
+    
+    OMX_CONFIG_SHARPNESSTYPE sharpnessConfig;
+    OMX_CONFIG_FRAMESTABTYPE framestabilizationConfig;
+    OMX_CONFIG_CONTRASTTYPE contrastConfig;
+    OMX_CONFIG_BRIGHTNESSTYPE brightnessConfig;
+    OMX_CONFIG_SATURATIONTYPE saturationConfig;
+    OMX_CONFIG_WHITEBALCONTROLTYPE whiteBalanceConfig;
+    OMX_CONFIG_COLORENHANCEMENTTYPE colorEnhancementConfig;
+    OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+    
+    //OMX_CONFIG_BOOLEANTYPE burstModeConfig;
+    OMX_CONFIG_BOOLEANTYPE hdrConfig;
+    OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
+    
+    OMX_PARAM_CAMERADISABLEALGORITHMTYPE cameraDisableAlgorithmConfig;
+    OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
+    OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE dreConfig;
+    OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
+    
+    
+    OMX_CONFIG_CAMERAINFOTYPE cameraInfoConfig;
+    OMX_PARAM_BRCMFRAMERATERANGETYPE frameRateRangeConfig;
+    
+    
+    OMX_CONFIG_ROTATIONTYPE rotationConfig;
+    OMX_CONFIG_MIRRORTYPE mirrorConfig;
+    
+    OMX_CONFIG_BOOLEANTYPE disableSoftwareSharpenConfig;
+    OMX_CONFIG_BOOLEANTYPE disableSoftwareSaturationConfig;
 	
 };
