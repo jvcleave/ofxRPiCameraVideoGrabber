@@ -89,9 +89,11 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
         456131, 472515, 488899, 506593,
         524288
     };
-    vector<int> converted(zoomStepsSource, zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
+    vector<int> converted(zoomStepsSource, 
+                          zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
     zoomLevels = converted;
     zoomLevel = 0;
+    
     OMX_INIT_STRUCTURE(digitalZoomConfig);
     digitalZoomConfig.nPortIndex = OMX_ALL;
     
@@ -103,6 +105,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     OMX_INIT_STRUCTURE(rotationConfig);
     rotationConfig.nPortIndex = CAMERA_OUTPUT_PORT;
 
+    
+    OMX_INIT_STRUCTURE(imagefilterConfig);
+    imagefilterConfig.nPortIndex = OMX_ALL;
+    imageFilter="None";
     
     cropRectangle.set(0,0,100,100);
 
@@ -992,6 +998,42 @@ ofxRPiCameraVideoGrabber::rotateCounterClockwise()
     return applyRotation();
 }
 
+#pragma mark FILTERS
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter_)
+{
+    
+    imagefilterConfig.eImageFilter = imageFilter_;
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        imageFilter = OMX_Maps::getInstance().getImageFilter(imageFilter_);
+    }
+    return error;
+}
+
+OMX_ERRORTYPE 
+ofxRPiCameraVideoGrabber::setImageFilter(string imageFilter_)
+{
+    return setImageFilter(OMX_Maps::getInstance().getImageFilter(imageFilter_));
+}
+
+string ofxRPiCameraVideoGrabber::getImageFilter()
+{
+    return OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
+}
+
+
+void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
+{
+    
+    imagefilterConfig.eImageFilter = imageFilter;
+    
+    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
+    OMX_TRACE(error);
+    
+}
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
@@ -1020,17 +1062,7 @@ void ofxRPiCameraVideoGrabber::setLEDState(bool status)
 	ofLogVerbose(__func__) << "command: " << command << " result: " << result;
 }
 
-void ofxRPiCameraVideoGrabber::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
-{
-	OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
-	OMX_INIT_STRUCTURE(imagefilterConfig);
-	imagefilterConfig.nPortIndex = OMX_ALL;
-	imagefilterConfig.eImageFilter = imageFilter;
-	
-	OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonImageFilter, &imagefilterConfig);
-    OMX_TRACE(error);
 
-}
 
 
 

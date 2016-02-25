@@ -122,7 +122,6 @@ public:
 	void setup(OMXCameraSettings omxCameraSettings);
 	void draw();
 	
-	void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
 	ofTexture& getTextureReference();
 
 	void setSharpness(int sharpness_);
@@ -215,6 +214,15 @@ public:
 
     OMX_ERRORTYPE rotateClockwise();
     OMX_ERRORTYPE rotateCounterClockwise();
+    
+    OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
+    OMX_ERRORTYPE setImageFilter(OMX_IMAGEFILTERTYPE);
+    OMX_ERRORTYPE setImageFilter(string);
+    string getImageFilter();
+    string imageFilter;
+    
+    void applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter);
+    
     
 private:
 	
