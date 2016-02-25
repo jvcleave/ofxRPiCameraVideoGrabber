@@ -57,7 +57,7 @@ void ofxRPiCameraVideoGrabber::reset()
 }
 void ofxRPiCameraVideoGrabber::resetValues()
 {
-    ofLogVerbose(__func__) << endl << endl << endl << endl<< endl << endl<< endl << endl;
+    ofLogVerbose(__func__) << endl;
     exposurePreset = "Auto";
     meteringType="OMX_MeteringModeAverage";
     evCompensation=0;
@@ -176,15 +176,14 @@ void ofxRPiCameraVideoGrabber::applyAllSettings()
 {
     
     setExposurePreset(exposurePreset); 
-    CameraMeteringMode cameraMeteringMode;
-    cameraMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(meteringType);
-    cameraMeteringMode.evCompensation = evCompensation;
-    cameraMeteringMode.autoShutter = autoShutter;
-    cameraMeteringMode.shutterSpeedMicroSeconds = shutterSpeedMicroSeconds;
-    cameraMeteringMode.autoAperture = autoAperture;
-    cameraMeteringMode.aperture = aperture;
-    cameraMeteringMode.autoISO = autoISO;
-    cameraMeteringMode.ISO = ISO;
+    currentMeteringMode.meteringType = GetMetering(meteringType);
+    currentMeteringMode.evCompensation = evCompensation;
+    currentMeteringMode.autoShutter = autoShutter;
+    currentMeteringMode.shutterSpeedMicroSeconds = shutterSpeedMicroSeconds;
+    currentMeteringMode.autoAperture = autoAperture;
+    currentMeteringMode.aperture = aperture;
+    currentMeteringMode.autoISO = autoISO;
+    currentMeteringMode.ISO = ISO;
     applyCurrentMeteringMode();
     
     
@@ -401,6 +400,8 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSoftwareSaturation(bool state)
         if(error == OMX_ErrorNone)
         {
             doDisableSoftwareSaturation = state;
+            ofLogVerbose() << "doDisableSoftwareSaturation: " << doDisableSoftwareSaturation;
+
         }
     }
     
@@ -430,6 +431,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setSoftwareSharpening(bool state)
         if(error == OMX_ErrorNone)
         {
             doDisableSoftwareSharpen = state;
+            ofLogVerbose() << "doDisableSoftwareSharpen: " << doDisableSoftwareSharpen;
         }
     }
     return error;
@@ -656,51 +658,16 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(OMX_METERINGTYPE meterin
 
 string ofxRPiCameraVideoGrabber::getMeteringType()
 {
-    return OMX_Maps::getInstance().getMetering(currentMeteringMode.exposurevalue.eMetering);
+    return GetMeteringString(currentMeteringMode.exposurevalue.eMetering);
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMeteringType(string meteringType)
 {
     
-    currentMeteringMode.meteringType = OMX_Maps::getInstance().getMetering(meteringType);
+    currentMeteringMode.meteringType = GetMetering(meteringType);
     return applyCurrentMeteringMode();    
 }
 
-#if 0
-void ofxRPiCameraVideoGrabber::setMeteringMode(OMX_METERINGTYPE meteringType, 
-                                               int evCompensation,	//default 0
-                                               int sensitivity,		//default 100
-                                               bool autoSensitivity //default false
-)
-{
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-    
-    
-    error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
-    if(error != OMX_ErrorNone) 
-    {
-        ofLog(OF_LOG_ERROR,	"camera OMX_SetConfig OMX_IndexConfigCommonExposureValue FAIL error: 0x%08x", error);
-    }	 
-    
-    exposurevalue.xEVCompensation = evCompensation;	//Fixed point value stored as Q16 
-    exposurevalue.nSensitivity = sensitivity;		//< e.g. nSensitivity = 100 implies "ISO 100" 
-    exposurevalue.bAutoAperture = OMX_TRUE;
-    //exposurevalue.nApertureFNumber = 2;
-    if (autoSensitivity)
-    {
-        exposurevalue.bAutoSensitivity	= OMX_TRUE;
-    }else 
-    {
-        exposurevalue.bAutoSensitivity	= OMX_FALSE;
-    }
-    
-    exposurevalue.eMetering = meteringType; 
-    
-    error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposurevalue);
-    OMX_TRACE(error);
-    
-}
-#endif
 void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE omxExposureValue)
 {
     currentMeteringMode.exposurevalue               = omxExposureValue;
@@ -717,7 +684,8 @@ void ofxRPiCameraVideoGrabber::updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALU
     currentMeteringMode.autoISO                     = fromOMXBool(omxExposureValue.bAutoSensitivity);
     currentMeteringMode.ISO                         = omxExposureValue.nSensitivity;
     
-    
+    ofLogVerbose(__func__) << "UPDATED currentMeteringMode: " << currentMeteringMode.toString();
+
 }
 
 
@@ -766,6 +734,10 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyCurrentMeteringMode()
     if(error == OMX_ErrorNone)
     {
         updateCurrentMeteringMode(currentMeteringMode.exposurevalue); 
+
+    }else
+    {
+        ofLogError(__func__) << "COULD NOT UPDATE METERING MODE";
     }
     
     return error;
@@ -803,12 +775,12 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(OMX_WHITEBALCONTROLTYPE 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setWhiteBalance(string name)
 {	
     
-    return setWhiteBalance(OMX_Maps::getInstance().getWhiteBalance(name));
+    return setWhiteBalance(GetWhiteBalance(name));
 }
 
 string ofxRPiCameraVideoGrabber::getWhiteBalance()
 {
-    return OMX_Maps::getInstance().getWhiteBalance(whiteBalanceConfig.eWhiteBalControl);
+    return GetWhiteBalanceString(whiteBalanceConfig.eWhiteBalControl);
 }
 
 #pragma mark EXPOSURE
@@ -837,6 +809,9 @@ void ofxRPiCameraVideoGrabber::enableManualExposure()
 EXPOSURE_MODE 
 ofxRPiCameraVideoGrabber::getExposureMode()
 {
+   // ofLogVerbose(__func__) << "autoShutter: " << currentMeteringMode.autoShutter;
+    //ofLogVerbose(__func__) << "autoAperture: " << currentMeteringMode.autoAperture;
+
     if(currentMeteringMode.autoShutter && currentMeteringMode.autoAperture)
     {
         return EXPOSURE_MODE_AUTO;
@@ -961,7 +936,7 @@ float ofxRPiCameraVideoGrabber::getZoomLevelNormalized()
 string ofxRPiCameraVideoGrabber::getMirror()
 {
     
-    return OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);    
+    return GetMirrorString(mirrorConfig.eMirror);    
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
@@ -972,7 +947,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror)
 {
-    return setMirror(OMX_Maps::getInstance().getMirror(mirror));
+    return setMirror(GetMirror(mirror));
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
@@ -981,7 +956,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        mirror = OMX_Maps::getInstance().getMirror(mirrorConfig.eMirror);
+        mirror = GetMirrorString(mirrorConfig.eMirror);
     }
     return error;
 }
@@ -1060,19 +1035,19 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(OMX_IMAGEFILTERTYPE image
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        imageFilter = OMX_Maps::getInstance().getImageFilter(imageFilter_);
+        imageFilter = GetImageFilterString(imageFilter_);
     }
     return error;
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setImageFilter(string imageFilter_)
 {
-    return setImageFilter(OMX_Maps::getInstance().getImageFilter(imageFilter_));
+    return setImageFilter(GetImageFilter(imageFilter_));
 }
 
 string ofxRPiCameraVideoGrabber::getImageFilter()
 {
-    return OMX_Maps::getInstance().getImageFilter(imagefilterConfig.eImageFilter);
+    return GetImageFilterString(imagefilterConfig.eImageFilter);
 }
 
 
@@ -1121,21 +1096,21 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(OMX_EXPOSURECONTROLTYP
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        exposurePreset = OMX_Maps::getInstance().getExposurePreset(exposurePreset_);
+        exposurePreset = GetExposurePresetString(exposurePreset_);
     }
     return error;
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setExposurePreset(string exposurePreset_)
 {
-    return setExposurePreset(OMX_Maps::getInstance().getExposurePreset(exposurePreset_));
+   
+    return setExposurePreset(GetExposurePreset(exposurePreset_));
 }
 
 
 string ofxRPiCameraVideoGrabber::getExposurePreset()
 {
-    
-    return OMX_Maps::getInstance().getExposurePreset(exposurePresetConfig.eExposureControl);
+    return GetExposurePresetString(exposurePresetConfig.eExposureControl);
 }
 
 void ofxRPiCameraVideoGrabber::toggleLED()

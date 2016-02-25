@@ -262,12 +262,12 @@ public:
     OMX_ERRORTYPE setSoftwareSharpening(bool);
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
-    bool isSoftwareSharpeningEnabled() {return !fromOMXBool(disableSoftwareSharpenConfig.bEnabled);}
+    bool isSoftwareSharpeningEnabled() {return doDisableSoftwareSharpen;}
     
     OMX_ERRORTYPE setSoftwareSaturation(bool);
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
-    bool isSoftwareSaturationEnabled() {return !fromOMXBool(disableSoftwareSaturationConfig.bEnabled);}
+    bool isSoftwareSaturationEnabled() {return doDisableSoftwareSaturation;}
 
     void reset();
  

@@ -48,7 +48,10 @@ public:
     {
         return imageFilters[name];
     }
-    
+    map<string, OMX_IMAGEFILTERTYPE>& getImageFilters()
+    {
+        return imageFilters;
+    }
     
     vector<string> whiteBalanceNames;
     map<string, OMX_WHITEBALCONTROLTYPE> whiteBalance;
@@ -264,15 +267,30 @@ public:
         return omxErrors[name];
     }
     
+    vector<string> commandNames;
+    map<string, OMX_COMMANDTYPE> commands;
+    map<OMX_COMMANDTYPE, string> commandTypes;
     
-    map<OMX_STATETYPE, string>omxStateNames;
+    vector<string> omxStateNames;
+    map<string, OMX_STATETYPE> omxStates;
+    map<OMX_STATETYPE, string> omxStateTypes;
+    
     map<EGLint, string> eglErrors;
     
 private:	
     OMX_Maps()
     {
         
+        commands["OMX_CommandVendorStartUnused"]= OMX_CommandVendorStartUnused;
+        commands["OMX_CommandMax"]= OMX_CommandMax;
+        commands["OMX_CommandStateSet"]= OMX_CommandStateSet;
+        commands["OMX_CommandFlush"]= OMX_CommandFlush;
+        commands["OMX_CommandPortDisable"]= OMX_CommandPortDisable;
+        commands["OMX_CommandPortEnable"]= OMX_CommandPortEnable;
+        commands["OMX_CommandMarkBuffer"]= OMX_CommandMarkBuffer;
+        commands["OMX_CommandKhronosExtensions"]= OMX_CommandKhronosExtensions;
         
+        collectNames<OMX_COMMANDTYPE>(commands, commandNames, commandTypes);
         
         focusControls["On"] = OMX_IMAGE_FocusControlOn;
         focusControls["Off"] = OMX_IMAGE_FocusControlOff;
@@ -501,11 +519,15 @@ private:
         
         
         
-        omxStateNames[OMX_StateInvalid] = "OMX_StateInvalid";
-        omxStateNames[OMX_StateLoaded] = "OMX_StateLoaded";
-        omxStateNames[OMX_StateIdle] = "OMX_StateIdle";
-        omxStateNames[OMX_StateExecuting] = "OMX_StateExecuting";
-        omxStateNames[OMX_StatePause] = "OMX_StatePause";
+        omxStateTypes[OMX_StateInvalid] = "OMX_StateInvalid";
+        omxStateTypes[OMX_StateLoaded] = "OMX_StateLoaded";
+        omxStateTypes[OMX_StateIdle] = "OMX_StateIdle";
+        omxStateTypes[OMX_StateExecuting] = "OMX_StateExecuting";
+        omxStateTypes[OMX_StatePause] = "OMX_StatePause";
+        omxStateTypes[OMX_StateWaitForResources] = "OMX_StateWaitForResources";
+        
+        
+        collectNames<OMX_STATETYPE>(omxStates, omxStateNames, omxStateTypes);
         
         omxErrorTypes[OMX_ErrorNone] =  "OMX_ErrorNone";
         omxErrorTypes[OMX_ErrorInsufficientResources] =  "OMX_ErrorInsufficientResources";
@@ -620,3 +642,198 @@ private:
     
     
 };
+
+static
+string  GetOMXStateString(OMX_STATETYPE type)
+{
+    return OMX_Maps::getInstance().omxStateTypes[type];
+};
+
+static
+OMX_STATETYPE  GetOMXState(string name)
+{
+    return OMX_Maps::getInstance().omxStates[name];
+};
+
+static
+string  GetWhiteBalanceString(OMX_WHITEBALCONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().whiteBalanceTypes[type];
+};
+
+
+static
+OMX_WHITEBALCONTROLTYPE  GetWhiteBalance(string name)
+{
+    return OMX_Maps::getInstance().whiteBalance[name];
+};
+
+
+static
+string  GetImageFilterString(OMX_IMAGEFILTERTYPE type)
+{
+    return OMX_Maps::getInstance().imageFilterTypes[type];
+};
+
+
+static
+OMX_IMAGEFILTERTYPE  GetImageFilter(string name)
+{
+    return OMX_Maps::getInstance().imageFilters[name];
+};
+
+
+static
+string  GetFocusString(OMX_IMAGE_FOCUSCONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().focusControlTypes[type];
+};
+
+
+static
+OMX_IMAGE_FOCUSCONTROLTYPE  GetFocus(string name)
+{
+    return OMX_Maps::getInstance().focusControls[name];
+};
+
+
+static
+string  GetMeteringString(OMX_METERINGTYPE type)
+{
+    return OMX_Maps::getInstance().meteringTypes[type];
+};
+
+
+static
+OMX_METERINGTYPE  GetMetering(string name)
+{
+    return OMX_Maps::getInstance().metering[name];
+};
+
+
+static
+string  GetExposurePresetString(OMX_EXPOSURECONTROLTYPE type)
+{
+    return OMX_Maps::getInstance().exposurePresetTypes[type];
+};
+
+
+static
+OMX_EXPOSURECONTROLTYPE  GetExposurePreset(string name)
+{
+    return OMX_Maps::getInstance().exposurePresets[name];
+};
+
+
+static
+string  GetMirrorString(OMX_MIRRORTYPE type)
+{
+    return OMX_Maps::getInstance().mirrorTypes[type];
+};
+
+
+static
+OMX_MIRRORTYPE  GetMirror(string name)
+{
+    return OMX_Maps::getInstance().mirrors[name];
+};
+
+
+static
+string  GetImageCodingString(OMX_IMAGE_CODINGTYPE type)
+{
+    return OMX_Maps::getInstance().imageCodingTypes[type];
+};
+
+
+static
+OMX_IMAGE_CODINGTYPE  GetImageCoding(string name)
+{
+    return OMX_Maps::getInstance().imageCoding[name];
+};
+
+
+static
+string  GetVideoCodingString(OMX_VIDEO_CODINGTYPE type)
+{
+    return OMX_Maps::getInstance().videoCodingTypes[type];
+};
+
+
+static
+OMX_VIDEO_CODINGTYPE  GetVideoCoding(string name)
+{
+    return OMX_Maps::getInstance().videoCoding[name];
+};
+
+
+static
+string  GetColorFormatString(OMX_COLOR_FORMATTYPE type)
+{
+    return OMX_Maps::getInstance().colorFormatTypes[type];
+};
+
+
+static
+OMX_COLOR_FORMATTYPE  GetColorFormat(string name)
+{
+    return OMX_Maps::getInstance().colorFormats[name];
+};
+
+
+static
+string  GetWorkingColorFormatString(OMX_COLOR_FORMATTYPE type)
+{
+    return OMX_Maps::getInstance().workingColorFormatTypes[type];
+};
+
+
+static
+OMX_COLOR_FORMATTYPE  GetWorkingColorFormat(string name)
+{
+    return OMX_Maps::getInstance().workingColorFormats[name];
+};
+
+
+static
+string  GetEventString(OMX_EVENTTYPE type)
+{
+    return OMX_Maps::getInstance().eventTypes[type];
+};
+
+
+static
+OMX_EVENTTYPE  GetEvent(string name)
+{
+    return OMX_Maps::getInstance().events[name];
+};
+
+
+static
+string  GetOMXErrorString(OMX_ERRORTYPE type)
+{
+    return OMX_Maps::getInstance().omxErrorTypes[type];
+};
+
+
+static
+OMX_ERRORTYPE  GetOMXError(string name)
+{
+    return OMX_Maps::getInstance().omxErrors[name];
+};
+
+
+static
+string  GetOMXCommandString(OMX_COMMANDTYPE type)
+{
+    return OMX_Maps::getInstance().commandTypes[type];
+};
+
+
+static
+OMX_COMMANDTYPE  GetOMXCommand(string name)
+{
+    return OMX_Maps::getInstance().commands[name];
+};
+
+
