@@ -533,6 +533,43 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance,
     return error;
 
 }
+#pragma mark ISO
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setAutoISO(bool doAutoISO)
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone) 
+    {
+        currentMeteringMode.exposurevalue.bAutoSensitivity	= toOMXBool(doAutoISO);
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone) 
+        {
+            updateCurrentMeteringMode(currentMeteringMode.exposurevalue);
+        }
+    }
+    return error;
+}
+
+
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setISO(int ISO_)
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone) 
+    {
+        currentMeteringMode.exposurevalue.nSensitivity	= ISO_;
+        error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &currentMeteringMode.exposurevalue);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone) 
+        {
+            updateCurrentMeteringMode(currentMeteringMode.exposurevalue);
+            ISO = ISO_;
+        }
+    }
+    return error;
+}
 
 #pragma mark SHUTTER
 
@@ -740,7 +777,6 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKER
     
     return error;
 }
-
 
 #pragma mark DYNAMIC RANGE EXPANSION (DRE)
 

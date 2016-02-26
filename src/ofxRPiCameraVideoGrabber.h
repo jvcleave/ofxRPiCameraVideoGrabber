@@ -243,6 +243,12 @@ public:
     
     void setBurstMode(bool);
     bool isBurstModeEnabled(){ return burstModeEnabled;}
+    
+    int getISO() { return currentMeteringMode.ISO; }
+    OMX_ERRORTYPE setISO(int ISO);
+    OMX_ERRORTYPE setAutoISO(bool);
+    bool getAutoISO(){return currentMeteringMode.autoISO;} 
+    
 private:
 
     OMX_HANDLETYPE camera;
