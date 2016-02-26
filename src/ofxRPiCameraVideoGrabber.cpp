@@ -71,6 +71,7 @@ void ofxRPiCameraVideoGrabber::resetValues()
     brightness=50;
     saturation=0;
     frameStabilization=false;
+    flickerCancellation = false;
     whiteBalance="Auto";
     imageFilter="None";
     dreLevel=0;
@@ -189,6 +190,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
         camera = engine->camera;
     }
     checkBurstMode();
+    checkFlickerCancellation();
     applyAllSettings();
 }
 
@@ -612,6 +614,73 @@ void ofxRPiCameraVideoGrabber::setBurstMode(bool doBurstMode)
     ofLogVerbose() << "burstModeEnabled: " << burstModeEnabled;
 }
 
+#pragma mark FLICKER CANCELLATION
+
+void ofxRPiCameraVideoGrabber::checkFlickerCancellation()
+{
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone) 
+    {
+        switch (flickerCancelConfig.eFlickerCancel) 
+        {
+            case OMX_COMMONFLICKERCANCEL_OFF:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_OFF";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_AUTO:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_AUTO";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_50:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_50";
+                break;
+            }
+            case OMX_COMMONFLICKERCANCEL_60:
+            {
+                ofLogVerbose(__func__) << "OMX_COMMONFLICKERCANCEL_60";
+                break;
+            }
+            default:
+                break;
+        }
+        if(flickerCancelConfig.eFlickerCancel == OMX_COMMONFLICKERCANCEL_OFF)
+        {
+            flickerCancellation = false;
+        }else
+        {
+            flickerCancellation = true;
+        }
+    }
+    else
+    {
+        //error so assume it's not working
+        flickerCancellation = false;
+    }
+}
+void ofxRPiCameraVideoGrabber::setFlickerCancellation(bool enable)
+{
+    if(enable)
+    {
+       setFlickerCancellation(OMX_COMMONFLICKERCANCEL_AUTO); 
+    }else
+    {
+        setFlickerCancellation(OMX_COMMONFLICKERCANCEL_OFF); 
+    }
+    
+}
+void ofxRPiCameraVideoGrabber::enableFlickerCancellation()
+{
+    setFlickerCancellation(true);
+}
+void ofxRPiCameraVideoGrabber::disableFlickerCancellation()
+{
+    setFlickerCancellation(false);
+}
+
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
@@ -647,7 +716,26 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setFlickerCancellation(OMX_COMMONFLICKER
         }
         flickerCancelConfig.eFlickerCancel = eFlickerCancel;
         error = OMX_SetConfig(camera, OMX_IndexConfigCommonFlickerCancellation, &flickerCancelConfig);
+        if(error == OMX_ErrorNone)
+        {
+            if(flickerCancelConfig.eFlickerCancel == OMX_COMMONFLICKERCANCEL_OFF)
+            {
+                flickerCancellation = false;
+            }else
+            {
+                flickerCancellation = true;
+            }
+        }else
+        {
+            //error so assume it's not working
+            flickerCancellation = false;
+        }
         OMX_TRACE(error);
+    }
+    else
+    {
+        //error so assume it's not working
+        flickerCancellation = false;
     }
     
     return error;

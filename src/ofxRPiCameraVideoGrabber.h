@@ -171,8 +171,12 @@ public:
     bool getLEDState() { return LED_CURRENT_STATE; }
     
 	OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE);
-
-
+    void setFlickerCancellation(bool);
+    void enableFlickerCancellation();
+    void disableFlickerCancellation();
+    bool isFlickerCancellationEnabled() { return flickerCancellation; }
+    //TODO: enable explict 50/60 hz
+    
     void  enableAutoExposure();
     void  enableManualExposure();
     EXPOSURE_MODE getExposureMode();
@@ -269,9 +273,12 @@ private:
     int frameCounter;
     bool pixelsRequested;
     bool burstModeEnabled;
+    bool flickerCancellation;
+
     void addExitHandler();
     
     void checkBurstMode();
+    void checkFlickerCancellation();
     OMX_ERRORTYPE applyMirror();
     void applyImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE applyRotation();
