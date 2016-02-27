@@ -24,72 +24,6 @@
 #include "TextureEngine.h"
 #include "NonTextureEngine.h"
 
-struct CameraMeteringMode
-{
-    OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue;
-    
-    OMX_METERINGTYPE meteringType;
-    float evCompensation;
-    
-    
-    bool autoShutter;
-    int shutterSpeedMicroSeconds;
-    
-    bool autoAperture;
-    int aperture;
-    
-    bool autoISO;
-    int ISO;
-    
-    CameraMeteringMode()
-    {
-        OMX_INIT_STRUCTURE(exposurevalue);
-        exposurevalue.nPortIndex = OMX_ALL;
-        meteringType = OMX_MeteringModeAverage;
-        
-        
-        evCompensation=0; //-4 to +4
-        
-        autoShutter = true;
-        shutterSpeedMicroSeconds = 0;
-        
-        autoAperture = true;
-        aperture = 0;
-        
-        autoISO = true;
-        ISO=0;
-    };
-    
-    
-    
-    string toString()
-    {
-        
-        stringstream ss;
-        ss << OMX_Maps::getInstance().getMetering(meteringType) << "\n";
-        ss << "evCompensation: " << evCompensation << "\n";
-        
-        ss << "autoShutter: " << autoShutter << "\n";
-        ss << "shutterSpeedMicroSeconds: " << shutterSpeedMicroSeconds << "\n";
-        
-        ss << "autoAperture: " << autoAperture << "\n";
-        ss << "aperture: " << aperture << "\n";
-        
-        ss << "autoISO: " << autoISO << "\n";
-        ss << "ISO: " << ISO << "\n";
-        return ss.str();
-        
-    }
-    
-};
-
-
-enum EXPOSURE_MODE
-{
-    EXPOSURE_MODE_AUTO,
-    EXPOSURE_MODE_MANUAL,
-    EXPOSURE_MODE_INVALID
-};
 
 enum MIRROR
 {
@@ -117,7 +51,7 @@ public:
     ~ofxRPiCameraVideoGrabber();
     
     OMXCameraSettings omxCameraSettings;
-    CameraMeteringMode currentMeteringMode;
+    //CameraMetering metering;
     
     void setup(OMXCameraSettings omxCameraSettings);
     
@@ -177,9 +111,6 @@ public:
     bool isFlickerCancellationEnabled() { return flickerCancellation; }
     //TODO: enable explict 50/60 hz
     
-    void  enableAutoExposure();
-    void  enableManualExposure();
-    EXPOSURE_MODE getExposureMode();
     
     OMX_ERRORTYPE setSensorCrop(ofRectangle&);
     ofRectangle& getCropRectangle() { return cropRectangle; }
@@ -219,12 +150,12 @@ public:
     string getWhiteBalance();
 
     OMX_ERRORTYPE setAutoShutter(bool);
-    bool getAutoShutter(){return currentMeteringMode.autoShutter;}
+    bool getAutoShutter();
     int getShutterSpeed();
     
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
     
-    OMX_ERRORTYPE setMeteringMode(CameraMeteringMode);
+   //OMX_ERRORTYPE setMeteringMode(CameraMetering);
     OMX_ERRORTYPE setMeteringType(OMX_METERINGTYPE);
     OMX_ERRORTYPE setMeteringType(string);
     string getMeteringType();
@@ -244,16 +175,29 @@ public:
     void setBurstMode(bool);
     bool isBurstModeEnabled(){ return burstModeEnabled;}
     
-    int getISO() { return currentMeteringMode.ISO; }
     OMX_ERRORTYPE setISO(int ISO);
+    int getISO();
+    
     OMX_ERRORTYPE setAutoISO(bool);
-    bool getAutoISO(){return currentMeteringMode.autoISO;} 
+    bool getAutoISO();
+    
+    OMX_CONFIG_EXPOSUREVALUETYPE exposureConfig;
+    
+    
+    string printExposure();
+
     
 private:
 
     OMX_HANDLETYPE camera;
     OMXCameraUtils omxCameraUtils;
     bool hasNewFrame;
+    
+    OMX_METERINGTYPE meteringType;
+    bool autoISO;
+    int ISO;
+    bool autoShutter;
+    int shutterSpeed;
     int sharpness;	//	-100 to 100
     int contrast;	//  -100 to 100 
     int brightness; //     0 to 100
@@ -267,13 +211,6 @@ private:
     string exposurePreset;
     int evCompensation;
     string whiteBalance;
-    string meteringType;
-    bool autoShutter;
-    int shutterSpeedMicroSeconds;
-    bool autoAperture;
-    int aperture;
-    bool autoISO;
-    int ISO;
     bool LED_CURRENT_STATE;
     int updateFrameCounter;
     int frameCounter;
@@ -289,7 +226,7 @@ private:
     void applyImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
-    void updateCurrentMeteringMode(OMX_CONFIG_EXPOSUREVALUETYPE exposurevalue);
+    OMX_ERRORTYPE applyExposure(string caller="UNDEFINED");
     OMX_ERRORTYPE updateSensorCrop();
     
     void resetValues();
