@@ -51,10 +51,8 @@ void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 	string cameraComponentName = "OMX.broadcom.camera";
 	
 	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_GetHandle FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
     if (omxCameraSettings.enablePixels) 
     {
         enablePixels();
@@ -187,6 +185,7 @@ OMX_ERRORTYPE TextureEngine::renderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompone
 	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
 	grabber->renderedFrameCounter++;
 	OMX_ERRORTYPE error = OMX_FillThisBuffer(hComponent, pBuffer);
+    OMX_TRACE(error);
 	return error;
 }
 
@@ -195,10 +194,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	ofLogVerbose(__func__) << "onCameraEventParamOrConfigChanged";
 	
 	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	//Enable Camera Output Port
 	OMX_CONFIG_PORTBOOLEANTYPE cameraport;
@@ -207,10 +204,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	cameraport.bEnabled = OMX_TRUE;
 	
 	error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera enable Output Port FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	if(omxCameraSettings.doRecording)
 	{
@@ -220,17 +215,12 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 
 		string splitterComponentName = "OMX.broadcom.video_splitter";
 		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
-		OMXCameraUtils::disableAllPortsForComponent(&splitter);
+		DisableAllPortsForComponent(&splitter);
 		
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose(__func__) << "splitter OMX_SendCommand OMX_StateIdle PASS";
-		}
+        OMX_TRACE(error);
+
 	}
 
 	
@@ -244,14 +234,12 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	string renderComponentName = "OMX.broadcom.egl_render";
 	
 	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	OMXCameraUtils::disableAllPortsForComponent(&render);
+	DisableAllPortsForComponent(&render);
 	
 	//Set renderer to Idle
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	if(omxCameraSettings.doRecording)
 	{
@@ -266,10 +254,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		string encoderComponentName = "OMX.broadcom.video_encode";
 		
 		error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetHandle FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
 		
 		configureEncoder();
 		
@@ -277,199 +262,124 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	
 	//Create camera->splitter Tunnel
 	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera->splitter OMX_SetupTunnel FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	if(omxCameraSettings.doRecording)
 	{
 		// Tunnel splitter2 output port and encoder input port
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODE_INPUT_PORT);
-		if(error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "CAMERA_OUTPUT_PORT->VIDEO_ENCODE_INPUT_PORT OMX_SetupTunnel FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
+
 		
 		//Create splitter->egl_render Tunnel
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, render, EGL_RENDER_INPUT_PORT);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
+
 	}else 
 	{
 		//Create camera->egl_render Tunnel
 		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "camera->egl_render OMX_SetupTunnel FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
+
 	}
 	
 	//Enable camera output port
 	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera enable output port FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	if(omxCameraSettings.doRecording)
 	{
 		//Enable splitter input port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter enable input port FAIL error: 0x%08x", error);
-		}
-		
+        OMX_TRACE(error);
+
 		//Enable splitter output port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT1, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter enable output port 1 FAIL error: 0x%08x", error);
-		}
-	
+        OMX_TRACE(error);
+
 		//Enable splitter output2 port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT2, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter enable output port 2 FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
+
 	}
 	
 	
 	//Enable render output port
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "render enable output port FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
 	
 	//Enable render input port
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_INPUT_PORT, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "render enable input port FAIL error: 0x%08x", error);
-	}
-	
+    OMX_TRACE(error);
+
 	if(omxCameraSettings.doRecording)
 	{
 		//Enable encoder input port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_INPUT_PORT FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
 	
 		//Set encoder to Idle
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_SendCommand OMX_StateIdle FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
 		
 		//Enable encoder output port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_CommandPortEnable VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
-		}
-		
+        OMX_TRACE(error);
+
 		// Configure encoder output buffer
 		OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
 		OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
 		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
 		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_GetParameter OMX_IndexParamPortDefinition FAIL error: 0x%08x", error);
-		}else 
-		{
-			ofLogVerbose(__func__) << "encoderOutputPortDefinition buffer info";
-			ofLog(OF_LOG_VERBOSE, 
-				  "nBufferCountMin(%u)					\n \
-				  nBufferCountActual(%u)				\n \
-				  nBufferSize(%u)						\n \
-				  nBufferAlignmen(%u) \n", 
-				  encoderOutputPortDefinition.nBufferCountMin, 
-				  encoderOutputPortDefinition.nBufferCountActual, 
-				  encoderOutputPortDefinition.nBufferSize, 
-				  encoderOutputPortDefinition.nBufferAlignment);
-			
-		}
+        OMX_TRACE(error);
 
-		error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, VIDEO_ENCODE_OUTPUT_PORT, NULL, encoderOutputPortDefinition.nBufferSize);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_AllocateBuffer VIDEO_ENCODE_OUTPUT_PORT FAIL error: 0x%08x", error);
-			
-		}
+		error =  OMX_AllocateBuffer(encoder, 
+                                    &encoderOutputBuffer, 
+                                    VIDEO_ENCODE_OUTPUT_PORT, 
+                                    NULL, 
+                                    encoderOutputPortDefinition.nBufferSize);
+        OMX_TRACE(error);
+
 	}
 	
 	//Set renderer to use texture
 	error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImage);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_UseEGLImage-----> FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
 	
 	//Start renderer
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_StateExecuting FAIL error: 0x%08x", error);		
-	}
+    OMX_TRACE(error);
 	
 	if(omxCameraSettings.doRecording)
 	{
 		//Start encoder
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_StateExecuting FAIL error: 0x%08x", error);		
-		}
+		OMX_TRACE(error);
 		
 		//Start splitter
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-		if (error != OMX_ErrorNone) 
-		{
-			ofLog(OF_LOG_ERROR, "splitter OMX_StateExecuting FAIL error: 0x%08x", error);
-		}
+		OMX_TRACE(error);
 	}
 	
 	
 	
 	//Start camera
 	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-	if (error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera OMX_StateExecuting FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	//start the buffer filling loop
 	//once completed the callback will trigger and refill
 	error = OMX_FillThisBuffer(render, eglBuffer);
-	if(error == OMX_ErrorNone)
-	{
-		ofLogVerbose(__func__) << "render OMX_FillThisBuffer PASS";
-		
-	}else 
-	{
-		ofLog(OF_LOG_ERROR, "render OMX_FillThisBuffer FAIL error: 0x%08x", error);
-	}
+    OMX_TRACE(error);
+
 	
 	if(omxCameraSettings.doRecording)
 	{
 		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-		if(error == OMX_ErrorNone)
-		{
-			ofLogVerbose(__func__) << "encoder OMX_FillThisBuffer PASS";
-			
-		}else 
-		{
-			ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-		}
+        OMX_TRACE(error);
 		bool doThreadBlocking	= true;
 		startThread(doThreadBlocking);
 	}
