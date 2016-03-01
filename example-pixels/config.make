@@ -105,8 +105,13 @@
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-# PROJECT_CFLAGS = 
-
+PROJECT_CFLAGS = -Wno-unused-but-set-variable 
+PROJECT_CFLAGS += -Wno-unused-function 
+PROJECT_CFLAGS += -Wno-unknown-pragmas 
+#-Wunused-variable -Wunused-function -Wunknown-pragmas
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS
 #   These are lists of CFLAGS that are target-specific.  While any flags could 

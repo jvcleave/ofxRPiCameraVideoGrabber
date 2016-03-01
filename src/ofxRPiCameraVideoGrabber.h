@@ -102,7 +102,7 @@ public:
 	
 	void toggleLED();
     void setLEDState(bool status);
-    bool getLEDState() { return LED_CURRENT_STATE; }
+    bool getLEDState() { return LED; }
     
 	OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE);
     void setFlickerCancellation(bool);
@@ -211,7 +211,11 @@ private:
     string exposurePreset;
     int evCompensation;
     string whiteBalance;
-    bool LED_CURRENT_STATE;
+    
+    bool LED;
+    string LED_PIN;
+    string getLEDPin();
+    bool hasGPIOProgram;
     int updateFrameCounter;
     int frameCounter;
     bool pixelsRequested;

@@ -73,7 +73,8 @@ void ofxRPiCameraVideoGrabber::resetValues()
     mirror="MIRROR_NONE";
     doDisableSoftwareSharpen = false;
     doDisableSoftwareSaturation = false;
-
+    LED = true;
+    
     OMX_INIT_STRUCTURE(exposurePresetConfig);
     exposurePresetConfig.nPortIndex = OMX_ALL;
     
@@ -196,23 +197,78 @@ void ofxRPiCameraVideoGrabber::applyAllSettings()
     setSoftwareSharpening(doDisableSoftwareSharpen);
     setSoftwareSaturation(doDisableSoftwareSaturation);
     applyExposure(__func__);
-    //Requires gpio program provided via wiringPi
-    //https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
     
-    ofFile gpioProgram("/usr/local/bin/gpio");
-    if(gpioProgram.exists())
+    //Requires gpio program provided via wiringPi
+    //sudo apt-get install wiringpi
+    ofFile gpioProgram("/usr/bin/gpio");
+    hasGPIOProgram = gpioProgram.exists();
+    
+    if(hasGPIOProgram)
     {
-        if(system("gpio export 5 out") == 0)
+        LED_PIN = getLEDPin();
+        
+        stringstream command;
+        command << "gpio export ";
+        command << LED_PIN;
+        command << " out";
+        
+        if(system(command.str().c_str()) == 0)
         {
             //silence compiler warning 
         }
-        LED_CURRENT_STATE = true;
-        setLEDState(LED_CURRENT_STATE);
+        LED = true;
+        setLEDState(LED);
     } 
+
     
+    
+    
+
+    
+        
     
 }
-
+string ofxRPiCameraVideoGrabber::getLEDPin()
+{
+    //default as RPI1 GPIO Layout
+    string result = "5";
+    if(hasGPIOProgram)
+    {
+        string command = "gpio -v";
+        FILE* myPipe = popen(command.c_str(), "r");
+        char buffer[128];
+        string commandOutput = "";
+        while (!feof(myPipe)) 
+        {
+            if (fgets(buffer, 128, myPipe) != NULL)
+            {
+                commandOutput += buffer;
+            }
+        } 
+        
+        pclose (myPipe);
+        //ofLogVerbose(__func__) << "result: " << result;
+        if(!commandOutput.empty())
+        {
+            vector<string> contents = ofSplitString(commandOutput, "Type:");
+            string secondLine = contents[1];
+            //ofLogVerbose(__func__) << "secondLine: " << secondLine;
+            vector<string> secondLineContents = ofSplitString(secondLine, ",");
+            string modelValue = secondLineContents[0];
+            ofLogVerbose(__func__) << "modelValue: " << modelValue;
+            //assuming RPI2 and RPI3 GPIO layout is the same
+            //TODO: check RPI3
+            if(ofIsStringInString(modelValue, "2") || ofIsStringInString(modelValue, "3"))
+            {
+                result = "32";
+            }
+        }
+    }
+    
+    ofLogVerbose(__func__) << "result: " << result;
+    return result;
+    
+}
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
@@ -1180,29 +1236,32 @@ string ofxRPiCameraVideoGrabber::getExposurePreset()
 
 void ofxRPiCameraVideoGrabber::toggleLED()
 {
-	setLEDState(!LED_CURRENT_STATE);
+	setLEDState(!LED);
 }
 
-void ofxRPiCameraVideoGrabber::setLEDState(bool status)
+void ofxRPiCameraVideoGrabber::setLEDState(bool stateRequested)
 {
-	//OMX doesn't work - using GPIO 
-	/*OMX_ERRORTYPE error = OMX_ErrorNone;
-	
-	
-	OMX_CONFIG_PRIVACYINDICATORTYPE privacy;
-	OMX_INIT_STRUCTURE(privacy);
-	privacy.ePrivacyIndicatorMode = OMX_PrivacyIndicatorOff;
-	
-	error = OMX_SetConfig(camera, OMX_IndexConfigPrivacyIndicator, &privacy);
-	if(error != OMX_ErrorNone) 
-	{
-		ofLog(OF_LOG_ERROR, "camera setLEDState FAIL error: 0x%08x", error);
-	}*/
-	
-	LED_CURRENT_STATE = status;	
-	string command = "gpio -g write 5 " + ofToString(LED_CURRENT_STATE);
-	int result = system(command.c_str());
-	ofLogVerbose(__func__) << "command: " << command << " result: " << result;
+    if (!hasGPIOProgram) 
+    {
+        return;
+    }
+    stringstream command;
+    command << "gpio -g write ";
+    command << LED_PIN;
+    if (stateRequested) 
+    {
+       command <<  " 1";
+    }else
+    {
+       command <<  " 0";
+    }
+    
+   
+    int result = system(command.str().c_str());
+    if(result == 0)
+    {
+        LED = stateRequested;
+    }
 }
 
 int ofxRPiCameraVideoGrabber::getISO() 
