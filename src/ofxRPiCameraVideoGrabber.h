@@ -186,6 +186,8 @@ public:
     
     string printExposure();
 
+    string currentStateToString();
+    void saveStateToFile(string fileName="");
     
 private:
 
