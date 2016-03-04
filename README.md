@@ -1,7 +1,8 @@
 ofxRPiCameraVideoGrabber
 ========================
 
-STATUS: PERPETUAL DEVELOPMENT
+STATUS: PERPETUAL DEVELOPMENT    
+Master may be unstable, features untested. See [Releases](https://github.com/jvcleave/ofxRPiCameraVideoGrabber/releases) for tested versions
 
 DESCRIPTION:   
 openFrameworks addon to control the Raspberry Pi Camera Module. This does _not_ provide still camera functionality.
@@ -17,7 +18,7 @@ Clone into your openFrameworks/addons folder
 Either copy one of the examples into /myApps or add ofxRPiCameraVideoGrabber to the addons.make file in your project
 
 LED Toggling requires gpio program provided via wiringPi   
-https://projects.drogon.net/raspberry-pi/wiringpi/the-gpio-utility/
+`$sudo apt-get install wiringpi`
 
 
 The addon works in a few different modes:
@@ -39,6 +40,10 @@ Recording is available in both texture and non-texture modes
 
 EXAMPLES:   
 
+example-demo-mode    
+Shows different settings available to tweak the camera exposure, metering, cropping, zooming, filters, mirroring, white balance
+
+
 example-non-texture   
 Camera turns on and is rendered full screen inside app   
 Press the "e" key to toggle through built in filters
@@ -58,7 +63,10 @@ example-pixels:
 Demonstrates how to get pixels (needed for OpenCv operations). 
 
 example-wrapper:   
-NEW: drop-in replacement for ofVideoGrabber (texture-mode only)
+Drop-in replacement for ofVideoGrabber (texture-mode only)
+
+example-saved-settings:   
+Alternative way to load a camera configuration through a text file
 
 THANKS:
 Thanks to @tjormola for sharing his demos and exploration - especially in regards to recording
