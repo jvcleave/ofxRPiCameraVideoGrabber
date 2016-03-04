@@ -325,7 +325,8 @@ private:
         mirrors["Vertical"] = OMX_MirrorVertical;
         mirrors["Horizontal"] = OMX_MirrorHorizontal;
         mirrors["Both"] = OMX_MirrorBoth;
-        
+        collectNames<OMX_MIRRORTYPE>(mirrors, mirrorNames, mirrorTypes);
+
         
         imageFilters["None"] = OMX_ImageFilterNone;
         imageFilters["Noise"] = OMX_ImageFilterNoise;
@@ -354,6 +355,8 @@ private:
         imageFilters["Cartoon"] = OMX_ImageFilterCartoon;
         
         collectNames<OMX_IMAGEFILTERTYPE>(imageFilters, imageFilterNames, imageFilterTypes);
+        
+        
         
         
         whiteBalance["Off"] = OMX_WhiteBalControlOff;

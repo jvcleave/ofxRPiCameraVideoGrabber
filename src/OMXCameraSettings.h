@@ -51,6 +51,23 @@ public:
 		
 		doRecordingPreview = true;
 	}
+    
+    string toString()
+    {
+        stringstream info;
+        info << "width " << width << endl;
+        info << "height " << height << endl;
+        info << "framerate " << framerate << endl;
+        info << "isUsingTexture " << isUsingTexture << endl;
+        info << "enablePixels " << enablePixels << endl;
+        info << "doRecording " << doRecording << endl;
+        info << "doRecordingPreview " << doRecordingPreview << endl;
+        info << "previewWidth " << previewWidth << endl;
+        info << "previewHeight " << previewHeight << endl;
+        info << "recordingFilePath " << recordingFilePath << endl;
+        info << "doConvertToMKV " << doConvertToMKV << endl;
+        return info.str();
+    }
 private:
 	//bool doRecordingPreview;
 };

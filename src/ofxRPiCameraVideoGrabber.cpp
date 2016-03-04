@@ -135,6 +135,45 @@ void ofxRPiCameraVideoGrabber::resetValues()
     
 }
 
+string ofxRPiCameraVideoGrabber::currentStateToString()
+{
+    stringstream info;
+    info << "sharpness " << getSharpness() << endl;
+    info << "contrast " << getContrast() << endl;
+    info << "brightness " << getBrightness() << endl;
+    info << "saturation " << getSaturation() << endl;
+
+    info << "ISO " << getISO() << endl;
+    info << "AutoISO " << getAutoISO() << endl;
+
+    info << "DRE " << getDRE() << endl;
+    info << "cropRectangle " << getCropRectangle() << endl;
+    info << "zoomLevelNormalized " << getZoomLevelNormalized() << endl;
+    info << "mirror " << getMirror() << endl;
+    info << "rotation " << getRotation() << endl;
+    info << "imageFilter " << getImageFilter() << endl;
+    info << "exposurePreset " << getExposurePreset() << endl;
+    info << "evCompensation " << getEvCompensation() << endl;
+    info << "autoShutter " << getAutoShutter() << endl;
+    info << "shutterSpeed " << getShutterSpeed() << endl;
+    info << "meteringType " << getMeteringType() << endl;
+    info << "SoftwareSaturationEnabled " << isSoftwareSaturationEnabled() << endl;
+    info << "SoftwareSharpeningEnabled " << isSoftwareSharpeningEnabled() << endl;
+
+    //OMXCameraSettings
+    info << omxCameraSettings.toString() << endl;
+    return info.str();
+}
+
+void ofxRPiCameraVideoGrabber::saveStateToFile(string fileName)
+{
+    ofBuffer buffer(currentStateToString());
+    if(fileName.empty())
+    {
+        fileName = "STATE_"+ofGetTimestampString()+".txt";
+    }
+    ofBufferToFile(fileName, buffer);    
+}
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
 {
@@ -1081,9 +1120,9 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(int mirrorType)
     return applyMirror();
 }
 
-OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror)
+OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setMirror(string mirror_)
 {
-    return setMirror(GetMirror(mirror));
+    return setMirror(GetMirror(mirror_));
 }
 
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyMirror()
