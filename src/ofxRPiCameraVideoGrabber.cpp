@@ -47,6 +47,7 @@ void ofxRPiCameraVideoGrabber::reset()
     resetValues();
     applyAllSettings();
 }
+
 void ofxRPiCameraVideoGrabber::resetValues()
 {
     ofLogVerbose(__func__) << endl;
@@ -219,15 +220,8 @@ void ofxRPiCameraVideoGrabber::applyAllSettings()
         LED = true;
         setLEDState(LED);
     } 
-
-    
-    
-    
-
-    
-        
-    
 }
+
 string ofxRPiCameraVideoGrabber::getLEDPin()
 {
     //default as RPI1 GPIO Layout
@@ -265,7 +259,6 @@ string ofxRPiCameraVideoGrabber::getLEDPin()
         }
     }
     
-    ofLogVerbose(__func__) << "result: " << result;
     return result;
     
 }
@@ -544,10 +537,6 @@ void ofxRPiCameraVideoGrabber::setSaturation(int saturation_) //-100 to 100
 
 }
 
-
-
-
-
 OMX_ERRORTYPE ofxRPiCameraVideoGrabber::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
 	
@@ -751,10 +740,12 @@ void ofxRPiCameraVideoGrabber::setFlickerCancellation(bool enable)
     }
     
 }
+
 void ofxRPiCameraVideoGrabber::enableFlickerCancellation()
 {
     setFlickerCancellation(true);
 }
+
 void ofxRPiCameraVideoGrabber::disableFlickerCancellation()
 {
     setFlickerCancellation(false);
@@ -1278,7 +1269,6 @@ bool ofxRPiCameraVideoGrabber::getAutoShutter()
 {
     return fromOMXBool(exposureConfig.bAutoShutterSpeed);
 }
-
 
 int ofxRPiCameraVideoGrabber::getShutterSpeed()
 {
