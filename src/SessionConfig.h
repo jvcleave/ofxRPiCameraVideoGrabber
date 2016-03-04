@@ -15,10 +15,10 @@ public:
     }
     void createSettings()
     {
-        for(auto iterator = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
+        for(map<string, string>::iterator it=keyValueMap.begin(); it != keyValueMap.end(); it++) 
         {
-            string key = iterator->first;
-            string value = iterator->second;
+            string key = it->first;
+            string value = it->second;
             
             if(key == "width")
             {
@@ -67,10 +67,10 @@ public:
     void applySettings(ofxRPiCameraVideoGrabber* videoGrabber)
     {
         if(!videoGrabber) return;
-        for(auto iterator  = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
+        for(map<string, string>::iterator it=keyValueMap.begin(); it != keyValueMap.end(); it++) 
         {
-            string key = iterator->first;
-            string value = iterator->second;
+            string key = it->first;
+            string value = it->second;
 
             if(key == "sharpness")
             {
@@ -177,16 +177,20 @@ public:
         if(file.exists())
         {
             ofBuffer buffer(file);
-            for (ofBuffer::Line it = buffer.getLines().begin(), end = buffer.getLines().end(); it != end; ++it) 
+            while(buffer.isLastLine() == false) 
             {
-                string line = *it;
-                vector<string> keyValuePairs = ofSplitString(line, " ");
-                if(keyValuePairs.size() == 2)
+                
+                string line = buffer.getNextLine();
+                if(!line.empty())
                 {
-                    
-                    string key = keyValuePairs[0];
-                    string value = keyValuePairs[1]; 
-                    keyValueMap[key] = value;
+                    vector<string> keyValuePairs = ofSplitString(line, " ");
+                    if(keyValuePairs.size() == 2)
+                    {
+                        
+                        string key = keyValuePairs[0];
+                        string value = keyValuePairs[1]; 
+                        keyValueMap[key] = value;
+                    }
                 }
             }
             createSettings();
