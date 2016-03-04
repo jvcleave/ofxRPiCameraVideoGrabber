@@ -1,0 +1,31 @@
+sharpness -6
+contrast 14
+brightness 58
+saturation 28
+ISO 400
+AutoISO 0
+DRE 1
+cropRectangle 0, 0, 0, 81, 81
+zoomLevelNormalized 0.0163934
+mirror 
+rotation 180
+imageFilter OilPaint
+exposurePreset LargeAperture
+evCompensation 1
+autoShutter 1
+shutterSpeed 0
+meteringType Backlit
+SoftwareSaturationEnabled 0
+SoftwareSharpeningEnabled 0
+width 1280
+height 720
+framerate 30
+isUsingTexture 1
+enablePixels 0
+doRecording 0
+doRecordingPreview 0
+previewWidth 1280
+previewHeight 720
+recordingFilePath 
+doConvertToMKV 0
+
