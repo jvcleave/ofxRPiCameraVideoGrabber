@@ -46,10 +46,10 @@ int NonTextureEngine::getFrameCounter()
 }
 
 
-void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings)
+void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
 	
-	this->omxCameraSettings = omxCameraSettings;
+	omxCameraSettings = omxCameraSettings_;
 	
 	if (omxCameraSettings.doRecordingPreview) 
 	{
@@ -134,7 +134,10 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	
-	
+	if(omxCameraSettings.doRecording)
+    {
+        omxCameraSettings.doRecordingPreview = true;
+    }
 	
 	if (omxCameraSettings.doRecording) 
 	{		
@@ -345,8 +348,27 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 NonTextureEngine::~NonTextureEngine()
 {
     ofLogVerbose(__func__) << "START";
-    
     OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    if(omxCameraSettings.doRecording && !didWriteFile)
+    {
+        writeFile();
+        
+    }
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&encoder);
+        OMX_TRACE(error);
+    }
+    
+    
     error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
     
@@ -359,20 +381,57 @@ NonTextureEngine::~NonTextureEngine()
     error = DisableAllPortsForComponent(&camera);
     OMX_TRACE(error);
     
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+        
+    }
+    
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&render);
     OMX_TRACE(error);
+   
+    
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SetupTunnel(encoder, VIDEO_ENCODE_INPUT_PORT, NULL, 0);
+        OMX_TRACE(error);
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        if (omxCameraSettings.doRecordingPreview) 
+        {
+            error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, NULL, 0);
+            OMX_TRACE(error);
+        
+        }
+    }else
+    {
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
+        OMX_TRACE(error);
+    }
+
     
     
-    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
-    OMX_TRACE(error);
+    
     error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT,  NULL, 0);
     OMX_TRACE(error);
     
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_FreeHandle(encoder);
+        OMX_TRACE(error);
+        
+    }
     
     error = OMX_FreeHandle(render);
     OMX_TRACE(error);

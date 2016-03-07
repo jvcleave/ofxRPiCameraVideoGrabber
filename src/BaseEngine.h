@@ -32,8 +32,9 @@ public:
 	
 	bool isOpen;
 	virtual int getFrameCounter() = 0;
+    OMXCameraSettings omxCameraSettings;
 protected:
-	OMXCameraSettings omxCameraSettings;
+	
 
 	void configureCameraResolution();
 	void configureEncoder();

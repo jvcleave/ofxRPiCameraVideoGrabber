@@ -9,7 +9,7 @@ class NonTextureEngine: public BaseEngine
 public:
 	NonTextureEngine();
 	~NonTextureEngine();
-	void setup(OMXCameraSettings& omxCameraSettings);
+	void setup(OMXCameraSettings&);
 
 	
 	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();

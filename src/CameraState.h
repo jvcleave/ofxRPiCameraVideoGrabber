@@ -19,7 +19,7 @@ public:
         {
             string key = iterator->first;
             string value = iterator->second;
-            ofLogVerbose(__func__) << "key: " << key << " value: " << value;
+            //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
             if(key == "width")              cameraSettings.width                = ofToInt(value);
             if(key == "height")             cameraSettings.height               = ofToInt(value);
@@ -52,7 +52,7 @@ public:
                 
                 string key = keyValuePairs[0];
                 string value = keyValuePairs[1];
-                ofLogVerbose(__func__) << "key: " << key << " value: " << value;
+                //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
                 keyValueMap[key] = value;
             }

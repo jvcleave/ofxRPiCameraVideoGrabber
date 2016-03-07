@@ -64,6 +64,9 @@ public:
     GLuint getTextureID();
     ofTexture& getTextureReference();
     
+    bool recordingRequested;
+    bool isRecording();
+    void startRecording();
     void stopRecording();
     void enablePixels();
     void disablePixels();
@@ -75,7 +78,9 @@ public:
     bool isReady();
     
     void draw();
-	
+    void draw(int x, int y);
+	void draw(int x, int y, int width, int height);
+    
     void reset();
     void close();
     

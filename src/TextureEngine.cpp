@@ -39,9 +39,10 @@ int TextureEngine::getFrameCounter()
 	
 }
 
-void TextureEngine::setup(OMXCameraSettings& omxCameraSettings)
+void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
-	this->omxCameraSettings = omxCameraSettings;
+	omxCameraSettings = omxCameraSettings_;
+    ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
 	generateEGLImage();
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -266,13 +267,13 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		
 	}
 	
-	//Create camera->splitter Tunnel
-	//error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
-    //OMX_TRACE(error);
-
 	
 	if(omxCameraSettings.doRecording)
 	{
+        //Create camera->splitter Tunnel
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+        OMX_TRACE(error);
+        
 		// Tunnel splitter2 output port and encoder input port
 		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODE_INPUT_PORT);
         OMX_TRACE(error);

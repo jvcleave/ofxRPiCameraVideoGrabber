@@ -40,6 +40,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	directEngine = NULL;
     camera = NULL;
 	pixelsRequested = false;
+    recordingRequested = false;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 }
 
@@ -195,7 +196,7 @@ void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
     {
         string key = iterator->first;
         string value = iterator->second;
-        ofLogVerbose() << "key: " << key << " value: " << value;
+        //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
         if(key == "sharpness")  setSharpness(ofToInt(value));
         if(key == "contrast")   setContrast(ofToInt(value));
@@ -239,6 +240,11 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     OMX_TRACE(error);
     
     omxCameraSettings = omxCameraSettings_;
+    
+    ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
+
+    
+    
     if(!hasAddedExithandler)
     {
         addExitHandler();
@@ -430,6 +436,14 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 			}
 		}
 	}
+    if (recordingRequested) 
+    {
+        recordingRequested = false;
+        CameraState currentState = getCameraState();
+        currentState.cameraSettings.doRecording = true;
+        //ofLogVerbose() << "CALLING SETUP: " << currentStateToString();
+        setup(currentState);
+    }
 	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
 
@@ -519,6 +533,46 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 
 #pragma mark RECORDING
 
+
+bool ofxRPiCameraVideoGrabber::isRecording()
+{
+   
+    if (!directEngine && !textureEngine)
+    {
+        return false;
+    }
+    
+    bool result = false;
+    if (directEngine) 
+    {
+        result = directEngine->omxCameraSettings.doRecording;
+    }
+    if (textureEngine) 
+    {
+       result =  textureEngine->omxCameraSettings.doRecording;
+    }
+    return result;
+    
+    
+}
+
+void ofxRPiCameraVideoGrabber::startRecording()
+{
+    if (!directEngine && !textureEngine)
+    {
+        return;
+    }
+    bool isCurrentlyRecording = isRecording();
+    ofLogVerbose(__func__) << "isCurrentlyRecording: " << isCurrentlyRecording;
+    if(!isCurrentlyRecording)
+    {
+        recordingRequested = true;
+    }
+    
+
+}
+
+
 void ofxRPiCameraVideoGrabber::stopRecording()
 {
 	if (directEngine) 
@@ -541,6 +595,24 @@ void ofxRPiCameraVideoGrabber::draw()
 	textureEngine->tex.draw(0, 0);
 }
 
+void ofxRPiCameraVideoGrabber::draw(int x, int y)
+{
+    if (!textureEngine)
+    {
+        return;
+    }
+    textureEngine->tex.draw(x, y);
+}
+
+
+void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
+{
+    if (!textureEngine)
+    {
+        return;
+    }
+    textureEngine->tex.draw(x, y, width, height);
+}
 
 #pragma mark IMAGE ENHANCEMENT
 
@@ -1031,7 +1103,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyExposure(string caller)
        autoISO          = fromOMXBool(exposureConfig.bAutoSensitivity);
        ISO              = exposureConfig.nSensitivity;
     }*/
-    ofLogVerbose(__func__) << printExposure();
+    //ofLogVerbose(__func__) << printExposure();
     
     return error;
 }
