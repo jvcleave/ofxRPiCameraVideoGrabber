@@ -37,7 +37,8 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	frameCounter = 0;
 	hasNewFrame = false;
 	textureEngine = NULL;
-	engine = NULL;
+	directEngine = NULL;
+    camera = NULL;
 	pixelsRequested = false;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 }
@@ -165,6 +166,17 @@ string ofxRPiCameraVideoGrabber::currentStateToString()
     return info.str();
 }
 
+
+
+
+SessionConfig ofxRPiCameraVideoGrabber::getSessionConfig()
+{
+    SessionConfig sessionConfig;
+    sessionConfig.setup(currentStateToString());
+    return sessionConfig;    
+}
+
+
 void ofxRPiCameraVideoGrabber::saveStateToFile(string fileName)
 {
     ofBuffer buffer(currentStateToString());
@@ -175,22 +187,76 @@ void ofxRPiCameraVideoGrabber::saveStateToFile(string fileName)
     ofBufferToFile(fileName, buffer);    
 }
 
-void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
+void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig)
 {
-    
-    addExitHandler();
-    OMX_ERRORTYPE error = OMX_Init();
-    if (error == OMX_ErrorNone) 
+    setup(sessionConfig.cameraSettings);
+    map<string, string> keyValueMap = sessionConfig.keyValueMap;
+    for(auto iterator  = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
     {
-        ofLogVerbose(__func__) << "OMX_Init PASS";
+        string key = iterator->first;
+        string value = iterator->second;
+        ofLogVerbose() << "key: " << key << " value: " << value;
+
+        if(key == "sharpness")  setSharpness(ofToInt(value));
+        if(key == "contrast")   setContrast(ofToInt(value));
+        if(key == "brightness") setBrightness(ofToInt(value));
+        if(key == "saturation") setSaturation(ofToInt(value));
+        if(key == "ISO")        setISO(ofToInt(value));
+        if(key == "AutoISO")    setAutoISO(ofToBool(value));
+        if(key == "DRE")        setDRE(ofToInt(value));
+        if(key == "cropRectangle") 
+        {
+            vector<string> rectValues = ofSplitString(value, ",");
+            if(rectValues.size() == 4)             
+            {
+                setSensorCrop(ofToInt(rectValues[0]),
+                                            ofToInt(rectValues[1]),
+                                            ofToInt(rectValues[2]),
+                                            ofToInt(rectValues[3])); 
+            }
+        }
+        if(key == "zoomLevelNormalized")    setZoomLevelNormalized(ofToFloat(value));
+        if(key == "mirror")                 setMirror(value);
+        if(key == "rotation")               setRotation(ofToInt(value));
+        if(key == "imageFilter")            setImageFilter(value);
+        if(key == "exposurePreset")         setExposurePreset(value);
+        if(key == "evCompensation")         setEvCompensation(ofToInt(value));
+        if(key == "autoShutter")            setAutoShutter(ofToBool(value));
+        if(key == "shutterSpeed")           setShutterSpeed(ofToInt(value));
+        if(key == "meteringType")           setMeteringType(value);
+        
+        if(key == "SoftwareSaturationEnabled") setSoftwareSaturation(ofToBool(value));
+        if(key == "SoftwareSharpeningEnabled") setSoftwareSharpening(ofToBool(value));
+    }
+}
+
+void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    omxCameraSettings = omxCameraSettings_;
+    if(!directEngine && !textureEngine)
+    {
+        addExitHandler();
+        OMX_ERRORTYPE error = OMX_Init();
+        OMX_TRACE(error);
+    }else
+    {
+        reset();
     }
     
-    
-    
-    this->omxCameraSettings = omxCameraSettings;
     if (omxCameraSettings.isUsingTexture) 
     {
-        textureEngine = new TextureEngine();
+        if(directEngine)
+        {
+            delete directEngine;
+            directEngine = NULL;
+            camera = NULL;
+        }
+        if(!textureEngine)
+        {
+           textureEngine = new TextureEngine();     
+        }
+        
         textureEngine->setup(omxCameraSettings);
         camera = textureEngine->camera;
         if (omxCameraSettings.enablePixels) 
@@ -199,9 +265,18 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings)
         }
     }else 
     {
-        engine = new NonTextureEngine();
-        engine->setup(omxCameraSettings);
-        camera = engine->camera;
+        if(textureEngine)
+        {
+            delete textureEngine;
+            textureEngine = NULL;
+            camera = NULL;
+        }
+        if(!directEngine)
+        {
+            directEngine = new NonTextureEngine();     
+        }
+        directEngine->setup(omxCameraSettings);
+        camera = directEngine->camera;
     }
     checkBurstMode();
     error = applyExposure(__func__);
@@ -305,9 +380,9 @@ string ofxRPiCameraVideoGrabber::getLEDPin()
 bool ofxRPiCameraVideoGrabber::isReady()
 {
     
-    if (engine) 
+    if (directEngine) 
     {
-        return engine->isOpen;
+        return directEngine->isOpen;
     }
     
     if (textureEngine) 
@@ -327,9 +402,9 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 		
 	}else
 	{
-		if (engine) 
+		if (directEngine) 
 		{
-			frameCounter  = engine->getFrameCounter();
+			frameCounter  = directEngine->getFrameCounter();
 		}
 	}
 	
@@ -443,9 +518,9 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 
 void ofxRPiCameraVideoGrabber::stopRecording()
 {
-	if (engine) 
+	if (directEngine) 
 	{
-		engine->stopRecording();
+		directEngine->stopRecording();
 	}
 	if (textureEngine) 
 	{
@@ -1402,11 +1477,11 @@ void ofxRPiCameraVideoGrabber::close()
     
     cout << "ofxRPiCameraVideoGrabber::close" << endl;
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
-    if(engine)
+    if(directEngine)
     {
-        cout << "~ofxRPiCameraVideoGrabber delete engine" << endl;
-        delete engine;
-        engine = NULL;
+        cout << "~ofxRPiCameraVideoGrabber delete directEngine" << endl;
+        delete directEngine;
+        directEngine = NULL;
     }
     if(textureEngine)
     {

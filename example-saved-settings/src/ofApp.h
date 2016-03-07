@@ -22,6 +22,7 @@ class ofApp : public ofBaseApp, public KeyListener{
     SessionConfig sessionConfig;
 	
 	bool doDrawInfo;
-		
+    ofDirectory dataFolder;	
+    vector<ofFile> configFiles;
 };
 

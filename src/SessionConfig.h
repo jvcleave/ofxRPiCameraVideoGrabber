@@ -1,6 +1,6 @@
 #pragma once
 #include "ofMain.h"
-#include "ofxRPiCameraVideoGrabber.h"
+//#include "ofxRPiCameraVideoGrabber.h"
 
 
 class SessionConfig
@@ -19,180 +19,57 @@ public:
         {
             string key = iterator->first;
             string value = iterator->second;
-            
-            if(key == "width")
-            {
-                cameraSettings.width = ofToInt(value);
-            }
-            if(key == "height")
-            {
-                cameraSettings.height = ofToInt(value);
-            }
-            if(key == "framerate")
-            {
-                cameraSettings.framerate = ofToInt(value);
-            }
-            if(key == "isUsingTexture")
-            {
-                cameraSettings.isUsingTexture = ofToBool(value);
-            }
-            if(key == "enablePixels")
-            {
-                cameraSettings.enablePixels = ofToBool(value);
-            }
-            if(key == "doRecording")
-            {
-                cameraSettings.doRecording = ofToBool(value);
-            }
-            if(key == "previewWidth")
-            {
-                cameraSettings.previewWidth = ofToInt(value);
-            }
-            if(key == "previewHeight")
-            {
-                cameraSettings.previewHeight = ofToInt(value);
-            }
-            if(key == "recordingFilePath")
-            {
-                cameraSettings.recordingFilePath = value;
-            }
-            if(key == "doConvertToMKV")
-            {
-                cameraSettings.doConvertToMKV = ofToBool(value);
-            }
+            ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
+            if(key == "width")              cameraSettings.width                = ofToInt(value);
+            if(key == "height")             cameraSettings.height               = ofToInt(value);
+            if(key == "framerate")          cameraSettings.framerate            = ofToInt(value);
+            if(key == "isUsingTexture")     cameraSettings.isUsingTexture       = ofToBool(value);
+            if(key == "enablePixels")       cameraSettings.enablePixels         = ofToBool(value);
+            if(key == "doRecording")        cameraSettings.doRecording          = ofToBool(value);
+            if(key == "previewWidth")       cameraSettings.previewWidth         = ofToInt(value);
+            if(key == "previewHeight")      cameraSettings.previewHeight        = ofToInt(value);
+            if(key == "recordingFilePath")  cameraSettings.recordingFilePath    = value;
+            if(key == "doConvertToMKV")     cameraSettings.doConvertToMKV       = ofToBool(value);
         }
     }
     
-    void applySettings(ofxRPiCameraVideoGrabber* videoGrabber)
+    void setup(string currentState)
     {
-        if(!videoGrabber) return;
-        for(auto iterator  = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
+        ofBuffer buffer(currentState);
+        setup(buffer);        
+    }
+    
+    void setup(ofBuffer buffer)
+    {
+        ofLogVerbose(__func__) << "buffer: " << buffer.getText();
+        for (ofBuffer::Line it = buffer.getLines().begin(), end = buffer.getLines().end(); it != end; ++it) 
         {
-            string key = iterator->first;
-            string value = iterator->second;
-
-            if(key == "sharpness")
+            string line = *it;
+            vector<string> keyValuePairs = ofSplitString(line, " ");
+            if(keyValuePairs.size() == 2)
             {
-                videoGrabber->setSharpness(ofToInt(value));
-            }
-            if(key == "contrast")
-            {
-                videoGrabber->setContrast(ofToInt(value));
-            }   
-            if(key == "brightness")
-            {
-                videoGrabber->setBrightness(ofToInt(value));
-            }   
-            if(key == "saturation")
-            {
-                videoGrabber->setSaturation(ofToInt(value));
-            }
-            if(key == "ISO")
-            {
-                videoGrabber->setISO(ofToInt(value));
-            } 
-            if(key == "AutoISO")
-            {
-                videoGrabber->setAutoISO(ofToBool(value));
-            } 
-            if(key == "DRE")
-            {
-                videoGrabber->setDRE(ofToInt(value));
-            } 
-            if(key == "cropRectangle")
-            {
-                vector<string> rectValues = ofSplitString(value, ",");
-                if(rectValues.size() == 4)
-                {
-                    videoGrabber->setSensorCrop(ofToInt(rectValues[0]),
-                                               ofToInt(rectValues[1]),
-                                               ofToInt(rectValues[2]),
-                                               ofToInt(rectValues[3])); 
-                }
                 
-            }
-            if(key == "zoomLevelNormalized")
-            {
-                videoGrabber->setZoomLevelNormalized(ofToFloat(value));
-            }
-            
-            if(key == "mirror")
-            {
-                videoGrabber->setMirror(value);
-            }
-            if(key == "rotation")
-            {
-                videoGrabber->setRotation(ofToInt(value));
-            }   
-            
-            if(key == "imageFilter")
-            {
-                videoGrabber->setImageFilter(value);
-            }
+                string key = keyValuePairs[0];
+                string value = keyValuePairs[1];
+                ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
-            if(key == "exposurePreset")
-            {
-                videoGrabber->setExposurePreset(value);
-            }
-
-            if(key == "evCompensation")
-            {
-                videoGrabber->setEvCompensation(ofToInt(value));
-            }
-            
-            if(key == "autoShutter")
-            {
-                videoGrabber->setAutoShutter(ofToBool(value));
-            }
-            
-            if(key == "shutterSpeed")
-            {
-                videoGrabber->setShutterSpeed(ofToInt(value));
-            }
-            
-            if(key == "meteringType")
-            {
-                videoGrabber->setMeteringType(value);
-            }
-            
-            if(key == "SoftwareSaturationEnabled")
-            {
-                videoGrabber->setSoftwareSaturation(ofToBool(value));
-            }
-            
-            if(key == "SoftwareSharpeningEnabled")
-            {
-                videoGrabber->setSoftwareSharpening(ofToBool(value));
+                keyValueMap[key] = value;
             }
         }
-                
-}
+        createSettings();
+    }
     
-    void loadFile(string filePath, ofxRPiCameraVideoGrabber* videoGrabber)
+    void setup(ofFile file)
     {
-        if(!videoGrabber) return;
-        
-        ofFile file(filePath);
+        ofLogVerbose(__func__) << "file: " << file.path();
+
         if(file.exists())
         {
-            ofBuffer buffer(file);
-            for (ofBuffer::Line it = buffer.getLines().begin(), end = buffer.getLines().end(); it != end; ++it) 
-            {
-                string line = *it;
-                vector<string> keyValuePairs = ofSplitString(line, " ");
-                if(keyValuePairs.size() == 2)
-                {
-                    
-                    string key = keyValuePairs[0];
-                    string value = keyValuePairs[1]; 
-                    keyValueMap[key] = value;
-                }
-            }
-            createSettings();
-            videoGrabber->setup(cameraSettings);
-            applySettings(videoGrabber);
+            ofBuffer buffer = ofBufferFromFile(file.path(), false);
             
+            //ofBuffer buffer(file);
+            setup(buffer);
         }
     }
     

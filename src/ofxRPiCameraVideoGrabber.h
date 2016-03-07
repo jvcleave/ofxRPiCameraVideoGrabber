@@ -23,6 +23,7 @@
 
 #include "TextureEngine.h"
 #include "NonTextureEngine.h"
+#include "SessionConfig.h"
 
 
 enum MIRROR
@@ -53,8 +54,8 @@ public:
     OMXCameraSettings omxCameraSettings;
     //CameraMetering metering;
     
-    void setup(OMXCameraSettings omxCameraSettings);
-    
+    void setup(OMXCameraSettings);
+    void setup(SessionConfig);
     int getWidth();
     int getHeight();
     int getFrameRate();
@@ -69,7 +70,7 @@ public:
     unsigned char * getPixels();
     
     TextureEngine* textureEngine;
-    NonTextureEngine* engine;
+    NonTextureEngine* directEngine;
     
     bool isReady();
     
@@ -155,7 +156,6 @@ public:
     
     OMX_ERRORTYPE setShutterSpeed(int shutterSpeedMicroSeconds);
     
-   //OMX_ERRORTYPE setMeteringMode(CameraMetering);
     OMX_ERRORTYPE setMeteringType(OMX_METERINGTYPE);
     OMX_ERRORTYPE setMeteringType(string);
     string getMeteringType();
@@ -188,6 +188,8 @@ public:
 
     string currentStateToString();
     void saveStateToFile(string fileName="");
+    
+    SessionConfig getSessionConfig();
     
 private:
 
