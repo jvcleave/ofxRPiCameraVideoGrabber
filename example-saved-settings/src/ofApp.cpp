@@ -1,17 +1,25 @@
 #include "ofApp.h"
 
+
 //--------------------------------------------------------------
 void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-    ofSetLogLevel("ofThread", OF_LOG_ERROR);
 	doDrawInfo	= true;
-	
+    //currentConfigFileIndex = 0;
+    //doSwitchConfig = false;
 	consoleListener.setup(this);
-    ofFile settingsFile("STATE_2016-03-04-18-31-10-762.txt");
     
-    sessionConfig.loadFile(settingsFile.path(), &videoGrabber);
-	
+    ofDirectory dataFolder(ofToDataPath(""));
+    
+    configFiles  = dataFolder.getFiles();
+    for(size_t i=0; i<configFiles.size(); i++)
+    {
+        ofLogVerbose(__func__) << configFiles[i].path();
+    }
+    int currentConfigFileIndex = ofRandom(0, configFiles.size());
+    sessionConfig.setup(configFiles[currentConfigFileIndex]);
+    videoGrabber.setup(sessionConfig);
 
 
 
@@ -20,7 +28,22 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	
+    /*
+	if(doSwitchConfig)
+    {
+        doSwitchConfig = false;
+        if (currentConfigFileIndex+1 < configFiles.size()) 
+        {
+            currentConfigFileIndex++;
+        }else
+        {
+            currentConfigFileIndex=0;
+        }
+        SessionConfig sessionConfig;
+        sessionConfig.setup(configFiles[currentConfigFileIndex]);
+        videoGrabber.setup(sessionConfig);
+        
+    }*/
 
 }
 
@@ -55,6 +78,10 @@ void ofApp::keyPressed  (int key)
 	{
 		doDrawInfo = !doDrawInfo;
 	}
+    if (key == 's')
+    {
+        //doSwitchConfig = true;
+    }
 
 }
 
