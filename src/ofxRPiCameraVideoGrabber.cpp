@@ -32,7 +32,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
     
     cropRectangle.set(0,0,100,100);
 
-
+    hasAddedExithandler = false;
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -169,11 +169,11 @@ string ofxRPiCameraVideoGrabber::currentStateToString()
 
 
 
-SessionConfig ofxRPiCameraVideoGrabber::getSessionConfig()
+CameraState ofxRPiCameraVideoGrabber::getCameraState()
 {
-    SessionConfig sessionConfig;
-    sessionConfig.setup(currentStateToString());
-    return sessionConfig;    
+    CameraState cameraState;
+    cameraState.setup(currentStateToString());
+    return cameraState;    
 }
 
 
@@ -187,10 +187,10 @@ void ofxRPiCameraVideoGrabber::saveStateToFile(string fileName)
     ofBufferToFile(fileName, buffer);    
 }
 
-void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig)
+void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
 {
-    setup(sessionConfig.cameraSettings);
-    map<string, string> keyValueMap = sessionConfig.keyValueMap;
+    setup(cameraState.cameraSettings);
+    map<string, string> keyValueMap = cameraState.keyValueMap;
     for(auto iterator  = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
     {
         string key = iterator->first;
@@ -232,31 +232,39 @@ void ofxRPiCameraVideoGrabber::setup(SessionConfig sessionConfig)
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
+    ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
+
     OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_Init();
+    OMX_TRACE(error);
+    
     omxCameraSettings = omxCameraSettings_;
-    if(!directEngine && !textureEngine)
+    if(!hasAddedExithandler)
     {
         addExitHandler();
-        OMX_ERRORTYPE error = OMX_Init();
-        OMX_TRACE(error);
-    }else
+        hasAddedExithandler = true; 
+    }
+    if(directEngine)
     {
-        reset();
+        delete directEngine;
+        directEngine = NULL;
+        camera = NULL;
+        ofLogVerbose() << "deleted directEngine";
+        resetValues();
+    }
+    if(textureEngine)
+    {
+        delete textureEngine;
+        textureEngine = NULL;
+        camera = NULL;
+        ofLogVerbose() << "deleted textureEngine";
+        resetValues();
     }
     
     if (omxCameraSettings.isUsingTexture) 
     {
-        if(directEngine)
-        {
-            delete directEngine;
-            directEngine = NULL;
-            camera = NULL;
-        }
-        if(!textureEngine)
-        {
-           textureEngine = new TextureEngine();     
-        }
         
+        textureEngine = new TextureEngine(); 
         textureEngine->setup(omxCameraSettings);
         camera = textureEngine->camera;
         if (omxCameraSettings.enablePixels) 
@@ -265,24 +273,19 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         }
     }else 
     {
-        if(textureEngine)
-        {
-            delete textureEngine;
-            textureEngine = NULL;
-            camera = NULL;
-        }
-        if(!directEngine)
-        {
-            directEngine = new NonTextureEngine();     
-        }
+        
+        directEngine = new NonTextureEngine(); 
         directEngine->setup(omxCameraSettings);
         camera = directEngine->camera;
     }
+    
     checkBurstMode();
     error = applyExposure(__func__);
     OMX_TRACE(error);
     checkFlickerCancellation();
     applyAllSettings();
+    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
+
 }
 
 void ofxRPiCameraVideoGrabber::applyAllSettings()
@@ -1000,6 +1003,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyExposure(string caller)
     OMX_ERRORTYPE error = OMX_ErrorNone;
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposureConfig);
     OMX_TRACE(error);
+#if 0
     stringstream info;
     info << "eMetering: " << exposureConfig.eMetering << endl;
     info << "bAutoShutterSpeed: " << exposureConfig.xEVCompensation << endl;
@@ -1015,7 +1019,7 @@ OMX_ERRORTYPE ofxRPiCameraVideoGrabber::applyExposure(string caller)
     info << "ISO: " << ISO << endl;
     ofLogVerbose(__func__) << " caller: " << caller;
     ofLogVerbose(__func__) << " info: " << info.str();
-
+#endif
     /*if (error == OMX_ErrorNone) 
     {
        meteringType     = exposureConfig.eMetering;

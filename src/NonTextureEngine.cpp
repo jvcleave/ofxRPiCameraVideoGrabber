@@ -46,6 +46,7 @@ int NonTextureEngine::getFrameCounter()
 	return frameCounter;
 }
 
+
 void NonTextureEngine::setup(OMXCameraSettings& omxCameraSettings)
 {
 	
@@ -321,6 +322,7 @@ OMX_ERRORTYPE NonTextureEngine::setupDisplay()
 
 OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 {
+    OMX_ERRORTYPE error = OMX_ErrorNone;
 	//Set up renderer
 	OMX_CALLBACKTYPE renderCallbacks;
 	renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
@@ -329,14 +331,54 @@ OMX_ERRORTYPE NonTextureEngine::setupRenderer()
 	
 	string renderComponentName = "OMX.broadcom.video_render";
 	
-	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	DisableAllPortsForComponent(&render);
-	
+	error = OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+    OMX_TRACE(error);
+	error = DisableAllPortsForComponent(&render);
+    OMX_TRACE(error);
+
 	//Set renderer to Idle
-	OMX_ERRORTYPE error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
 
 	return error;
+}
+
+NonTextureEngine::~NonTextureEngine()
+{
+    ofLogVerbose(__func__) << "START";
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&camera);
+    OMX_TRACE(error);
+    
+    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&render);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
+    error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
+    
+    error = OMX_FreeHandle(camera);
+    OMX_TRACE(error);
+    
+    error = OMX_FreeHandle(render);
+    OMX_TRACE(error);
+    
+    isOpen = false;
+    ofLogVerbose(__func__) << "END";
+    
 }
 
 

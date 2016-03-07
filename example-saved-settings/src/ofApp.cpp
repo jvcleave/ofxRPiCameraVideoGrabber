@@ -6,8 +6,8 @@ void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	doDrawInfo	= true;
-    //currentConfigFileIndex = 0;
-    //doSwitchConfig = false;
+    currentConfigFileIndex = 0;
+    doSwitchConfig = false;
 	consoleListener.setup(this);
     
     ofDirectory dataFolder(ofToDataPath(""));
@@ -17,9 +17,9 @@ void ofApp::setup()
     {
         ofLogVerbose(__func__) << configFiles[i].path();
     }
-    int currentConfigFileIndex = ofRandom(0, configFiles.size());
-    sessionConfig.setup(configFiles[currentConfigFileIndex]);
-    videoGrabber.setup(sessionConfig);
+    currentConfigFileIndex = ofRandom(0, configFiles.size());
+    cameraState.setup(configFiles[currentConfigFileIndex]);
+    videoGrabber.setup(cameraState);
 
 
 
@@ -28,7 +28,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-    /*
+    
 	if(doSwitchConfig)
     {
         doSwitchConfig = false;
@@ -39,11 +39,10 @@ void ofApp::update()
         {
             currentConfigFileIndex=0;
         }
-        SessionConfig sessionConfig;
-        sessionConfig.setup(configFiles[currentConfigFileIndex]);
-        videoGrabber.setup(sessionConfig);
+        cameraState.setup(configFiles[currentConfigFileIndex]);
+        videoGrabber.setup(cameraState);
         
-    }*/
+    }
 
 }
 
@@ -80,7 +79,7 @@ void ofApp::keyPressed  (int key)
 	}
     if (key == 's')
     {
-        //doSwitchConfig = true;
+        doSwitchConfig = true;
     }
 
 }

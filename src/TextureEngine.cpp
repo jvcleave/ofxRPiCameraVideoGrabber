@@ -14,6 +14,8 @@ TextureEngine::TextureEngine()
 	isOpen		= false;
 	textureID	= 0;
 	eglBuffer	= NULL;
+    eglImage = NULL;
+
 	renderedFrameCounter = 0;
 	recordedFrameCounter = 0;
 	
@@ -214,9 +216,11 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
 
 		string splitterComponentName = "OMX.broadcom.video_splitter";
-		OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
-		DisableAllPortsForComponent(&splitter);
-		
+		error = OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
+        OMX_TRACE(error);
+		error =DisableAllPortsForComponent(&splitter);
+        OMX_TRACE(error);
+
 		//Set splitter to Idle
 		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
         OMX_TRACE(error);
@@ -233,9 +237,12 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	
 	string renderComponentName = "OMX.broadcom.egl_render";
 	
-	OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-	DisableAllPortsForComponent(&render);
-	
+	error = OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+    OMX_TRACE(error);
+
+	error = DisableAllPortsForComponent(&render);
+    OMX_TRACE(error);
+
 	//Set renderer to Idle
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
@@ -261,8 +268,8 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	}
 	
 	//Create camera->splitter Tunnel
-	error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
-    OMX_TRACE(error);
+	//error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+    //OMX_TRACE(error);
 
 	
 	if(omxCameraSettings.doRecording)
@@ -406,13 +413,139 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 }
 
 
+#if 0
+ofLogVerbose(__func__) << "START";
+OMX_ERRORTYPE error = OMX_ErrorNone;
+if(omxCameraSettings.doRecording)
+{
+    //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+    //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+}
 
+if(omxCameraSettings.doRecording && !didWriteFile)
+{
+    writeFile();
+    
+}
+
+ofLogVerbose(__func__) << "OMX BREAKDOWN START";
+
+error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+OMX_TRACE(error);
+if(omxCameraSettings.doRecording)
+{
+    error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+    OMX_TRACE(error);
+    error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+}
+
+if(omxCameraSettings.doRecording)
+{
+    error = DisableAllPortsForComponent(&encoder);
+    OMX_TRACE(error);
+    
+}
+error = DisableAllPortsForComponent(&camera);
+OMX_TRACE(error);
+if(omxCameraSettings.doRecording)
+{
+    error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+    OMX_TRACE(error);
+    
+}
+
+error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+OMX_TRACE(error);
+
+if(omxCameraSettings.doRecording)
+{
+    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+}
+
+error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+OMX_TRACE(error);
+
+if(omxCameraSettings.doRecording)
+{
+    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    OMX_TRACE(error);
+    
+}
+
+error = OMX_FreeHandle(camera);
+OMX_TRACE(error);
+
+if(omxCameraSettings.doRecording)
+{
+    error = OMX_FreeHandle(encoder);
+    OMX_TRACE(error);
+    
+}
+error = OMX_FreeHandle(render);
+OMX_TRACE(error);
+
+ofLogVerbose(__func__) << "OMX BREAKDOWN END";
+ofLogVerbose(__func__) << " END";
+isOpen = false;
+#endif
 
 TextureEngine::~TextureEngine()
 {
+    ofLogVerbose(__func__) << "START isThreadRunning() " << isThreadRunning();
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&camera);
+    OMX_TRACE(error);
+    
+    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&render);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
+    error = OMX_SetupTunnel(render, EGL_RENDER_INPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
+    
+    ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
+    display = appEGLWindow->getEglDisplay();
+    context = appEGLWindow->getEglContext();
+    if (eglImage)
+    {
+        if (!eglDestroyImageKHR(display, eglImage))
+        {
+            ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
+        }else
+        {
+            ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
+
+        }
+        eglImage = NULL;
+    }
+    error = OMX_FreeHandle(camera);
+    OMX_TRACE(error);
+    
+    error = OMX_FreeHandle(render);
+    OMX_TRACE(error);
+    
+    //error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
+    
 	if (pixels) 
 	{
 		delete[] pixels;
 		pixels = NULL;
 	}
+    ofLogVerbose(__func__) << "END";
 }

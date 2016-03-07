@@ -17,7 +17,7 @@ BaseEngine::BaseEngine()
 	
 	recordedFrameCounter = 0;
 }
-
+/*
 BaseEngine::~BaseEngine()
 {
 	if(isOpen)
@@ -25,7 +25,7 @@ BaseEngine::~BaseEngine()
 		close();
 	}
 }
-
+*/
 void BaseEngine::configureCameraResolution()
 {
 	
@@ -203,7 +203,8 @@ void BaseEngine::threadedFunction()
 			if(error != OMX_ErrorNone) 
 			{
 				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-				close();
+				//close();
+               //stopThread();
 				
 			}
 		}
@@ -222,6 +223,89 @@ void BaseEngine::stopRecording()
 	}
 	
 }
+
+#if 0
+void BaseEngine::close()
+{
+    ofLogVerbose(__func__) << "START";
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    if(omxCameraSettings.doRecording)
+    {
+        //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+        //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    }
+    
+    if(omxCameraSettings.doRecording && !didWriteFile)
+    {
+        writeFile();
+        
+    }
+
+    ofLogVerbose(__func__) << "OMX BREAKDOWN START";
+    
+    error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        OMX_TRACE(error);
+
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        error = DisableAllPortsForComponent(&encoder);
+        OMX_TRACE(error);
+
+    }
+    error = DisableAllPortsForComponent(&camera);
+    OMX_TRACE(error);
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_TRACE(error);
+
+    }
+    
+    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_TRACE(error);
+
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+    }
+    
+    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    OMX_TRACE(error);
+
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+        OMX_TRACE(error);
+
+    }
+    
+    error = OMX_FreeHandle(camera);
+    OMX_TRACE(error);
+
+    if(omxCameraSettings.doRecording)
+    {
+         error = OMX_FreeHandle(encoder);
+        OMX_TRACE(error);
+
+    }
+    error = OMX_FreeHandle(render);
+    OMX_TRACE(error);
+    
+    ofLogVerbose(__func__) << "OMX BREAKDOWN END";
+    ofLogVerbose(__func__) << " END";
+    isOpen = false;
+}
+
+
 
 
 void BaseEngine::close()
@@ -292,7 +376,7 @@ void BaseEngine::close()
 	ofLogVerbose(__func__) << " END";
 	isOpen = false;
 }
-
+#endif
 
 void BaseEngine::writeFile()
 {

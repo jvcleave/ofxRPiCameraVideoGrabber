@@ -4,7 +4,7 @@
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
-#include "SessionConfig.h"
+#include "CameraState.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
 
@@ -19,10 +19,12 @@ class ofApp : public ofBaseApp, public KeyListener{
 	TerminalListener consoleListener;
 	ofxRPiCameraVideoGrabber videoGrabber;
 	
-    SessionConfig sessionConfig;
+    CameraState cameraState;
 	
 	bool doDrawInfo;
     ofDirectory dataFolder;	
     vector<ofFile> configFiles;
+    int currentConfigFileIndex;
+    bool doSwitchConfig;
 };
 

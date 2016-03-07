@@ -23,7 +23,7 @@
 
 #include "TextureEngine.h"
 #include "NonTextureEngine.h"
-#include "SessionConfig.h"
+#include "CameraState.h"
 
 
 enum MIRROR
@@ -55,7 +55,7 @@ public:
     //CameraMetering metering;
     
     void setup(OMXCameraSettings);
-    void setup(SessionConfig);
+    void setup(CameraState);
     int getWidth();
     int getHeight();
     int getFrameRate();
@@ -189,7 +189,7 @@ public:
     string currentStateToString();
     void saveStateToFile(string fileName="");
     
-    SessionConfig getSessionConfig();
+    CameraState getCameraState();
     
 private:
 
@@ -226,6 +226,7 @@ private:
     bool burstModeEnabled;
     bool flickerCancellation;
 
+    bool hasAddedExithandler;
     void addExitHandler();
     
     void checkBurstMode();

@@ -3,13 +3,13 @@
 //#include "ofxRPiCameraVideoGrabber.h"
 
 
-class SessionConfig
+class CameraState
 {
 public:
     
     OMXCameraSettings cameraSettings;
     map<string, string> keyValueMap;
-    SessionConfig()
+    CameraState()
     {
         
     }
