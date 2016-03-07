@@ -7,7 +7,6 @@
 #include "NonTextureEngine.h"
 NonTextureEngine::NonTextureEngine()
 {
-	engineType = NON_TEXTURE_ENGINE;
 	frameCounter = 0;		
 }
 
@@ -351,6 +350,8 @@ NonTextureEngine::~NonTextureEngine()
     error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
     
+    error = OMX_SendCommand(render, OMX_CommandFlush, VIDEO_RENDER_INPUT_PORT, NULL);
+    OMX_TRACE(error);
     
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);

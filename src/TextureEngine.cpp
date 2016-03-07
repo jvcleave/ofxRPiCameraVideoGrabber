@@ -29,7 +29,6 @@ TextureEngine::TextureEngine()
 	isKeyframeValid = false;
 	doFillBuffer = false;
 	bufferAvailable = false;
-	engineType = TEXTURE_ENGINE;
 	pixels = NULL;
 	doPixels = false;
 }
@@ -412,94 +411,39 @@ OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hCompon
 	return OMX_ErrorNone;
 }
 
-
-#if 0
-ofLogVerbose(__func__) << "START";
-OMX_ERRORTYPE error = OMX_ErrorNone;
-if(omxCameraSettings.doRecording)
-{
-    //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
-    //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-}
-
-if(omxCameraSettings.doRecording && !didWriteFile)
-{
-    writeFile();
-    
-}
-
-ofLogVerbose(__func__) << "OMX BREAKDOWN START";
-
-error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
-OMX_TRACE(error);
-if(omxCameraSettings.doRecording)
-{
-    error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
-    OMX_TRACE(error);
-    error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
-    OMX_TRACE(error);
-    
-}
-
-if(omxCameraSettings.doRecording)
-{
-    error = DisableAllPortsForComponent(&encoder);
-    OMX_TRACE(error);
-    
-}
-error = DisableAllPortsForComponent(&camera);
-OMX_TRACE(error);
-if(omxCameraSettings.doRecording)
-{
-    error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
-    OMX_TRACE(error);
-    
-}
-
-error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-OMX_TRACE(error);
-
-if(omxCameraSettings.doRecording)
-{
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error);
-}
-
-error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-OMX_TRACE(error);
-
-if(omxCameraSettings.doRecording)
-{
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
-    OMX_TRACE(error);
-    
-}
-
-error = OMX_FreeHandle(camera);
-OMX_TRACE(error);
-
-if(omxCameraSettings.doRecording)
-{
-    error = OMX_FreeHandle(encoder);
-    OMX_TRACE(error);
-    
-}
-error = OMX_FreeHandle(render);
-OMX_TRACE(error);
-
-ofLogVerbose(__func__) << "OMX BREAKDOWN END";
-ofLogVerbose(__func__) << " END";
-isOpen = false;
-#endif
-
 TextureEngine::~TextureEngine()
 {
     ofLogVerbose(__func__) << "START isThreadRunning() " << isThreadRunning();
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    if(omxCameraSettings.doRecording)
+    {
+        //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
+        //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    }
+    
+    if(omxCameraSettings.doRecording && !didWriteFile)
+    {
+        writeFile();
+        
+    }
+    
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        OMX_TRACE(error);
+        error = DisableAllPortsForComponent(&encoder);
+        OMX_TRACE(error);
+    }
+    
     error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
     
+    error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
+    OMX_TRACE(error);
     
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
@@ -507,6 +451,15 @@ TextureEngine::~TextureEngine()
     error = DisableAllPortsForComponent(&camera);
     OMX_TRACE(error);
     
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
+        OMX_TRACE(error);
+        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        OMX_TRACE(error);
+        
+    }
+
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
     
@@ -536,6 +489,13 @@ TextureEngine::~TextureEngine()
     }
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
+    
+    if(omxCameraSettings.doRecording)
+    {
+        error = OMX_FreeHandle(encoder);
+        OMX_TRACE(error);
+        
+    }
     
     error = OMX_FreeHandle(render);
     OMX_TRACE(error);
