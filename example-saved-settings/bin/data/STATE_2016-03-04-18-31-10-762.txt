@@ -27,5 +27,3 @@ doRecordingPreview 0
 previewWidth 1280
 previewHeight 720
 recordingFilePath 
-doConvertToMKV 0
-
