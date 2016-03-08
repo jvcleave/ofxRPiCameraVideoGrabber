@@ -30,7 +30,6 @@ public:
             if(key == "previewWidth")       cameraSettings.previewWidth         = ofToInt(value);
             if(key == "previewHeight")      cameraSettings.previewHeight        = ofToInt(value);
             if(key == "recordingFilePath")  cameraSettings.recordingFilePath    = value;
-            if(key == "doConvertToMKV")     cameraSettings.doConvertToMKV       = ofToBool(value);
         }
     }
     

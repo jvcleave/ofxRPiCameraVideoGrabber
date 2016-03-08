@@ -18,7 +18,6 @@ public:
 	bool isUsingTexture;
 	bool enablePixels;
 	string recordingFilePath;
-	bool doConvertToMKV;
 	OMXCameraSettings()
 	{
 		width = 1280;
@@ -33,8 +32,6 @@ public:
 		previewWidth = width;
 		previewHeight = height;
 		recordingFilePath = "";
-		doConvertToMKV = false;
-		//doFlipTexture = false;
 	}
 	
 	void enablePreview()
@@ -65,7 +62,6 @@ public:
         info << "previewWidth " << previewWidth << endl;
         info << "previewHeight " << previewHeight << endl;
         info << "recordingFilePath " << recordingFilePath << endl;
-        info << "doConvertToMKV " << doConvertToMKV << endl;
         return info.str();
     }
 private:

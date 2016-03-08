@@ -22,6 +22,7 @@ int NonTextureEngine::getFrameCounter()
 	OMX_INIT_STRUCTURE(stats);
 	stats.nPortIndex = VIDEO_RENDER_INPUT_PORT;
 	OMX_ERRORTYPE error =OMX_GetParameter(render, OMX_IndexConfigBrcmPortStats, &stats);
+    OMX_TRACE(error);
 	if (error == OMX_ErrorNone)
 	{
 		/*OMX_U32 nImageCount;
@@ -93,12 +94,14 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 
 OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
+    /*
 	ofLog(OF_LOG_VERBOSE, 
 	 "NonTextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
 	 __func__, eEvent, nData1, nData2, pEventData);
+     */
 	NonTextureEngine *grabber = static_cast<NonTextureEngine*>(pAppData);
-	//ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
-	switch (eEvent) 
+
+    switch (eEvent) 
 	{
 		case OMX_EventParamOrConfigChanged:
 		{

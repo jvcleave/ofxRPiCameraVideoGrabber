@@ -489,7 +489,8 @@ GLuint ofxRPiCameraVideoGrabber::getTextureID()
 {
 	if (!textureEngine) 
 	{
-		return 0;
+        ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE ID";
+        return errorTexture.texData.textureID;
 	}
 	return textureEngine->textureID;
 }
@@ -525,8 +526,8 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
 	if (!textureEngine) 
 	{
-		ofLogError() << "TEXTURE NOT ENABLED - EXITING";
-		ofExit(0);
+		ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE";
+        return errorTexture;
 	}
 	return textureEngine->tex;
 }
@@ -578,6 +579,14 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 	if (directEngine) 
 	{
 		directEngine->stopRecording();
+        /*
+         
+         direct mode has to use a lower resolution for display while recording
+         set it back after recording
+         */
+        CameraState currentState = getCameraState();
+        currentState.cameraSettings.doRecording = false;
+        setup(currentState);
 	}
 	if (textureEngine) 
 	{

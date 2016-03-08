@@ -197,7 +197,7 @@ public:
     CameraState getCameraState();
     
 private:
-
+    ofTexture errorTexture;
     OMX_HANDLETYPE camera;
     OMXCameraUtils omxCameraUtils;
     bool hasNewFrame;

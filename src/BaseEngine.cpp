@@ -17,15 +17,7 @@ BaseEngine::BaseEngine()
 	
 	recordedFrameCounter = 0;
 }
-/*
-BaseEngine::~BaseEngine()
-{
-	if(isOpen)
-	{
-		close();
-	}
-}
-*/
+
 void BaseEngine::configureCameraResolution()
 {
 	
@@ -189,7 +181,6 @@ void BaseEngine::threadedFunction()
 			{
 				ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
 				writeFile();
-				
 				doFillBuffer = false;
 			}else 
 			{
@@ -235,11 +226,6 @@ OMXCameraSettings& BaseEngine::getSettings()
 
 void BaseEngine::writeFile()
 {
-	//TODO not currently setup to allow recording after setup
-	if (!omxCameraSettings.doRecording) 
-	{
-		return;
-	}
 	//format is raw H264 NAL Units
 	ofLogVerbose(__func__) << "START";
 	stopThread();
@@ -273,35 +259,11 @@ void BaseEngine::writeFile()
 	if(didWriteFile)
 	{
 		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
-		if (omxCameraSettings.doConvertToMKV) 
-		{
-			ofFile mkvmerge("/usr/bin/mkvmerge");
-			if(mkvmerge.exists())
-			{
-				string mkvmergePath = ofToDataPath("/usr/bin/mkvmerge", true);
-				ofLogVerbose(__func__) << filePath << " SUCCESS";
-				stringstream commandString;
-				commandString << "/usr/bin/mkvmerge -o ";
-				commandString << ofToDataPath(mkvFilePath, true);
-				commandString << " " << filePath;
-				commandString << " &";
-				string commandName = commandString.str();
-				ofLogVerbose(__func__) << "commandName: " << commandName;
-				//ofSystem(commandName);
-				
-				int commandResult = system(commandName.c_str());
-				ofLogVerbose(__func__) << "commandResult: " << commandResult;
-			}else 
-			{
-				ofLogError(__func__) << "COULD NOT FIND mkvmerge, try: sudo apt-get install mkvtoolnix";
-			}
-			
-		}
-		
-		
-	}else
+	}
+    else
 	{
 		ofLogVerbose(__func__) << filePath << " FAIL";
 	}
+    recordedFrameCounter = 0;
 }
 
