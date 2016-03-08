@@ -545,11 +545,11 @@ bool ofxRPiCameraVideoGrabber::isRecording()
     bool result = false;
     if (directEngine) 
     {
-        result = directEngine->omxCameraSettings.doRecording;
+        result = directEngine->isThreadRunning();
     }
     if (textureEngine) 
     {
-       result =  textureEngine->omxCameraSettings.doRecording;
+       result =  textureEngine->isThreadRunning();
     }
     return result;
     

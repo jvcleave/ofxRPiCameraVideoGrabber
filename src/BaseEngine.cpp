@@ -31,24 +31,27 @@ void BaseEngine::configureCameraResolution()
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 	
-	DisableAllPortsForComponent(&camera);
-	
+	error = DisableAllPortsForComponent(&camera);
+	OMX_TRACE(error);
+    
 	OMX_CONFIG_REQUESTCALLBACKTYPE cameraCallback;
 	OMX_INIT_STRUCTURE(cameraCallback);
 	cameraCallback.nPortIndex	=	OMX_ALL;
 	cameraCallback.nIndex		=	OMX_IndexParamCameraDeviceNumber;
 	cameraCallback.bEnable		=	OMX_TRUE;
 	
-	OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
-	
+	error = OMX_SetConfig(camera, OMX_IndexConfigRequestCallback, &cameraCallback);
+    OMX_TRACE(error);
+
 	//Set the camera (always 0)
 	OMX_PARAM_U32TYPE device;
 	OMX_INIT_STRUCTURE(device);
 	device.nPortIndex	= OMX_ALL;
 	device.nU32			= 0;
 	
-	OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
-	
+	error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
+    OMX_TRACE(error);
+
 	//Set the resolution
 	OMX_PARAM_PORTDEFINITIONTYPE cameraOutputPortDefinition;
 	OMX_INIT_STRUCTURE(cameraOutputPortDefinition);
@@ -223,6 +226,11 @@ void BaseEngine::stopRecording()
 		unlock();
 	}
 	
+}
+
+OMXCameraSettings& BaseEngine::getSettings()
+{
+    return omxCameraSettings;
 }
 
 void BaseEngine::writeFile()

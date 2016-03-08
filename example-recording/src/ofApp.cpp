@@ -10,7 +10,8 @@ void ofApp::setup()
     doStartRecording = false;
     doStopRecording =false;
     consoleListener.setup(this);
-    omxCameraSettings.doRecording = true;
+    omxCameraSettings.isUsingTexture = false;
+    //omxCameraSettings.doRecording = true;
 	//pass in the settings and it will start the camera
 	videoGrabber.setup(omxCameraSettings);
 	

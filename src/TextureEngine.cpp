@@ -39,7 +39,7 @@ int TextureEngine::getFrameCounter()
 	
 }
 
-void TextureEngine::setup(OMXCameraSettings& omxCameraSettings_)
+void TextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 {
 	omxCameraSettings = omxCameraSettings_;
     ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
@@ -341,13 +341,19 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
 		error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
         OMX_TRACE(error);
-
+        
 		error =  OMX_AllocateBuffer(encoder, 
                                     &encoderOutputBuffer, 
                                     VIDEO_ENCODE_OUTPUT_PORT, 
                                     NULL, 
                                     encoderOutputPortDefinition.nBufferSize);
+        
         OMX_TRACE(error);
+        if(error != OMX_ErrorNone)
+        {
+            ofLogError(__func__) << "UNABLE TO RECORD - MAY REQUIRE MORE GPU MEMORY";
+        }
+        
 
 	}
 	
@@ -488,6 +494,16 @@ TextureEngine::~TextureEngine()
         }
         eglImage = NULL;
     }
+    
+    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+    OMX_INIT_STRUCTURE(cameraport);
+    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
+    cameraport.bEnabled = OMX_FALSE;
+    
+    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
+    OMX_TRACE(error);
+
+    
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
     

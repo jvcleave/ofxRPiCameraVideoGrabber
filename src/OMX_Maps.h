@@ -646,10 +646,21 @@ private:
     
 };
 
+
+
 static
 string  GetOMXStateString(OMX_STATETYPE type)
 {
     return OMX_Maps::getInstance().omxStateTypes[type];
+};
+
+static 
+string PrintOMXState(OMX_HANDLETYPE handle)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    OMX_STATETYPE currentState;
+    error = OMX_GetState(handle, &currentState);
+    return GetOMXStateString(currentState);
 };
 
 static
