@@ -133,17 +133,19 @@ void ofApp::draw()
     if (doDrawInfo || doPrintInfo) 
     {
         stringstream info;
-        info << "\n";
-        info << "App FPS: " << ofGetFrameRate() << "\n";
-        info << "Camera Resolution: "   << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< "\n";
-        info << "\n";
-        info << "DEMO: " << currentDemo->name << "\n";
-        info << "\n";
+        info << endl;
+        info << "App FPS: " << ofGetFrameRate() << endl;
+        info << "CAMERA RESOLUTION: "   << videoGrabber.getWidth() << "x" << videoGrabber.getHeight()	<< " @ "<< videoGrabber.getFrameRate() <<"FPS"<< endl;
+        info << endl;
+        info << "DEMO: " << currentDemo->name << endl;
+        info << endl;
         info << currentDemo->infoString;
-        info << "\n";
-        info << "Press r to reset camera settings" << "\n";
-        info << "Press SPACE for next Demo" << "\n";
-        
+        info << endl;
+        info << "Press SPACE for next Demo" << endl;
+        info << "Press r to reset camera settings" << endl;
+        info << "Press z TO START RECORDING" << endl;
+        info << "Press x TO STOP RECORDING" << endl;
+
         if (doDrawInfo) 
         {
             int x = 100;
@@ -151,7 +153,7 @@ void ofApp::draw()
             {
                 x = videoGrabber.getWidth();
             }
-            ofDrawBitmapStringHighlight(info.str(), x, 40, ofColor(ofColor::black, 10), ofColor::yellow);
+            ofDrawBitmapStringHighlight(info.str(), x, 40, ofColor(ofColor::black, 10), ofColor::blue);
         }
         if (doPrintInfo) 
         {
@@ -160,13 +162,13 @@ void ofApp::draw()
         }
     }
     ofColor circleColor;
-    /*if (videoGrabber.isRecording()) 
+    if (videoGrabber.isRecording()) 
     {
         circleColor = ofColor::green;
     }else
     {
         circleColor = ofColor::red;
-    }*/
+    }
     ofPushStyle();
         ofSetColor(circleColor, 90);
         ofDrawCircle(ofPoint(ofGetWidth() - 200, 40), 20);
@@ -204,53 +206,16 @@ void ofApp::keyPressed  (int key)
             break;
         }
             
-        case 'S' :
-        {
-            //videoGrabber.saveCameraSettingsToFile();
-            break;
-        }
-        case 'L' :
-        {
-            //videoGrabber.cameraSettings.loadCameraSettingsFromFile();
-            break;
-        }
-        case '8' :
-        {
-            //videoGrabber.startRecording();
-            break;
-        }
-        case '9' :
-        {
-            videoGrabber.stopRecording();
-            break;
-        }
-        /*
-        case '5' :
-        {
-            videoGrabber.rotateCounterClockwise();
-            break;
-        }
-        case '6' :
-        {
-            videoGrabber.rotateClockwise();
-            break;
-        }
-        case '7' :
-        {
-            videoGrabber.toggleLED();
-            break;
-        }
-        case '8' :
+        case 'z' :
         {
             videoGrabber.startRecording();
             break;
         }
-        case '9' :
+        case 'x' :
         {
             videoGrabber.stopRecording();
             break;
         }
-        */
         default:
         {
             currentDemo->onKey(key);
