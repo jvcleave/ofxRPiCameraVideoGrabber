@@ -289,7 +289,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     
-    error = setupDisplay();
+    error = setupDisplay(0, 0, omxCameraSettings.width, omxCameraSettings.height);
     OMX_TRACE(error);
     
     if(omxCameraSettings.doRecording)
@@ -306,75 +306,8 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 }
 
 
-#if 0
-#pragma mark SIMPLE
-OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
-{
-    
-    ofLogVerbose(__func__) << "START";
-    
-    OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error);
-    
-    
-    //Enable Camera Output Port
-    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
-    OMX_INIT_STRUCTURE(cameraport);
-    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
-    cameraport.bEnabled = OMX_TRUE;
-    
-    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
-    OMX_TRACE(error);
-    
-  
-    //Set up renderer
-    OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
-    renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
-    
-    string renderComponentName = "OMX.broadcom.video_render";
-    
-    error = OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
-    OMX_TRACE(error);
-    error = DisableAllPortsForComponent(&render);
-    OMX_TRACE(error);
-    
-    //Set renderer to Idle
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
-    OMX_TRACE(error);
-    
-    //Create camera->video_render Tunnel
-    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, VIDEO_RENDER_INPUT_PORT);
-    OMX_TRACE(error);
-    
-    
-    //Enable camera output port
-    error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
-    OMX_TRACE(error);
-    
-    
-    //Enable render input port
-    error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
-    OMX_TRACE(error);
-    
-    //Start renderer
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-    OMX_TRACE(error);
-    
-    //Start camera
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
-    OMX_TRACE(error);
-    
-    error = setupDisplay();
-    OMX_TRACE(error);
-    
-    isOpen = true;
-    return error;
-}
-#endif
 
-OMX_ERRORTYPE NonTextureEngine::setupDisplay()
+OMX_ERRORTYPE NonTextureEngine::setupDisplay(int x, int y, int width, int height)
 {
 
 	OMX_CONFIG_DISPLAYREGIONTYPE region;
@@ -384,10 +317,10 @@ OMX_ERRORTYPE NonTextureEngine::setupDisplay()
 	
 	region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
 
-	region.dest_rect.x_offset = 0;
-	region.dest_rect.y_offset = 0;
-	region.dest_rect.width	= omxCameraSettings.width;
-	region.dest_rect.height = omxCameraSettings.height;
+	region.dest_rect.x_offset = x;
+	region.dest_rect.y_offset = y;
+	region.dest_rect.width	= width;
+	region.dest_rect.height = height;
     region.fullscreen = OMX_FALSE;
 	region.noaspect = OMX_TRUE;
 	OMX_ERRORTYPE error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
@@ -408,15 +341,13 @@ NonTextureEngine::~NonTextureEngine()
         writeFile();
         
     }
+   
     if(omxCameraSettings.doRecording)
     {
         error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
         OMX_TRACE(error);
         error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
         OMX_TRACE(error);
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-        OMX_TRACE(error);
-        
         error = DisableAllPortsForComponent(&encoder);
         OMX_TRACE(error);
     }
@@ -449,31 +380,34 @@ NonTextureEngine::~NonTextureEngine()
     error = DisableAllPortsForComponent(&render);
     OMX_TRACE(error);
    
+    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
+    error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT,  NULL, 0);
+    OMX_TRACE(error);
     
     if(omxCameraSettings.doRecording)
     {
+        //Destroy splitter->encoder Tunnel
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, NULL, 0);
+        OMX_TRACE(error);
         error = OMX_SetupTunnel(encoder, VIDEO_ENCODE_INPUT_PORT, NULL, 0);
         OMX_TRACE(error);
-    }
     
-    if(omxCameraSettings.doRecording)
-    {
-        if (omxCameraSettings.doRecordingPreview) 
-        {
-            error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, NULL, 0);
-            OMX_TRACE(error);
-        
-        }
-    }else
-    {
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
+    
+        //Destroy splitter->render Tunnel
+        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, NULL, 0);
+        OMX_TRACE(error);
+        error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT, NULL, 0);
         OMX_TRACE(error);
     }
-
     
     
+    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+    OMX_INIT_STRUCTURE(cameraport);
+    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
+    cameraport.bEnabled = OMX_FALSE;
     
-    error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT,  NULL, 0);
+    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
     OMX_TRACE(error);
     
     error = OMX_FreeHandle(camera);
@@ -484,6 +418,8 @@ NonTextureEngine::~NonTextureEngine()
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error);
         
+        error = OMX_FreeHandle(splitter);
+        OMX_TRACE(error);
     }
     
     error = OMX_FreeHandle(render);

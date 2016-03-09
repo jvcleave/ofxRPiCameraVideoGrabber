@@ -511,6 +511,8 @@ TextureEngine::~TextureEngine()
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error);
         
+        error = OMX_FreeHandle(splitter);
+        OMX_TRACE(error);
     }
     
     error = OMX_FreeHandle(render);
