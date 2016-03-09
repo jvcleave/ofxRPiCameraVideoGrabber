@@ -27,8 +27,6 @@ public:
             if(key == "isUsingTexture")     cameraSettings.isUsingTexture       = ofToBool(value);
             if(key == "enablePixels")       cameraSettings.enablePixels         = ofToBool(value);
             if(key == "doRecording")        cameraSettings.doRecording          = ofToBool(value);
-            if(key == "previewWidth")       cameraSettings.previewWidth         = ofToInt(value);
-            if(key == "previewHeight")      cameraSettings.previewHeight        = ofToInt(value);
             if(key == "recordingFilePath")  cameraSettings.recordingFilePath    = value;
         }
     }

@@ -52,11 +52,6 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 	
 	omxCameraSettings = omxCameraSettings_;
 	
-	if (omxCameraSettings.doRecordingPreview) 
-	{
-		//validate the settings
-		omxCameraSettings.enablePreview();
-	}
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
@@ -71,23 +66,6 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 	
 	configureCameraResolution();
 	
-	if (omxCameraSettings.doRecording && omxCameraSettings.doRecordingPreview) 
-	{
-		OMX_PARAM_PORTDEFINITIONTYPE cameraPreviewPortDefinition;
-		OMX_INIT_STRUCTURE(cameraPreviewPortDefinition);
-		cameraPreviewPortDefinition.nPortIndex = CAMERA_PREVIEW_PORT;
-		error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-        OMX_TRACE(error);
-
-		
-		cameraPreviewPortDefinition.format.video.nFrameWidth		= omxCameraSettings.previewWidth;
-		cameraPreviewPortDefinition.format.video.nFrameHeight		= omxCameraSettings.previewHeight;
-		cameraPreviewPortDefinition.format.video.nStride			= omxCameraSettings.previewWidth;
-		error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraPreviewPortDefinition);
-        OMX_TRACE(error);
-
-		
-	}
 	
 }
 
