@@ -308,15 +308,13 @@ OMX_ERRORTYPE NonTextureEngine::setupDisplay()
 	region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
 	
 	region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
-	
-	region.fullscreen = OMX_FALSE;
-	region.noaspect = OMX_TRUE;
-	
+
 	region.dest_rect.x_offset = 0;
 	region.dest_rect.y_offset = 0;
 	region.dest_rect.width	= omxCameraSettings.width;
 	region.dest_rect.height = omxCameraSettings.height;
-	
+    region.fullscreen = OMX_FALSE;
+	region.noaspect = OMX_TRUE;
 	OMX_ERRORTYPE error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
     OMX_TRACE(error);
 
