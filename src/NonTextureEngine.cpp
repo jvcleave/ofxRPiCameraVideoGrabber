@@ -57,10 +57,8 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &NonTextureEngine::cameraEventHandlerCallback;
-	
-	string cameraComponentName = "OMX.broadcom.camera";
-	
-	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
+		
+	error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     OMX_TRACE(error);
 
 	
@@ -70,7 +68,12 @@ void NonTextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 }
 
 
-OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+OMX_ERRORTYPE NonTextureEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, 
+                                                           OMX_PTR pAppData, 
+                                                           OMX_EVENTTYPE eEvent, 
+                                                           OMX_U32 nData1,
+                                                           OMX_U32 nData2, 
+                                                           OMX_PTR pEventData)
 {
     /*
 	ofLog(OF_LOG_VERBOSE, 
@@ -119,8 +122,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
         OMX_CALLBACKTYPE splitterCallbacks;
         splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
         
-        string splitterComponentName = "OMX.broadcom.video_splitter";
-        error = OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
+        error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
         OMX_TRACE(error);
         error =DisableAllPortsForComponent(&splitter);
         OMX_TRACE(error);
@@ -134,11 +136,11 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
     OMX_CALLBACKTYPE renderCallbacks;
     renderCallbacks.EventHandler    = &BaseEngine::renderEventHandlerCallback;
     renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
+    
+    //Implementation specific
     renderCallbacks.FillBufferDone	= &BaseEngine::renderFillBufferDone;
-    
-    string renderComponentName = "OMX.broadcom.video_render";
-    
-    error = OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+        
+    error = OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
     OMX_TRACE(error);
     error = DisableAllPortsForComponent(&render);
     OMX_TRACE(error);
@@ -156,10 +158,7 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
         encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
         encoderCallbacks.FillBufferDone		= &NonTextureEngine::encoderFillBufferDone;
         
-        
-        string encoderComponentName = "OMX.broadcom.video_encode";
-        
-        error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
+        error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
         
         configureEncoder();

@@ -25,17 +25,13 @@ class BaseEngine: public ofThread
 public:
 	BaseEngine();
 	
-	virtual void setup(OMXCameraSettings omxCameraSettings) = 0;
-	void stopRecording();
-	
+	virtual void setup(OMXCameraSettings) = 0;
+    virtual int getFrameCounter() = 0;
+	OMXCameraSettings& getSettings();
+    void stopRecording();
 	OMX_HANDLETYPE camera;
-	
 	bool isOpen;
-	virtual int getFrameCounter() = 0;
-    
-    
-    OMXCameraSettings& getSettings();
-    
+
 protected:
 	
     OMXCameraSettings omxCameraSettings;

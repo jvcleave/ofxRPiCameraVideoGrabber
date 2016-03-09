@@ -12,7 +12,6 @@
 TextureEngine::TextureEngine()
 {
 	isOpen		= false;
-	textureID	= 0;
 	eglBuffer	= NULL;
     eglImage = NULL;
 
@@ -49,10 +48,8 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 	
 	OMX_CALLBACKTYPE cameraCallbacks;
 	cameraCallbacks.EventHandler    = &TextureEngine::cameraEventHandlerCallback;
-	
-	string cameraComponentName = "OMX.broadcom.camera";
-	
-	error = OMX_GetHandle(&camera, (OMX_STRING)cameraComponentName.c_str(), this , &cameraCallbacks);
+		
+	error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     OMX_TRACE(error);
 
     if (omxCameraSettings.enablePixels) 
@@ -96,7 +93,7 @@ void TextureEngine::updatePixels()
 	}
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
-		tex.draw(0, 0);
+		texture.draw(0, 0);
 		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
 	fbo.end();
 }
@@ -115,11 +112,11 @@ void TextureEngine::generateEGLImage()
 	context = appEGLWindow->getEglContext();
 	
 	
-	tex.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
-	//tex.getTextureData().bFlipTexture = true;
+	texture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	//texture.getTextureData().bFlipTexture = true;
 	
-	tex.setTextureWrap(GL_REPEAT, GL_REPEAT);
-	textureID = tex.getTextureData().textureID;
+	texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
+    GLuint textureID = texture.getTextureData().textureID;
 	
 	glEnable(GL_TEXTURE_2D);
 	
@@ -215,8 +212,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		OMX_CALLBACKTYPE splitterCallbacks;
 		splitterCallbacks.EventHandler    = &BaseEngine::splitterEventHandlerCallback;
 
-		string splitterComponentName = "OMX.broadcom.video_splitter";
-		error = OMX_GetHandle(&splitter, (OMX_STRING)splitterComponentName.c_str(), this , &splitterCallbacks);
+        error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
         OMX_TRACE(error);
 		error =DisableAllPortsForComponent(&splitter);
         OMX_TRACE(error);
@@ -233,11 +229,11 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	OMX_CALLBACKTYPE renderCallbacks;
 	renderCallbacks.EventHandler	= &BaseEngine::renderEventHandlerCallback;
 	renderCallbacks.EmptyBufferDone	= &BaseEngine::renderEmptyBufferDone;
-	renderCallbacks.FillBufferDone	= &TextureEngine::renderFillBufferDone;
 	
-	string renderComponentName = "OMX.broadcom.egl_render";
-	
-	error = OMX_GetHandle(&render, (OMX_STRING)renderComponentName.c_str(), this , &renderCallbacks);
+    //Implementation specific
+    renderCallbacks.FillBufferDone	= &TextureEngine::renderFillBufferDone;
+		
+	error = OMX_GetHandle(&render, OMX_EGL_RENDER, this , &renderCallbacks);
     OMX_TRACE(error);
 
 	error = DisableAllPortsForComponent(&render);
@@ -257,10 +253,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
 		encoderCallbacks.FillBufferDone		= &TextureEngine::encoderFillBufferDone;
 		
-		
-		string encoderComponentName = "OMX.broadcom.video_encode";
-		
-		error =OMX_GetHandle(&encoder, (OMX_STRING)encoderComponentName.c_str(), this , &encoderCallbacks);
+		error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
 		
 		configureEncoder();

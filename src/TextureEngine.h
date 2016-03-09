@@ -14,30 +14,45 @@ public:
 	int renderedFrameCounter;
 	
 	void generateEGLImage();
-	GLuint textureID;
-	ofTexture tex;
 	
+	
+    int getFrameCounter();
+    
+    void enablePixels();
+    void disablePixels();
+    unsigned char * getPixels();
+    void updatePixels();
+    unsigned char * pixels;
+    bool doPixels;
+    ofFbo fbo;
+    ofTexture& getTexture()
+    {
+        return texture;
+    }
+private:
 	EGLImageKHR eglImage;
 	EGLDisplay display;
 	EGLContext context;
-	
+    ofTexture texture;
+    
 	OMX_BUFFERHEADERTYPE* eglBuffer;
 	
 	
 	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
 	
-	static OMX_ERRORTYPE cameraEventHandlerCallback(OMX_HANDLETYPE hComponent, OMX_PTR pAppData,  OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
-	static OMX_ERRORTYPE encoderFillBufferDone	(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
-	static OMX_ERRORTYPE renderFillBufferDone	(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
+	static OMX_ERRORTYPE cameraEventHandlerCallback(OMX_HANDLETYPE, 
+                                                    OMX_PTR,  
+                                                    OMX_EVENTTYPE, 
+                                                    OMX_U32, 
+                                                    OMX_U32, 
+                                                    OMX_PTR);
+	static OMX_ERRORTYPE encoderFillBufferDone	(OMX_IN OMX_HANDLETYPE, 
+                                                 OMX_IN OMX_PTR, 
+                                                 OMX_IN OMX_BUFFERHEADERTYPE*);
+	static OMX_ERRORTYPE renderFillBufferDone	(OMX_IN OMX_HANDLETYPE, 
+                                                 OMX_IN OMX_PTR, 
+                                                 OMX_IN OMX_BUFFERHEADERTYPE*);
 	
-	int getFrameCounter();
-	
-	void enablePixels();
-	void disablePixels();
-	unsigned char * getPixels();
-	void updatePixels();
-	unsigned char * pixels;
-	bool doPixels;
-	ofFbo fbo;
+
 	
 };

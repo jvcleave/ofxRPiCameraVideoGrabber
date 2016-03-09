@@ -492,7 +492,7 @@ GLuint ofxRPiCameraVideoGrabber::getTextureID()
         ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE ID";
         return errorTexture.texData.textureID;
 	}
-	return textureEngine->textureID;
+	return textureEngine->getTexture().texData.textureID;
 }
 
 void ofxRPiCameraVideoGrabber::enablePixels()
@@ -529,7 +529,7 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 		ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE";
         return errorTexture;
 	}
-	return textureEngine->tex;
+	return textureEngine->getTexture();
 }
 
 #pragma mark RECORDING
@@ -601,7 +601,7 @@ void ofxRPiCameraVideoGrabber::draw()
 	{
 		return;
 	}
-	textureEngine->tex.draw(0, 0);
+	textureEngine->getTexture().draw(0, 0);
 }
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y)
@@ -610,7 +610,7 @@ void ofxRPiCameraVideoGrabber::draw(int x, int y)
     {
         return;
     }
-    textureEngine->tex.draw(x, y);
+    textureEngine->getTexture().draw(x, y);
 }
 
 
@@ -620,7 +620,7 @@ void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
     {
         return;
     }
-    textureEngine->tex.draw(x, y, width, height);
+    textureEngine->getTexture().draw(x, y, width, height);
 }
 
 #pragma mark IMAGE ENHANCEMENT
