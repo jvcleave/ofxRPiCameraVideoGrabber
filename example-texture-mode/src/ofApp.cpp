@@ -18,23 +18,6 @@ void ofApp::setup()
 	
 	if (omxCameraSettings.doRecording) 
 	{
-		/*
-		 If you are recording you have the option to display a "preview"
-		 
-		 This seems to have issues at 1080p so calling omxSettings.enablePreview()
-		 will do some validation
-		 
-		 */
-		if (omxCameraSettings.doRecordingPreview)
-		{
-			omxCameraSettings.enablePreview();
-		}
-		/*
-		 
-		 You can also specify a filename or it will generate one 
-		 using a timestamp and put it in bin/data
-		 
-		 */
 		omxCameraSettings.recordingFilePath = ""; //default "" will self-generate
 		
 	}

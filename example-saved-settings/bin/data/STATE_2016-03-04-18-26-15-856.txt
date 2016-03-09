@@ -23,7 +23,4 @@ framerate 30
 isUsingTexture 0
 enablePixels 0
 doRecording 0
-doRecordingPreview 0
-previewWidth 1280
-previewHeight 720
 recordingFilePath 
