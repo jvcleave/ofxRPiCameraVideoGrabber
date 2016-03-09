@@ -153,7 +153,7 @@ void ofApp::draw()
             {
                 x = videoGrabber.getWidth();
             }
-            ofDrawBitmapStringHighlight(info.str(), x, 40, ofColor(ofColor::black, 10), ofColor::blue);
+            ofDrawBitmapStringHighlight(info.str(), x, 40, ofColor(ofColor::black, 50), ofColor::yellow);
         }
         if (doPrintInfo) 
         {
