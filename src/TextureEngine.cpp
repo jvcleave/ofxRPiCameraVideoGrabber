@@ -265,28 +265,27 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		
 		configureEncoder();
 		
-	}
-	
-	
-	if(omxCameraSettings.doRecording)
-	{
         //Create camera->splitter Tunnel
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, splitter, VIDEO_SPLITTER_INPUT_PORT);
+        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,
+                                splitter, VIDEO_SPLITTER_INPUT_PORT);
         OMX_TRACE(error);
         
 		// Tunnel splitter2 output port and encoder input port
-		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, encoder, VIDEO_ENCODE_INPUT_PORT);
+		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2,
+                                encoder, VIDEO_ENCODE_INPUT_PORT);
         OMX_TRACE(error);
 
 		
 		//Create splitter->egl_render Tunnel
-		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, render, EGL_RENDER_INPUT_PORT);
+		error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1,
+                                render, EGL_RENDER_INPUT_PORT);
         OMX_TRACE(error);
 
 	}else 
 	{
 		//Create camera->egl_render Tunnel
-		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT, render, EGL_RENDER_INPUT_PORT);
+		error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,
+                                render, EGL_RENDER_INPUT_PORT);
         OMX_TRACE(error);
 
 	}
