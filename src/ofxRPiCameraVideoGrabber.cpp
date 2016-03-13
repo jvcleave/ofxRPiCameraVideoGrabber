@@ -597,30 +597,47 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 #pragma mark DRAW
 void ofxRPiCameraVideoGrabber::draw()
 {
-	if (!textureEngine)
+	if (textureEngine)
 	{
-		return;
+		textureEngine->getTexture().draw(0, 0);
+        return;
 	}
-	textureEngine->getTexture().draw(0, 0);
+    if (directEngine)
+    {
+        directEngine->displayManager.options.drawRectangle.set(0, 0, getWidth(), getHeight());
+    }
+    
+	
 }
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y)
 {
-    if (!textureEngine)
+    if (textureEngine)
     {
+        textureEngine->getTexture().draw(x, y);
         return;
     }
-    textureEngine->getTexture().draw(x, y);
+    
+    if (directEngine)
+    {
+        directEngine->displayManager.options.drawRectangle.set(x, y, getWidth(), getHeight());
+    }
 }
 
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
 {
-    if (!textureEngine)
+    if (textureEngine)
     {
+        textureEngine->getTexture().draw(x, y, width, height);
         return;
     }
-    textureEngine->getTexture().draw(x, y, width, height);
+    
+    
+    if (directEngine)
+    {
+        directEngine->displayManager.options.drawRectangle.set(x, y, width, height);
+    }
 }
 
 #pragma mark IMAGE ENHANCEMENT
