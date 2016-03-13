@@ -287,6 +287,9 @@ OMX_ERRORTYPE NonTextureEngine::onCameraEventParamOrConfigChanged()
 OMX_ERRORTYPE NonTextureEngine::setupDisplay(int x, int y, int width, int height)
 {
 
+    OMX_ERRORTYPE error  = displayManager.setup(render, x, y, width, height);
+    return error;
+    
 	OMX_CONFIG_DISPLAYREGIONTYPE region;
 	
 	OMX_INIT_STRUCTURE(region);
@@ -300,7 +303,7 @@ OMX_ERRORTYPE NonTextureEngine::setupDisplay(int x, int y, int width, int height
 	region.dest_rect.height = height;
     region.fullscreen = OMX_FALSE;
 	region.noaspect = OMX_TRUE;
-	OMX_ERRORTYPE error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
+    error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
     OMX_TRACE(error);
 
 	

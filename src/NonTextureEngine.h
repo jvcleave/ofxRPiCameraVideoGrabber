@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BaseEngine.h"
+#include "OMXDisplay.h"
 
 
 
@@ -11,7 +12,7 @@ public:
 	~NonTextureEngine();
 	void setup(OMXCameraSettings);
     int getFrameCounter();
-    
+    OMXDisplay displayManager;
 private:
     
     OMX_ERRORTYPE setupDisplay(int x, int y, int width, int height);
