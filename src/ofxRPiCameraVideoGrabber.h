@@ -197,6 +197,11 @@ public:
     CameraState getCameraState();
     OMXDisplay* getDisplayManager();
 
+    void setDisplayAlpha(int);
+    void setDisplayRotation(int);
+    void setDisplayDrawRectangle(ofRectangle);
+    void setDisplayCropRectangle(ofRectangle);
+    void setDisplayMirror(bool);
 
 private:
     ofTexture errorTexture;
