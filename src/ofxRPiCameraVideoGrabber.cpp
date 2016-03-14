@@ -595,6 +595,18 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 }
 
 #pragma mark DRAW
+
+OMXDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
+{
+    if(directEngine)
+    {
+        return &directEngine->displayManager;
+    }
+    
+    return NULL;
+}
+
+
 void ofxRPiCameraVideoGrabber::draw()
 {
 	if (textureEngine)

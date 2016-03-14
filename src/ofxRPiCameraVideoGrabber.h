@@ -195,7 +195,9 @@ public:
     void saveStateToFile(string fileName="");
     
     CameraState getCameraState();
-    
+    OMXDisplay* getDisplayManager();
+
+
 private:
     ofTexture errorTexture;
     OMX_HANDLETYPE camera;
