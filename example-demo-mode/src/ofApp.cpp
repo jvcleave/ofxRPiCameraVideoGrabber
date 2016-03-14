@@ -13,8 +13,8 @@ void ofApp::setup()
     consoleListener.setup(this);
 
     
-    omxCameraSettings.width = 1920;
-    omxCameraSettings.height = 1080;
+    omxCameraSettings.width = 1280;
+    omxCameraSettings.height = 720;
     omxCameraSettings.framerate = 30;
     omxCameraSettings.enableTexture = true;
     //pass in the settings and it will start the camera
