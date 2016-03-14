@@ -12,7 +12,7 @@ public:
 	int framerate;
 	bool doRecording;
 	
-	bool isUsingTexture;
+	bool enableTexture;
 	bool enablePixels;
 	string recordingFilePath;
 	OMXCameraSettings()
@@ -20,7 +20,7 @@ public:
 		width = 1280;
 		height = 720;
 		framerate = 30;
-		isUsingTexture = true;
+		enableTexture = true;
 		enablePixels = false;
 		doRecording = false;
 		recordingFilePath = "";
@@ -33,7 +33,7 @@ public:
         info << "width " << width << endl;
         info << "height " << height << endl;
         info << "framerate " << framerate << endl;
-        info << "isUsingTexture " << isUsingTexture << endl;
+        info << "enableTexture " << enableTexture << endl;
         info << "enablePixels " << enablePixels << endl;
         info << "doRecording " << doRecording << endl;
         info << "recordingFilePath " << recordingFilePath << endl;

@@ -22,7 +22,7 @@
 #include "OMXCameraSettings.h"
 
 #include "TextureEngine.h"
-#include "NonTextureEngine.h"
+#include "DirectEngine.h"
 #include "CameraState.h"
 
 
@@ -73,7 +73,7 @@ public:
     unsigned char * getPixels();
     
     TextureEngine* textureEngine;
-    NonTextureEngine* directEngine;
+    DirectEngine* directEngine;
     
     bool isReady();
     

@@ -58,7 +58,6 @@ public:
         previousRotationDegrees = 0;
         OMX_INIT_STRUCTURE(displayConfig);
         displayConfigDefaults = displayConfig;
-        ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
     };
     
     ~OMXDisplay()
@@ -88,6 +87,9 @@ public:
         OMX_ERRORTYPE error = OMX_ErrorNone;
         error = applyConfig();
         OMX_TRACE(error);
+        
+        ofAddListener(ofEvents().update, this, &OMXDisplay::onUpdate);
+
         return error;
         
     }

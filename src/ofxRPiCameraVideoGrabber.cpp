@@ -267,7 +267,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         resetValues();
     }
     
-    if (omxCameraSettings.isUsingTexture) 
+    if (omxCameraSettings.enableTexture) 
     {
         
         textureEngine = new TextureEngine(); 
@@ -280,7 +280,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }else 
     {
         
-        directEngine = new NonTextureEngine(); 
+        directEngine = new DirectEngine(); 
         directEngine->setup(omxCameraSettings);
         camera = directEngine->camera;
     }
