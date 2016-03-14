@@ -40,11 +40,12 @@ Recording is available in both texture and non-texture modes
 ##### example-demo-mode    
 Shows different settings available to tweak the camera exposure, metering, cropping, zooming, filters, mirroring, white balance
 
-
-##### example-non-texture   
-Camera turns on and is rendered full screen inside app   
+##### example-direct-mode   
+Camera turns on and is rendered full screen via OMX acceleration   
 Press the "e" key to toggle through built in filters
 
+##### example-direct-mode-transform
+Demos cropping, alpha, mirroring of direct display (not camera)  
 
 ##### example-texture-mode  
 Camera turns on and renders to a texture that is drawn at full screen and a scaled version   
@@ -56,14 +57,16 @@ Basic shader usage with texture-mode
 Press the "e" key to toggle through built in filters 
 Press the "s" key to toggle shader   
 
-##### example-pixels:   
-Demonstrates how to get pixels (needed for OpenCv operations). 
+##### example-saved-settings:   
+Alternative way to load a camera configuration through a text file
+
+##### example-recording:   
+Recording of video in texture or direct mode
 
 ##### example-wrapper:   
 Drop-in replacement for ofVideoGrabber (texture-mode only)
 
-##### example-saved-settings:   
-Alternative way to load a camera configuration through a text file
+
 
 ### THANKS:
 Thanks to @tjormola for sharing his demos and exploration - especially in regards to recording
