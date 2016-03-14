@@ -10,7 +10,7 @@ void ofApp::setup()
     doStartRecording = false;
     doStopRecording =false;
     consoleListener.setup(this);
-    omxCameraSettings.isUsingTexture = false;
+    omxCameraSettings.enableTexture = false;
     omxCameraSettings.width = 1920;
     omxCameraSettings.height = 1080;
     //omxCameraSettings.doRecording = true;

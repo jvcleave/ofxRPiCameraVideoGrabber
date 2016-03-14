@@ -637,7 +637,7 @@ void ofxRPiCameraVideoGrabber::setDisplayMirror(bool doMirror)
     }
 }
 
-OMXDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
+DirectDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
 {
     if(directEngine)
     {

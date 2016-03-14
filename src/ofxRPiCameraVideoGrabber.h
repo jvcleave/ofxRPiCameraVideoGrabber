@@ -195,7 +195,7 @@ public:
     void saveStateToFile(string fileName="");
     
     CameraState getCameraState();
-    OMXDisplay* getDisplayManager();
+    DirectDisplay* getDisplayManager();
 
     void setDisplayAlpha(int);
     void setDisplayRotation(int);
