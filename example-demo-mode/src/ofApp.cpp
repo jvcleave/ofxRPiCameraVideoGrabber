@@ -16,7 +16,7 @@ void ofApp::setup()
     omxCameraSettings.width = 1920;
     omxCameraSettings.height = 1080;
     omxCameraSettings.framerate = 30;
-    omxCameraSettings.enableTexture = false;
+    omxCameraSettings.enableTexture = true;
     //pass in the settings and it will start the camera
 
     videoGrabber.setup(omxCameraSettings);
