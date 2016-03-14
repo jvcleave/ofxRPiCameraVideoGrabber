@@ -22,7 +22,7 @@
 #include "OMXCameraSettings.h"
 
 #include "TextureEngine.h"
-#include "NonTextureEngine.h"
+#include "DirectEngine.h"
 #include "CameraState.h"
 
 
@@ -73,7 +73,7 @@ public:
     unsigned char * getPixels();
     
     TextureEngine* textureEngine;
-    NonTextureEngine* directEngine;
+    DirectEngine* directEngine;
     
     bool isReady();
     
@@ -195,7 +195,14 @@ public:
     void saveStateToFile(string fileName="");
     
     CameraState getCameraState();
-    
+    DirectDisplay* getDisplayManager();
+
+    void setDisplayAlpha(int);
+    void setDisplayRotation(int);
+    void setDisplayDrawRectangle(ofRectangle);
+    void setDisplayCropRectangle(ofRectangle);
+    void setDisplayMirror(bool);
+
 private:
     ofTexture errorTexture;
     OMX_HANDLETYPE camera;

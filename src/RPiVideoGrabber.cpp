@@ -33,7 +33,7 @@ bool RPiVideoGrabber::initGrabber(int w, int h)
     cameraWidth = w;
     cameraHeight = h;
     
-    omxCameraSettings.isUsingTexture = true; //default true
+    omxCameraSettings.enableTexture = true; //default true
     videoGrabber.setup(omxCameraSettings);
     videoGrabber.enablePixels();
     

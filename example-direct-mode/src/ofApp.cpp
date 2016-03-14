@@ -4,8 +4,6 @@
 void ofApp::setup()
 {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	ofSetLogLevel("ofThread", OF_LOG_ERROR);
-	//ofSetVerticalSync(false);
 	
 	doDrawInfo	= true;
 		
@@ -14,7 +12,7 @@ void ofApp::setup()
 	OMXCameraSettings omxCameraSettings;
 	omxCameraSettings.width					= 1280;
 	omxCameraSettings.height				= 720;
-	omxCameraSettings.isUsingTexture		= false;
+	omxCameraSettings.enableTexture         = false;
 	omxCameraSettings.doRecording			= false;		//default: false
 	if (omxCameraSettings.doRecording) 
 	{		

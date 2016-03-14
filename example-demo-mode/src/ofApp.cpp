@@ -13,10 +13,10 @@ void ofApp::setup()
     consoleListener.setup(this);
 
     
-    omxCameraSettings.width = 1280;
-    omxCameraSettings.height = 720;
+    omxCameraSettings.width = 1920;
+    omxCameraSettings.height = 1080;
     omxCameraSettings.framerate = 30;
-    omxCameraSettings.isUsingTexture = true;
+    omxCameraSettings.enableTexture = false;
     //pass in the settings and it will start the camera
 
     videoGrabber.setup(omxCameraSettings);
@@ -75,15 +75,6 @@ void ofApp::setup()
     optimizationDemo->name = "OPTIMIZATION";
     demos[demoCount] = optimizationDemo;
     demoCount++;
-    /*
-     DEMOS TODO
-     
-    - Manual mode, shutter speed, disable sharpen/saturation, White Balance/Metering
-    - Recording mode
-    - Saving/Loading States
-     
-    
-    */
     
     doNextDemo = false;
     currentDemoID =0;

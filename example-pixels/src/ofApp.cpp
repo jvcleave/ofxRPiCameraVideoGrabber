@@ -18,7 +18,7 @@ void ofApp::setup()
 	omxCameraSettings.width = 1280;
 	omxCameraSettings.height = 720;
 	omxCameraSettings.framerate = 30;
-	omxCameraSettings.isUsingTexture = true;
+	omxCameraSettings.enableTexture = true;
 	
 	
 	

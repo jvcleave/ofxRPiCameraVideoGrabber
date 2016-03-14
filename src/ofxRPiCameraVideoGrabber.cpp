@@ -267,7 +267,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         resetValues();
     }
     
-    if (omxCameraSettings.isUsingTexture) 
+    if (omxCameraSettings.enableTexture) 
     {
         
         textureEngine = new TextureEngine(); 
@@ -280,7 +280,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     }else 
     {
         
-        directEngine = new NonTextureEngine(); 
+        directEngine = new DirectEngine(); 
         directEngine->setup(omxCameraSettings);
         camera = directEngine->camera;
     }
@@ -595,32 +595,102 @@ void ofxRPiCameraVideoGrabber::stopRecording()
 }
 
 #pragma mark DRAW
+void ofxRPiCameraVideoGrabber::setDisplayAlpha(int alpha)
+{
+    if(directEngine)
+    {
+        getDisplayManager()->options.alpha = alpha;
+    }
+}
+
+void ofxRPiCameraVideoGrabber::setDisplayRotation(int rotationDegrees)
+{
+    if(directEngine)
+    {
+        getDisplayManager()->rotateDisplay(rotationDegrees);
+    }
+}
+
+void ofxRPiCameraVideoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
+{
+    if(directEngine)
+    {
+        getDisplayManager()->options.drawRectangle = drawRectangle;
+        
+    }
+}
+
+void ofxRPiCameraVideoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
+{
+    if(directEngine)
+    {
+        getDisplayManager()->options.cropRectangle = cropRectangle;
+        
+    }
+}
+
+void ofxRPiCameraVideoGrabber::setDisplayMirror(bool doMirror)
+{
+    if(directEngine)
+    {
+        getDisplayManager()->options.doMirror = doMirror;
+    }
+}
+
+DirectDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
+{
+    if(directEngine)
+    {
+        return &directEngine->displayManager;
+    }
+    
+    return NULL;
+}
+
+
 void ofxRPiCameraVideoGrabber::draw()
 {
-	if (!textureEngine)
+	if (textureEngine)
 	{
-		return;
+		textureEngine->getTexture().draw(0, 0);
+        return;
 	}
-	textureEngine->getTexture().draw(0, 0);
+    if (directEngine)
+    {
+        setDisplayDrawRectangle(ofRectangle(0, 0, getWidth(), getHeight()));
+    }
+    
+	
 }
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y)
 {
-    if (!textureEngine)
+    if (textureEngine)
     {
+        textureEngine->getTexture().draw(x, y);
         return;
     }
-    textureEngine->getTexture().draw(x, y);
+    
+    if (directEngine)
+    {
+        setDisplayDrawRectangle(ofRectangle(x, y, getWidth(), getHeight()));
+    }
 }
 
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
 {
-    if (!textureEngine)
+    if (textureEngine)
     {
+        textureEngine->getTexture().draw(x, y, width, height);
         return;
     }
-    textureEngine->getTexture().draw(x, y, width, height);
+    
+    
+    if (directEngine)
+    {
+        setDisplayDrawRectangle(ofRectangle(x, y, width, height));
+    }
 }
 
 #pragma mark IMAGE ENHANCEMENT
