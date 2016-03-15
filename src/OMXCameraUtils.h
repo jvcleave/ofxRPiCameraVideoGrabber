@@ -140,6 +140,44 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
     
 }
 
+extern inline
+void PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDefinition)
+{
+    stringstream info;
+    
+    //info << "cMIMEType: "		<< portDefinition.format.video.cMIMEType << endl;
+    //info << "pNativeRender: "   << portDefinition.format.video.pNativeRender << endl;
+    info << "nFrameWidth: "		<< portDefinition.format.video.nFrameWidth << endl;
+    info << "nFrameHeight: "	<< portDefinition.format.video.nFrameHeight << endl;
+    info << "nStride: "			<< portDefinition.format.video.nStride << endl;
+    info << "nSliceHeight: "    << portDefinition.format.video.nSliceHeight << endl;
+    info << "nBitrate: "        << portDefinition.format.video.nBitrate << endl;
+    info << "xFramerate: "		<< (portDefinition.format.video.xFramerate >> 16) << endl;
+    info << "bFlagErrorConcealment: "   << portDefinition.format.video.bFlagErrorConcealment << endl;
+    info << "eCompressionFormat: "      << GetVideoCodingString(portDefinition.format.video.eCompressionFormat) << endl;
+    info << "eColorFormat: "            << GetColorFormatString(portDefinition.format.video.eColorFormat) << endl;
+    info << "pNativeWindow: "           << portDefinition.format.video.pNativeWindow << endl;
+    
+    ofLogVerbose(__func__) << info.str();
+    
+    /*
+     
+     OMX_STRING cMIMEType;
+     OMX_NATIVE_DEVICETYPE pNativeRender;
+     OMX_U32 nFrameWidth;
+     OMX_U32 nFrameHeight;
+     OMX_S32 nStride;
+     OMX_U32 nSliceHeight;
+     OMX_U32 nBitrate;
+     OMX_U32 xFramerate;
+     OMX_BOOL bFlagErrorConcealment;
+     OMX_VIDEO_CODINGTYPE eCompressionFormat;
+     OMX_COLOR_FORMATTYPE eColorFormat;
+     OMX_NATIVE_WINDOWTYPE pNativeWindow;
+     */
+}
+
+
 extern inline  
 string eglErrorToString(EGLint error)
 {

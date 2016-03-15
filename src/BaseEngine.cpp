@@ -57,11 +57,11 @@ void BaseEngine::configureCameraResolution()
     cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
 	cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
     cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
-	//cameraOutputPortDefinition.format.video.nSliceHeight	= omxCameraSettings.height;
-	
-	error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
-    OMX_TRACE(error);
+    //cameraOutputPortDefinition.format.video.eColorFormat    = OMX_COLOR_FormatYUV420PackedPlanar;
 
+    error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
+    OMX_TRACE(error);
+    PrintPortDef(cameraOutputPortDefinition);
 	
 	//camera color spaces
 	/*
