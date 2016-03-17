@@ -15,7 +15,6 @@ public:
     DirectDisplay displayManager;
 private:
     
-    OMX_ERRORTYPE setupDisplay(int x, int y, int width, int height);
     int frameCounter;
     
 	OMX_ERRORTYPE onCameraEventParamOrConfigChanged();

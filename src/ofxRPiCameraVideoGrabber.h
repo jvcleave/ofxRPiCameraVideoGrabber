@@ -84,16 +84,16 @@ public:
     void reset();
     void close();
     
-	void setSharpness(int sharpness_);
+	void setSharpness(int);
     int getSharpness() { return sharpness; }
     
-	void setContrast(int contrast_);
+	void setContrast(int);
     int getContrast() { return contrast; }
     
-	void setBrightness(int brightness_);
+	void setBrightness(int);
     int getBrightness() { return brightness; }
     
-	void setSaturation(int saturation_);
+	void setSaturation(int);
 	int getSaturation()		{ return saturation; }
     
     bool frameStabilization;
@@ -267,16 +267,12 @@ private:
     OMX_CONFIG_IMAGEFILTERTYPE imagefilterConfig;
     
     OMX_CONFIG_BOOLEANTYPE burstModeConfig;
-    OMX_CONFIG_BOOLEANTYPE hdrConfig;
     OMX_CONFIG_SCALEFACTORTYPE digitalZoomConfig;
     
     OMX_CONFIG_FLICKERCANCELTYPE flickerCancelConfig;
     OMX_CONFIG_DYNAMICRANGEEXPANSIONTYPE dreConfig;
     OMX_CONFIG_INPUTCROPTYPE sensorCropConfig;
     
-    
-    OMX_CONFIG_CAMERAINFOTYPE cameraInfoConfig;
-    OMX_PARAM_BRCMFRAMERATERANGETYPE frameRateRangeConfig;
     
     
     OMX_CONFIG_ROTATIONTYPE rotationConfig;

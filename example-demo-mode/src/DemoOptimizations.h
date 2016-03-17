@@ -11,12 +11,15 @@ public:
     bool doChangeSharpening;
     bool doChangeSaturation;
     bool doChangeStabilization;
+    bool doChangeBurstMode;
     void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doChangeSharpening = false;
         doChangeSaturation = false;
         doChangeStabilization = false;
+        doChangeBurstMode = false;
+        
     };
     
     void update()
@@ -36,18 +39,18 @@ public:
             videoGrabber->setFrameStabilization(!videoGrabber->getFrameStabilization());
             doChangeStabilization = false;
         }
-        
+        if (doChangeBurstMode) 
+        {
+            videoGrabber->setBurstMode(!videoGrabber->isBurstModeEnabled());
+            doChangeBurstMode = false;
+        }
         
         stringstream info;
-        info << " Software Sharpening: "      << videoGrabber->isSoftwareSharpeningEnabled()  << "\n";
-        info << " Software Saturation: "      << videoGrabber->isSoftwareSaturationEnabled()  << "\n";
-        info << " Frame Stabilization: "      << videoGrabber->getFrameStabilization()  << "\n";
-
-        info << "\n";
-        info << "Press 1 to toggle Sharpening" << "\n";
-        info << "Press 2 to toggle Saturation" << "\n";
-        info << "Press 3 to toggle Stabilization" << "\n";
-        
+        info << "Press 1 to toggle Software Sharpening: "   <<  videoGrabber->isSoftwareSharpeningEnabled() << endl;
+        info << "Press 2 to toggle Software Saturation"     <<  videoGrabber->isSoftwareSaturationEnabled() << endl;
+        info << "Press 3 to toggle Frame Stabilization"     <<  videoGrabber->getFrameStabilization()       << endl;
+        info << "Press 4 to toggle Burst Mode: "            <<  videoGrabber->isBurstModeEnabled()          << endl;
+    
         infoString = info.str();
         
     };
@@ -70,6 +73,10 @@ public:
         if (key == '3')
         {
             doChangeStabilization = true;
+        }
+        if (key == '4')
+        {
+            doChangeBurstMode = true;
         }
     };
 };

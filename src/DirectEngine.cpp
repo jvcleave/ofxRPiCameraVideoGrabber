@@ -266,7 +266,8 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     
-    error = setupDisplay(0, 0, omxCameraSettings.width, omxCameraSettings.height);
+    //setup DisplayManager
+    error = displayManager.setup(render, 0, 0, omxCameraSettings.width, omxCameraSettings.height);
     OMX_TRACE(error);
     
     if(omxCameraSettings.doRecording)
@@ -282,33 +283,6 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     return error;
 }
 
-
-
-OMX_ERRORTYPE DirectEngine::setupDisplay(int x, int y, int width, int height)
-{
-
-    OMX_ERRORTYPE error  = displayManager.setup(render, x, y, width, height);
-    return error;
-    
-	OMX_CONFIG_DISPLAYREGIONTYPE region;
-	
-	OMX_INIT_STRUCTURE(region);
-	region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
-	
-	region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
-
-	region.dest_rect.x_offset = x;
-	region.dest_rect.y_offset = y;
-	region.dest_rect.width	= width;
-	region.dest_rect.height = height;
-    region.fullscreen = OMX_FALSE;
-	region.noaspect = OMX_TRUE;
-    error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
-    OMX_TRACE(error);
-
-	
-	return error;	
-}
 
 
 DirectEngine::~DirectEngine()

@@ -110,9 +110,7 @@ void ofxRPiCameraVideoGrabber::resetValues()
     
     OMX_INIT_STRUCTURE(digitalZoomConfig);
     digitalZoomConfig.nPortIndex = OMX_ALL;
-    
-    OMX_INIT_STRUCTURE(frameRateRangeConfig);
-    
+        
     OMX_INIT_STRUCTURE(rotationConfig);
     rotationConfig.nPortIndex = CAMERA_OUTPUT_PORT;
     
@@ -121,20 +119,16 @@ void ofxRPiCameraVideoGrabber::resetValues()
     
     OMX_INIT_STRUCTURE(disableSoftwareSharpenConfig);
     OMX_INIT_STRUCTURE(disableSoftwareSaturationConfig);
-    
-    OMX_INIT_STRUCTURE(cameraInfoConfig);
-    
+        
     OMX_INIT_STRUCTURE(dreConfig);
-    
-    OMX_INIT_STRUCTURE(hdrConfig);
-    OMX_INIT_STRUCTURE(burstModeConfig);
-
+      
     OMX_INIT_STRUCTURE(exposureConfig);
     exposureConfig.nPortIndex = OMX_ALL;
     
     OMX_INIT_STRUCTURE(flickerCancelConfig);
     flickerCancelConfig.nPortIndex = OMX_ALL;
     
+    OMX_INIT_STRUCTURE(burstModeConfig);    
 }
 
 string ofxRPiCameraVideoGrabber::currentStateToString()
@@ -926,13 +920,15 @@ void ofxRPiCameraVideoGrabber::setFrameStabilization(bool doStabilization)
 
 void ofxRPiCameraVideoGrabber::checkBurstMode()
 {
-    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBrcmHighDynamicRange, &burstModeConfig);
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
     OMX_TRACE(error);
     burstModeEnabled = fromOMXBool(burstModeConfig.bEnabled);
 }
 
 void ofxRPiCameraVideoGrabber::setBurstMode(bool doBurstMode)
 {
+    OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
+    OMX_TRACE(error);
     if(doBurstMode)
     {
         burstModeConfig.bEnabled = OMX_TRUE;  
@@ -941,7 +937,7 @@ void ofxRPiCameraVideoGrabber::setBurstMode(bool doBurstMode)
         burstModeConfig.bEnabled = OMX_FALSE;  
 
     }
-    OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
+    error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
