@@ -9,16 +9,8 @@
 
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
+#include "OMX_Maps.h"
 
-#include <IL/OMX_Core.h>
-#include <IL/OMX_Component.h>
-#include <IL/OMX_Index.h>
-#include <IL/OMX_Image.h>
-#include <IL/OMX_Video.h>
-#include <IL/OMX_Broadcom.h>
-
-
-#include "OMXCameraUtils.h"
 #include "OMXCameraSettings.h"
 
 #include "TextureEngine.h"
@@ -206,7 +198,6 @@ public:
 private:
     ofTexture errorTexture;
     OMX_HANDLETYPE camera;
-    OMXCameraUtils omxCameraUtils;
     bool hasNewFrame;
     
     OMX_METERINGTYPE meteringType;

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "OMXCameraUtils.h"
-
+#include "OMX_Maps.h"
 
 class DirectDisplayOptions
 {

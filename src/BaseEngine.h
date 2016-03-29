@@ -9,16 +9,8 @@
 #pragma once
 
 #include "ofMain.h"
-
-#include <IL/OMX_Core.h>
-#include <IL/OMX_Component.h>
-#include <IL/OMX_Index.h>
-#include <IL/OMX_Image.h>
-#include <IL/OMX_Video.h>
-#include <IL/OMX_Broadcom.h>
-
+#include "OMX_Maps.h"
 #include "OMXCameraSettings.h"
-#include "OMXCameraUtils.h"
 
 class BaseEngine: public ofThread
 {
