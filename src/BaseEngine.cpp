@@ -39,7 +39,12 @@ void BaseEngine::configureCameraResolution()
 	OMX_PARAM_U32TYPE device;
 	OMX_INIT_STRUCTURE(device);
 	device.nPortIndex	= OMX_ALL;
-	device.nU32			= 0;
+	
+	if(omxCameraSettings.cameraIndex)
+	{
+		ofLog() << "omxCameraSettings.cameraIndex: " << omxCameraSettings.cameraIndex;
+	}
+	device.nU32	= omxCameraSettings.cameraIndex;
 	
 	error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
     OMX_TRACE(error);

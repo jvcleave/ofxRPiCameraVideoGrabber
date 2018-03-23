@@ -14,6 +14,8 @@ public:
 	
 	bool enableTexture;
 	bool enablePixels;
+	bool enableMultipleCameras;
+	int cameraIndex;
 	string recordingFilePath;
 	OMXCameraSettings()
 	{
@@ -23,6 +25,8 @@ public:
 		enableTexture = true;
 		enablePixels = false;
 		doRecording = false;
+		enableMultipleCameras = false;
+		cameraIndex = 0;
 		recordingFilePath = "";
 	}
 	
@@ -37,6 +41,9 @@ public:
         info << "enablePixels " << enablePixels << endl;
         info << "doRecording " << doRecording << endl;
         info << "recordingFilePath " << recordingFilePath << endl;
+		info << "enableMultipleCameras " << enableMultipleCameras << endl;
+		info << "cameraIndex " << cameraIndex << endl;
+
         return info.str();
     }
 };
