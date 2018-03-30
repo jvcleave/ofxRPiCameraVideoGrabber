@@ -2,6 +2,7 @@
 #include "ofMain.h"
 //#include "ofxRPiCameraVideoGrabber.h"
 
+using namespace std;
 
 class CameraState
 {
@@ -33,7 +34,8 @@ public:
     
     void setup(string currentState)
     {
-        ofBuffer buffer(currentState);
+    
+        ofBuffer buffer(currentState.c_str(), currentState.size());
         setup(buffer);        
     }
     
