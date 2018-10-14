@@ -167,14 +167,17 @@ string ofxRPiCameraVideoGrabber::currentStateToString()
 CameraState ofxRPiCameraVideoGrabber::getCameraState()
 {
     CameraState cameraState;
-    cameraState.setup(currentStateToString());
+    string currentStateString = currentStateToString();
+    cameraState.setup(currentStateString);
     return cameraState;    
 }
 
 
 void ofxRPiCameraVideoGrabber::saveStateToFile(string fileName)
 {
-    ofBuffer buffer(currentStateToString());
+	string currentStateString = currentStateToString();
+
+    ofBuffer buffer(currentStateString.c_str(), currentStateString.size());
     if(fileName.empty())
     {
         fileName = "STATE_"+ofGetTimestampString()+".txt";

@@ -23,13 +23,14 @@ public:
 };
 
 
-class TerminalListener : public Poco::Runnable
+class TerminalListener : public ofThread
 {
 private:
     struct termios orig_termios;
 public:
     KeyListener* listener;
-    Poco::Thread thread;
+	std::condition_variable condition;
+
     TerminalListener()
     {
         
@@ -51,13 +52,13 @@ public:
         new_termios.c_cc[VMIN] = 0;
         
         tcsetattr(STDIN_FILENO, TCSANOW, &new_termios);
-        thread.start(*this);
+        startThread();
     }
     
-    void run()
+    void threadedFunction()
     {
         
-        while (thread.isRunning())
+        while (isThreadRunning())
         {
             if (listener != NULL)
             {
@@ -83,22 +84,29 @@ public:
                     KeyListenerEventData eventData(ch[0], (void *)this);
                     listener->onCharacterReceived(eventData);
                 }
-		thread.sleep(100);
+				sleep(100);
             }
         }
     }
     
-    void close()
+  
+    void stop()
     {
+        std::unique_lock<std::mutex> lck(mutex);
+        stopThread();
         tcsetattr(STDIN_FILENO, TCSANOW, &orig_termios);
-        thread.tryJoin(50);
         listener = NULL;
+        
+        condition.notify_all();
     }
     
     ~TerminalListener()
     {
-        close();
-        //ofLogVerbose(__func__) << " END";
+    	stop();
+        
+        
+		waitForThread(false);
+
     }
     
 };

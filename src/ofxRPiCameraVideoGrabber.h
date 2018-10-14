@@ -17,6 +17,7 @@
 #include "DirectEngine.h"
 #include "CameraState.h"
 
+using namespace std;
 
 enum MIRROR
 {
