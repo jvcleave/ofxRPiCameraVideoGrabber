@@ -16,7 +16,8 @@ class BaseEngine: public ofThread
 {
 public:
 	BaseEngine();
-	
+    virtual ~BaseEngine(){};
+
 	virtual void setup(OMXCameraSettings) = 0;
     virtual int getFrameCounter() = 0;
 	OMXCameraSettings& getSettings();

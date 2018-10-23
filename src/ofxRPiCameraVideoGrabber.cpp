@@ -659,6 +659,10 @@ void ofxRPiCameraVideoGrabber::draw()
     
 	
 }
+void ofxRPiCameraVideoGrabber::draw(ofRectangle& rectangle)
+{
+    draw(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+}
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y)
 {

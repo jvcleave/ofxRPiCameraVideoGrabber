@@ -73,6 +73,7 @@ public:
     void draw();
     void draw(int x, int y);
 	void draw(int x, int y, int width, int height);
+    void draw(ofRectangle&);
     
     void reset();
     void close();
