@@ -16,6 +16,7 @@ public:
         
         doHDMISync = true;
         alpha = 255;
+        layer = 0;
         doMirror = false;
         rotationIndex = 0;
         rotationDegrees =0; 
@@ -35,6 +36,7 @@ public:
     int rotationDegrees;
     int alpha;
     bool doForceFill;
+    int layer;
 };
 
 class DirectDisplay
@@ -145,7 +147,7 @@ public:
     
     OMX_ERRORTYPE applyConfig()
     {
-        displayConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_MODE);
+        displayConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_LAYER | OMX_DISPLAY_SET_MODE);
         
         displayConfig.dest_rect.x_offset  = options.drawRectangle.x;
         displayConfig.dest_rect.y_offset  = options.drawRectangle.y;
@@ -162,6 +164,7 @@ public:
         displayConfig.transform  = (OMX_DISPLAYTRANSFORMTYPE)options.rotationIndex;
         //int alpha = (ofGetFrameNum() % 255); 
         displayConfig.alpha  = options.alpha;
+        displayConfig.layer  = options.layer;
 
         if(options.doForceFill)
         {

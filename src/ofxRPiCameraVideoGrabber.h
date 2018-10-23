@@ -192,6 +192,7 @@ public:
     DirectDisplay* getDisplayManager();
 
     void setDisplayAlpha(int);
+    void setDisplayLayer(int);
     void setDisplayRotation(int);
     void setDisplayDrawRectangle(ofRectangle);
     void setDisplayCropRectangle(ofRectangle);
