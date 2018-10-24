@@ -50,13 +50,6 @@ void ofxRPiCameraVideoGrabber::reset()
     applyAllSettings();
 }
 
-
-
-
-
-
-
-
 void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
 {
     setup(cameraState.cameraSettings);

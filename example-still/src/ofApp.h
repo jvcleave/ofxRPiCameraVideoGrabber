@@ -20,7 +20,7 @@ class ofApp : public ofBaseApp, public KeyListener{
 	TerminalListener consoleListener;
 	ofxRPiCameraPhotoGrabber photoGrabber;
 	
-	//ImageFilterCollection filterCollection;
+	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
 

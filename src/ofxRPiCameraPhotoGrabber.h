@@ -10,13 +10,13 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 
-#include "OMX_Maps.h"
+#include "RPICameraController.h"
 
 #include "StillCameraEngine.h"
 
 
 
-class ofxRPiCameraPhotoGrabber
+class ofxRPiCameraPhotoGrabber : public RPICameraController
 {
 
 public:
@@ -35,8 +35,7 @@ public:
     
     void takePhoto();
 
-    OMX_HANDLETYPE camera;
-    StillCameraEngine engine;
+    StillCameraEngine* engine;
     
 #if 0
     void loadCameraSettingsFromFile(string filePath="");
