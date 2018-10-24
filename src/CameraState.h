@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
-//#include "ofxRPiCameraVideoGrabber.h"
+#include "OMXCameraSettings.h"
+
 
 using namespace std;
 
