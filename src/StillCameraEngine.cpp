@@ -349,9 +349,9 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     return error;
 
 }
-void StillCameraEngine::takePhoto()
+bool StillCameraEngine::takePhoto()
 {
-    
+    bool result = false;
     ofLogVerbose(__func__);
     OMX_ERRORTYPE error;
     
@@ -398,8 +398,16 @@ void StillCameraEngine::takePhoto()
     bool doThreadBlocking	= true;
     startThread(doThreadBlocking);
     error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-    OMX_TRACE(error, "OMX_FillThisBuffer");
-    
+    if (error != OMX_ErrorNone) 
+    {
+        ofLogError() << "TAKE PHOTO FAILED";
+    }else
+    {
+        OMX_TRACE(error, "OMX_FillThisBuffer");
+        result = true;
+
+    }
+    return result;
 }
 OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
 {

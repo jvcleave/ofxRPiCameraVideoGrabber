@@ -12,7 +12,7 @@ void ofApp::setup()
 
 	
 	photoGrabber.setup();
-	//filterCollection.setup();
+	filterCollection.setup();
 	
 
 }
@@ -38,7 +38,7 @@ void ofApp::keyPressed  (int key)
 	
 	if (key == 'e')
 	{
-		//photoGrabber.setImageFilter(filterCollection.getNextFilter());
+		photoGrabber.setImageFilter(filterCollection.getNextFilter());
 	}
 	
 	if (key == 'g')

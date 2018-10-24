@@ -3,13 +3,21 @@
 
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
-
+    OMX_Init();
+    OMX_Maps::getInstance(); 
+    resetValues();
+    engine = NULL;
 }
 
 void ofxRPiCameraPhotoGrabber::setup()
 {
-    OMX_Init();
-    engine.setup();
+    if(engine)
+    {
+        delete engine;
+    }
+    engine = new StillCameraEngine();
+    engine->setup();
+    camera = engine->camera;
     
 }
 /*
@@ -27,23 +35,41 @@ void ofxRPiCameraPhotoGrabber::saveCameraSettingsToFile(string filePath)
 
 bool ofxRPiCameraPhotoGrabber::isReady()
 {
-    return engine.isOpen();
+    if(engine)
+    {
+        return engine->isOpen();
+    }
+    return false;
 }
 
 void ofxRPiCameraPhotoGrabber::takePhoto()
 {
-    engine.takePhoto();
+    if(!engine) return;
+    
+    if(engine->takePhoto())
+    {
+        ofLog() << "TAKE PHOTO SUCCESS";
+    }else
+    {
+        ofLogError() << "TAKE PHOTO FAILED";
+        engine->closeEngine();
+        setup();
+    }
 
 }
 
 int ofxRPiCameraPhotoGrabber::getWidth()
 {
-    return engine.frameWidth;
+    if(!engine) return 0;
+
+    return engine->frameWidth;
 }
 
 int ofxRPiCameraPhotoGrabber::getHeight()
 {
-    return engine.frameHeight;
+    if(!engine) return 0;
+
+    return engine->frameHeight;
 }
 
 
@@ -52,7 +78,10 @@ int ofxRPiCameraPhotoGrabber::getHeight()
 
 ofxRPiCameraPhotoGrabber::~ofxRPiCameraPhotoGrabber()
 {
-   
+    if(engine)
+    {
+        delete engine;
+    }
 }
 
 

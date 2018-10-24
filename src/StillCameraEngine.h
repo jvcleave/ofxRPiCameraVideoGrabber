@@ -27,7 +27,7 @@ public:
     
     bool isOpen(){return didOpen;}
     
-    void takePhoto();
+    bool takePhoto();
     
     int frameWidth;
     int frameHeight;
