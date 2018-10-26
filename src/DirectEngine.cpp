@@ -47,10 +47,10 @@ int DirectEngine::getFrameCounter()
 }
 
 
-void DirectEngine::setup(OMXCameraSettings omxCameraSettings_)
+void DirectEngine::setup(OMXCameraSettings& settings_)
 {
 	
-	omxCameraSettings = omxCameraSettings_;
+	settings = settings_;
 	
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -116,7 +116,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);	
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Set up video splitter
         OMX_CALLBACKTYPE splitterCallbacks;
@@ -149,7 +149,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Create encoder
         
@@ -192,7 +192,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Enable splitter input port
         error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
@@ -212,7 +212,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Enable encoder input port
         error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
@@ -251,7 +251,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Start encoder
         error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
@@ -267,10 +267,10 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     //setup DisplayManager
-    error = displayManager.setup(render, 0, 0, omxCameraSettings.width, omxCameraSettings.height);
+    error = displayManager.setup(render, 0, 0, settings.width, settings.height);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
@@ -290,13 +290,13 @@ DirectEngine::~DirectEngine()
     ofLogVerbose(__func__) << "START";
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
-    if(omxCameraSettings.doRecording && !didWriteFile)
+    if(settings.doRecording && !didWriteFile)
     {
         writeFile();
         
     }
    
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
         OMX_TRACE(error);
@@ -319,7 +319,7 @@ DirectEngine::~DirectEngine()
     error = DisableAllPortsForComponent(&camera);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
         OMX_TRACE(error);
@@ -339,7 +339,7 @@ DirectEngine::~DirectEngine()
     error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT,  NULL, 0);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //Destroy splitter->encoder Tunnel
         error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, NULL, 0);
@@ -367,7 +367,7 @@ DirectEngine::~DirectEngine()
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error);

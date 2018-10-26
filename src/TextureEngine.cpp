@@ -38,10 +38,10 @@ int TextureEngine::getFrameCounter()
 	
 }
 
-void TextureEngine::setup(OMXCameraSettings omxCameraSettings_)
+void TextureEngine::setup(OMXCameraSettings& settings_)
 {
-	omxCameraSettings = omxCameraSettings_;
-    ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
+	settings = settings_;
+    ofLogVerbose(__func__) << "settings: " << settings.toString();
 	generateEGLImage();
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -52,7 +52,7 @@ void TextureEngine::setup(OMXCameraSettings omxCameraSettings_)
 	error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     OMX_TRACE(error);
 
-    if (omxCameraSettings.enablePixels) 
+    if (settings.enablePixels) 
     {
         enablePixels();
         updatePixels();
@@ -84,9 +84,9 @@ void TextureEngine::updatePixels()
 	
 	if (!fbo.isAllocated()) 
 	{
-		fbo.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+		fbo.allocate(settings.width, settings.height, GL_RGBA);
 	}
-	int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+	int dataSize = settings.width * settings.height * 4;
 	if (pixels == NULL)
 	{
 		pixels = new unsigned char[dataSize];
@@ -94,7 +94,7 @@ void TextureEngine::updatePixels()
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
 		texture.draw(0, 0);
-		glReadPixels(0,0, omxCameraSettings.width, omxCameraSettings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
+		glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);	
 	fbo.end();
 }
 
@@ -112,7 +112,7 @@ void TextureEngine::generateEGLImage()
 	context = appEGLWindow->getEglContext();
 	
 	
-	texture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+	texture.allocate(settings.width, settings.height, GL_RGBA);
 	//texture.getTextureData().bFlipTexture = true;
 	
 	texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
@@ -121,7 +121,7 @@ void TextureEngine::generateEGLImage()
 	glEnable(GL_TEXTURE_2D);
 	
 	// setup first texture
-	int dataSize = omxCameraSettings.width * omxCameraSettings.height * 4;
+	int dataSize = settings.width * settings.height * 4;
 	
 	GLubyte* pixelData = new GLubyte [dataSize];
 	
@@ -129,7 +129,7 @@ void TextureEngine::generateEGLImage()
     memset(pixelData, 0xff, dataSize);  // white texture, opaque
 	
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, omxCameraSettings.width, omxCameraSettings.height, 0,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, settings.width, settings.height, 0,
 				 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 	
 	delete[] pixelData;
@@ -206,7 +206,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		//Set up video splitter
 		OMX_CALLBACKTYPE splitterCallbacks;
@@ -244,7 +244,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		//Create encoder
 		
@@ -288,7 +288,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		//Enable splitter input port
 		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
@@ -313,7 +313,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_INPUT_PORT, NULL);
     OMX_TRACE(error);
 
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		//Enable encoder input port
 		error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
@@ -357,7 +357,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		//Start encoder
 		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
@@ -381,7 +381,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
@@ -416,19 +416,19 @@ TextureEngine::~TextureEngine()
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         //encoderOutputBuffer->nFlags = OMX_BUFFERFLAG_EOS;
         //OMX_FillThisBuffer(encoder, encoderOutputBuffer);
     }
     
-    if(omxCameraSettings.doRecording && !didWriteFile)
+    if(settings.doRecording && !didWriteFile)
     {
         writeFile();
         
     }
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
         OMX_TRACE(error);
@@ -450,7 +450,7 @@ TextureEngine::~TextureEngine()
     error = DisableAllPortsForComponent(&camera);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
         OMX_TRACE(error);
@@ -499,7 +499,7 @@ TextureEngine::~TextureEngine()
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
     
-    if(omxCameraSettings.doRecording)
+    if(settings.doRecording)
     {
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error);

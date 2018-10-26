@@ -28,10 +28,8 @@ public:
 
 	ofxRPiCameraVideoGrabber();
     ~ofxRPiCameraVideoGrabber();
-    
-    //CameraMetering metering;
-    
-    void setup(OMXCameraSettings);
+        
+    void setup(OMXCameraSettings&);
     int getWidth();
     int getHeight();
     int getFrameRate();

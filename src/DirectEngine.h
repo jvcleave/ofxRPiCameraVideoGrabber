@@ -10,8 +10,8 @@ class DirectEngine: public BaseEngine
 public:
 	DirectEngine();
 	~DirectEngine();
-	void setup(OMXCameraSettings);
-    int getFrameCounter();
+	void setup(OMXCameraSettings&) override;
+    int getFrameCounter() override;
     DirectDisplay displayManager;
 private:
     

@@ -18,54 +18,11 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 void ofxRPiCameraVideoGrabber::reset()
 {
     resetValues();
-    omxCameraSettings.resetValues();
+    settings.resetValues();
     applyAllSettings();
 }
-/*
-void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
-{
-    setup(cameraState.cameraSettings);
-    map<string, string> keyValueMap = cameraState.keyValueMap;
-    for(auto iterator  = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
-    {
-        string key = iterator->first;
-        string value = iterator->second;
-        //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
-        if(key == "sharpness")  setSharpness(ofToInt(value));
-        if(key == "contrast")   setContrast(ofToInt(value));
-        if(key == "brightness") setBrightness(ofToInt(value));
-        if(key == "saturation") setSaturation(ofToInt(value));
-        if(key == "ISO")        setISO(ofToInt(value));
-        if(key == "AutoISO")    setAutoISO(ofToBool(value));
-        if(key == "DRE")        setDRE(ofToInt(value));
-        if(key == "cropRectangle") 
-        {
-            vector<string> rectValues = ofSplitString(value, ",");
-            if(rectValues.size() == 4)             
-            {
-                setSensorCrop(ofToInt(rectValues[0]),
-                                            ofToInt(rectValues[1]),
-                                            ofToInt(rectValues[2]),
-                                            ofToInt(rectValues[3])); 
-            }
-        }
-        if(key == "zoomLevelNormalized")    setZoomLevelNormalized(ofToFloat(value));
-        if(key == "mirror")                 setMirror(value);
-        if(key == "rotation")               setRotation(ofToInt(value));
-        if(key == "imageFilter")            setImageFilter(value);
-        if(key == "exposurePreset")         setExposurePreset(value);
-        if(key == "evCompensation")         setEvCompensation(ofToInt(value));
-        if(key == "autoShutter")            setAutoShutter(ofToBool(value));
-        if(key == "shutterSpeed")           setShutterSpeed(ofToInt(value));
-        if(key == "meteringType")           setMeteringType(value);
-        
-        if(key == "SoftwareSaturationEnabled") setSoftwareSaturation(ofToBool(value));
-        if(key == "SoftwareSharpeningEnabled") setSoftwareSharpening(ofToBool(value));
-    }
-}
-*/
-void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
+void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 {
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 
@@ -73,9 +30,12 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     error = OMX_Init();
     OMX_TRACE(error);
     
-    omxCameraSettings = omxCameraSettings_;
+    settings = omxCameraSettings_;
     
-    ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
+    
+    ofLog() << settings.toJSON().dump();
+
+    ofLogVerbose(__func__) << "settings: " << settings.toString();
     
     if(directEngine)
     {
@@ -94,13 +54,13 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
         resetValues();
     }
     
-    if (omxCameraSettings.enableTexture) 
+    if (settings.enableTexture) 
     {
         
         textureEngine = new TextureEngine(); 
-        textureEngine->setup(omxCameraSettings);
+        textureEngine->setup(settings);
         camera = textureEngine->camera;
-        if (omxCameraSettings.enablePixels) 
+        if (settings.enablePixels) 
         {
             enablePixels();
         }
@@ -108,7 +68,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     {
         
         directEngine = new DirectEngine(); 
-        directEngine->setup(omxCameraSettings);
+        directEngine->setup(settings);
         camera = directEngine->camera;
     }
     
@@ -176,9 +136,8 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     if (recordingRequested) 
     {
         recordingRequested = false;
-        omxCameraSettings.doRecording = true;
-        //ofLogVerbose() << "CALLING SETUP: " << currentStateToString();
-        setup(omxCameraSettings);
+        settings.doRecording = true;
+        setup(settings);
     }
 	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
@@ -207,17 +166,17 @@ bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 
 int ofxRPiCameraVideoGrabber::getWidth()
 {
-	return omxCameraSettings.width;
+	return settings.width;
 }
 
 int ofxRPiCameraVideoGrabber::getHeight()
 {
-	return omxCameraSettings.height;
+	return settings.height;
 }
 
 int ofxRPiCameraVideoGrabber::getFrameRate()
 {
-	return omxCameraSettings.framerate;
+	return settings.framerate;
 }
 
 #pragma mark PIXELS/TEXTURE
@@ -320,8 +279,8 @@ void ofxRPiCameraVideoGrabber::stopRecording()
          direct mode has to use a lower resolution for display while recording
          set it back after recording
          */
-        omxCameraSettings.doRecording = false;
-        setup(omxCameraSettings);
+        settings.doRecording = false;
+        setup(settings);
 	}
 	if (textureEngine) 
 	{

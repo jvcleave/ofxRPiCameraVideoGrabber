@@ -4,7 +4,6 @@
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
 #include "ofxRPiCameraVideoGrabber.h"
-#include "CameraState.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
 
@@ -17,10 +16,9 @@ class ofApp : public ofBaseApp, public KeyListener{
 
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
+    
 	ofxRPiCameraVideoGrabber videoGrabber;
-	
-    CameraState cameraState;
-	
+		
 	bool doDrawInfo;
     ofDirectory dataFolder;	
     vector<ofFile> configFiles;

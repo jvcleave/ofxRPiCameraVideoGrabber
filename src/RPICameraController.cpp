@@ -2,29 +2,29 @@
 
 void RPICameraController::applyAllSettings()
 {
-    setExposurePreset(omxCameraSettings.exposurePreset); 
-    setMeteringType(omxCameraSettings.meteringType);
-    setAutoISO(omxCameraSettings.autoISO);
-    setISO(omxCameraSettings.ISO);    
-    setAutoShutter(omxCameraSettings.autoShutter);
-    setShutterSpeed(omxCameraSettings.shutterSpeed);
+    setExposurePreset(settings.exposurePreset); 
+    setMeteringType(settings.meteringType);
+    setAutoISO(settings.autoISO);
+    setISO(settings.ISO);    
+    setAutoShutter(settings.autoShutter);
+    setShutterSpeed(settings.shutterSpeed);
     
-    setSharpness(omxCameraSettings.sharpness);
-    setContrast(omxCameraSettings.contrast);
-    setBrightness(omxCameraSettings.brightness);
-    setSaturation(omxCameraSettings.saturation);
-    setFrameStabilization(omxCameraSettings.frameStabilization);
-    setWhiteBalance(omxCameraSettings.whiteBalance);
-    setImageFilter(omxCameraSettings.imageFilter);
+    setSharpness(settings.sharpness);
+    setContrast(settings.contrast);
+    setBrightness(settings.brightness);
+    setSaturation(settings.saturation);
+    setFrameStabilization(settings.frameStabilization);
+    setWhiteBalance(settings.whiteBalance);
+    setImageFilter(settings.imageFilter);
     setColorEnhancement(false);     //TODO implement
-    setDRE(omxCameraSettings.dreLevel);
-    setSensorCrop(omxCameraSettings.cropRectangle);
-    setZoomLevelNormalized(omxCameraSettings.zoomLevel);
-    setRotation(omxCameraSettings.rotation);
-    setMirror(omxCameraSettings.mirror);
+    setDRE(settings.dreLevel);
+    setSensorCrop(settings.cropRectangle);
+    setZoomLevelNormalized(settings.zoomLevel);
+    setRotation(settings.rotation);
+    setMirror(settings.mirror);
     
-    setSoftwareSharpening(omxCameraSettings.doDisableSoftwareSharpen);
-    setSoftwareSaturation(omxCameraSettings.doDisableSoftwareSaturation);
+    setSoftwareSharpening(settings.doDisableSoftwareSharpen);
+    setSoftwareSaturation(settings.doDisableSoftwareSaturation);
     applyExposure(__func__);
     
     //Requires gpio program provided via wiringPi
@@ -34,19 +34,19 @@ void RPICameraController::applyAllSettings()
     
     if(hasGPIOProgram)
     {
-        omxCameraSettings.LED_PIN = getLEDPin();
+        settings.LED_PIN = getLEDPin();
         
         stringstream command;
         command << "gpio export ";
-        command << omxCameraSettings.LED_PIN;
+        command << settings.LED_PIN;
         command << " out";
         
         if(system(command.str().c_str()) == 0)
         {
             //silence compiler warning 
         }
-        omxCameraSettings.LED = true;
-        setLEDState(omxCameraSettings.LED);
+        settings.LED = true;
+        setLEDState(settings.LED);
     } 
 }
 
@@ -90,55 +90,6 @@ string RPICameraController::getLEDPin()
     return result;
     
 }
-
-
-void RPICameraController::saveStateToFile(string fileName)
-{
-    string currentStateString = currentStateToString();
-    
-    ofBuffer buffer(currentStateString.c_str(), currentStateString.size());
-    if(fileName.empty())
-    {
-        fileName = "STATE_"+ofGetTimestampString()+".txt";
-    }
-    ofBufferToFile(fileName, buffer);    
-}
-
-
-
-string RPICameraController::currentStateToString()
-{
-    stringstream info;
-    info << "sharpness " << getSharpness() << endl;
-    info << "contrast " << getContrast() << endl;
-    info << "brightness " << getBrightness() << endl;
-    info << "saturation " << getSaturation() << endl;
-    
-    info << "ISO " << getISO() << endl;
-    info << "AutoISO " << getAutoISO() << endl;
-    
-    info << "DRE " << getDRE() << endl;
-    info << "cropRectangle " << getCropRectangle() << endl;
-    info << "zoomLevelNormalized " << getZoomLevelNormalized() << endl;
-    info << "mirror " << getMirror() << endl;
-    info << "rotation " << getRotation() << endl;
-    info << "imageFilter " << getImageFilter() << endl;
-    info << "exposurePreset " << getExposurePreset() << endl;
-    info << "evCompensation " << getEvCompensation() << endl;
-    info << "autoShutter " << getAutoShutter() << endl;
-    info << "shutterSpeed " << getShutterSpeed() << endl;
-    info << "meteringType " << getMeteringType() << endl;
-    info << "SoftwareSaturationEnabled " << isSoftwareSaturationEnabled() << endl;
-    info << "SoftwareSharpeningEnabled " << isSoftwareSharpeningEnabled() << endl;
-    
-    //OMXCameraSettings
-    info << omxCameraSettings.toString() << endl;
-    return info.str();
-}
-
-
-
-
 
 void RPICameraController::resetValues()
 {
@@ -236,7 +187,7 @@ OMX_ERRORTYPE RPICameraController::setSoftwareSaturation(bool state)
         OMX_TRACE(error); 
         if(error == OMX_ErrorNone)
         {
-            omxCameraSettings.doDisableSoftwareSaturation = state;
+            settings.doDisableSoftwareSaturation = state;
             ofLogVerbose() << "doDisableSoftwareSaturation: " << doDisableSoftwareSaturation;
             
         }
@@ -267,7 +218,7 @@ OMX_ERRORTYPE RPICameraController::setSoftwareSharpening(bool state)
         OMX_TRACE(error);   
         if(error == OMX_ErrorNone)
         {
-            omxCameraSettings.doDisableSoftwareSharpen = state;
+            settings.doDisableSoftwareSharpen = state;
             ofLogVerbose() << "doDisableSoftwareSharpen: " << doDisableSoftwareSharpen;
         }
     }
@@ -287,10 +238,10 @@ OMX_ERRORTYPE RPICameraController::disableSoftwareSharpening()
 
 void RPICameraController::setSharpness(int sharpness_) //-100 to 100
 {
-    omxCameraSettings.sharpness = sharpness_;
+    settings.sharpness = sharpness_;
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    sharpnessConfig.nSharpness = omxCameraSettings.sharpness; 
+    sharpnessConfig.nSharpness = settings.sharpness; 
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonSharpness, &sharpnessConfig);
     OMX_TRACE(error);
@@ -299,10 +250,10 @@ void RPICameraController::setSharpness(int sharpness_) //-100 to 100
 
 void RPICameraController::setContrast(int contrast_ ) //-100 to 100 
 {
-    omxCameraSettings.contrast = contrast_;
+    settings.contrast = contrast_;
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    contrastConfig.nContrast = omxCameraSettings.contrast; 
+    contrastConfig.nContrast = settings.contrast; 
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonContrast, &contrastConfig);
     OMX_TRACE(error);
@@ -311,10 +262,10 @@ void RPICameraController::setContrast(int contrast_ ) //-100 to 100
 
 void RPICameraController::setBrightness(int brightness_ ) //0 to 100
 {
-    omxCameraSettings.brightness = brightness_;
+    settings.brightness = brightness_;
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    brightnessConfig.nBrightness = omxCameraSettings.brightness;
+    brightnessConfig.nBrightness = settings.brightness;
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonBrightness, &brightnessConfig);
     OMX_TRACE(error);
@@ -323,10 +274,10 @@ void RPICameraController::setBrightness(int brightness_ ) //0 to 100
 
 void RPICameraController::setSaturation(int saturation_) //-100 to 100
 {
-    omxCameraSettings.saturation = saturation_;
+    settings.saturation = saturation_;
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    saturationConfig.nSaturation    = omxCameraSettings.saturation; 
+    saturationConfig.nSaturation    = settings.saturation; 
     
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonSaturation, &saturationConfig);
     OMX_TRACE(error);
@@ -378,7 +329,7 @@ OMX_ERRORTYPE RPICameraController::setISO(int ISO_)
         
         if(error == OMX_ErrorNone)
         {
-            omxCameraSettings.ISO = getISO();
+            settings.ISO = getISO();
         }
     }
     return error;
@@ -396,7 +347,7 @@ OMX_ERRORTYPE RPICameraController::setShutterSpeed(int shutterSpeedMicroSeconds_
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.shutterSpeed = getShutterSpeed();
+        settings.shutterSpeed = getShutterSpeed();
     }
     ofLogVerbose(__func__) << "POST getShutterSpeed(): " << getShutterSpeed();
     return error;
@@ -423,7 +374,7 @@ OMX_ERRORTYPE RPICameraController::setAutoShutter(bool doAutoShutter)
         
         if(error == OMX_ErrorNone)
         {
-            omxCameraSettings.autoShutter = getAutoShutter();
+            settings.autoShutter = getAutoShutter();
         }
     }
     return error;
@@ -445,7 +396,7 @@ void RPICameraController::setFrameStabilization(bool doStabilization)
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonFrameStabilisation, &framestabilizationConfig);
     if(error == OMX_ErrorNone) 
     {
-        omxCameraSettings.frameStabilization = doStabilization;
+        settings.frameStabilization = doStabilization;
     }
     
     OMX_TRACE(error);
@@ -456,7 +407,7 @@ void RPICameraController::checkBurstMode()
 {
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
     OMX_TRACE(error);
-    omxCameraSettings.burstModeEnabled = fromOMXBool(burstModeConfig.bEnabled);
+    settings.burstModeEnabled = fromOMXBool(burstModeConfig.bEnabled);
 }
 
 void RPICameraController::setBurstMode(bool doBurstMode)
@@ -475,9 +426,9 @@ void RPICameraController::setBurstMode(bool doBurstMode)
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.burstModeEnabled = doBurstMode;
+        settings.burstModeEnabled = doBurstMode;
     }
-    ofLogVerbose() << "burstModeEnabled: " << omxCameraSettings.burstModeEnabled;
+    ofLogVerbose() << "burstModeEnabled: " << settings.burstModeEnabled;
 }
 
 #pragma mark FLICKER CANCELLATION
@@ -515,16 +466,16 @@ void RPICameraController::checkFlickerCancellation()
         }
         if(flickerCancelConfig.eFlickerCancel == OMX_COMMONFLICKERCANCEL_OFF)
         {
-            omxCameraSettings.flickerCancellation = false;
+            settings.flickerCancellation = false;
         }else
         {
-            omxCameraSettings.flickerCancellation = true;
+            settings.flickerCancellation = true;
         }
     }
     else
     {
         //error so assume it's not working
-        omxCameraSettings.flickerCancellation = false;
+        settings.flickerCancellation = false;
     }
 }
 void RPICameraController::setFlickerCancellation(bool enable)
@@ -588,22 +539,22 @@ OMX_ERRORTYPE RPICameraController::setFlickerCancellation(OMX_COMMONFLICKERCANCE
         {
             if(flickerCancelConfig.eFlickerCancel == OMX_COMMONFLICKERCANCEL_OFF)
             {
-                omxCameraSettings.flickerCancellation = false;
+                settings.flickerCancellation = false;
             }else
             {
-                omxCameraSettings.flickerCancellation = true;
+                settings.flickerCancellation = true;
             }
         }else
         {
             //error so assume it's not working
-            omxCameraSettings.flickerCancellation = false;
+            settings.flickerCancellation = false;
         }
         OMX_TRACE(error);
     }
     else
     {
         //error so assume it's not working
-        omxCameraSettings.flickerCancellation = false;
+        settings.flickerCancellation = false;
     }
     
     return error;
@@ -651,7 +602,7 @@ void RPICameraController::setDRE(int level)
     
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.dreLevel = level;
+        settings.dreLevel = level;
     }
 }
 
@@ -663,7 +614,7 @@ OMX_ERRORTYPE RPICameraController::setMeteringType(OMX_METERINGTYPE meteringType
     OMX_ERRORTYPE error = applyExposure(__func__);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.meteringType     = getMeteringType();
+        settings.meteringType     = getMeteringType();
     }
     
     return error;
@@ -726,7 +677,7 @@ OMX_ERRORTYPE RPICameraController::setEvCompensation(int value)
     OMX_ERRORTYPE error =  applyExposure(__func__);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.evCompensation = getEvCompensation();
+        settings.evCompensation = getEvCompensation();
     }
     return error;
 }
@@ -742,7 +693,7 @@ OMX_ERRORTYPE RPICameraController::setWhiteBalance(OMX_WHITEBALCONTROLTYPE white
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.whiteBalance = whiteBalance_;
+        settings.whiteBalance = whiteBalance_;
     }
     return error;
 }
@@ -762,12 +713,12 @@ string RPICameraController::getWhiteBalance()
 
 OMX_ERRORTYPE RPICameraController::updateSensorCrop()
 {
-    return setSensorCrop(omxCameraSettings.cropRectangle);
+    return setSensorCrop(settings.cropRectangle);
 }
 
 OMX_ERRORTYPE RPICameraController::setSensorCrop(int left, int top, int width, int height)
 {
-    omxCameraSettings.cropRectangle.set(left, top, width, height);
+    settings.cropRectangle.set(left, top, width, height);
     return updateSensorCrop();
 }
 
@@ -788,7 +739,7 @@ OMX_ERRORTYPE RPICameraController::setSensorCrop(ofRectangle& rectangle)
         if(error == OMX_ErrorBadParameter)
         {
             ofLogWarning(__func__) << "resetting cropRectangle to known good params (0, 0, 100, 100)";
-            omxCameraSettings.cropRectangle.set(0, 0, 100, 100);
+            settings.cropRectangle.set(0, 0, 100, 100);
             return updateSensorCrop(); 
         }
         
@@ -806,31 +757,31 @@ OMX_ERRORTYPE RPICameraController::setZoomLevelNormalized(float value)
         ofLogError(__func__) << value << "MUST BE BETWEEN 0.0 - 1.0";
         return OMX_ErrorBadParameter;
     }
-    omxCameraSettings.zoomLevel = (int) ofMap(value, 0.0f, 1.0f, 0, zoomLevels.size());
+    settings.zoomLevel = (int) ofMap(value, 0.0f, 1.0f, 0, zoomLevels.size());
     return setDigitalZoom();
 }
 
 OMX_ERRORTYPE RPICameraController::resetZoom()
 {
-    omxCameraSettings.zoomLevel = 0;
+    settings.zoomLevel = 0;
     return setDigitalZoom();
 }
 
 OMX_ERRORTYPE RPICameraController::zoomIn()
 {
-    if((unsigned int)omxCameraSettings.zoomLevel+1 < zoomLevels.size())
+    if((unsigned int)settings.zoomLevel+1 < zoomLevels.size())
     {
-        omxCameraSettings.zoomLevel++;
+        settings.zoomLevel++;
     }
     return setDigitalZoom();
 }
 
 OMX_ERRORTYPE RPICameraController::zoomOut()
 {
-    omxCameraSettings.zoomLevel--;
-    if(omxCameraSettings.zoomLevel<0)
+    settings.zoomLevel--;
+    if(settings.zoomLevel<0)
     {
-        omxCameraSettings.zoomLevel = 0;
+        settings.zoomLevel = 0;
     }
     
     return setDigitalZoom();
@@ -839,15 +790,15 @@ OMX_ERRORTYPE RPICameraController::zoomOut()
 OMX_ERRORTYPE RPICameraController::setDigitalZoom()
 {
     
-    if(omxCameraSettings.zoomLevel<0 || (unsigned int) omxCameraSettings.zoomLevel>zoomLevels.size())
+    if(settings.zoomLevel<0 || (unsigned int) settings.zoomLevel>zoomLevels.size())
     {
         
-        ofLogError(__func__) << "BAD zoomLevel: " << omxCameraSettings.zoomLevel << " SETTING TO 0" << " zoomLevels.size(): " << zoomLevels.size();
-        omxCameraSettings.zoomLevel = 0;
+        ofLogError(__func__) << "BAD zoomLevel: " << settings.zoomLevel << " SETTING TO 0" << " zoomLevels.size(): " << zoomLevels.size();
+        settings.zoomLevel = 0;
     }
     
     
-    int value = zoomLevels[omxCameraSettings.zoomLevel];
+    int value = zoomLevels[settings.zoomLevel];
     if(digitalZoomConfig.xWidth != value && digitalZoomConfig.xHeight != value)
     {
         digitalZoomConfig.xWidth  = value;
@@ -863,7 +814,7 @@ OMX_ERRORTYPE RPICameraController::setDigitalZoom()
 
 float RPICameraController::getZoomLevelNormalized()
 {
-    return ofMap(omxCameraSettings.zoomLevel, 0, zoomLevels.size(), 0.0f, 1.0f);
+    return ofMap(settings.zoomLevel, 0, zoomLevels.size(), 0.0f, 1.0f);
 }
 
 #pragma mark MIRROR
@@ -891,7 +842,7 @@ OMX_ERRORTYPE RPICameraController::applyMirror()
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.mirror = GetMirrorString(mirrorConfig.eMirror);
+        settings.mirror = GetMirrorString(mirrorConfig.eMirror);
     }
     return error;
 }
@@ -928,7 +879,7 @@ OMX_ERRORTYPE RPICameraController::applyRotation()
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.rotation = getRotation();
+        settings.rotation = getRotation();
     }
     return error;
 }
@@ -970,7 +921,7 @@ OMX_ERRORTYPE RPICameraController::setImageFilter(OMX_IMAGEFILTERTYPE imageFilte
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.imageFilter = GetImageFilterString(imageFilter_);
+        settings.imageFilter = GetImageFilterString(imageFilter_);
     }
     return error;
 }
@@ -1007,7 +958,7 @@ OMX_ERRORTYPE RPICameraController::setExposurePreset(OMX_EXPOSURECONTROLTYPE exp
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        omxCameraSettings.exposurePreset = GetExposurePresetString(exposurePreset_);
+        settings.exposurePreset = GetExposurePresetString(exposurePreset_);
     }
     return error;
 }
@@ -1026,7 +977,7 @@ string RPICameraController::getExposurePreset()
 
 void RPICameraController::toggleLED()
 {
-    setLEDState(!omxCameraSettings.LED);
+    setLEDState(!settings.LED);
 }
 
 void RPICameraController::setLEDState(bool stateRequested)
@@ -1037,7 +988,7 @@ void RPICameraController::setLEDState(bool stateRequested)
     }
     stringstream command;
     command << "gpio -g write ";
-    command << omxCameraSettings.LED_PIN;
+    command << settings.LED_PIN;
     if (stateRequested) 
     {
         command <<  " 1";
@@ -1050,7 +1001,7 @@ void RPICameraController::setLEDState(bool stateRequested)
     int result = system(command.str().c_str());
     if(result == 0)
     {
-        omxCameraSettings.LED = stateRequested;
+        settings.LED = stateRequested;
     }
 }
 

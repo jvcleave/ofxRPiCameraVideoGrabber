@@ -31,7 +31,7 @@ public:
 
     string getLEDPin();
     bool hasGPIOProgram;
-    OMXCameraSettings omxCameraSettings;
+    OMXCameraSettings settings;
 
 
     
@@ -74,40 +74,40 @@ public:
     void applyAllSettings();
     
     void setSharpness(int);
-    int getSharpness() { return omxCameraSettings.sharpness; }
+    int getSharpness() { return settings.sharpness; }
     
     void setContrast(int);
-    int getContrast() { return omxCameraSettings.contrast; }
+    int getContrast() { return settings.contrast; }
     
     void setBrightness(int);
-    int getBrightness() { return omxCameraSettings.brightness; }
+    int getBrightness() { return settings.brightness; }
     
     void setSaturation(int);
-    int getSaturation()        { return omxCameraSettings.saturation; }
+    int getSaturation()        { return settings.saturation; }
     
     void setFrameStabilization(bool doStabilization);
-    bool getFrameStabilization(){ return omxCameraSettings.frameStabilization;}
+    bool getFrameStabilization(){ return settings.frameStabilization;}
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
     
     
     void setDRE(int level);
-    int getDRE() { return omxCameraSettings.dreLevel; }
+    int getDRE() { return settings.dreLevel; }
     
     void toggleLED();
     void setLEDState(bool status);
-    bool getLEDState() { return omxCameraSettings.LED; }
+    bool getLEDState() { return settings.LED; }
     
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE);
     void setFlickerCancellation(bool);
     void enableFlickerCancellation();
     void disableFlickerCancellation();
-    bool isFlickerCancellationEnabled() { return omxCameraSettings.flickerCancellation; }
+    bool isFlickerCancellationEnabled() { return settings.flickerCancellation; }
     //TODO: enable explict 50/60 hz
     
     
     OMX_ERRORTYPE setSensorCrop(ofRectangle&);
-    ofRectangle& getCropRectangle() { return omxCameraSettings.cropRectangle; }
+    ofRectangle& getCropRectangle() { return settings.cropRectangle; }
     OMX_ERRORTYPE setSensorCrop(int left, int top, int width, int height);
     
     vector<int> zoomLevels;
@@ -158,15 +158,15 @@ public:
     OMX_ERRORTYPE setSoftwareSharpening(bool);
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
-    bool isSoftwareSharpeningEnabled() {return omxCameraSettings.doDisableSoftwareSharpen;}
+    bool isSoftwareSharpeningEnabled() {return settings.doDisableSoftwareSharpen;}
     
     OMX_ERRORTYPE setSoftwareSaturation(bool);
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
-    bool isSoftwareSaturationEnabled() {return omxCameraSettings.doDisableSoftwareSaturation;}
+    bool isSoftwareSaturationEnabled() {return settings.doDisableSoftwareSaturation;}
     
     void setBurstMode(bool);
-    bool isBurstModeEnabled(){ return omxCameraSettings.burstModeEnabled;}
+    bool isBurstModeEnabled(){ return settings.burstModeEnabled;}
     
     OMX_ERRORTYPE setISO(int ISO);
     int getISO();

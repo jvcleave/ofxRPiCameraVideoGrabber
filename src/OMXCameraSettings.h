@@ -23,11 +23,11 @@ public:
     int ISO;
     bool autoShutter;
     int shutterSpeed;
-    int sharpness;    //    -100 to 100
-    int contrast;    //  -100 to 100 
-    int brightness; //     0 to 100
-    int saturation; //  -100 to 100 
-    int dreLevel; 
+    int sharpness;   // -100 to 100
+    int contrast;    // -100 to 100 
+    int brightness;  //    0 to 100
+    int saturation;  // -100 to 100 
+    int dreLevel;    //   -4 to 4
     ofRectangle cropRectangle;
     int zoomLevel;
     string mirror; 
@@ -45,7 +45,6 @@ public:
 	{
         OMX_Maps::getInstance(); 
         resetValues();
-        
 	}
 	
     void resetValues()
@@ -57,7 +56,6 @@ public:
         enablePixels = false;
         doRecording = false;
         recordingFilePath = "";
-        
         exposurePreset = "Auto";
         meteringType = "Average";
         autoISO = true;
@@ -112,5 +110,339 @@ public:
         info << "doDisableSoftwareSaturation " << doDisableSoftwareSaturation << endl;
         info << "LED " << LED << endl;
         return info.str();
+    }
+    
+    bool exists(ofJson& json, const string& key)
+    {
+        return json.find(key) != json.end();
+    }
+    bool parseJSON(const string& jsonString)
+    {
+        ofLog() << "jsonString: " << jsonString;
+        
+        ofJson json = ofJson::parse(jsonString);
+        
+        if(json.is_null())
+        {
+            return false;
+        }
+        if(exists(json, "width")) width = json["width"].get<int>();
+        if(exists(json, "height")) height = json["height"].get<int>();
+        if(exists(json, "framerate")) framerate = json["framerate"].get<int>();
+        
+        if(exists(json, "enableTexture")) enableTexture = json["enableTexture"].get<bool>();
+        if(exists(json, "enablePixels")) enablePixels = json["enablePixels"].get<bool>();
+        if(exists(json, "doRecording")) doRecording = json["doRecording"].get<bool>();
+        
+        if(exists(json, "meteringType")) meteringType = json["meteringType"].get<string>();
+        
+        if(exists(json, "autoISO")) autoISO = json["autoISO"].get<bool>();
+        if(exists(json, "ISO")) ISO = json["ISO"].get<int>();
+        
+        
+        if(exists(json, "autoShutter")) autoShutter = json["autoShutter"].get<bool>();
+        if(exists(json, "shutterSpeed")) shutterSpeed = json["shutterSpeed"].get<int>();
+        
+        if(exists(json, "sharpness")) sharpness = json["sharpness"].get<int>();
+        if(exists(json, "contrast")) contrast = json["contrast"].get<int>();
+        if(exists(json, "brightness")) brightness = json["brightness"].get<int>();
+        if(exists(json, "saturation")) saturation = json["saturation"].get<int>();
+
+        
+        if(exists(json, "frameStabilization")) frameStabilization = json["frameStabilization"].get<bool>();
+        if(exists(json, "flickerCancellation")) flickerCancellation = json["flickerCancellation"].get<bool>();
+        if(exists(json, "dreLevel")) dreLevel = json["dreLevel"].get<int>();
+        if(exists(json, "cropRectangle"))
+        {
+            cropRectangle.set(json["cropRectangle"]["x"].get<int>(),
+                              json["cropRectangle"]["y"].get<int>(),
+                              json["cropRectangle"]["width"].get<int>(),
+                              json["cropRectangle"]["height"].get<int>());
+
+        }
+        if(exists(json, "zoomLevel")) zoomLevel = json["zoomLevel"].get<float>();
+        if(exists(json, "rotation")) rotation = json["rotation"].get<int>();
+        if(exists(json, "mirror")) mirror = json["mirror"].get<string>();
+        if(exists(json, "doDisableSoftwareSharpen")) doDisableSoftwareSharpen = json["doDisableSoftwareSharpen"].get<bool>();
+        if(exists(json, "doDisableSoftwareSaturation")) doDisableSoftwareSaturation = json["doDisableSoftwareSaturation"].get<bool>();
+        if(exists(json, "LED")) LED = json["LED"].get<bool>();
+        return true;
+
+
+    }   
+    ofJson toJSON()
+    {
+        ofJson result;
+        
+        result["width"]=width;
+        result["height"]=height;
+        result["framerate"]=framerate;
+        result["enableTexture"]=enableTexture;
+        result["enablePixels"]=enablePixels;
+        result["doRecording"]=doRecording;
+        result["exposurePreset"]=exposurePreset;
+        result["meteringType"]=meteringType;
+        result["autoISO"]=autoISO;
+        result["ISO"]=ISO;
+        result["autoShutter"]=autoShutter;
+        result["shutterSpeed"]=shutterSpeed;
+        result["sharpness"]=sharpness;
+        result["contrast"]=contrast;
+        result["brightness"]=brightness;
+        result["saturation"]=saturation;
+        result["frameStabilization"]=frameStabilization;
+        result["flickerCancellation"]=flickerCancellation;
+        result["dreLevel"]=dreLevel;
+        
+        result["cropRectangle"]["x"]= cropRectangle.x;
+        result["cropRectangle"]["y"]= cropRectangle.y;
+        result["cropRectangle"]["width"]= cropRectangle.width;
+        result["cropRectangle"]["height"]= cropRectangle.height;
+        result["zoomLevel"]=zoomLevel;
+        result["rotation"]=rotation;
+        result["mirror"]=mirror;
+        result["doDisableSoftwareSharpen"]=doDisableSoftwareSharpen;
+        result["doDisableSoftwareSaturation"]=doDisableSoftwareSaturation;
+        result["LED"]=LED;
+        
+        return result;
+    }
+    
+    enum RPI_CAMERA_PRESET 
+    {
+        PRESET_FASTEST_480P,
+        PRESET_FASTEST_720P,
+        PRESET_FASTEST_FRAME_RATE,
+        PRESET_HIGHEST_RES,
+        PRESET_HIGHEST_RES_TEXTURE,
+        PRESET_HIGHEST_RES_NONTEXTURE,
+        
+        PRESET_1080P_30FPS_TEXTURE,
+        PRESET_1080P_30FPS_NONTEXTURE,
+        PRESET_1080P_30FPS,
+        
+        PRESET_720P_40FPS_NONTEXTURE,
+        PRESET_720P_30FPS_NONTEXTURE,
+        
+        PRESET_720P_40FPS_TEXTURE,
+        PRESET_720P_30FPS_TEXTURE,
+        
+        PRESET_720P_40FPS,
+        PRESET_720P_30FPS,
+        
+        PRESET_480P_90FPS_TEXTURE,
+        PRESET_480P_60FPS_TEXTURE,
+        PRESET_480P_40FPS_TEXTURE,
+        PRESET_480P_30FPS_TEXTURE,
+        
+        PRESET_480P_90FPS_NONTEXTURE,
+        PRESET_480P_60FPS_NONTEXTURE,
+        PRESET_480P_40FPS_NONTEXTURE,
+        PRESET_480P_30FPS_NONTEXTURE,
+        
+        PRESET_480P_90FPS,
+        PRESET_480P_60FPS,
+        PRESET_480P_40FPS,
+        PRESET_480P_30FPS,
+    };
+    void applyPreset(RPI_CAMERA_PRESET preset)
+    {
+        switch(preset)
+        {
+            case PRESET_1080P_30FPS_TEXTURE :
+            case PRESET_HIGHEST_RES_TEXTURE :
+            {
+                width = 1920;
+                height = 1080;
+                framerate = 30;
+                enableTexture=false;
+                break;
+            }
+                
+            case PRESET_1080P_30FPS_NONTEXTURE :
+            case PRESET_HIGHEST_RES_NONTEXTURE :
+            {
+                width = 1920;
+                height = 1080;
+                framerate = 30;
+                enableTexture=false;
+                break;
+            }
+                
+            case PRESET_1080P_30FPS :
+            case PRESET_HIGHEST_RES :
+            {
+                width = 1920;
+                height = 1080;
+                framerate = 30;
+                break;
+            }
+                
+            case PRESET_720P_40FPS_TEXTURE :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 40;
+                enableTexture=true;
+                break;
+            }
+                
+            case PRESET_720P_40FPS_NONTEXTURE :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 40;
+                enableTexture=false;
+                break;
+            }
+                
+            case PRESET_720P_40FPS :
+            case PRESET_FASTEST_720P:
+            {
+                width = 1280;
+                height = 720;
+                framerate = 40;
+                break;
+            }
+            case PRESET_720P_30FPS :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                break;
+            }
+                
+                
+            case PRESET_720P_30FPS_TEXTURE :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                enableTexture=true;
+                break;
+            }
+                
+            case PRESET_720P_30FPS_NONTEXTURE :
+            {
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                enableTexture=false;
+                break;
+            }
+                
+            case PRESET_480P_90FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                enableTexture=true;
+                break;
+            } 
+            case PRESET_480P_60FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                enableTexture=true;
+                break;
+            }    
+                
+            case PRESET_480P_40FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                enableTexture=true;
+                break;
+            }    
+                
+                
+            case PRESET_480P_30FPS_TEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 30;
+                enableTexture=true;
+                break;
+            }
+                
+            case PRESET_480P_90FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                enableTexture=false;
+                break;
+            } 
+            case PRESET_480P_60FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                enableTexture=false;
+                break;
+            } 
+            case PRESET_480P_40FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                enableTexture=false;
+                break;
+            } 
+                
+            case PRESET_480P_30FPS_NONTEXTURE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 30;
+                enableTexture=false;
+                break;
+            }
+                
+            case PRESET_480P_90FPS :
+            case PRESET_FASTEST_480P:
+            case PRESET_FASTEST_FRAME_RATE :
+            {
+                width = 640;
+                height = 480;
+                framerate = 90;
+                break;
+            }
+                
+            case PRESET_480P_60FPS :
+            {
+                width = 640;
+                height = 480;
+                framerate = 60;
+                break;
+            }
+                
+            case PRESET_480P_40FPS :
+            {
+                width = 640;
+                height = 480;
+                framerate = 40;
+                break;
+            }
+                
+            case PRESET_480P_30FPS :
+            {
+                width = 640;
+                height = 480;
+                framerate = 30;
+                break;
+            }
+                
+            default:
+            {
+                width = 1280;
+                height = 720;
+                framerate = 30;
+                break;
+            }
+                
+        }
     }
 };

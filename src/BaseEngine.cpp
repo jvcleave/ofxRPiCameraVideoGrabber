@@ -53,10 +53,10 @@ void BaseEngine::configureCameraResolution()
     OMX_TRACE(error);
 
 	
-	cameraOutputPortDefinition.format.video.nFrameWidth		= omxCameraSettings.width;
-    cameraOutputPortDefinition.format.video.nFrameHeight	= omxCameraSettings.height;
-	cameraOutputPortDefinition.format.video.xFramerate		= omxCameraSettings.framerate << 16; //currently always 30
-    cameraOutputPortDefinition.format.video.nStride			= omxCameraSettings.width;
+	cameraOutputPortDefinition.format.video.nFrameWidth		= settings.width;
+    cameraOutputPortDefinition.format.video.nFrameHeight	= settings.height;
+	cameraOutputPortDefinition.format.video.xFramerate		= settings.framerate << 16; //currently always 30
+    cameraOutputPortDefinition.format.video.nStride			= settings.width;
     //cameraOutputPortDefinition.format.video.eColorFormat    = OMX_COLOR_FormatYUV420PackedPlanar;
 
     error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
@@ -209,7 +209,7 @@ void BaseEngine::threadedFunction()
 void BaseEngine::stopRecording()
 {
 	
-	if(omxCameraSettings.doRecording)
+	if(settings.doRecording)
 	{
 		lock();
             stopRequested = true;
@@ -221,7 +221,7 @@ void BaseEngine::stopRecording()
 
 OMXCameraSettings& BaseEngine::getSettings()
 {
-    return omxCameraSettings;
+    return settings;
 }
 
 void BaseEngine::writeFile()
@@ -233,9 +233,9 @@ void BaseEngine::writeFile()
 	stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
-	fileName << omxCameraSettings.width << "x";
-	fileName << omxCameraSettings.height << "_";
-	fileName << omxCameraSettings.framerate << "fps_";
+	fileName << settings.width << "x";
+	fileName << settings.height << "_";
+	fileName << settings.framerate << "fps_";
 	
 	fileName << numMBps << "MBps_";
 	
@@ -247,12 +247,12 @@ void BaseEngine::writeFile()
 	
 	string filePath;
 	
-	if (omxCameraSettings.recordingFilePath == "") 
+	if (settings.recordingFilePath == "") 
 	{
 		filePath = ofToDataPath(fileName.str(), true);
 	}else
 	{
-		filePath = omxCameraSettings.recordingFilePath;
+		filePath = settings.recordingFilePath;
 	}
 	
 	didWriteFile = ofBufferToFile(filePath, recordingFileBuffer, true);

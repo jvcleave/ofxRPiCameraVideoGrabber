@@ -9,14 +9,14 @@ class TextureEngine : public BaseEngine
 public:
 	TextureEngine();
 	~TextureEngine();
-	void setup(OMXCameraSettings);
+	void setup(OMXCameraSettings&) override;
 
 	int renderedFrameCounter;
 	
 	void generateEGLImage();
 	
 	
-    int getFrameCounter();
+    int getFrameCounter() override;
     
     void enablePixels();
     void disablePixels();

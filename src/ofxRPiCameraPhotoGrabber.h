@@ -23,15 +23,11 @@ public:
     
 	ofxRPiCameraPhotoGrabber();
     ~ofxRPiCameraPhotoGrabber();
-    void setup(OMXCameraSettings);
+    void setup(OMXCameraSettings&);
     bool isReady();
 	int getWidth();
 	int getHeight();
     void takePhoto();
     StillCameraEngine* engine;
-    OMXCameraSettings omxCameraSettings;
     
-
-
-	
 };

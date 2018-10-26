@@ -21,7 +21,7 @@ void ofApp::setup()
     photoGrabber.setSaturation(-100);
 
     //photoGrabber.rotateClockwise();
-    ofLog() << photoGrabber.currentStateToString();
+    ofLog() << photoGrabber.settings.toString();
     
 	filterCollection.setup();
 	

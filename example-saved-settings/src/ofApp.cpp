@@ -10,7 +10,7 @@ void ofApp::setup()
     doSwitchConfig = false;
 	consoleListener.setup(this);
     
-    ofDirectory dataFolder(ofToDataPath(""));
+    ofDirectory dataFolder(ofToDataPath("savedSettings"));
     
     configFiles  = dataFolder.getFiles();
     for(size_t i=0; i<configFiles.size(); i++)
@@ -18,8 +18,16 @@ void ofApp::setup()
         ofLogVerbose(__func__) << configFiles[i].path();
     }
     currentConfigFileIndex = ofRandom(0, configFiles.size());
-    cameraState.setup(configFiles[currentConfigFileIndex]);
-    videoGrabber.setup(cameraState);
+    
+    
+    //can save like this
+    //ofSavePrettyJson("settings.json", omxCameraSettings.toJSON());
+    
+    OMXCameraSettings omxCameraSettings;
+    ofBuffer jsonBuffer = ofBufferFromFile("settings.json");
+    omxCameraSettings.parseJSON(jsonBuffer.getText());
+    //omxCameraSettings.applyPreset(OMXCameraSettings::PRESET_720P_40FPS);
+    videoGrabber.setup(omxCameraSettings);
 
 
 
@@ -39,8 +47,12 @@ void ofApp::update()
         {
             currentConfigFileIndex=0;
         }
-        cameraState.setup(configFiles[currentConfigFileIndex]);
-        videoGrabber.setup(cameraState);
+        ofLog() << "LOADING CONFIG: " << configFiles[currentConfigFileIndex].path();
+        
+        ofBuffer jsonBuffer = ofBufferFromFile(configFiles[currentConfigFileIndex]);
+        OMXCameraSettings omxCameraSettings;
+        omxCameraSettings.parseJSON(jsonBuffer.getText());
+        videoGrabber.setup(omxCameraSettings);
         
     }
 
@@ -60,7 +72,7 @@ void ofApp::draw(){
     info << " @ "<< videoGrabber.getFrameRate() <<"FPS" << endl;
     info << endl;
     info << "CURRENT STATE" << endl;
-	info << videoGrabber.currentStateToString() << endl;
+	info << videoGrabber.settings.toString() << endl;
 	
 	if (doDrawInfo) 
 	{

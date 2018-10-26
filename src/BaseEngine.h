@@ -18,7 +18,7 @@ public:
 	BaseEngine();
     virtual ~BaseEngine(){};
 
-	virtual void setup(OMXCameraSettings) = 0;
+	virtual void setup(OMXCameraSettings&) = 0;
     virtual int getFrameCounter() = 0;
 	OMXCameraSettings& getSettings();
     void stopRecording();
@@ -27,7 +27,7 @@ public:
 
 protected:
 	
-    OMXCameraSettings omxCameraSettings;
+    OMXCameraSettings settings;
 	void configureCameraResolution();
 	void configureEncoder();
 	

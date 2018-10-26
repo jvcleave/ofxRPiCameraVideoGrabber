@@ -17,7 +17,7 @@ class StillCameraEngine: public ofThread
 public:
 	StillCameraEngine();
     ~StillCameraEngine();
-    void setup(OMXCameraSettings);
+    void setup(OMXCameraSettings&);
     
     void closeEngine();
     OMX_HANDLETYPE camera;
@@ -27,7 +27,7 @@ public:
     
     bool takePhoto();
     
-    OMXCameraSettings omxCameraSettings;
+    OMXCameraSettings settings;
     
 private:
     bool hasCreatedRenderTunnel;
