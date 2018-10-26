@@ -1,0 +1,33 @@
+{
+    "ISO": 0,
+    "LED": true,
+    "autoISO": true,
+    "autoShutter": true,
+    "brightness": 50,
+    "contrast": 100,
+    "cropRectangle": {
+        "height": 100.0,
+        "width": 100.0,
+        "x": 0.0,
+        "y": 0.0
+    },
+    "doDisableSoftwareSaturation": false,
+    "doDisableSoftwareSharpen": false,
+    "doRecording": false,
+    "dreLevel": 0,
+    "enablePixels": false,
+    "enableTexture": true,
+    "exposurePreset": "Auto",
+    "flickerCancellation": false,
+    "frameStabilization": false,
+    "framerate": 30,
+    "height": 720,
+    "meteringType": "Average",
+    "mirror": "None",
+    "rotation": 0,
+    "saturation": -100,
+    "sharpness": 100,
+    "shutterSpeed": 0,
+    "width": 1280,
+    "zoomLevel": 0.5
+}
