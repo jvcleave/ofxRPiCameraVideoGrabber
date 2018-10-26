@@ -9,17 +9,15 @@
 #pragma once
 
 #include "ofMain.h"
-
-
 #include "OMX_Maps.h"
-
+#include "OMXCameraSettings.h"
 
 class StillCameraEngine: public ofThread
 {
 public:
 	StillCameraEngine();
     ~StillCameraEngine();
-    void setup();
+    void setup(OMXCameraSettings);
     
     void closeEngine();
     OMX_HANDLETYPE camera;
@@ -29,9 +27,7 @@ public:
     
     bool takePhoto();
     
-    int frameWidth;
-    int frameHeight;
-    
+    OMXCameraSettings omxCameraSettings;
     
 private:
     bool hasCreatedRenderTunnel;

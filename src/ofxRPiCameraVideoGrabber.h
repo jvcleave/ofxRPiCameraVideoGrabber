@@ -81,15 +81,9 @@ private:
     int frameCounter;
     bool pixelsRequested;
 
-    
-   
-    
 
 	void onUpdate(ofEventArgs & args);
     
-    bool hasAddedExithandler;
-    void addExitHandler();
-    void onUpdateDuringExit(ofEventArgs& args);
 
 
 	

@@ -6,33 +6,11 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	OMX_Maps::getInstance(); 
     resetValues();
     
-    int zoomStepsSource[61] = 
-    {
-        65536,  68157,  70124,  72745,
-        75366,  77988,  80609,  83231,
-        86508,  89784,  92406,  95683,
-        99615,  102892, 106168, 110100,
-        114033, 117965, 122552, 126484,
-        131072, 135660, 140247, 145490,
-        150733, 155976, 161219, 167117,
-        173015, 178913, 185467, 192020,
-        198574, 205783, 212992, 220201,
-        228065, 236585, 244449, 252969,
-        262144, 271319, 281149, 290980,
-        300810, 311951, 322437, 334234,
-        346030, 357827, 370934, 384041,
-        397148, 411566, 425984, 441057,
-        456131, 472515, 488899, 506593,
-        524288
-    };
-    vector<int> converted(zoomStepsSource, 
-                          zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
-    zoomLevels = converted;
+    
 
     
     cropRectangle.set(0,0,100,100);
 
-    hasAddedExithandler = false;
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -104,14 +82,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     omxCameraSettings = omxCameraSettings_;
     
     ofLogVerbose(__func__) << "omxCameraSettings: " << omxCameraSettings.toString();
-
     
-    
-    if(!hasAddedExithandler)
-    {
-        addExitHandler();
-        hasAddedExithandler = true; 
-    }
     if(directEngine)
     {
         delete directEngine;
@@ -491,64 +462,6 @@ void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
 
 
 #pragma mark EXIT
-
-bool doExit = false;
-void signal_handler(int signum)
-{
-    cout << "ofxRPiCameraVideoGrabber caught signal " << signum;
-    doExit = true;
-}
-
-void ofxRPiCameraVideoGrabber::onUpdateDuringExit(ofEventArgs& args)
-{
-    if (doExit)
-    {
-        ofLogVerbose(__func__) << " EXITING VIA SIGNAL";
-        close();
-        ofExit();
-    }
-}
-
-void ofxRPiCameraVideoGrabber::addExitHandler()
-{
-    
-    vector<int> signals;
-    signals.push_back(SIGINT);
-    signals.push_back(SIGQUIT);
-    
-    for (size_t i=0; i<signals.size(); i++)
-    {
-        int SIGNAL_TO_BLOCK = signals[i];
-        //http://stackoverflow.com/questions/11465148/using-sigaction-c-cpp
-        
-        //Struct for the new action associated to the SIGNAL_TO_BLOCK
-        struct sigaction new_action;
-        new_action.sa_handler = signal_handler;
-        
-        //Empty the sa_mask. This means that no signal is blocked while the signal_handler runs.
-        sigemptyset(&new_action.sa_mask);
-        
-        //Block the SEGTERM signal so while the signal_handler runs, the SIGTERM signal is ignored
-        sigaddset(&new_action.sa_mask, SIGTERM);
-        
-        //Remove any flag from sa_flag. See documentation for flags allowed
-        new_action.sa_flags = 0;
-        
-        struct sigaction old_action;
-        //Read the old signal associated to SIGNAL_TO_BLOCK
-        sigaction(SIGNAL_TO_BLOCK, NULL, &old_action);
-        
-        //If the old handler wasn't SIG_IGN it is a handler that just "ignores" the signal
-        if (old_action.sa_handler != SIG_IGN)
-        {
-            //Replace the signal handler of SIGNAL_TO_BLOCK with the one described by new_action
-            sigaction(SIGNAL_TO_BLOCK, &new_action, NULL);
-        }
-        
-    }
-    
-    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdateDuringExit);
-}
 
 void ofxRPiCameraVideoGrabber::close()
 {

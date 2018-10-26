@@ -14,8 +14,7 @@ StillCameraEngine::StillCameraEngine()
     encoderOutputBuffer = NULL;
     hasCreatedRenderTunnel = false;
     
-   frameWidth = 2592;
-   frameHeight = 1944;
+
 }   
 
 
@@ -35,9 +34,9 @@ OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent
 }
 
 
-void StillCameraEngine::setup()
+void StillCameraEngine::setup(OMXCameraSettings omxCameraSettings_)
 {
-    
+    omxCameraSettings = omxCameraSettings_;
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     OMX_CALLBACKTYPE cameraCallbacks;
@@ -89,10 +88,10 @@ void StillCameraEngine::setup()
         // ofLogVerbose() << "sessionConfig.height: " << sessionConfig.height;
         
         //OMXCameraUtils::printPortDef(stillPortConfig);
-        stillPortConfig.format.image.nFrameWidth        = frameWidth;
-        stillPortConfig.format.image.nFrameHeight       = frameHeight;
+        stillPortConfig.format.image.nFrameWidth        = omxCameraSettings.width;
+        stillPortConfig.format.image.nFrameHeight       = omxCameraSettings.height;
         
-        stillPortConfig.format.video.nStride            = frameWidth;
+        stillPortConfig.format.video.nStride            = omxCameraSettings.width;
         //below works but leaving it at default 0
         //stillPortConfig.format.video.nSliceHeight    = round(sessionConfig.height / 16) * 16;
         
@@ -512,9 +511,9 @@ OMX_ERRORTYPE StillCameraEngine::configureEncoder()
 
         
         //OMXCameraUtils::printPortDef(encoderOutputPortDefinition);
-        encoderOutputPortDefinition.format.image.nFrameWidth = frameWidth;
-        encoderOutputPortDefinition.format.image.nFrameHeight= frameHeight;
-        encoderOutputPortDefinition.format.image.nStride = frameWidth; 
+        encoderOutputPortDefinition.format.image.nFrameWidth = omxCameraSettings.width;
+        encoderOutputPortDefinition.format.image.nFrameHeight= omxCameraSettings.height;
+        encoderOutputPortDefinition.format.image.nStride = omxCameraSettings.width; 
         encoderOutputPortDefinition.format.image.eColorFormat = OMX_COLOR_FormatUnused;
         encoderOutputPortDefinition.format.image.eCompressionFormat = OMX_IMAGE_CodingJPEG;
         error =OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);

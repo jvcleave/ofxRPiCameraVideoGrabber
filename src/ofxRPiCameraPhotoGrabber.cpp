@@ -9,14 +9,15 @@ ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
     engine = NULL;
 }
 
-void ofxRPiCameraPhotoGrabber::setup()
+void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
+    omxCameraSettings = omxCameraSettings_;
     if(engine)
     {
         delete engine;
     }
     engine = new StillCameraEngine();
-    engine->setup();
+    engine->setup(omxCameraSettings);
     camera = engine->camera;
     
 }
@@ -53,23 +54,19 @@ void ofxRPiCameraPhotoGrabber::takePhoto()
     {
         ofLogError() << "TAKE PHOTO FAILED";
         engine->closeEngine();
-        setup();
+        setup(omxCameraSettings);
     }
 
 }
 
 int ofxRPiCameraPhotoGrabber::getWidth()
 {
-    if(!engine) return 0;
-
-    return engine->frameWidth;
+    return omxCameraSettings.width;
 }
 
 int ofxRPiCameraPhotoGrabber::getHeight()
 {
-    if(!engine) return 0;
-
-    return engine->frameHeight;
+    return omxCameraSettings.height;
 }
 
 

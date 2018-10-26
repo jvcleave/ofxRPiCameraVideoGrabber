@@ -9,9 +9,20 @@ void ofApp::setup()
 		
 	consoleListener.setup(this);
 	
+    OMXCameraSettings cameraSettings;
+    cameraSettings.width = 2592;
+    cameraSettings.height = 1944;
+	photoGrabber.setup(cameraSettings);
+    
+    photoGrabber.setSharpness(100);
+    photoGrabber.setContrast(100);
+    photoGrabber.setBrightness(100);
+    photoGrabber.setZoomLevelNormalized(0.2);
+    photoGrabber.setSaturation(-100);
 
-	
-	photoGrabber.setup();
+    //photoGrabber.rotateClockwise();
+    ofLog() << photoGrabber.currentStateToString();
+    
 	filterCollection.setup();
 	
 

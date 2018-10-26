@@ -15,23 +15,7 @@ public:
     {
         
     }
-    void createSettings()
-    {
-        for(auto iterator = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
-        {
-            string key = iterator->first;
-            string value = iterator->second;
-            //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
 
-            if(key == "width")              cameraSettings.width                = ofToInt(value);
-            if(key == "height")             cameraSettings.height               = ofToInt(value);
-            if(key == "framerate")          cameraSettings.framerate            = ofToInt(value);
-            if(key == "enableTexture")     cameraSettings.enableTexture       = ofToBool(value);
-            if(key == "enablePixels")       cameraSettings.enablePixels         = ofToBool(value);
-            if(key == "doRecording")        cameraSettings.doRecording          = ofToBool(value);
-            if(key == "recordingFilePath")  cameraSettings.recordingFilePath    = value;
-        }
-    }
     
     void setup(string currentState)
     {
@@ -42,6 +26,9 @@ public:
     
     void setup(ofBuffer buffer)
     {
+        
+        ofJson json;
+        
         ofLogVerbose(__func__) << "buffer: " << buffer.getText();
         for (ofBuffer::Line it = buffer.getLines().begin(), end = buffer.getLines().end(); it != end; ++it) 
         {
@@ -53,11 +40,26 @@ public:
                 string key = keyValuePairs[0];
                 string value = keyValuePairs[1];
                 //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
-
+                json[key] = value;
                 keyValueMap[key] = value;
             }
         }
-        createSettings();
+        //createSettings
+        for(auto iterator = keyValueMap.begin(); iterator != keyValueMap.end(); iterator++) 
+        {
+            string key = iterator->first;
+            string value = iterator->second;
+            //ofLogVerbose(__func__) << "key: " << key << " value: " << value;
+            
+            if(key == "width")              cameraSettings.width                = ofToInt(value);
+            if(key == "height")             cameraSettings.height               = ofToInt(value);
+            if(key == "framerate")          cameraSettings.framerate            = ofToInt(value);
+            if(key == "enableTexture")      cameraSettings.enableTexture       = ofToBool(value);
+            if(key == "enablePixels")       cameraSettings.enablePixels         = ofToBool(value);
+            if(key == "doRecording")        cameraSettings.doRecording          = ofToBool(value);
+            if(key == "recordingFilePath")  cameraSettings.recordingFilePath    = value;
+        }
+        ofLog() << "json.dump: " << json.dump();
     }
     
     void setup(ofFile file)
