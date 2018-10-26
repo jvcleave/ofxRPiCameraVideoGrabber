@@ -32,7 +32,6 @@ public:
     //CameraMetering metering;
     
     void setup(OMXCameraSettings);
-    void setup(CameraState);
     int getWidth();
     int getHeight();
     int getFrameRate();

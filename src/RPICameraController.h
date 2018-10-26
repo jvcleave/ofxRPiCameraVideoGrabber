@@ -1,8 +1,8 @@
 #pragma once
 #include "ofMain.h"
 #include "OMX_Maps.h"
-#include "CameraState.h"
 #include "DirectDisplay.h"
+#include "OMXCameraSettings.h"
 
 
 enum MIRROR
@@ -26,34 +26,14 @@ class RPICameraController
 {
 public:
     
+    
     OMX_HANDLETYPE camera;
 
-    OMX_METERINGTYPE meteringType;
-    bool autoISO;
-    int ISO;
-    bool autoShutter;
-    int shutterSpeed;
-    int sharpness;    //    -100 to 100
-    int contrast;    //  -100 to 100 
-    int brightness; //     0 to 100
-    int saturation; //  -100 to 100 
-    int dreLevel; 
-    ofRectangle cropRectangle;
-    int zoomLevel;
-    string mirror; 
-    int rotation;
-    string imageFilter;
-    string exposurePreset;
-    int evCompensation;
-    string whiteBalance;
-    
-    bool LED;
-    string LED_PIN;
     string getLEDPin();
     bool hasGPIOProgram;
-    
-    bool burstModeEnabled;
-    bool flickerCancellation;
+    OMXCameraSettings omxCameraSettings;
+
+
     
     void checkBurstMode();
     void checkFlickerCancellation();
@@ -94,41 +74,40 @@ public:
     void applyAllSettings();
     
     void setSharpness(int);
-    int getSharpness() { return sharpness; }
+    int getSharpness() { return omxCameraSettings.sharpness; }
     
     void setContrast(int);
-    int getContrast() { return contrast; }
+    int getContrast() { return omxCameraSettings.contrast; }
     
     void setBrightness(int);
-    int getBrightness() { return brightness; }
+    int getBrightness() { return omxCameraSettings.brightness; }
     
     void setSaturation(int);
-    int getSaturation()        { return saturation; }
+    int getSaturation()        { return omxCameraSettings.saturation; }
     
-    bool frameStabilization;
     void setFrameStabilization(bool doStabilization);
-    bool getFrameStabilization(){ return frameStabilization;}
+    bool getFrameStabilization(){ return omxCameraSettings.frameStabilization;}
     
     OMX_ERRORTYPE setColorEnhancement(bool doColorEnhance, int U=128, int V=128);
     
     
     void setDRE(int level);
-    int getDRE() { return dreLevel; }
+    int getDRE() { return omxCameraSettings.dreLevel; }
     
     void toggleLED();
     void setLEDState(bool status);
-    bool getLEDState() { return LED; }
+    bool getLEDState() { return omxCameraSettings.LED; }
     
     OMX_ERRORTYPE setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE);
     void setFlickerCancellation(bool);
     void enableFlickerCancellation();
     void disableFlickerCancellation();
-    bool isFlickerCancellationEnabled() { return flickerCancellation; }
+    bool isFlickerCancellationEnabled() { return omxCameraSettings.flickerCancellation; }
     //TODO: enable explict 50/60 hz
     
     
     OMX_ERRORTYPE setSensorCrop(ofRectangle&);
-    ofRectangle& getCropRectangle() { return cropRectangle; }
+    ofRectangle& getCropRectangle() { return omxCameraSettings.cropRectangle; }
     OMX_ERRORTYPE setSensorCrop(int left, int top, int width, int height);
     
     vector<int> zoomLevels;
@@ -179,15 +158,15 @@ public:
     OMX_ERRORTYPE setSoftwareSharpening(bool);
     OMX_ERRORTYPE enableSoftwareSharpening();
     OMX_ERRORTYPE disableSoftwareSharpening();
-    bool isSoftwareSharpeningEnabled() {return doDisableSoftwareSharpen;}
+    bool isSoftwareSharpeningEnabled() {return omxCameraSettings.doDisableSoftwareSharpen;}
     
     OMX_ERRORTYPE setSoftwareSaturation(bool);
     OMX_ERRORTYPE enableSoftwareSaturation();
     OMX_ERRORTYPE disableSoftwareSaturation();
-    bool isSoftwareSaturationEnabled() {return doDisableSoftwareSaturation;}
+    bool isSoftwareSaturationEnabled() {return omxCameraSettings.doDisableSoftwareSaturation;}
     
     void setBurstMode(bool);
-    bool isBurstModeEnabled(){ return burstModeEnabled;}
+    bool isBurstModeEnabled(){ return omxCameraSettings.burstModeEnabled;}
     
     OMX_ERRORTYPE setISO(int ISO);
     int getISO();
@@ -203,9 +182,6 @@ public:
     string currentStateToString();
     void saveStateToFile(string fileName="");
     
-    CameraState getCameraState();
-    OMXCameraSettings omxCameraSettings;
-
 
 
 };

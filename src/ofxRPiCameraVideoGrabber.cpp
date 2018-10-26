@@ -3,14 +3,7 @@
 #pragma mark SETUP
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
-	OMX_Maps::getInstance(); 
     resetValues();
-    
-    
-
-    
-    cropRectangle.set(0,0,100,100);
-
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
@@ -25,9 +18,10 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 void ofxRPiCameraVideoGrabber::reset()
 {
     resetValues();
+    omxCameraSettings.resetValues();
     applyAllSettings();
 }
-
+/*
 void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
 {
     setup(cameraState.cameraSettings);
@@ -70,7 +64,7 @@ void ofxRPiCameraVideoGrabber::setup(CameraState cameraState)
         if(key == "SoftwareSharpeningEnabled") setSoftwareSharpening(ofToBool(value));
     }
 }
-
+*/
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
@@ -182,10 +176,9 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
     if (recordingRequested) 
     {
         recordingRequested = false;
-        CameraState currentState = getCameraState();
-        currentState.cameraSettings.doRecording = true;
+        omxCameraSettings.doRecording = true;
         //ofLogVerbose() << "CALLING SETUP: " << currentStateToString();
-        setup(currentState);
+        setup(omxCameraSettings);
     }
 	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
@@ -327,9 +320,8 @@ void ofxRPiCameraVideoGrabber::stopRecording()
          direct mode has to use a lower resolution for display while recording
          set it back after recording
          */
-        CameraState currentState = getCameraState();
-        currentState.cameraSettings.doRecording = false;
-        setup(currentState);
+        omxCameraSettings.doRecording = false;
+        setup(omxCameraSettings);
 	}
 	if (textureEngine) 
 	{
