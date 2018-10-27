@@ -27,9 +27,6 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 
     OMX_ERRORTYPE error = OMX_ErrorNone;
-    error = OMX_Init();
-    OMX_TRACE(error);
-    
     settings = omxCameraSettings_;
     
     

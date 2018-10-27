@@ -43,6 +43,7 @@ public:
     bool doDisableSoftwareSaturation;
 	OMXCameraSettings()
 	{
+        OMX_Init();
         OMX_Maps::getInstance(); 
         resetValues();
 	}
