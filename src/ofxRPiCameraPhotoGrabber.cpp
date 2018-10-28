@@ -7,16 +7,24 @@ ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
     engine = NULL;
 }
 
-void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
+void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_, bool doApplySettings)
 {
     settings = omxCameraSettings_;
+    listener = settings.photoGrabberListener;
+    ofLog() << settings.toString();
     if(engine)
     {
         delete engine;
     }
     engine = new StillCameraEngine();
+    engine->listener = this;
     engine->setup(settings);
     camera = engine->camera;
+    if(doApplySettings)
+    {
+        resetValues();
+        applyAllSettings();
+    }
     
 }
 
@@ -39,10 +47,27 @@ void ofxRPiCameraPhotoGrabber::takePhoto()
     }else
     {
         ofLogError() << "TAKE PHOTO FAILED";
+        ofLog() << "PRE RESET: " << settings.toString();
+        //settings = engine->settings;
         engine->closeEngine();
-        setup(settings);
+        setup(settings, true);
+        
+
     }
 
+}
+
+void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
+{
+    photosTaken.push_back(filePath);
+    if(listener)
+    {
+        
+        listener->onTakePhotoComplete(filePath);
+    }else
+    {
+        ofLogWarning(__func__) << filePath << " WRITTEN BUT NO LISTENER SET";
+    }
 }
 
 int ofxRPiCameraPhotoGrabber::getWidth()

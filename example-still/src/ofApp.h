@@ -7,7 +7,8 @@
 #include "ImageFilterCollection.h"
 
 
-class ofApp : public ofBaseApp, public KeyListener{
+class ofApp : public ofBaseApp, public KeyListener, public ofxRPiCameraPhotoGrabberListener
+{
 
 	public:
 
@@ -16,7 +17,7 @@ class ofApp : public ofBaseApp, public KeyListener{
 		void draw();
 		void keyPressed(int key);
 
-	void onCharacterReceived(KeyListenerEventData& e);
+	void onCharacterReceived(KeyListenerEventData& e) override;
 	TerminalListener consoleListener;
 	ofxRPiCameraPhotoGrabber photoGrabber;
 	
@@ -24,6 +25,8 @@ class ofApp : public ofBaseApp, public KeyListener{
     OMXCameraSettings cameraSettings;
 
 	bool doDrawInfo;
-
+    vector<string>photoFiles;
+    void onTakePhotoComplete(string fileName) override;
+    
 };
 

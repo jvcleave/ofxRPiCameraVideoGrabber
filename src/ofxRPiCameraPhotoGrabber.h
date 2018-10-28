@@ -16,14 +16,16 @@
 
 
 
-class ofxRPiCameraPhotoGrabber : public RPICameraController
+
+
+class ofxRPiCameraPhotoGrabber : public RPICameraController, public StillCameraEngineListener
 {
 
 public:
     
 	ofxRPiCameraPhotoGrabber();
     ~ofxRPiCameraPhotoGrabber();
-    void setup(OMXCameraSettings&);
+    void setup(OMXCameraSettings&, bool doApplySettings=false);
     bool isReady();
 	int getWidth();
 	int getHeight();
@@ -41,5 +43,8 @@ public:
     void setDisplayMirror(bool);
 
     DirectDisplay* getDisplayManager();
-
+    ofxRPiCameraPhotoGrabberListener* listener;
+    
+    void onTakePhotoComplete(string filePath) override;
+    vector<string> photosTaken;
 };

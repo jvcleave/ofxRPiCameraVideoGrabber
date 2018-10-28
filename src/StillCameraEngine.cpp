@@ -22,7 +22,7 @@ OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE hComponent
                                                        OMX_PTR pAppData,
                                                        OMX_BUFFERHEADERTYPE* pBuffer)
 {	
-    ofLogVerbose(__func__);
+    //ofLogVerbose(__func__);
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
@@ -83,11 +83,11 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
     OMX_TRACE(error, "stillPortConfig");
     if(error == OMX_ErrorNone) 
     {
-        ofLogVerbose() << "BEFORE SET";
+        //ofLogVerbose() << "BEFORE SET";
         //ofLogVerbose() << "sessionConfig.width: " << sessionConfig.width;
         // ofLogVerbose() << "sessionConfig.height: " << sessionConfig.height;
         
-        PrintPortDef(stillPortConfig);
+       // PrintPortDef(stillPortConfig);
         stillPortConfig.format.image.nFrameWidth        = settings.width;
         stillPortConfig.format.image.nFrameHeight       = settings.height;
         
@@ -100,8 +100,8 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
         OMX_TRACE(error);
         error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
-        ofLogVerbose() << "AFTER SET";
-        PrintPortDef(stillPortConfig);
+       // ofLogVerbose() << "AFTER SET";
+        //PrintPortDef(stillPortConfig);
     }
     
     //Set the preview resolution
@@ -113,11 +113,11 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
     OMX_TRACE(error, "previewPortConfig");
     if(error == OMX_ErrorNone) 
     {
-        ofLogVerbose() << "BEFORE SET";
+        //ofLogVerbose() << "BEFORE SET";
         //ofLogVerbose() << "sessionConfig.width: " << sessionConfig.width;
         // ofLogVerbose() << "sessionConfig.height: " << sessionConfig.height;
         
-        PrintPortDef(previewPortConfig);
+        //PrintPortDef(previewPortConfig);
         previewPortConfig.format.video.nFrameWidth        = settings.stillPreviewWidth;
         previewPortConfig.format.video.nFrameHeight       = settings.stillPreviewHeight;
         
@@ -129,8 +129,8 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
         OMX_TRACE(error);
-        error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
-        ofLogVerbose() << "AFTER SET";
+        //error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+        //ofLogVerbose() << "AFTER SET";
         PrintPortDef(previewPortConfig);
     }
 }
@@ -147,9 +147,9 @@ OMX_ERRORTYPE StillCameraEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hCom
 //          __func__, eEvent, nData1, nData2, pEventData);
     StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
 
-    stringstream ss;
+    /*stringstream ss;
     ss << OMX_Maps::getInstance().getEvent(eEvent);
-    ofLogVerbose(__func__) << ss.str();
+    ofLogVerbose(__func__) << ss.str();*/
     if (eEvent == OMX_EventError)
     {
          OMX_TRACE((OMX_ERRORTYPE)nData1);
@@ -213,12 +213,12 @@ void StillCameraEngine::threadedFunction()
                                        encoderOutputBuffer->nFilledLen);
             
             
-            ofLogVerbose(__func__) << recordingFileBuffer.size();
+            //ofLogVerbose(__func__) << recordingFileBuffer.size();
             bool endOfFrame = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME);
             bool endOfStream = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_EOS);
 
-            ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME: " << endOfFrame;
-            ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
+            //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME: " << endOfFrame;
+            //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
             
             if(endOfStream || endOfFrame)
             {
@@ -229,10 +229,7 @@ void StillCameraEngine::threadedFunction()
             }else
             {
                 doFillBuffer = true;
-            }
-
-            
-            
+            }   
         }
         if(doFillBuffer && encoder)
         {
@@ -243,11 +240,11 @@ void StillCameraEngine::threadedFunction()
         }
         if(!doFillBuffer && !bufferAvailable)
         {
-            logCounter++;
+            /*logCounter++;
             if(logCounter%100000 == 0)
             {
                 ofLogVerbose(__func__) << "logCounter: " << logCounter; 
-            }
+            }*/
            
         }
         
@@ -390,40 +387,50 @@ bool StillCameraEngine::takePhoto()
     
     error = configureEncoder();
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     //Create camera->encoder Tunnel
     error = OMX_SetupTunnel(camera, CAMERA_STILL_OUTPUT_PORT, encoder, IMAGE_ENCODER_INPUT_PORT);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     //Enable camera output port
     error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_STILL_OUTPUT_PORT, NULL);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     //Enable encoder input port
     error = OMX_SendCommand(encoder, OMX_CommandPortEnable, IMAGE_ENCODER_INPUT_PORT, NULL);
-    OMX_TRACE(error);    
+    OMX_TRACE(error); 
+    if(error != OMX_ErrorNone) return false;
     
     //Enable encoder output port
     error = OMX_SendCommand(encoder, OMX_CommandPortEnable, IMAGE_ENCODER_OUTPUT_PORT, NULL);
     OMX_TRACE(error); 
+    if(error != OMX_ErrorNone) return false;
     
     
     error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, IMAGE_ENCODER_OUTPUT_PORT, NULL, encoderBufferSize);
     OMX_TRACE(error, "encode OMX_AllocateBuffer");
+    if(error != OMX_ErrorNone) return false;
     
     //Start camera
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
     // Start encoder
     error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
+    if(error != OMX_ErrorNone) return false;
     
         
     bufferAvailable = false; 
@@ -491,6 +498,7 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
 }
 bool StillCameraEngine::writeFile()
 {
+    
     stopThread();
     
     destroyEncoder();
@@ -498,13 +506,25 @@ bool StillCameraEngine::writeFile()
     buildNonCapturePipeline();
     
     bool result = false;
+    string filePath = ofToDataPath(ofGetTimestampString()+".jpg", true);
+    
     if(recordingFileBuffer.size()>0)
     {
-        result = ofBufferToFile(ofToDataPath(ofGetTimestampString()+".jpg", true), recordingFileBuffer);
+        result = ofBufferToFile(filePath, recordingFileBuffer);
     }
     doWriteFile = false;
     recordingFileBuffer.clear();
-
+    
+    if(result)
+    {
+        if(listener)
+        {
+            listener->onTakePhotoComplete(filePath);
+        }else
+        {
+            ofLogWarning(__func__) << filePath << " WRITTEN BUT NO LISTENER SET";
+        }
+    }
     
     return result;
 }
@@ -541,10 +561,10 @@ OMX_ERRORTYPE StillCameraEngine::configureEncoder()
     OMX_TRACE(error);
     if (error == OMX_ErrorNone) 
     {
-        ofLogVerbose() << "ENCODER BEFORE SET";
+        //ofLogVerbose() << "ENCODER BEFORE SET";
 
         
-        //OMXCameraUtils::printPortDef(encoderOutputPortDefinition);
+        //PrintPortDef(encoderOutputPortDefinition);
         encoderOutputPortDefinition.format.image.nFrameWidth = settings.width;
         encoderOutputPortDefinition.format.image.nFrameHeight= settings.height;
         encoderOutputPortDefinition.format.image.nStride = settings.width; 
@@ -552,8 +572,8 @@ OMX_ERRORTYPE StillCameraEngine::configureEncoder()
         encoderOutputPortDefinition.format.image.eCompressionFormat = OMX_IMAGE_CodingJPEG;
         error =OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
         OMX_TRACE(error);
-        ofLogVerbose() << "ENCODER AFTER SET";
-        //OMXCameraUtils::printPortDef(encoderOutputPortDefinition);
+        //ofLogVerbose() << "ENCODER AFTER SET";
+        //PrintPortDef(encoderOutputPortDefinition);
         
         encoderBufferSize = encoderOutputPortDefinition.nBufferSize;
 

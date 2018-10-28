@@ -18,7 +18,7 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 void ofxRPiCameraVideoGrabber::reset()
 {
     resetValues();
-    settings.resetValues();
+    //settings.resetValues();
     applyAllSettings();
 }
 

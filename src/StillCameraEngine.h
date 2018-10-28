@@ -13,6 +13,12 @@
 #include "OMXCameraSettings.h"
 #include "DirectDisplay.h"
 
+class StillCameraEngineListener
+{
+public:
+    virtual void onTakePhotoComplete(string filePath)=0;
+    
+};
 class StillCameraEngine: public ofThread
 {
 public:
@@ -32,6 +38,9 @@ public:
     DirectDisplay displayManager;
     DirectDisplay* getDisplayManager();
     bool displayManagerReady;
+    
+    StillCameraEngineListener* listener;
+    
 private:
     bool hasCreatedRenderTunnel;
     OMX_U32 encoderBufferSize;

@@ -1,5 +1,10 @@
 #include "ofApp.h"
 
+
+void ofApp::onTakePhotoComplete(string fileName)
+{
+    ofLog() << "fileName: " << fileName;
+}
 //--------------------------------------------------------------
 void ofApp::setup()
 {
@@ -18,15 +23,15 @@ void ofApp::setup()
     
     //cameraSettings.stillPreviewWidth = cameraSettings.width;
     //cameraSettings.stillPreviewHeight = cameraSettings.height;
-    
+    cameraSettings.photoGrabberListener = this;
 	photoGrabber.setup(cameraSettings);
-    /*
+
     photoGrabber.setSharpness(100);
     photoGrabber.setContrast(100);
     photoGrabber.setBrightness(100);
-    photoGrabber.setZoomLevelNormalized(0.2);
+    //photoGrabber.setZoomLevelNormalized(0.2);
     photoGrabber.setSaturation(-100);
-     */
+    
     //photoGrabber.rotateClockwise();
     ofLog() << photoGrabber.settings.toString();
     

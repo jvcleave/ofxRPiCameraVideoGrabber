@@ -4,6 +4,15 @@
 
 #define MEGABYTE_IN_BITS 8388608
 
+
+
+class ofxRPiCameraPhotoGrabberListener
+{
+public:
+    virtual void onTakePhotoComplete(string filePath)=0;
+    
+};
+
 class OMXCameraSettings
 {
 public:
@@ -45,9 +54,11 @@ public:
     
     int stillPreviewWidth;
     int stillPreviewHeight;
-
+    
+    ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
 	OMXCameraSettings()
 	{
+        photoGrabberListener = NULL;
         OMX_Init();
         OMX_Maps::getInstance(); 
         resetValues();
