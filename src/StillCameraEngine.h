@@ -11,6 +11,7 @@
 #include "ofMain.h"
 #include "OMX_Maps.h"
 #include "OMXCameraSettings.h"
+#include "DirectDisplay.h"
 
 class StillCameraEngine: public ofThread
 {
@@ -28,7 +29,9 @@ public:
     bool takePhoto();
     
     OMXCameraSettings settings;
-    
+    DirectDisplay displayManager;
+    DirectDisplay* getDisplayManager();
+    bool displayManagerReady;
 private:
     bool hasCreatedRenderTunnel;
     OMX_U32 encoderBufferSize;

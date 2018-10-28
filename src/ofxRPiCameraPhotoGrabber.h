@@ -30,4 +30,16 @@ public:
     void takePhoto();
     StillCameraEngine* engine;
     
+    
+    void draw(ofRectangle& rectangle);
+    void draw(int x, int y, int width, int height);
+    void setDisplayAlpha(int);
+    void setDisplayLayer(int);
+    void setDisplayRotation(int);
+    void setDisplayDrawRectangle(ofRectangle);
+    void setDisplayCropRectangle(ofRectangle);
+    void setDisplayMirror(bool);
+
+    DirectDisplay* getDisplayManager();
+
 };

@@ -21,7 +21,8 @@ class ofApp : public ofBaseApp, public KeyListener{
 	ofxRPiCameraPhotoGrabber photoGrabber;
 	
 	ImageFilterCollection filterCollection;
-	
+    OMXCameraSettings cameraSettings;
+
 	bool doDrawInfo;
 
 };
