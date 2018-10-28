@@ -29,6 +29,7 @@ public:
     int saturation;  // -100 to 100 
     int dreLevel;    //   -4 to 4
     ofRectangle cropRectangle;
+    
     int zoomLevel;
     string mirror; 
     int rotation;
@@ -41,6 +42,10 @@ public:
     bool frameStabilization;
     bool doDisableSoftwareSharpen;
     bool doDisableSoftwareSaturation;
+    
+    int stillPreviewWidth;
+    int stillPreviewHeight;
+
 	OMXCameraSettings()
 	{
         OMX_Init();
@@ -79,6 +84,8 @@ public:
         doDisableSoftwareSharpen = false;
         doDisableSoftwareSaturation = false;
         LED = true;
+        stillPreviewWidth = 640;
+        stillPreviewHeight = 480;
     }
     
     string toString()
@@ -110,6 +117,8 @@ public:
         info << "doDisableSoftwareSharpen " << doDisableSoftwareSharpen << endl;
         info << "doDisableSoftwareSaturation " << doDisableSoftwareSaturation << endl;
         info << "LED " << LED << endl;
+        info << "stillPreviewWidth " << stillPreviewWidth << endl;
+        info << "stillPreviewHeight " << stillPreviewHeight << endl;
         return info.str();
     }
     

@@ -1462,4 +1462,70 @@ OMX_ERRORTYPE FlushOMXComponent(OMX_HANDLETYPE handle, int port)
     return error;
 }
 
+static 
+void PrintSensorModes(OMX_HANDLETYPE camera)
+{
+    OMX_ERRORTYPE error;
+    
+    OMX_CONFIG_CAMERASENSORMODETYPE sensorConfig;
+    OMX_INIT_STRUCTURE(sensorConfig);
+    sensorConfig.nPortIndex = OMX_ALL;
+    //sensorConfig.nModeIndex = 0;
+    error =  OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        stringstream sensorInfo;
+        sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+        sensorInfo << "nNumModes: "  << sensorConfig.nNumModes << endl;
+        sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+        sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+        sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+        sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+        sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+        sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+        
+        ofLogVerbose(__func__) << "sensorInfo: \n" << sensorInfo.str();
+    }
+    
+    
+    
+    int numModes = sensorConfig.nNumModes;
+    for (int i = 0; i < numModes; i++) 
+    {
+        sensorConfig.nModeIndex = i;
+        error = OMX_GetParameter(camera, OMX_IndexConfigCameraSensorModes, &sensorConfig);
+        OMX_TRACE(error);
+        stringstream sensorInfo;
+        sensorInfo << "nModeIndex: "  << sensorConfig.nModeIndex << endl;
+        sensorInfo << "nWidth: "  << sensorConfig.nWidth << endl;
+        sensorInfo << "nHeight: "  << sensorConfig.nHeight << endl;
+        sensorInfo << "nPaddingRight: "  << sensorConfig.nPaddingRight << endl;
+        sensorInfo << "eColorFormat: "  << OMX_Maps::getInstance().getColorFormat(sensorConfig.eColorFormat) << endl;
+        sensorInfo << "nFrameRateMax: "  << sensorConfig.nFrameRateMax << endl;
+        sensorInfo << "nFrameRateMin: "  << sensorConfig.nFrameRateMin << endl;
+        sensorInfo << "FrameRateMax: " << (sensorConfig.nFrameRateMax / 256.0f) << endl;
+        sensorInfo << "FrameRateMin: " << (sensorConfig.nFrameRateMin / 256.0f) << endl;
+        ofLogVerbose(__func__) << "sensorInfo "<< i << " : \n" << sensorInfo.str();
+    }
+}
+
+#if 0
+static 
+string PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDef)
+{
+    stringstream info;
+    info << "nFrameWidth: "  << portDef.format.image.nFrameWidth << endl;
+    info << "nFrameHeight: "  << portDef.format.image.nFrameHeight << endl;
+    info << "nStride: "  << portDef.format.image.nStride << endl;
+    info << "nSliceHeight: "  << portDef.format.image.nSliceHeight << endl;
+    info << "bFlagErrorConcealment: "  << portDef.format.image.bFlagErrorConcealment << endl;
+    info << "Color Format: " << OMX_Maps::getInstance().getColorFormat(portDef.format.image.eColorFormat) << endl;
+    info << "Compression Format: "    << OMX_Maps::getInstance().getImageCoding(portDef.format.image.eCompressionFormat) << "\n";
+    
+    ofLogVerbose(__func__) << "info: \n" << info.str();
+    return info.str();
+}
+#endif
+
 #endif

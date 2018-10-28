@@ -13,7 +13,7 @@ StillCameraEngine::StillCameraEngine()
     encoder = NULL;
     encoderOutputBuffer = NULL;
     hasCreatedRenderTunnel = false;
-    
+    displayManagerReady = false;
 
 }   
 
@@ -87,21 +87,54 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         //ofLogVerbose() << "sessionConfig.width: " << sessionConfig.width;
         // ofLogVerbose() << "sessionConfig.height: " << sessionConfig.height;
         
-        //OMXCameraUtils::printPortDef(stillPortConfig);
+        PrintPortDef(stillPortConfig);
         stillPortConfig.format.image.nFrameWidth        = settings.width;
         stillPortConfig.format.image.nFrameHeight       = settings.height;
         
         stillPortConfig.format.video.nStride            = settings.width;
-        //below works but leaving it at default 0
-        //stillPortConfig.format.video.nSliceHeight    = round(sessionConfig.height / 16) * 16;
+        
+        
+        //not setting also works
+        //stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
         OMX_TRACE(error);
         error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
         ofLogVerbose() << "AFTER SET";
-        //OMXCameraUtils::printPortDef(stillPortConfig);
+        PrintPortDef(stillPortConfig);
+    }
+    
+    //Set the preview resolution
+    OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
+    OMX_INIT_STRUCTURE(previewPortConfig);
+    previewPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
+    
+    error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+    OMX_TRACE(error, "previewPortConfig");
+    if(error == OMX_ErrorNone) 
+    {
+        ofLogVerbose() << "BEFORE SET";
+        //ofLogVerbose() << "sessionConfig.width: " << sessionConfig.width;
+        // ofLogVerbose() << "sessionConfig.height: " << sessionConfig.height;
+        
+        PrintPortDef(previewPortConfig);
+        previewPortConfig.format.video.nFrameWidth        = settings.stillPreviewWidth;
+        previewPortConfig.format.video.nFrameHeight       = settings.stillPreviewHeight;
+        
+        previewPortConfig.format.video.nStride            = settings.stillPreviewWidth;
+        
+        
+        //not setting also works
+        //previewPortConfig.format.video.nSliceHeight    = round(settings.stillPreviewHeight / 16) * 16;
+        
+        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+        OMX_TRACE(error);
+        error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+        ofLogVerbose() << "AFTER SET";
+        PrintPortDef(previewPortConfig);
     }
 }
+
 OMX_ERRORTYPE StillCameraEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent,
                                                             OMX_PTR pAppData,
                                                             OMX_EVENTTYPE eEvent,
@@ -231,7 +264,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error, "camera->OMX_StateIdle");
 
-    //OMXCameraUtils::printSensorModes(camera);
+    //PrintSensorModes(camera);
     
     OMX_FRAMESIZETYPE frameSizeConfig;
     OMX_INIT_STRUCTURE(frameSizeConfig);
@@ -282,26 +315,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     //Set renderer to Idle
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
     OMX_TRACE(error);
-    
-    OMX_CONFIG_DISPLAYREGIONTYPE region;
-    
-    OMX_INIT_STRUCTURE(region);
-    region.nPortIndex = VIDEO_RENDER_INPUT_PORT; /* Video render input port */
-    
-    region.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT);
-    
-    region.fullscreen = OMX_TRUE;
-    region.noaspect = OMX_TRUE;
-    
-    region.dest_rect.x_offset = 0;
-    region.dest_rect.y_offset = 0;
-    region.dest_rect.width	= 640;
-    region.dest_rect.height = 480;
-    
-    error  = OMX_SetParameter(render, OMX_IndexConfigDisplayRegion, &region);
-    
-    OMX_TRACE(error, "render OMX_IndexConfigDisplayRegion");
-    
+   
     error = buildNonCapturePipeline();
         
 
@@ -342,12 +356,32 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     
+    
+    
+    error = displayManager.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
+
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone)
+    {
+        displayManagerReady = true;
+    }
     //Start camera
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
     return error;
 
 }
+
+
+DirectDisplay* StillCameraEngine::getDisplayManager()
+{
+    if(!displayManagerReady) return NULL;
+    
+    return &displayManager;
+}
+
+
+
 bool StillCameraEngine::takePhoto()
 {
     bool result = false;

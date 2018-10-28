@@ -9,17 +9,24 @@ void ofApp::setup()
 		
 	consoleListener.setup(this);
 	
-    OMXCameraSettings cameraSettings;
     cameraSettings.width = 2592;
     cameraSettings.height = 1944;
-	photoGrabber.setup(cameraSettings);
     
+    cameraSettings.stillPreviewWidth = 1280;
+    cameraSettings.stillPreviewHeight = 720;
+
+    
+    //cameraSettings.stillPreviewWidth = cameraSettings.width;
+    //cameraSettings.stillPreviewHeight = cameraSettings.height;
+    
+	photoGrabber.setup(cameraSettings);
+    /*
     photoGrabber.setSharpness(100);
     photoGrabber.setContrast(100);
     photoGrabber.setBrightness(100);
     photoGrabber.setZoomLevelNormalized(0.2);
     photoGrabber.setSaturation(-100);
-
+     */
     //photoGrabber.rotateClockwise();
     ofLog() << photoGrabber.settings.toString();
     
@@ -37,8 +44,8 @@ void ofApp::update()
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	//Nothing really to do here as the output is rendered directly to full screen
-	
+
+    photoGrabber.draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
 //--------------------------------------------------------------
