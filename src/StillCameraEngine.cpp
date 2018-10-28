@@ -95,7 +95,7 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         
         
         //not setting also works
-        stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
+        //stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
         OMX_TRACE(error);
@@ -125,7 +125,7 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         
         
         //not setting also works
-        previewPortConfig.format.video.nSliceHeight    = round(settings.stillPreviewHeight / 16) * 16;
+        //previewPortConfig.format.video.nSliceHeight    = round(settings.stillPreviewHeight / 16) * 16;
         
         error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
         OMX_TRACE(error);
