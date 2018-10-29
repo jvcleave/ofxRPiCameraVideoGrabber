@@ -212,7 +212,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
 {
     
 
-    OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_ERRORTYPE error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error, "camera->OMX_StateIdle");
 
     //PrintSensorModes(camera);
@@ -264,7 +264,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     
     
     //Set renderer to Idle
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
    
     error = buildNonCapturePipeline();
@@ -278,10 +278,10 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
 {
     OMX_ERRORTYPE error;
     
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
     
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
 
     
@@ -289,17 +289,17 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     OMX_TRACE(error);
     
     //Enable camera preview port
-    error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_PREVIEW_PORT, NULL);
+    error = EnableComponentPort(camera, CAMERA_PREVIEW_PORT);
     OMX_TRACE(error);
     
     
     //Enable render input port
-    error = OMX_SendCommand(render, OMX_CommandPortEnable, VIDEO_RENDER_INPUT_PORT, NULL);
+    error = EnableComponentPort(render, VIDEO_RENDER_INPUT_PORT);
     OMX_TRACE(error);
     
     
     //Start renderer
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
     
     
@@ -312,7 +312,7 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     }
     
     //Start camera
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
     return error;
 
@@ -337,11 +337,11 @@ bool StillCameraEngine::takePhoto()
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(encoder, OMX_StateIdle);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
@@ -351,17 +351,17 @@ bool StillCameraEngine::takePhoto()
     if(error != OMX_ErrorNone) return false;
     
     //Enable camera output port
-    error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_STILL_OUTPUT_PORT, NULL);
+    error = EnableComponentPort(camera, CAMERA_STILL_OUTPUT_PORT);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
     //Enable encoder input port
-    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, IMAGE_ENCODER_INPUT_PORT, NULL);
+    error = EnableComponentPort(encoder, IMAGE_ENCODER_INPUT_PORT);    
     OMX_TRACE(error); 
     if(error != OMX_ErrorNone) return false;
     
     //Enable encoder output port
-    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, IMAGE_ENCODER_OUTPUT_PORT, NULL);
+    error = EnableComponentPort(encoder, IMAGE_ENCODER_OUTPUT_PORT);
     OMX_TRACE(error); 
     if(error != OMX_ErrorNone) return false;
     
@@ -371,14 +371,15 @@ bool StillCameraEngine::takePhoto()
     if(error != OMX_ErrorNone) return false;
     
     //Start camera
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
     
-    ofLog() << "PrintOMXState(encoder): " << PrintOMXState(encoder);
+    ofLogWarning() << __LINE__ << " PrintOMXState(encoder): " << PrintOMXState(encoder);
+    
     // Start encoder
-    error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(encoder, OMX_StateExecuting);
     OMX_TRACE(error);
     if(error != OMX_ErrorNone) return false;
     
@@ -400,43 +401,37 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
     OMX_ERRORTYPE error;
     
 
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(camera, OMX_StateIdle);
+    OMX_TRACE(error);
+    
+    error = FlushOMXComponent(camera, CAMERA_STILL_OUTPUT_PORT);
     OMX_TRACE(error);
     
     //Disable camera output port
-    error = OMX_SendCommand(camera, OMX_CommandPortDisable, CAMERA_STILL_OUTPUT_PORT, NULL);
+    error = DisableComponentPort(camera, CAMERA_STILL_OUTPUT_PORT);
     OMX_TRACE(error);
-    
-    
     
     //Disable encoder input port
-    error = OMX_SendCommand(encoder, OMX_CommandPortDisable, IMAGE_ENCODER_INPUT_PORT, NULL);
+    error = DisableComponentPort(encoder, IMAGE_ENCODER_INPUT_PORT);
+    OMX_TRACE(error);
+
+   
+
+    error = FlushOMXComponent(encoder, IMAGE_ENCODER_INPUT_PORT);
     OMX_TRACE(error);
     
- 
+    error = FlushOMXComponent(encoder, IMAGE_ENCODER_OUTPUT_PORT);
+    OMX_TRACE(error);
     
-    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
-    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_OUTPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
     error = DisableAllPortsForComponent(&encoder, "encoder");
     OMX_TRACE(error, "DisableAllPortsForComponent encoder");
-    
-  
     
     error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
     OMX_TRACE(error, "encoder->OMX_FreeBuffer");
     encoderOutputBuffer = NULL;
     
-    OMX_STATETYPE encoderState;
-    error = OMX_GetState(encoder, &encoderState);
-    //OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
-    
-    //OMX_CALLBACKTYPE nullCallbacks = {0, 0, 0};
-    
-    //error =OMX_GetHandle(&encoder, OMX_IMAGE_ENCODER, this , &nullCallbacks);
-    //OMX_TRACE(error, "encoderCallbacks");
-    
+    ofLog() << __LINE__ << " PrintOMXState(encoder): " << PrintOMXState(encoder);
+
     error = OMX_FreeHandle(encoder);
     OMX_TRACE(error, "OMX_FreeHandle(encoder)"); 
     encoder = NULL;
@@ -470,16 +465,16 @@ bool StillCameraEngine::writeFile()
     
     
     OMX_ERRORTYPE error;
-    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
     
-    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_OUTPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
+    error = FlushOMXComponent(camera, CAMERA_STILL_OUTPUT_PORT);
+    OMX_TRACE(error);
     
+    error = FlushOMXComponent(encoder, IMAGE_ENCODER_INPUT_PORT);
+    OMX_TRACE(error);
     
-    error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_STILL_OUTPUT_PORT, NULL);
-    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
-    
+    error = FlushOMXComponent(encoder, IMAGE_ENCODER_OUTPUT_PORT);
+    OMX_TRACE(error);
+
     destroyEncoder();
     
     //buildNonCapturePipeline();
@@ -584,59 +579,52 @@ void StillCameraEngine::closeEngine()
             isCameraIdle = true;
         }else
         {
-            error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+            error = SetComponentState(camera, OMX_StateIdle);
             OMX_TRACE(error, "camera->OMX_StateIdle");
         }
     }
     
-    
-
-    
-    error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, 0, 0);
-    OMX_TRACE(error);
-    
-    error = OMX_SetupTunnel(camera, CAMERA_STILL_OUTPUT_PORT, 0, 0);
-    OMX_TRACE(error);
-    
-    
     error = DisableAllPortsForComponent(&camera, "camera");
     OMX_TRACE(error, "DisableAllPortsForComponent: camera");
     
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error, "render->OMX_StateIdle");
     
     if (encoder) 
     {
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
-        error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_OUTPUT_PORT, NULL);
-        OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
         
+        
+        error = FlushOMXComponent(encoder, IMAGE_ENCODER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(encoder, IMAGE_ENCODER_OUTPUT_PORT);
+        OMX_TRACE(error);
+
         error = DisableAllPortsForComponent(&encoder, "encoder");
         OMX_TRACE(error, "DisableAllPortsForComponent encoder");
         
         error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
-        OMX_TRACE(error, "encoder->OMX_StateIdle");
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
-        OMX_TRACE(error, "encoder->OMX_StateIdle");
+        OMX_TRACE(error);
         
         
-        OMX_STATETYPE encoderState;
-        error = OMX_GetState(encoder, &encoderState);
-        //OMX_TRACE(error, "encoderState: "+ getStateString(encoderState));
+        error = SetComponentState(encoder, OMX_StateIdle);
+        OMX_TRACE(error);
+
+        
+        ofLogWarning() << __LINE__ << " PrintOMXState(encoder): " << PrintOMXState(encoder);
     }
    
     
     //OMX_StateLoaded
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    error = SetComponentState(camera, OMX_StateLoaded);
     OMX_TRACE(error, "camera->OMX_StateLoaded");
     
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+    error = SetComponentState(render, OMX_StateLoaded);
     OMX_TRACE(error, "render->OMX_StateLoaded");
     
     if (encoder) 
     {
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateLoaded, NULL);
+        error = SetComponentState(encoder, OMX_StateLoaded);
         OMX_TRACE(error, "encoder->OMX_StateLoaded");
     }
 

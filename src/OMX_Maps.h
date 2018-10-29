@@ -640,7 +640,6 @@ private:
 };
 
 
-
 static
 string  GetOMXStateString(OMX_STATETYPE type)
 {
@@ -1196,6 +1195,16 @@ float fromQ16(float n)
     return n*(1/65536.0); 
 }
 
+
+static 
+OMX_ERRORTYPE SetComponentState(OMX_HANDLETYPE handle, OMX_STATETYPE state)
+{
+    OMX_ERRORTYPE error = OMX_SendCommand(handle, OMX_CommandStateSet, state, NULL);
+    OMX_TRACE(error);
+    return error;
+}
+
+
 static
 OMX_ERRORTYPE DisableAllPortsForComponent(OMX_HANDLETYPE* handle, string componentName="")
 {
@@ -1451,6 +1460,25 @@ void ProbeImageColorFormats(OMX_HANDLETYPE handle,
             //ofLogVerbose(__func__) << "COLOR NAME: " << name << " FAIL";
         }
     }
+}
+
+
+static
+OMX_ERRORTYPE EnableComponentPort(OMX_HANDLETYPE handle, int port)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_SendCommand(handle, OMX_CommandPortEnable, port, NULL);
+    OMX_TRACE(error);
+    return error;
+}
+
+static
+OMX_ERRORTYPE DisableComponentPort(OMX_HANDLETYPE handle, int port)
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    error = OMX_SendCommand(handle, OMX_CommandPortDisable, port, NULL);
+    OMX_TRACE(error);
+    return error;
 }
 
 static
