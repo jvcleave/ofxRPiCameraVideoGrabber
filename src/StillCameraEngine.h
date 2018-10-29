@@ -35,7 +35,7 @@ public:
     bool takePhoto();
     
     OMXCameraSettings settings;
-    DirectDisplay displayManager;
+    DirectDisplay* displayManager;
     DirectDisplay* getDisplayManager();
     bool displayManagerReady;
     

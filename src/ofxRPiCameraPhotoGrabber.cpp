@@ -95,7 +95,7 @@ void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
 void ofxRPiCameraPhotoGrabber::setDisplayAlpha(int alpha)
 {
     if(!getDisplayManager()) return;
-    getDisplayManager()->options.alpha = alpha;
+    getDisplayManager()->alpha = alpha;
     getDisplayManager()->applyConfig();
 }
 
@@ -103,7 +103,7 @@ void ofxRPiCameraPhotoGrabber::setDisplayLayer(int layer)
 {
     if(!getDisplayManager()) return;
 
-    getDisplayManager()->options.layer = layer;
+    getDisplayManager()->layer = layer;
     getDisplayManager()->applyConfig();
 }
 
@@ -119,7 +119,7 @@ void ofxRPiCameraPhotoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle
 {
     if(!getDisplayManager()) return;
 
-    getDisplayManager()->options.drawRectangle = drawRectangle;
+    getDisplayManager()->drawRectangle = drawRectangle;
     getDisplayManager()->applyConfig();
 }
 
@@ -127,7 +127,7 @@ void ofxRPiCameraPhotoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle
 {
     if(!getDisplayManager()) return;
 
-    getDisplayManager()->options.cropRectangle = cropRectangle;
+    getDisplayManager()->cropRectangle = cropRectangle;
     getDisplayManager()->applyConfig();
 }
 
@@ -135,7 +135,7 @@ void ofxRPiCameraPhotoGrabber::setDisplayMirror(bool doMirror)
 {
     if(!getDisplayManager()) return;
 
-    getDisplayManager()->options.doMirror = doMirror;
+    getDisplayManager()->doMirror = doMirror;
     getDisplayManager()->applyConfig();
 }
 

@@ -290,7 +290,7 @@ void ofxRPiCameraVideoGrabber::setDisplayAlpha(int alpha)
 {
     if(directEngine)
     {
-        getDisplayManager()->options.alpha = alpha;
+        getDisplayManager()->alpha = alpha;
         getDisplayManager()->applyConfig();
     }
 }
@@ -299,7 +299,7 @@ void ofxRPiCameraVideoGrabber::setDisplayLayer(int layer)
 {
     if(directEngine)
     {
-        getDisplayManager()->options.layer = layer;
+        getDisplayManager()->layer = layer;
         getDisplayManager()->applyConfig();
     }
 }
@@ -320,7 +320,7 @@ void ofxRPiCameraVideoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle
 {
     if(directEngine)
     {
-        getDisplayManager()->options.drawRectangle = drawRectangle;
+        getDisplayManager()->drawRectangle = drawRectangle;
         getDisplayManager()->applyConfig();
 
         
@@ -331,7 +331,7 @@ void ofxRPiCameraVideoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle
 {
     if(directEngine)
     {
-        getDisplayManager()->options.cropRectangle = cropRectangle;
+        getDisplayManager()->cropRectangle = cropRectangle;
         getDisplayManager()->applyConfig();
 
         
@@ -342,7 +342,7 @@ void ofxRPiCameraVideoGrabber::setDisplayMirror(bool doMirror)
 {
     if(directEngine)
     {
-        getDisplayManager()->options.doMirror = doMirror;
+        getDisplayManager()->doMirror = doMirror;
         getDisplayManager()->applyConfig();
 
     }
@@ -352,7 +352,7 @@ DirectDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
 {
     if(directEngine)
     {
-        return &directEngine->displayManager;
+        return directEngine->displayManager;
     }
     
     return NULL;

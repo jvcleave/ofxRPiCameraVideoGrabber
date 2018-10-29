@@ -12,7 +12,7 @@ public:
 	~DirectEngine();
 	void setup(OMXCameraSettings&) override;
     int getFrameCounter() override;
-    DirectDisplay displayManager;
+    DirectDisplay* displayManager;
 private:
     
     int frameCounter;

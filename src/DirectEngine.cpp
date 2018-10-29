@@ -8,6 +8,7 @@
 DirectEngine::DirectEngine()
 {
 	frameCounter = 0;		
+    displayManager = NULL;
 }
 
 int DirectEngine::getFrameCounter()
@@ -267,7 +268,8 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     //setup DisplayManager
-    error = displayManager.setup(render, 0, 0, settings.width, settings.height);
+    displayManager = new DirectDisplay();
+    error = displayManager->setup(render, 0, 0, settings.width, settings.height);
     OMX_TRACE(error);
     
     if(settings.doRecording)
@@ -288,6 +290,11 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
 DirectEngine::~DirectEngine()
 {
     ofLogVerbose(__func__) << "START";
+    if(displayManager)
+    {
+        delete displayManager;
+        displayManager = NULL;
+    }
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     if(settings.doRecording && !didWriteFile)

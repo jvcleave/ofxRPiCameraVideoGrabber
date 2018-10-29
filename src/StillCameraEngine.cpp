@@ -13,8 +13,7 @@ StillCameraEngine::StillCameraEngine()
     encoder = NULL;
     encoderOutputBuffer = NULL;
     hasCreatedRenderTunnel = false;
-    displayManagerReady = false;
-
+    displayManager = NULL;
 }   
 
 
@@ -131,7 +130,7 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
         OMX_TRACE(error);
         //error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
         //ofLogVerbose() << "AFTER SET";
-        PrintPortDef(previewPortConfig);
+        //PrintPortDef(previewPortConfig);
     }
 }
 
@@ -354,14 +353,11 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     OMX_TRACE(error);
     
     
-    
-    error = displayManager.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
+    displayManager = new DirectDisplay();
+    error = displayManager->setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
 
     OMX_TRACE(error);
-    if(error == OMX_ErrorNone)
-    {
-        displayManagerReady = true;
-    }
+    
     //Start camera
     error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
     OMX_TRACE(error);
@@ -372,9 +368,8 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
 
 DirectDisplay* StillCameraEngine::getDisplayManager()
 {
-    if(!displayManagerReady) return NULL;
     
-    return &displayManager;
+    return displayManager;
 }
 
 
@@ -598,6 +593,12 @@ void StillCameraEngine::closeEngine()
     if(isThreadRunning())
     {
         stopThread();
+    }
+    if(displayManager)
+    {
+        delete displayManager;
+        displayManager = NULL;
+        
     }
     OMX_ERRORTYPE error;
     error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_STILL_OUTPUT_PORT, NULL);
