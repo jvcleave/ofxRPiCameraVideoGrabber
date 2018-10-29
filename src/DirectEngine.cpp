@@ -104,7 +104,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     
     ofLogVerbose(__func__) << "START";
     
-    OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    OMX_ERRORTYPE error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
     
     
@@ -129,7 +129,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
         
         //Set splitter to Idle
-        error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        error = SetComponentState(splitter, OMX_StateIdle);
         OMX_TRACE(error);
         
     }
@@ -147,7 +147,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     //Set renderer to Idle
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
     
     if(settings.doRecording)
@@ -220,11 +220,11 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
         
         //Set encoder to Idle
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        error = SetComponentState(encoder, OMX_StateIdle);
         OMX_TRACE(error);
         
         //Enable encoder output port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        error = EnableComponentPort(encoder, VIDEO_ENCODE_OUTPUT_PORT);
         OMX_TRACE(error);
         
         // Configure encoder output buffer
@@ -249,22 +249,22 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
         
     }
     //Start camera
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
     
     if(settings.doRecording)
     {
         //Start encoder
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+        error = SetComponentState(encoder, OMX_StateExecuting);
         OMX_TRACE(error);
         
         //Start splitter
-        error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+        error = SetComponentState(splitter, OMX_StateExecuting);
         OMX_TRACE(error);
     }
     
     //Start renderer
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+    error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
     
     //setup DisplayManager
@@ -305,22 +305,24 @@ DirectEngine::~DirectEngine()
    
     if(settings.doRecording)
     {
-        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        
+        
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
         OMX_TRACE(error);
-        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
         OMX_TRACE(error);
         error = DisableAllPortsForComponent(&encoder);
         OMX_TRACE(error);
     }
     
     
-    error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    error = FlushOMXComponent(camera, CAMERA_OUTPUT_PORT);
     OMX_TRACE(error);
     
-    error = OMX_SendCommand(render, OMX_CommandFlush, VIDEO_RENDER_INPUT_PORT, NULL);
+    error = FlushOMXComponent(render, VIDEO_RENDER_INPUT_PORT);
     OMX_TRACE(error);
     
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&camera);
@@ -330,12 +332,12 @@ DirectEngine::~DirectEngine()
     {
         error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
         OMX_TRACE(error);
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        error = SetComponentState(encoder, OMX_StateIdle);
         OMX_TRACE(error);
         
     }
     
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&render);

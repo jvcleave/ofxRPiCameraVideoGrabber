@@ -192,7 +192,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 {
 	ofLogVerbose(__func__) << "onCameraEventParamOrConfigChanged";
 	
-	OMX_ERRORTYPE error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	OMX_ERRORTYPE error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
 
 	
@@ -218,7 +218,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
 
 		//Set splitter to Idle
-		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateIdle, NULL);
+		error = SetComponentState(splitter, OMX_StateIdle);
         OMX_TRACE(error);
 
 	}
@@ -240,7 +240,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 
 	//Set renderer to Idle
-	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+	error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
 
 	
@@ -284,33 +284,33 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	}
 	
 	//Enable camera output port
-	error = OMX_SendCommand(camera, OMX_CommandPortEnable, CAMERA_OUTPUT_PORT, NULL);
+	error = EnableComponentPort(camera, CAMERA_OUTPUT_PORT);
     OMX_TRACE(error);
 
 	
 	if(settings.doRecording)
 	{
 		//Enable splitter input port
-		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_INPUT_PORT, NULL);
+		error = EnableComponentPort(splitter, VIDEO_SPLITTER_INPUT_PORT);
         OMX_TRACE(error);
 
 		//Enable splitter output port
-		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT1, NULL);
+		error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT1);
         OMX_TRACE(error);
 
 		//Enable splitter output2 port
-		error = OMX_SendCommand(splitter, OMX_CommandPortEnable, VIDEO_SPLITTER_OUTPUT_PORT2, NULL);
+		error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT2);
         OMX_TRACE(error);
 
 	}
 	
 	
 	//Enable render output port
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_OUTPUT_PORT, NULL);
+	error = EnableComponentPort(render, EGL_RENDER_OUTPUT_PORT);
     OMX_TRACE(error);
 	
 	//Enable render input port
-	error = OMX_SendCommand(render, OMX_CommandPortEnable, EGL_RENDER_INPUT_PORT, NULL);
+	error = EnableComponentPort(render, EGL_RENDER_INPUT_PORT);
     OMX_TRACE(error);
 
 	if(settings.doRecording)
@@ -320,7 +320,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
 	
 		//Set encoder to Idle
-		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+		error = SetComponentState(encoder, OMX_StateIdle);
         OMX_TRACE(error);
 		
 		//Enable encoder output port
@@ -354,24 +354,24 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
 	
 	//Start renderer
-	error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
 	
 	if(settings.doRecording)
 	{
 		//Start encoder
-		error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+		error = SetComponentState(encoder, OMX_StateExecuting);
 		OMX_TRACE(error);
 		
 		//Start splitter
-		error = OMX_SendCommand(splitter, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+		error = SetComponentState(splitter, OMX_StateExecuting);
 		OMX_TRACE(error);
 	}
 	
 	
 	
 	//Start camera
-	error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateExecuting, NULL);
+	error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
 
 	
@@ -430,21 +430,22 @@ TextureEngine::~TextureEngine()
     
     if(settings.doRecording)
     {
-        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_INPUT_PORT, NULL);
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
         OMX_TRACE(error);
-        error = OMX_SendCommand(encoder, OMX_CommandFlush, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+        
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
         OMX_TRACE(error);
         error = DisableAllPortsForComponent(&encoder);
         OMX_TRACE(error);
     }
     
-    error = OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_OUTPUT_PORT, NULL);
+    error = FlushOMXComponent(camera, CAMERA_OUTPUT_PORT);
     OMX_TRACE(error);
     
-    error = OMX_SendCommand(render, OMX_CommandFlush, EGL_RENDER_INPUT_PORT, NULL);
+    error = FlushOMXComponent(render, EGL_RENDER_INPUT_PORT);
     OMX_TRACE(error);
     
-    error = OMX_SendCommand(camera, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&camera);
@@ -454,12 +455,12 @@ TextureEngine::~TextureEngine()
     {
         error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
         OMX_TRACE(error);
-        error = OMX_SendCommand(encoder, OMX_CommandStateSet, OMX_StateIdle, NULL);
+        error = SetComponentState(encoder, OMX_StateIdle);
         OMX_TRACE(error);
         
     }
 
-    error = OMX_SendCommand(render, OMX_CommandStateSet, OMX_StateIdle, NULL);
+    error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&render);
