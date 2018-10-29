@@ -237,18 +237,6 @@ void StillCameraEngine::threadedFunction()
             OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
             OMX_TRACE(error);
         }
-        if(!doFillBuffer && !bufferAvailable)
-        {
-            /*logCounter++;
-            if(logCounter%100000 == 0)
-            {
-                ofLogVerbose(__func__) << "logCounter: " << logCounter; 
-            }*/
-           
-        }
-        
-        
-        
     }
 }
 
