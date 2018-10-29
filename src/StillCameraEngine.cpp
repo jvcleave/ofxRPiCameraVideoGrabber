@@ -468,6 +468,18 @@ bool StillCameraEngine::writeFile()
         }
     }
     
+    
+    OMX_ERRORTYPE error;
+    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_INPUT_PORT, NULL);
+    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_INPUT_PORT");
+    
+    error =  OMX_SendCommand(encoder, OMX_CommandFlush, IMAGE_ENCODER_OUTPUT_PORT, NULL);
+    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
+    
+    
+    error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_STILL_OUTPUT_PORT, NULL);
+    OMX_TRACE(error, "encoder: OMX_CommandFlush IMAGE_ENCODER_OUTPUT_PORT");
+    
     destroyEncoder();
     
     //buildNonCapturePipeline();
