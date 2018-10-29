@@ -19,7 +19,7 @@ public:
     virtual void onTakePhotoComplete(string filePath)=0;
     
 };
-class StillCameraEngine: public ofThread
+class StillCameraEngine
 {
 public:
 	StillCameraEngine();
@@ -37,7 +37,6 @@ public:
     OMXCameraSettings settings;
     DirectDisplay* displayManager;
     DirectDisplay* getDisplayManager();
-    bool displayManagerReady;
     
     StillCameraEngineListener* listener;
     
@@ -51,11 +50,6 @@ private:
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
     OMX_ERRORTYPE configureEncoder();
-    bool writeFileOnNextPass;
-    bool doWriteFile;
-    bool bufferAvailable;
-    bool doFillBuffer;
-	void threadedFunction();
     ofBuffer recordingFileBuffer;
 
     OMX_HANDLETYPE render;

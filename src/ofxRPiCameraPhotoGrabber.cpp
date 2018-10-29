@@ -47,7 +47,7 @@ void ofxRPiCameraPhotoGrabber::takePhoto()
     }else
     {
         ofLogError() << "TAKE PHOTO FAILED";
-        ofLog() << "PRE RESET: " << settings.toString();
+        //ofLog() << "PRE RESET: " << settings.toString();
         //settings = engine->settings;
         engine->closeEngine();
         setup(settings, true);
