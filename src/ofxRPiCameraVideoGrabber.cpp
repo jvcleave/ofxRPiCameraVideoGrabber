@@ -7,8 +7,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	updateFrameCounter = 0;
 	frameCounter = 0;
 	hasNewFrame = false;
-	textureEngine = NULL;
-	directEngine = NULL;
     camera = NULL;
 	pixelsRequested = false;
     recordingRequested = false;
@@ -36,40 +34,10 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 
     ofLogVerbose(__func__) << "settings: " << settings.toString();
     
-    if(directEngine)
-    {
-        delete directEngine;
-        directEngine = NULL;
-        camera = NULL;
-        ofLogVerbose() << "deleted directEngine";
-        resetValues();
-    }
-    if(textureEngine)
-    {
-        delete textureEngine;
-        textureEngine = NULL;
-        camera = NULL;
-        ofLogVerbose() << "deleted textureEngine";
-        resetValues();
-    }
+    videoEngine.setup(settings, this);
+    camera = videoEngine.camera;
+    resetValues();
     
-    if (settings.enableTexture) 
-    {
-        
-        textureEngine = new TextureEngine(); 
-        textureEngine->setup(settings, this);
-        camera = textureEngine->camera;
-        if (settings.enablePixels) 
-        {
-            enablePixels();
-        }
-    }else 
-    {
-        
-        directEngine = new DirectEngine(); 
-        directEngine->setup(settings, this);
-        camera = directEngine->camera;
-    }
     
     //checkBurstMode();
     error = applyExposure(__func__);
@@ -84,35 +52,14 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 
 bool ofxRPiCameraVideoGrabber::isReady()
 {
-    
-    if (directEngine) 
-    {
-        return directEngine->isOpen;
-    }
-    
-    if (textureEngine) 
-    {
-        return textureEngine->isOpen;
-    }
-    
-    return false;
+    return videoEngine.isOpen;
 }
 
 #pragma mark UPDATE
 void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 {
-	if(textureEngine)
-	{
-		frameCounter  = textureEngine->getFrameCounter();
-		
-	}else
-	{
-		if (directEngine) 
-		{
-			frameCounter  = directEngine->getFrameCounter();
-		}
-	}
-	
+    
+    frameCounter = videoEngine.getFrameCounter();
 	if (frameCounter > updateFrameCounter) 
 	{
 		updateFrameCounter = frameCounter;
@@ -124,11 +71,11 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 	}
 	if (hasNewFrame) 
 	{
-		if (textureEngine) 
+		if (settings.enableTexture) 
 		{
 			if (pixelsRequested) 
 			{
-				textureEngine->updatePixels();
+				videoEngine.updatePixels();
 			}
 		}
 	}
@@ -152,15 +99,7 @@ bool ofxRPiCameraVideoGrabber::isFrameNew()
 
 bool ofxRPiCameraVideoGrabber::isTextureEnabled()
 {
-    bool result = false;
-    if(textureEngine)
-    {
-        result = true;
-    }else
-    {
-        result = false;
-    }
-    return result;
+    return settings.enableTexture;
 }
 
 int ofxRPiCameraVideoGrabber::getWidth()
@@ -181,49 +120,35 @@ int ofxRPiCameraVideoGrabber::getFrameRate()
 #pragma mark PIXELS/TEXTURE
 GLuint ofxRPiCameraVideoGrabber::getTextureID()
 {
-	if (!textureEngine) 
-	{
-        ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE ID";
-        return errorTexture.texData.textureID;
-	}
-	return textureEngine->getTexture().texData.textureID;
+	return videoEngine.getTexture().texData.textureID;
 }
 
 void ofxRPiCameraVideoGrabber::enablePixels()
 {
-    if(textureEngine)
+    if(settings.enableTexture)
     {
-        textureEngine->enablePixels();
+        videoEngine.enablePixels();
         pixelsRequested = true;
     }
 }
 
 void ofxRPiCameraVideoGrabber::disablePixels()
 {
-    if(textureEngine)
+    if(settings.enableTexture)
     {
-        textureEngine->disablePixels();
+        videoEngine.disablePixels();
         pixelsRequested = false;
     }
 }
 
 unsigned char * ofxRPiCameraVideoGrabber::getPixels()
 {
-    unsigned char * pixels = NULL;
-    if (textureEngine) {
-        pixels = textureEngine->getPixels();
-    }
-    return pixels;
+    return videoEngine.getPixels();
 }
 
 ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 {
-	if (!textureEngine) 
-	{
-		ofLogError(__func__) << "TEXTURE NOT ENABLED - RETURN UNALLOCATED TEXTURE";
-        return errorTexture;
-	}
-	return textureEngine->getTexture();
+	return videoEngine.getTexture();
 }
 
 #pragma mark RECORDING
@@ -231,40 +156,17 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 
 bool ofxRPiCameraVideoGrabber::isRecording()
 {
-   
-    if (!directEngine && !textureEngine)
-    {
-        return false;
-    }
-    
-    bool result = false;
-    if (directEngine) 
-    {
-        result = directEngine->isRecording;
-    }
-    if (textureEngine) 
-    {
-       result =  textureEngine->isRecording;
-    }
-    return result;
-    
-    
+    return videoEngine.isRecording;
 }
 
 void ofxRPiCameraVideoGrabber::startRecording()
 {
-    if (!directEngine && !textureEngine)
-    {
-        return;
-    }
     bool isCurrentlyRecording = isRecording();
     ofLogVerbose(__func__) << "isCurrentlyRecording: " << isCurrentlyRecording;
     if(!isCurrentlyRecording)
     {
         recordingRequested = true;
     }
-    
-
 }
 
 
@@ -294,103 +196,51 @@ void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
 
 void ofxRPiCameraVideoGrabber::stopRecording()
 {
-	if (directEngine) 
-	{
-		directEngine->stopRecording();
-	}
-	if (textureEngine) 
-	{
-		textureEngine->stopRecording();
-	}
+	videoEngine.stopRecording();
 }
 
 #pragma mark DRAW
 void ofxRPiCameraVideoGrabber::setDisplayAlpha(int alpha)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->alpha = alpha;
-        getDisplayManager()->applyConfig();
-    }
+    videoEngine.setDisplayAlpha(alpha);
 }
 
 void ofxRPiCameraVideoGrabber::setDisplayLayer(int layer)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->layer = layer;
-        getDisplayManager()->applyConfig();
-    }
+    videoEngine.setDisplayLayer(layer);
 }
-
-
 
 void ofxRPiCameraVideoGrabber::setDisplayRotation(int rotationDegrees)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->rotateDisplay(rotationDegrees);
-        getDisplayManager()->applyConfig();
-
-    }
+    videoEngine.setDisplayRotation(rotationDegrees);
 }
 
 void ofxRPiCameraVideoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->drawRectangle = drawRectangle;
-        getDisplayManager()->applyConfig();
+    videoEngine.setDisplayDrawRectangle(drawRectangle);
 
-        
-    }
 }
 
 void ofxRPiCameraVideoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->cropRectangle = cropRectangle;
-        getDisplayManager()->applyConfig();
+    videoEngine.setDisplayCropRectangle(cropRectangle);
 
-        
-    }
 }
 
 void ofxRPiCameraVideoGrabber::setDisplayMirror(bool doMirror)
 {
-    if(directEngine)
-    {
-        getDisplayManager()->doMirror = doMirror;
-        getDisplayManager()->applyConfig();
-
-    }
+    videoEngine.setDisplayMirror(doMirror);
 }
-
-DirectDisplay* ofxRPiCameraVideoGrabber::getDisplayManager()
-{
-    if(directEngine)
-    {
-        return directEngine->displayManager;
-    }
-    
-    return NULL;
-}
-
 
 void ofxRPiCameraVideoGrabber::draw()
 {
-	if (textureEngine)
+	if (settings.enableTexture)
 	{
-		textureEngine->getTexture().draw(0, 0);
-        return;
-	}
-    if (directEngine)
+		videoEngine.getTexture().draw(0, 0);
+	}else
     {
-        setDisplayDrawRectangle(ofRectangle(0, 0, getWidth(), getHeight()));
-    }
-    
-	
+        videoEngine.setDisplayDrawRectangle(ofRectangle(0, 0, getWidth(), getHeight()));
+    }    
 }
 void ofxRPiCameraVideoGrabber::draw(ofRectangle& rectangle)
 {
@@ -399,29 +249,23 @@ void ofxRPiCameraVideoGrabber::draw(ofRectangle& rectangle)
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y)
 {
-    if (textureEngine)
+    if (settings.enableTexture)
     {
-        textureEngine->getTexture().draw(x, y);
-        return;
-    }
-    
-    if (directEngine)
+        videoEngine.getTexture().draw(x, y);
+    }else
     {
         setDisplayDrawRectangle(ofRectangle(x, y, getWidth(), getHeight()));
+
     }
 }
 
 
 void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
 {
-    if (textureEngine)
+    if (settings.enableTexture)
     {
-        textureEngine->getTexture().draw(x, y, width, height);
-        return;
-    }
-    
-    
-    if (directEngine)
+        videoEngine.getTexture().draw(x, y, width, height);
+    }else
     {
         setDisplayDrawRectangle(ofRectangle(x, y, width, height));
     }
@@ -435,18 +279,7 @@ void ofxRPiCameraVideoGrabber::close()
     
     cout << "ofxRPiCameraVideoGrabber::close" << endl;
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
-    if(directEngine)
-    {
-        cout << "~ofxRPiCameraVideoGrabber delete directEngine" << endl;
-        delete directEngine;
-        directEngine = NULL;
-    }
-    if(textureEngine)
-    {
-        delete textureEngine;
-        textureEngine = NULL;
-    }
-    
+    videoEngine.close();    
     cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
 }
 

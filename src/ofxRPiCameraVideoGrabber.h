@@ -8,13 +8,8 @@
 #pragma once
 
 #include "RPICameraController.h"
-
 #include "ofAppEGLWindow.h"
-
-
-
-#include "TextureEngine.h"
-#include "DirectEngine.h"
+#include "VideoModeEngine.h"
 
 
 using namespace std;
@@ -47,8 +42,7 @@ public:
     void disablePixels();
     unsigned char * getPixels();
     
-    TextureEngine* textureEngine;
-    DirectEngine* directEngine;
+    VideoModeEngine videoEngine;
     
     bool isReady();
     
