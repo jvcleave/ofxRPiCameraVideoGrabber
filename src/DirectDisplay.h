@@ -77,7 +77,7 @@ public:
         displayConfig.dest_rect.y_offset  = drawRectangle.y;
         displayConfig.dest_rect.width     = drawRectangle.getWidth();
         displayConfig.dest_rect.height    = drawRectangle.getHeight();
-        
+        //ofLog() << "drawRectangle: " << drawRectangle;
         displayConfig.src_rect.x_offset  = cropRectangle.x;
         displayConfig.src_rect.y_offset  = cropRectangle.y;
         displayConfig.src_rect.width     = cropRectangle.getWidth();

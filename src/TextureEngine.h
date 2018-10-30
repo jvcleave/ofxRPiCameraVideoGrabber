@@ -9,7 +9,7 @@ class TextureEngine : public BaseEngine
 public:
 	TextureEngine();
 	~TextureEngine();
-	void setup(OMXCameraSettings&) override;
+	void setup(OMXCameraSettings&, RecordingListener*) override;
 
 	int renderedFrameCounter;
 	
@@ -46,9 +46,7 @@ private:
                                                     OMX_U32, 
                                                     OMX_U32, 
                                                     OMX_PTR);
-	static OMX_ERRORTYPE encoderFillBufferDone	(OMX_IN OMX_HANDLETYPE, 
-                                                 OMX_IN OMX_PTR, 
-                                                 OMX_IN OMX_BUFFERHEADERTYPE*);
+
 	static OMX_ERRORTYPE renderFillBufferDone	(OMX_IN OMX_HANDLETYPE, 
                                                  OMX_IN OMX_PTR, 
                                                  OMX_IN OMX_BUFFERHEADERTYPE*);

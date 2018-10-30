@@ -10,7 +10,7 @@ class DirectEngine: public BaseEngine
 public:
 	DirectEngine();
 	~DirectEngine();
-	void setup(OMXCameraSettings&) override;
+	void setup(OMXCameraSettings&, RecordingListener*) override;
     int getFrameCounter() override;
     DirectDisplay* displayManager;
 private:
@@ -26,10 +26,7 @@ private:
                                OMX_U32,
                                OMX_U32,
                                OMX_PTR);
-	static OMX_ERRORTYPE
-    encoderFillBufferDone(OMX_IN OMX_HANDLETYPE,
-                          OMX_IN OMX_PTR,
-                          OMX_IN OMX_BUFFERHEADERTYPE*);
+
 
 	
     

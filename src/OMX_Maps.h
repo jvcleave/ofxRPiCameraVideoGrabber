@@ -997,7 +997,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_SILENT 9
 
 #ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_DEV
 #endif
 
 static  

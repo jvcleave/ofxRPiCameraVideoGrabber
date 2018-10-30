@@ -6,24 +6,30 @@
 #include "ofxRPiCameraVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-class ofApp : public ofBaseApp, public KeyListener{
-
-	public:
-
-		void setup();
-		void update();
-		void draw();
-		void keyPressed(int key);
-
-	void onCharacterReceived(KeyListenerEventData& e);
-	TerminalListener consoleListener;
-	ofxRPiCameraVideoGrabber videoGrabber;
-	
-	ImageFilterCollection filterCollection;
-	
-	OMXCameraSettings omxCameraSettings;
-	bool doDrawInfo;
+class ofApp : public ofBaseApp, public KeyListener, public ofxRPiCameraVideoGrabberListener
+{
+    
+public:
+    
+    void setup();
+    void update();
+    void draw();
+    void keyPressed(int key);
+    
+    void onCharacterReceived(KeyListenerEventData& e);
+    TerminalListener consoleListener;
+    ofxRPiCameraVideoGrabber videoGrabber;
+    
+    ImageFilterCollection filterCollection;
+    
+    OMXCameraSettings omxCameraSettings;
+    bool doDrawInfo;
     bool doStartRecording;
-    bool doStopRecording;	
+    bool doStopRecording;    
+    
+    
+    //required by ofxRPiCameraVideoGrabberListener
+    void onRecordingComplete(string filePath) override;
 };
+
 

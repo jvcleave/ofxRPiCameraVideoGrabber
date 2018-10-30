@@ -16,7 +16,6 @@ TextureEngine::TextureEngine()
     eglImage = NULL;
 
 	renderedFrameCounter = 0;
-	recordedFrameCounter = 0;
 	
 	didWriteFile = false;
 	
@@ -25,9 +24,6 @@ TextureEngine::TextureEngine()
 	
 	stopRequested = false;	 
 	isStopping = false;
-	isKeyframeValid = false;
-	doFillBuffer = false;
-	bufferAvailable = false;
 	pixels = NULL;
 	doPixels = false;
 }
@@ -38,9 +34,11 @@ int TextureEngine::getFrameCounter()
 	
 }
 
-void TextureEngine::setup(OMXCameraSettings& settings_)
+void TextureEngine::setup(OMXCameraSettings& settings_, RecordingListener* recordingListener_)
 {
 	settings = settings_;
+    recordingListener = recordingListener_;
+
     ofLogVerbose(__func__) << "settings: " << settings.toString();
 	generateEGLImage();
 	
@@ -251,7 +249,7 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 		OMX_CALLBACKTYPE encoderCallbacks;
 		encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
 		encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
-		encoderCallbacks.FillBufferDone		= &TextureEngine::encoderFillBufferDone;
+		encoderCallbacks.FillBufferDone		= &BaseEngine::encoderFillBufferDone;
 		
 		error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
@@ -383,36 +381,18 @@ OMX_ERRORTYPE TextureEngine::onCameraEventParamOrConfigChanged()
 	
 	if(settings.doRecording)
 	{
+        isRecording = true;
 		error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
-		bool doThreadBlocking	= true;
-		startThread(doThreadBlocking);
 	}
 	isOpen = true;
 	return error;
 }
 
 
-
-
-
-
-#pragma mark encoder callbacks
-
-OMX_ERRORTYPE TextureEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	TextureEngine *grabber = static_cast<TextureEngine*>(pAppData);
-	grabber->lock();
-		//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
-		grabber->bufferAvailable = true;
-		grabber->recordedFrameCounter++;
-	grabber->unlock();
-	return OMX_ErrorNone;
-}
-
 TextureEngine::~TextureEngine()
 {
-    ofLogVerbose(__func__) << "START isThreadRunning() " << isThreadRunning();
+    ofLogVerbose(__func__) << "START";
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     

@@ -25,7 +25,9 @@ void ofxRPiCameraVideoGrabber::reset()
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 {
     ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
-
+    
+    ofLog() << "ofRemoveListener PASS";
+    
     OMX_ERRORTYPE error = OMX_ErrorNone;
     settings = omxCameraSettings_;
     
@@ -55,7 +57,7 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
     {
         
         textureEngine = new TextureEngine(); 
-        textureEngine->setup(settings);
+        textureEngine->setup(settings, this);
         camera = textureEngine->camera;
         if (settings.enablePixels) 
         {
@@ -65,11 +67,11 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
     {
         
         directEngine = new DirectEngine(); 
-        directEngine->setup(settings);
+        directEngine->setup(settings, this);
         camera = directEngine->camera;
     }
     
-    checkBurstMode();
+    //checkBurstMode();
     error = applyExposure(__func__);
     OMX_TRACE(error);
     checkFlickerCancellation();
@@ -238,11 +240,11 @@ bool ofxRPiCameraVideoGrabber::isRecording()
     bool result = false;
     if (directEngine) 
     {
-        result = directEngine->isThreadRunning();
+        result = directEngine->isRecording;
     }
     if (textureEngine) 
     {
-       result =  textureEngine->isThreadRunning();
+       result =  textureEngine->isRecording;
     }
     return result;
     
@@ -266,18 +268,35 @@ void ofxRPiCameraVideoGrabber::startRecording()
 }
 
 
-void ofxRPiCameraVideoGrabber::stopRecording()
+void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
 {
-	if (directEngine) 
-	{
-		directEngine->stopRecording();
-        /*
-         
+    if(settings.videoGrabberListener)
+    {
+        settings.videoGrabberListener->onRecordingComplete(filePath);
+    }else
+    {
+        ofLogWarning(__func__) << "RECEIVED " << filePath << " BUT NO LISTENER SET";
+    }
+    
+    
+    if (directEngine) 
+    {
+        /* 
          direct mode has to use a lower resolution for display while recording
          set it back after recording
          */
         settings.doRecording = false;
         setup(settings);
+    }
+    
+    
+}
+
+void ofxRPiCameraVideoGrabber::stopRecording()
+{
+	if (directEngine) 
+	{
+		directEngine->stopRecording();
 	}
 	if (textureEngine) 
 	{

@@ -13,6 +13,12 @@ public:
     
 };
 
+class ofxRPiCameraVideoGrabberListener
+{
+public:
+    virtual void onRecordingComplete(string filePath)=0;
+};
+
 class OMXCameraSettings
 {
 public:
@@ -56,9 +62,11 @@ public:
     int stillPreviewHeight;
     
     ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
+    ofxRPiCameraVideoGrabberListener* videoGrabberListener;
 	OMXCameraSettings()
 	{
         photoGrabberListener = NULL;
+        videoGrabberListener = NULL;
         OMX_Init();
         OMX_Maps::getInstance(); 
         resetValues();

@@ -12,19 +12,26 @@
 #include "OMX_Maps.h"
 #include "OMXCameraSettings.h"
 
-class BaseEngine: public ofThread
+class RecordingListener
+{
+public:
+    virtual void onRecordingComplete(string filePath)=0;
+};
+
+class BaseEngine
 {
 public:
 	BaseEngine();
     virtual ~BaseEngine(){};
 
-	virtual void setup(OMXCameraSettings&) = 0;
+	virtual void setup(OMXCameraSettings&, RecordingListener*) = 0;
     virtual int getFrameCounter() = 0;
 	OMXCameraSettings& getSettings();
     void stopRecording();
 	OMX_HANDLETYPE camera;
 	bool isOpen;
-
+    bool isRecording;
+    RecordingListener* recordingListener;
 protected:
 	
     OMXCameraSettings settings;
@@ -43,11 +50,7 @@ protected:
 	
 	bool stopRequested;
 	bool isStopping;
-	int isKeyframeValid;
-	bool doFillBuffer;
-	bool bufferAvailable;
 	
-	void threadedFunction();
 	void writeFile();
 	
 	ofBuffer recordingFileBuffer;
@@ -72,6 +75,13 @@ protected:
     encoderEmptyBufferDone(OMX_IN OMX_HANDLETYPE, 
                            OMX_IN OMX_PTR, 
                            OMX_IN OMX_BUFFERHEADERTYPE*){return OMX_ErrorNone;};
+    
+    
+    static OMX_ERRORTYPE 
+    encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encoder,
+                          OMX_IN OMX_PTR engine,
+                          OMX_IN OMX_BUFFERHEADERTYPE* encoderOutputBuffer);
+    
 	
 	static OMX_ERRORTYPE 
     renderEventHandlerCallback(OMX_HANDLETYPE, 

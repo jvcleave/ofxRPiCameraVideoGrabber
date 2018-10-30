@@ -48,6 +48,7 @@ void RPICameraController::applyAllSettings()
         settings.LED = true;
         setLEDState(settings.LED);
     } 
+    ofLogNotice(__func__) << endl;
 }
 
 string RPICameraController::getLEDPin()

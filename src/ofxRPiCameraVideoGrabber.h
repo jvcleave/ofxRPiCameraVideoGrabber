@@ -20,7 +20,8 @@
 using namespace std;
 
 
-class ofxRPiCameraVideoGrabber : public RPICameraController
+
+class ofxRPiCameraVideoGrabber : public RPICameraController, public RecordingListener
 {
 
 public:
@@ -67,7 +68,8 @@ public:
     void setDisplayMirror(bool);
     
     DirectDisplay* getDisplayManager();
-
+    void onRecordingComplete(string filePath) override;
+    
 private:
     ofTexture errorTexture;
     bool hasNewFrame;

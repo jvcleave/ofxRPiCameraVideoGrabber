@@ -5,18 +5,64 @@ BaseEngine::BaseEngine()
 {
 	isOpen		= false;
 	
-	didWriteFile = false;
 	
 	numMBps = 2.0;
 	
 	stopRequested = false;	 
 	isStopping = false;
-	isKeyframeValid = false;
-	doFillBuffer = false;
-	bufferAvailable = false;
 	
+    isRecording = false;
 	recordedFrameCounter = 0;
+    recordingListener = NULL;
 }
+
+
+
+OMX_ERRORTYPE BaseEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encoder,
+                                                OMX_IN OMX_PTR engine,
+                                                OMX_IN OMX_BUFFERHEADERTYPE* encoderOutputBuffer)
+{    
+    BaseEngine *grabber = static_cast<BaseEngine*>(engine);
+    
+    bool isKeyframeValid = false;
+    grabber->recordedFrameCounter++;
+    // The user wants to quit, but don't exit
+    // the loop until we are certain that we have processed
+    // a full frame till end of the frame, i.e. we're at the end
+    // of the current key frame if processing one or until
+    // the next key frame is detected. This way we should always
+    // avoid corruption of the last encoded at the expense of
+    // small delay in exiting.
+    if(grabber->stopRequested && !grabber->isStopping) 
+    {
+        ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
+        grabber->isStopping = true;
+        isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
+    }
+    if(grabber->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+    {
+        ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
+        grabber->writeFile();
+    }else 
+    {
+        grabber->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+        //ofLogVerbose(__func__) << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
+        ofLog() << grabber->recordingFileBuffer.size();
+        OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+        if(error != OMX_ErrorNone) 
+        {
+            ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
+            if(!grabber->didWriteFile)
+            {
+                ofLogError() << "HAD ERROR FILLING BUFFER, JUST WRITING WHAT WE HAVE";
+                grabber->writeFile();
+
+            }
+        }
+    }
+    return OMX_ErrorNone;
+}
+
 
 void BaseEngine::configureCameraResolution()
 {
@@ -158,63 +204,13 @@ void BaseEngine::configureEncoder()
 
 
 }
-void BaseEngine::threadedFunction()
-{
-	while (isThreadRunning()) 
-	{
-		if(bufferAvailable) 
-		{
-			// The user wants to quit, but don't exit
-			// the loop until we are certain that we have processed
-			// a full frame till end of the frame, i.e. we're at the end
-			// of the current key frame if processing one or until
-			// the next key frame is detected. This way we should always
-			// avoid corruption of the last encoded at the expense of
-			// small delay in exiting.
-			if(stopRequested && !isStopping) 
-			{
-				ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
-				isStopping = true;
-				isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
-			}
-			if(isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
-			{
-				ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
-				writeFile();
-				doFillBuffer = false;
-			}else 
-			{
-				recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
-				//ofLogVerbose(__func__) << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
-				doFillBuffer = true;
-			}
-		}
-		// Buffer flushed, request a new buffer to be filled by the encoder component
-		if(doFillBuffer) 
-		{
-			doFillBuffer	= false;
-			bufferAvailable = false;
-			OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-			if(error != OMX_ErrorNone) 
-			{
-				ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-				//close();
-               //stopThread();
-				
-			}
-		}
-	}
-}
 
 void BaseEngine::stopRecording()
 {
 	
 	if(settings.doRecording)
 	{
-		lock();
-            stopRequested = true;
-            writeFile();
-		unlock();
+        stopRequested = true;
 	}
 	
 }
@@ -228,9 +224,8 @@ void BaseEngine::writeFile()
 {
 	//format is raw H264 NAL Units
 	ofLogVerbose(__func__) << "START";
-	stopThread();
-	ofLogVerbose(__func__) << "THREAD STOPPED";
-	stringstream fileName;
+
+    stringstream fileName;
 	fileName << ofGetTimestampString() << "_";
 	
 	fileName << settings.width << "x";
@@ -259,11 +254,18 @@ void BaseEngine::writeFile()
 	if(didWriteFile)
 	{
 		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
+        if(recordingListener)
+        {
+            recordingListener->onRecordingComplete(filePath);
+        }
 	}
     else
 	{
 		ofLogVerbose(__func__) << filePath << " FAIL";
 	}
+    isRecording = false;
     recordedFrameCounter = 0;
+    
+    
 }
 

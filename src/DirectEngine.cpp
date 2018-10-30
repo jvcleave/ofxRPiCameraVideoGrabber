@@ -48,11 +48,11 @@ int DirectEngine::getFrameCounter()
 }
 
 
-void DirectEngine::setup(OMXCameraSettings& settings_)
+void DirectEngine::setup(OMXCameraSettings& settings_, RecordingListener* recordingListener_)
 {
 	
 	settings = settings_;
-	
+    recordingListener = recordingListener_;
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
 
@@ -157,7 +157,7 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
         OMX_CALLBACKTYPE encoderCallbacks;
         encoderCallbacks.EventHandler		= &BaseEngine::encoderEventHandlerCallback;
         encoderCallbacks.EmptyBufferDone	= &BaseEngine::encoderEmptyBufferDone;
-        encoderCallbacks.FillBufferDone		= &DirectEngine::encoderFillBufferDone;
+        encoderCallbacks.FillBufferDone		= &BaseEngine::encoderFillBufferDone;
         
         error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
         OMX_TRACE(error);
@@ -268,17 +268,21 @@ OMX_ERRORTYPE DirectEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     //setup DisplayManager
+    if(displayManager)
+    {
+        delete displayManager;
+        displayManager = NULL;
+        ofLog() << "DELETED displayManager";
+    }
     displayManager = new DirectDisplay();
     error = displayManager->setup(render, 0, 0, settings.width, settings.height);
     OMX_TRACE(error);
     
     if(settings.doRecording)
     {
+        isRecording = true;
         error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         OMX_TRACE(error);
-        
-        bool doThreadBlocking	= true;
-        startThread(doThreadBlocking);
     }
     
     isOpen = true;
@@ -394,16 +398,7 @@ DirectEngine::~DirectEngine()
 }
 
 
-OMX_ERRORTYPE DirectEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent, OMX_IN OMX_PTR pAppData, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
-{	
-	DirectEngine *grabber = static_cast<DirectEngine*>(pAppData);
-	grabber->lock();
-		//ofLogVerbose(__func__) << "recordedFrameCounter: " << grabber->recordedFrameCounter;
-		grabber->bufferAvailable = true;
-		grabber->recordedFrameCounter++;
-	grabber->unlock();
-	return OMX_ErrorNone;
-}
+
 
 
 

@@ -1,6 +1,9 @@
 #include "ofApp.h"
 
-
+void ofApp::onRecordingComplete(string filePath)
+{
+    ofLogNotice(__FUNCTION__) << "filePath: " << filePath;
+}
 //--------------------------------------------------------------
 void ofApp::setup()
 {
@@ -10,10 +13,12 @@ void ofApp::setup()
     doStartRecording = false;
     doStopRecording =false;
     consoleListener.setup(this);
-    omxCameraSettings.enableTexture = false;
-    omxCameraSettings.width = 1920;
-    omxCameraSettings.height = 1080;
-    //omxCameraSettings.doRecording = true;
+    omxCameraSettings.enableTexture = true;
+    omxCameraSettings.width = 1280;
+    omxCameraSettings.height = 720;
+    omxCameraSettings.doRecording = false;
+    omxCameraSettings.videoGrabberListener = this; //calls onRecordingComplete
+    
 	//pass in the settings and it will start the camera
 	videoGrabber.setup(omxCameraSettings);
 	
@@ -43,14 +48,18 @@ void ofApp::update()
 void ofApp::draw(){
 
 	//draws at camera resolution
-	videoGrabber.draw();
-	
-	//draw a smaller version
-    int drawWidth = videoGrabber.getWidth()/4;
-	int drawHeight = videoGrabber.getHeight()/4;
-	videoGrabber.draw(ofGetWidth()-drawWidth, 
-                      ofGetHeight()-drawHeight, 
-                      drawWidth, drawHeight);
+    if(videoGrabber.isTextureEnabled())
+    {
+        videoGrabber.draw();
+        
+        //draw a smaller version
+        int drawWidth = videoGrabber.getWidth()/4;
+        int drawHeight = videoGrabber.getHeight()/4;
+        videoGrabber.draw(ofGetWidth()-drawWidth, 
+                          ofGetHeight()-drawHeight, 
+                          drawWidth, drawHeight);
+    }
+
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << endl;
