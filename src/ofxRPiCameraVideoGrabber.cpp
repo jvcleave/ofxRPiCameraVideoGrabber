@@ -278,7 +278,7 @@ void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
         ofLogWarning(__func__) << "RECEIVED " << filePath << " BUT NO LISTENER SET";
     }
     
-    
+#if 0
     if (directEngine) 
     {
         /* 
@@ -288,7 +288,7 @@ void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
         settings.doRecording = false;
         setup(settings);
     }
-    
+#endif   
     
 }
 
