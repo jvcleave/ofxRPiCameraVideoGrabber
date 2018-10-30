@@ -33,7 +33,10 @@ void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
     ofLog() << settings.toJSON().dump();
 
     ofLogVerbose(__func__) << "settings: " << settings.toString();
-    
+    if(videoEngine.isOpen)
+    {
+        videoEngine.close();
+    }
     videoEngine.setup(settings, this);
     camera = videoEngine.camera;
     resetValues();

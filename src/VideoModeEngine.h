@@ -109,10 +109,5 @@ protected:
     
     OMX_BUFFERHEADERTYPE* eglBuffer;
     
-    OMX_ERRORTYPE buildTexturePipeline();
-    OMX_ERRORTYPE buildDirectPipeline();
-
-    void destroyTexturePipeline();
-    void destroyDirectPipeline();
 	
 };
