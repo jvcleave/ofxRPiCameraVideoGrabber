@@ -104,16 +104,11 @@ void VideoModeEngine::setup(OMXCameraSettings& settings_, VideoModeEngineListene
 
 OMX_ERRORTYPE VideoModeEngine::cameraEventHandlerCallback(OMX_HANDLETYPE camera, OMX_PTR videoModeEngine_, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-    /*ofLog(OF_LOG_VERBOSE, 
-     "VideoModeEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-     __func__, eEvent, nData1, nData2, pEventData);*/
     VideoModeEngine *videoModeEngine = static_cast<VideoModeEngine*>(videoModeEngine_);
-    //ofLogVerbose(__func__) << OMX_Maps::getInstance().eventTypes[eEvent];
     switch (eEvent) 
     {
         case OMX_EventParamOrConfigChanged:
         {
-            
             return videoModeEngine->onCameraEventParamOrConfigChanged();
         }            
         default: 
@@ -372,14 +367,12 @@ void VideoModeEngine::writeFile()
 	}
     
     
-    encoderOutputBuffer->nFlags = 0;
-    encoderOutputBuffer->nFilledLen  = 0;
-    encoderOutputBuffer->nOffset= 0;
 
     recordingFileBuffer.clear();
     isRecording = false;
     recordedFrameCounter = 0;
     stopRequested = false;
+    isStopping = false;
     
 }
 
