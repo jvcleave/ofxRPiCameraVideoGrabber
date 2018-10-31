@@ -34,7 +34,6 @@ public:
     GLuint getTextureID();
     ofTexture& getTextureReference();
     
-    bool recordingRequested;
     bool isRecording();
     void startRecording();
     void stopRecording();

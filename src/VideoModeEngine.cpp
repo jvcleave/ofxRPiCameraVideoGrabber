@@ -311,11 +311,7 @@ void VideoModeEngine::configureEncoder()
 void VideoModeEngine::stopRecording()
 {
 	
-	if(settings.doRecording)
-	{
-        stopRequested = true;
-	}
-	
+	stopRequested = true;
 }
 
 OMXCameraSettings& VideoModeEngine::getSettings()
@@ -325,6 +321,14 @@ OMXCameraSettings& VideoModeEngine::getSettings()
 
 void VideoModeEngine::writeFile()
 {
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+
+    //stop encoder
+    error = SetComponentState(encoder, OMX_StateIdle);
+    OMX_TRACE(error);
+    
+    
 	//format is raw H264 NAL Units
 	ofLogVerbose(__func__) << "START";
 
@@ -366,9 +370,16 @@ void VideoModeEngine::writeFile()
 	{
 		ofLogVerbose(__func__) << filePath << " FAIL";
 	}
+    
+    
+    encoderOutputBuffer->nFlags = 0;
+    encoderOutputBuffer->nFilledLen  = 0;
+    encoderOutputBuffer->nOffset= 0;
+
+    recordingFileBuffer.clear();
     isRecording = false;
     recordedFrameCounter = 0;
-    
+    stopRequested = false;
     
 }
 
@@ -481,22 +492,18 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);    
     OMX_TRACE(error);
     
-    if(settings.doRecording)
-    {
-        //Set up video splitter
-        OMX_CALLBACKTYPE splitterCallbacks;
-        splitterCallbacks.EventHandler    = &VideoModeEngine::splitterEventHandlerCallback;
-        
-        error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
-        OMX_TRACE(error);
-        error =DisableAllPortsForComponent(&splitter);
-        OMX_TRACE(error);
-        
-        //Set splitter to Idle
-        error = SetComponentState(splitter, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-    }
+    //Set up video splitter
+    OMX_CALLBACKTYPE splitterCallbacks;
+    splitterCallbacks.EventHandler    = &VideoModeEngine::splitterEventHandlerCallback;
+    
+    error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
+    OMX_TRACE(error);
+    error =DisableAllPortsForComponent(&splitter);
+    OMX_TRACE(error);
+    
+    //Set splitter to Idle
+    error = SetComponentState(splitter, OMX_StateIdle);
+    OMX_TRACE(error);
     
     //Set up texture renderer
     OMX_CALLBACKTYPE renderCallbacks;
@@ -532,64 +539,46 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
     
-    if(settings.doRecording)
-    {
-        //Create encoder
-        
-        OMX_CALLBACKTYPE encoderCallbacks;
-        encoderCallbacks.EventHandler        = &VideoModeEngine::encoderEventHandlerCallback;
-        encoderCallbacks.EmptyBufferDone    = &VideoModeEngine::encoderEmptyBufferDone;
-        encoderCallbacks.FillBufferDone        = &VideoModeEngine::encoderFillBufferDone;
-        
-        error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
-        OMX_TRACE(error);
-        
-        configureEncoder();
-        
-        //Create camera->splitter Tunnel
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,
-                                splitter, VIDEO_SPLITTER_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        // Tunnel splitter2 output port and encoder input port
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2,
-                                encoder, VIDEO_ENCODE_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        
-        //Create splitter->render Tunnel
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1,
-                                render, renderInputPort);
-        OMX_TRACE(error);
-        
-    }else 
-    {
-        //Create camera->render Tunnel
-        error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,
-                                render, renderInputPort);
-        OMX_TRACE(error);
-        
-    }
+    OMX_CALLBACKTYPE encoderCallbacks;
+    encoderCallbacks.EventHandler        = &VideoModeEngine::encoderEventHandlerCallback;
+    encoderCallbacks.EmptyBufferDone    = &VideoModeEngine::encoderEmptyBufferDone;
+    encoderCallbacks.FillBufferDone        = &VideoModeEngine::encoderFillBufferDone;
+    
+    error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
+    OMX_TRACE(error);
+    
+    configureEncoder();
+    
+    //Create camera->splitter Tunnel
+    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,
+                            splitter, VIDEO_SPLITTER_INPUT_PORT);
+    OMX_TRACE(error);
+    
+    // Tunnel splitter2 output port and encoder input port
+    error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2,
+                            encoder, VIDEO_ENCODE_INPUT_PORT);
+    OMX_TRACE(error);
+    
+    
+    //Create splitter->render Tunnel
+    error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1,
+                            render, renderInputPort);
     
     //Enable camera output port
     error = EnableComponentPort(camera, CAMERA_OUTPUT_PORT);
     OMX_TRACE(error);
     
-    if(settings.doRecording)
-    {
-        //Enable splitter input port
-        error = EnableComponentPort(splitter, VIDEO_SPLITTER_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        //Enable splitter output port
-        error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT1);
-        OMX_TRACE(error);
-        
-        //Enable splitter output2 port
-        error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT2);
-        OMX_TRACE(error);
-        
-    }
+    //Enable splitter input port
+    error = EnableComponentPort(splitter, VIDEO_SPLITTER_INPUT_PORT);
+    OMX_TRACE(error);
+    
+    //Enable splitter output port
+    error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT1);
+    OMX_TRACE(error);
+    
+    //Enable splitter output2 port
+    error = EnableComponentPort(splitter, VIDEO_SPLITTER_OUTPUT_PORT2);
+    OMX_TRACE(error);
     
     if(settings.enableTexture)
     {
@@ -602,39 +591,35 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     error = EnableComponentPort(render, renderInputPort);
     OMX_TRACE(error);
     
-    if(settings.doRecording)
+    //Enable encoder input port
+    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+    //Set encoder to Idle
+    error = SetComponentState(encoder, OMX_StateIdle);
+    OMX_TRACE(error);
+    
+    //Enable encoder output port
+    error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
+    OMX_TRACE(error);
+    
+    // Configure encoder output buffer
+    OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
+    OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
+    encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
+    error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
+    OMX_TRACE(error);
+    
+    error =  OMX_AllocateBuffer(encoder, 
+                                &encoderOutputBuffer, 
+                                VIDEO_ENCODE_OUTPUT_PORT, 
+                                NULL, 
+                                encoderOutputPortDefinition.nBufferSize);
+    
+    OMX_TRACE(error);
+    if(error != OMX_ErrorNone)
     {
-        //Enable encoder input port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_INPUT_PORT, NULL);
-        OMX_TRACE(error);
-        
-        //Set encoder to Idle
-        error = SetComponentState(encoder, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        //Enable encoder output port
-        error = OMX_SendCommand(encoder, OMX_CommandPortEnable, VIDEO_ENCODE_OUTPUT_PORT, NULL);
-        OMX_TRACE(error);
-        
-        // Configure encoder output buffer
-        OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
-        OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
-        encoderOutputPortDefinition.nPortIndex = VIDEO_ENCODE_OUTPUT_PORT;
-        error =OMX_GetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
-        OMX_TRACE(error);
-        
-        error =  OMX_AllocateBuffer(encoder, 
-                                    &encoderOutputBuffer, 
-                                    VIDEO_ENCODE_OUTPUT_PORT, 
-                                    NULL, 
-                                    encoderOutputPortDefinition.nBufferSize);
-        
-        OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
-        {
-            ofLogError(__func__) << "UNABLE TO RECORD - MAY REQUIRE MORE GPU MEMORY";
-        }
-        
+        ofLogError(__func__) << "UNABLE TO RECORD - MAY REQUIRE MORE GPU MEMORY";
     }
     
     if(settings.enableTexture)
@@ -649,16 +634,11 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
     
-    if(settings.doRecording)
-    {
-        //Start encoder
-        error = SetComponentState(encoder, OMX_StateExecuting);
-        OMX_TRACE(error);
-        
-        //Start splitter
-        error = SetComponentState(splitter, OMX_StateExecuting);
-        OMX_TRACE(error);
-    }
+
+    
+    //Start splitter
+    error = SetComponentState(splitter, OMX_StateExecuting);
+    OMX_TRACE(error);
     
     //Start renderer
     error = SetComponentState(render, OMX_StateExecuting);
@@ -675,16 +655,24 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
         directDisplay.setup(render, 0, 0, settings.width, settings.height);
     }
     
-    if(settings.doRecording)
-    {
-        isRecording = true;
-        error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
-        OMX_TRACE(error);
-    }
     
     isOpen = true;
     videoModeEngineListener->onVideoEngineStart();
     return error;
+}
+
+
+void VideoModeEngine::startRecording()
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+    isRecording = true;
+    
+    //Start encoder
+    error = SetComponentState(encoder, OMX_StateExecuting);
+    OMX_TRACE(error);
+    
+    error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
+    OMX_TRACE(error);
 }
 
 void VideoModeEngine::close()
@@ -693,12 +681,12 @@ void VideoModeEngine::close()
     if(isClosing) return;
     
     isClosing = true;
-    
+    /*
     if(settings.doRecording && !didWriteFile)
     {
         writeFile();
     }
-    
+    */
     directDisplay.close();
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -715,14 +703,11 @@ void VideoModeEngine::close()
     error = DisableAllPortsForComponent(&camera);
     OMX_TRACE(error);
     
-    if(settings.doRecording)
-    {
-        error = DisableAllPortsForComponent(&splitter);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&encoder);
-        OMX_TRACE(error);
-    }
+    error = DisableAllPortsForComponent(&splitter);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&encoder);
+    OMX_TRACE(error);
     
     error = DisableAllPortsForComponent(&render);
     OMX_TRACE(error);
@@ -731,14 +716,11 @@ void VideoModeEngine::close()
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
     
-    if(settings.doRecording)
-    {
-        error = OMX_FreeHandle(encoder);
-        OMX_TRACE(error);
-        
-        error = OMX_FreeHandle(splitter);
-        OMX_TRACE(error);
-    }
+    error = OMX_FreeHandle(encoder);
+    OMX_TRACE(error);
+    
+    error = OMX_FreeHandle(splitter);
+    OMX_TRACE(error);
     
     error = OMX_FreeHandle(render);
     OMX_TRACE(error);

@@ -23,11 +23,7 @@ void ofApp::setup()
 	omxCameraSettings.width					= 1280;
 	omxCameraSettings.height				= 720;
 	omxCameraSettings.enableTexture		= false;
-	omxCameraSettings.doRecording			= false;		//default: false
-	if (omxCameraSettings.doRecording) 
-	{		
-		omxCameraSettings.recordingFilePath		= "";		//will self generate if left blank
-	}
+	
 	
 	
 	videoGrabber.setup(omxCameraSettings);

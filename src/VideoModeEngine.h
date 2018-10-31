@@ -33,6 +33,8 @@ public:
 	void setup(OMXCameraSettings&, VideoModeEngineListener*);
     int getFrameCounter();
 	OMXCameraSettings& getSettings();
+    
+    void startRecording();
     void stopRecording();
 	OMX_HANDLETYPE camera;
 	bool isOpen;

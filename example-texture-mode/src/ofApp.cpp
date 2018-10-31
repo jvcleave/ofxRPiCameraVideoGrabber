@@ -14,13 +14,7 @@ void ofApp::setup()
 	omxCameraSettings.width = 1280; //default 1280
 	omxCameraSettings.height = 720; //default 720
 	omxCameraSettings.enableTexture = true; //default true
-	omxCameraSettings.doRecording = false;   //default false
-	
-	if (omxCameraSettings.doRecording) 
-	{
-		omxCameraSettings.recordingFilePath = ""; //default "" will self-generate
-		
-	}
+
 
 	//pass in the settings and it will start the camera
 	videoGrabber.setup(omxCameraSettings);
@@ -63,10 +57,7 @@ void ofApp::draw(){
 	info << "\n";
 	info << "Press e to increment filter" << "\n";
 	info << "Press g to Toggle info" << "\n";
-	if (omxCameraSettings.doRecording) 
-	{
-		info << "Press q to stop recording" << "\n";
-	}
+
 	
 	if (doDrawInfo) 
 	{

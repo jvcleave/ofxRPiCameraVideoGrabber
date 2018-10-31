@@ -1,6 +1,5 @@
 #include "ofxRPiCameraVideoGrabber.h"
 
-bool doReopen = false;
 #pragma mark SETUP
 ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 {
@@ -10,7 +9,6 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	hasNewFrame = false;
     camera = NULL;
 	pixelsRequested = false;
-    recordingRequested = false;
 	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
 }
 
@@ -23,33 +21,14 @@ void ofxRPiCameraVideoGrabber::reset()
 
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 {
-    ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
-    
-    ofLog() << "ofRemoveListener PASS";
-    
     settings = omxCameraSettings_;
-    
-    
     ofLog() << settings.toJSON().dump();
-
     ofLogVerbose(__func__) << "settings: " << settings.toString();
-    if(engine.isOpen)
-    {
-        doReopen = true;
-        engine.close();
-    }else
-    {
-        engine.setup(settings, this);
-
-    }
- 
-
+    engine.setup(settings, this);
 }
 
 void ofxRPiCameraVideoGrabber::onVideoEngineStart()
 {
-    
-    
     ofLogVerbose(__func__) << endl;
 
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -69,11 +48,6 @@ void ofxRPiCameraVideoGrabber::onVideoEngineStart()
 void ofxRPiCameraVideoGrabber::onVideoEngineClose()
 {
     ofLogVerbose(__func__) << endl;
-    if(doReopen)
-    {
-        doReopen = false;
-        engine.setup(settings, this);
-    }
 }
 
 void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
@@ -85,8 +59,6 @@ void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
     {
         ofLogWarning(__func__) << "RECEIVED " << filePath << " BUT NO LISTENER SET";
     }
-    settings.doRecording = false;
-    setup(settings);
 }
 
 bool ofxRPiCameraVideoGrabber::isReady()
@@ -118,12 +90,7 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 			}
 		}
 	}
-    if (recordingRequested) 
-    {
-        recordingRequested = false;
-        settings.doRecording = true;
-        setup(settings);
-    }
+   
 	//ofLogVerbose() << "hasNewFrame: " << hasNewFrame;
 }
 
@@ -200,16 +167,8 @@ bool ofxRPiCameraVideoGrabber::isRecording()
 
 void ofxRPiCameraVideoGrabber::startRecording()
 {
-    bool isCurrentlyRecording = isRecording();
-    ofLogVerbose(__func__) << "isCurrentlyRecording: " << isCurrentlyRecording;
-    if(!isCurrentlyRecording)
-    {
-        recordingRequested = true;
-    }
+    engine.startRecording();
 }
-
-
-
 
 void ofxRPiCameraVideoGrabber::stopRecording()
 {

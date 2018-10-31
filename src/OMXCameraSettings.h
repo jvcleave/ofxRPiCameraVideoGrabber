@@ -25,7 +25,6 @@ public:
 	int width;
 	int height;
 	int framerate;
-	bool doRecording;
 	
 	bool enableTexture;
 	bool enablePixels;
@@ -79,7 +78,6 @@ public:
         framerate = 30;
         enableTexture = true;
         enablePixels = false;
-        doRecording = false;
         recordingFilePath = "";
         exposurePreset = "Auto";
         meteringType = "Average";
@@ -115,7 +113,6 @@ public:
         info << "framerate " << framerate << endl;
         info << "enableTexture " << enableTexture << endl;
         info << "enablePixels " << enablePixels << endl;
-        info << "doRecording " << doRecording << endl;
         info << "exposurePreset " << exposurePreset << endl;
         info << "meteringType " << meteringType << endl;
         info << "autoISO " << autoISO << endl;
@@ -161,7 +158,6 @@ public:
         
         if(exists(json, "enableTexture")) enableTexture = json["enableTexture"].get<bool>();
         if(exists(json, "enablePixels")) enablePixels = json["enablePixels"].get<bool>();
-        if(exists(json, "doRecording")) doRecording = json["doRecording"].get<bool>();
         
         if(exists(json, "meteringType")) meteringType = json["meteringType"].get<string>();
         
@@ -208,7 +204,6 @@ public:
         result["framerate"]=framerate;
         result["enableTexture"]=enableTexture;
         result["enablePixels"]=enablePixels;
-        result["doRecording"]=doRecording;
         result["exposurePreset"]=exposurePreset;
         result["meteringType"]=meteringType;
         result["autoISO"]=autoISO;
