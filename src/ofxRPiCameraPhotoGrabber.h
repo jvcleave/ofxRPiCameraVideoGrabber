@@ -25,12 +25,12 @@ public:
     
 	ofxRPiCameraPhotoGrabber();
     ~ofxRPiCameraPhotoGrabber();
-    void setup(OMXCameraSettings&, bool doApplySettings=false);
+    void setup(OMXCameraSettings&);
     bool isReady();
 	int getWidth();
 	int getHeight();
     void takePhoto();
-    PhotoEngine* engine;
+    PhotoEngine engine;
     
     
     void draw(ofRectangle& rectangle);
@@ -45,5 +45,6 @@ public:
     ofxRPiCameraPhotoGrabberListener* listener;
     
     void onTakePhotoComplete(string filePath) override;
+    void onPhotoEngineStart() override;
     vector<string> photosTaken;
 };

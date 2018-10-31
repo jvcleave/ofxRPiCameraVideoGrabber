@@ -17,42 +17,43 @@ class PhotoEngineListener
 {
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
-    
+    virtual void onPhotoEngineStart()=0;
 };
 class PhotoEngine
 {
 public:
 	PhotoEngine();
     ~PhotoEngine();
-    void setup(OMXCameraSettings&);
-    
-    void close();
-    OMX_HANDLETYPE camera;
-
-    
+    void setup(OMXCameraSettings&, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
+    void takePhoto();
+    void close();
     
-    bool takePhoto();
     
+    OMX_HANDLETYPE camera;
     OMXCameraSettings settings;
     DirectDisplay directDisplay;
     
     PhotoEngineListener* listener;
-    
+    void onEncoderOutputPortEnabled();
 private:
-    bool hasCreatedRenderTunnel;
-    OMX_U32 encoderBufferSize;
-    OMX_ERRORTYPE buildNonCapturePipeline();
-    OMX_ERRORTYPE destroyEncoder();
     
-    bool writeFile();
-    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
-    OMX_ERRORTYPE configureEncoder();
-    ofBuffer recordingFileBuffer;
 
     OMX_HANDLETYPE render;
-    OMX_HANDLETYPE encoder;    
+    OMX_HANDLETYPE encoder;
+
+    
+    bool writeFile();
+    
+    OMX_U32 encoderBufferSize;
+    ofBuffer recordingFileBuffer;
+
+    
+    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
+
+
+    
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
 
     
