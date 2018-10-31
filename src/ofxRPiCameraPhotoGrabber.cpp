@@ -16,7 +16,7 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_, bool
     {
         delete engine;
     }
-    engine = new StillCameraEngine();
+    engine = new PhotoEngine();
     engine->listener = this;
     engine->setup(settings);
     camera = engine->camera;

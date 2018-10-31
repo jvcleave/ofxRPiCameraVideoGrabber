@@ -1,7 +1,7 @@
-#include "StillCameraEngine.h"
+#include "PhotoEngine.h"
 
 
-StillCameraEngine::StillCameraEngine()
+PhotoEngine::PhotoEngine()
 {
 	didOpen		= false;
     render = NULL;
@@ -12,20 +12,20 @@ StillCameraEngine::StillCameraEngine()
 }   
 
 
-OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder,
-                                                       OMX_PTR pAppData,
+OMX_ERRORTYPE PhotoEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder,
+                                                       OMX_PTR photoEngine,
                                                        OMX_BUFFERHEADERTYPE* encoderOutputBuffer)
 {	
     //ofLogVerbose(__func__);
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
-    StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
+    PhotoEngine *engine = static_cast<PhotoEngine*>(photoEngine);
 
-    grabber->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, 
+    engine->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, 
                                         encoderOutputBuffer->nFilledLen);
     
     
-    ofLogVerbose(__func__) << grabber->recordingFileBuffer.size();
+    ofLogVerbose(__func__) << engine->recordingFileBuffer.size();
     bool endOfFrame = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME);
     bool endOfStream = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_EOS);
     
@@ -33,7 +33,7 @@ OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder,
     //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
     if(endOfStream || endOfFrame)
     {
-        grabber->writeFile();
+        engine->writeFile();
     }else
     {
         OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
@@ -46,16 +46,16 @@ OMX_ERRORTYPE StillCameraEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder,
 }
 
 
-void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
+void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_)
 {
     settings = omxCameraSettings_;
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     OMX_CALLBACKTYPE cameraCallbacks;
     
-    cameraCallbacks.EventHandler    = &StillCameraEngine::cameraEventHandlerCallback;
-    cameraCallbacks.EmptyBufferDone	= &StillCameraEngine::nullEmptyBufferDone;
-    cameraCallbacks.FillBufferDone	= &StillCameraEngine::nullFillBufferDone;
+    cameraCallbacks.EventHandler    = &PhotoEngine::cameraEventHandlerCallback;
+    cameraCallbacks.EmptyBufferDone	= &PhotoEngine::nullEmptyBufferDone;
+    cameraCallbacks.FillBufferDone	= &PhotoEngine::nullFillBufferDone;
     
     error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     if(error != OMX_ErrorNone) 
@@ -147,14 +147,14 @@ void StillCameraEngine::setup(OMXCameraSettings& omxCameraSettings_)
     }
 }
 
-OMX_ERRORTYPE StillCameraEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent,
-                                                            OMX_PTR pAppData,
+OMX_ERRORTYPE PhotoEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hComponent,
+                                                            OMX_PTR photoEngine,
                                                             OMX_EVENTTYPE eEvent,
                                                             OMX_U32 nData1,
                                                             OMX_U32 nData2,
                                                             OMX_PTR pEventData)
 {
-    StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
+    //PhotoEngine *engine = static_cast<PhotoEngine*>(photoEngine);
 
     if (eEvent == OMX_EventError)
     {
@@ -164,24 +164,22 @@ OMX_ERRORTYPE StillCameraEngine::encoderEventHandlerCallback(OMX_HANDLETYPE hCom
 }
 
 
-OMX_ERRORTYPE StillCameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
-                                                     OMX_PTR pAppData,
+OMX_ERRORTYPE PhotoEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComponent,
+                                                     OMX_PTR photoEngine,
                                                      OMX_EVENTTYPE eEvent,
                                                      OMX_U32 nData1,
                                                      OMX_U32 nData2,
                                                      OMX_PTR pEventData)
 {
-    /*ofLog(OF_LOG_VERBOSE, 
-     "TextureEngine::%s - eEvent(0x%x), nData1(0x%lx), nData2(0x%lx), pEventData(0x%p)\n",
-     __func__, eEvent, nData1, nData2, pEventData);*/
-    StillCameraEngine *grabber = static_cast<StillCameraEngine*>(pAppData);
+
+    PhotoEngine* engine = static_cast<PhotoEngine*>(photoEngine);
     //ofLogVerbose(__func__) << OMX_Maps::getInstance().getEvent(eEvent);
     switch (eEvent) 
     {
         case OMX_EventParamOrConfigChanged:
         {
             
-            return grabber->onCameraEventParamOrConfigChanged();
+            return engine->onCameraEventParamOrConfigChanged();
         }	
             
         case OMX_EventError:
@@ -207,7 +205,7 @@ OMX_ERRORTYPE StillCameraEngine::cameraEventHandlerCallback(OMX_HANDLETYPE hComp
 
 
 
-OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
+OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
 {
     
 
@@ -252,9 +250,9 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     
     //Set up renderer
     OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler	= &StillCameraEngine::nullEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone	= &StillCameraEngine::nullEmptyBufferDone;
-    renderCallbacks.FillBufferDone	= &StillCameraEngine::nullFillBufferDone;
+    renderCallbacks.EventHandler	= &PhotoEngine::nullEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone	= &PhotoEngine::nullEmptyBufferDone;
+    renderCallbacks.FillBufferDone	= &PhotoEngine::nullFillBufferDone;
     
 
     OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
@@ -273,7 +271,7 @@ OMX_ERRORTYPE StillCameraEngine::onCameraEventParamOrConfigChanged()
     return error;
 }
 
-OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
+OMX_ERRORTYPE PhotoEngine::buildNonCapturePipeline()
 {
     OMX_ERRORTYPE error;
     
@@ -316,7 +314,7 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
 
 
 
-bool StillCameraEngine::takePhoto()
+bool PhotoEngine::takePhoto()
 {
     bool result = false;
     ofLogVerbose(__func__);
@@ -385,7 +383,7 @@ bool StillCameraEngine::takePhoto()
     }
     return result;
 }
-OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
+OMX_ERRORTYPE PhotoEngine::destroyEncoder()
 {
     OMX_ERRORTYPE error;
     
@@ -427,7 +425,7 @@ OMX_ERRORTYPE StillCameraEngine::destroyEncoder()
     return error;
     
 }
-bool StillCameraEngine::writeFile()
+bool PhotoEngine::writeFile()
 {
         
   
@@ -472,7 +470,7 @@ bool StillCameraEngine::writeFile()
 }
 
 
-OMX_ERRORTYPE StillCameraEngine::configureEncoder()
+OMX_ERRORTYPE PhotoEngine::configureEncoder()
 {
     
     OMX_ERRORTYPE error;
@@ -482,9 +480,9 @@ OMX_ERRORTYPE StillCameraEngine::configureEncoder()
     
     OMX_CALLBACKTYPE encoderCallbacks;
 
-    encoderCallbacks.EventHandler		= &StillCameraEngine::encoderEventHandlerCallback;
-    encoderCallbacks.EmptyBufferDone	= &StillCameraEngine::nullEmptyBufferDone;
-    encoderCallbacks.FillBufferDone		= &StillCameraEngine::encoderFillBufferDone;
+    encoderCallbacks.EventHandler		= &PhotoEngine::encoderEventHandlerCallback;
+    encoderCallbacks.EmptyBufferDone	= &PhotoEngine::nullEmptyBufferDone;
+    encoderCallbacks.FillBufferDone		= &PhotoEngine::encoderFillBufferDone;
     
     error =OMX_GetHandle(&encoder, OMX_IMAGE_ENCODER, this , &encoderCallbacks);
     OMX_TRACE(error, "encoderCallbacks");
@@ -525,7 +523,7 @@ OMX_ERRORTYPE StillCameraEngine::configureEncoder()
     
 }
 
-StillCameraEngine::~StillCameraEngine()
+PhotoEngine::~PhotoEngine()
 {
     if(didOpen)
     {
@@ -534,7 +532,7 @@ StillCameraEngine::~StillCameraEngine()
 }
 
 
-void StillCameraEngine::close()
+void PhotoEngine::close()
 {
     
     directDisplay.close();

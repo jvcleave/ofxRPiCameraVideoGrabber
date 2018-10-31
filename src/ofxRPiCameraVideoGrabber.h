@@ -9,14 +9,14 @@
 
 #include "RPICameraController.h"
 #include "ofAppEGLWindow.h"
-#include "VideoModeEngine.h"
+#include "VideoEngine.h"
 
 
 using namespace std;
 
 
 
-class ofxRPiCameraVideoGrabber : public RPICameraController, public VideoModeEngineListener
+class ofxRPiCameraVideoGrabber : public RPICameraController, public VideoEngineListener
 {
 
 public:
@@ -41,7 +41,6 @@ public:
     void disablePixels();
     unsigned char * getPixels();
     
-    VideoModeEngine engine;
     
     bool isReady();
     
@@ -63,17 +62,15 @@ public:
     void onRecordingComplete(string filePath) override;
     void onVideoEngineStart() override;
     void onVideoEngineClose() override;
-private:
-    ofTexture errorTexture;
-    bool hasNewFrame;
     
-
+    VideoEngine engine;
+    
+private:
+    bool hasNewFrame;
     
     int updateFrameCounter;
     int frameCounter;
     bool pixelsRequested;
-
-
 	void onUpdate(ofEventArgs & args);
     
 

@@ -36,7 +36,7 @@ void ofxRPiCameraVideoGrabber::onVideoEngineStart()
     resetValues();
     
     //checkBurstMode();
-    error = applyExposure(__func__);
+    error = applyExposure();
     OMX_TRACE(error);
     
     //checkFlickerCancellation();

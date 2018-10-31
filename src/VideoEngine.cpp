@@ -1,8 +1,8 @@
-#include "VideoModeEngine.h"
+#include "VideoEngine.h"
 
 
 
-VideoModeEngine::VideoModeEngine()
+VideoEngine::VideoEngine()
 {
     isOpen        = false;
     numMBps = 2.0;
@@ -10,13 +10,13 @@ VideoModeEngine::VideoModeEngine()
     isStopping = false;
     isRecording = false;
     recordedFrameCounter = 0;
-    videoModeEngineListener = NULL;
+    listener = NULL;
     frameCounter = 0;
     isClosing = false;
     pixels = NULL;
 }
 
-int VideoModeEngine::getFrameCounter()
+int VideoEngine::getFrameCounter()
 {
     
     if (!isOpen) 
@@ -57,11 +57,11 @@ int VideoModeEngine::getFrameCounter()
 }
 
 
-OMX_ERRORTYPE VideoModeEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE render, OMX_IN OMX_PTR videoModeEngine, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+OMX_ERRORTYPE VideoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE render, OMX_IN OMX_PTR videoEngine, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
 {    
     OMX_ERRORTYPE error = OMX_ErrorNone;
 
-    VideoModeEngine* engine = static_cast<VideoModeEngine*>(videoModeEngine);
+    VideoEngine* engine = static_cast<VideoEngine*>(videoEngine);
     if(!engine->isClosing)
     {
         engine->frameCounter++;
@@ -71,11 +71,11 @@ OMX_ERRORTYPE VideoModeEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE
     return error;
 }
 
-void VideoModeEngine::setup(OMXCameraSettings& settings_, VideoModeEngineListener* videoModeEngineListener_)
+void VideoEngine::setup(OMXCameraSettings& settings_, VideoEngineListener* listener_)
 {
     isClosing = false;
     settings = settings_;
-    videoModeEngineListener = videoModeEngineListener_;
+    listener = listener_;
     
     ofLogVerbose(__func__) << "settings: " << settings.toString();
     if(settings.enableTexture)
@@ -87,7 +87,7 @@ void VideoModeEngine::setup(OMXCameraSettings& settings_, VideoModeEngineListene
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     OMX_CALLBACKTYPE cameraCallbacks;
-    cameraCallbacks.EventHandler    = &VideoModeEngine::cameraEventHandlerCallback;
+    cameraCallbacks.EventHandler    = &VideoEngine::cameraEventHandlerCallback;
     
     error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     OMX_TRACE(error);
@@ -102,14 +102,14 @@ void VideoModeEngine::setup(OMXCameraSettings& settings_, VideoModeEngineListene
 }
 
 
-OMX_ERRORTYPE VideoModeEngine::cameraEventHandlerCallback(OMX_HANDLETYPE camera, OMX_PTR videoModeEngine_, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
+OMX_ERRORTYPE VideoEngine::cameraEventHandlerCallback(OMX_HANDLETYPE camera, OMX_PTR videoEngine_, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData)
 {
-    VideoModeEngine *videoModeEngine = static_cast<VideoModeEngine*>(videoModeEngine_);
+    VideoEngine *engine = static_cast<VideoEngine*>(videoEngine_);
     switch (eEvent) 
     {
         case OMX_EventParamOrConfigChanged:
         {
-            return videoModeEngine->onCameraEventParamOrConfigChanged();
+            return engine->onCameraEventParamOrConfigChanged();
         }            
         default: 
         {
@@ -121,14 +121,14 @@ OMX_ERRORTYPE VideoModeEngine::cameraEventHandlerCallback(OMX_HANDLETYPE camera,
 
 
 
-OMX_ERRORTYPE VideoModeEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encoder,
-                                                OMX_IN OMX_PTR engine,
+OMX_ERRORTYPE VideoEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encoder,
+                                                OMX_IN OMX_PTR videoEngine_,
                                                 OMX_IN OMX_BUFFERHEADERTYPE* encoderOutputBuffer)
 {    
-    VideoModeEngine *grabber = static_cast<VideoModeEngine*>(engine);
+    VideoEngine* engine = static_cast<VideoEngine*>(videoEngine_);
     
     bool isKeyframeValid = false;
-    grabber->recordedFrameCounter++;
+    engine->recordedFrameCounter++;
     // The user wants to quit, but don't exit
     // the loop until we are certain that we have processed
     // a full frame till end of the frame, i.e. we're at the end
@@ -136,29 +136,29 @@ OMX_ERRORTYPE VideoModeEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encod
     // the next key frame is detected. This way we should always
     // avoid corruption of the last encoded at the expense of
     // small delay in exiting.
-    if(grabber->stopRequested && !grabber->isStopping) 
+    if(engine->stopRequested && !engine->isStopping) 
     {
         ofLogVerbose(__func__) << "Exit signal detected, waiting for next key frame boundry before exiting...";
-        grabber->isStopping = true;
+        engine->isStopping = true;
         isKeyframeValid = encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME;
     }
-    if(grabber->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
+    if(engine->isStopping && (isKeyframeValid ^ (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_SYNCFRAME))) 
     {
         ofLogVerbose(__func__) << "Key frame boundry reached, exiting loop...";
-        grabber->writeFile();
+        engine->writeFile();
     }else 
     {
-        grabber->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
+        engine->recordingFileBuffer.append((const char*) encoderOutputBuffer->pBuffer + encoderOutputBuffer->nOffset, encoderOutputBuffer->nFilledLen);
         //ofLogVerbose(__func__) << "encoderOutputBuffer->nFilledLen: " << encoderOutputBuffer->nFilledLen;
-        ofLog() << grabber->recordingFileBuffer.size();
+        ofLog() << engine->recordingFileBuffer.size();
         OMX_ERRORTYPE error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
         if(error != OMX_ErrorNone) 
         {
             ofLog(OF_LOG_ERROR, "encoder OMX_FillThisBuffer FAIL error: 0x%08x", error);
-            if(!grabber->didWriteFile)
+            if(!engine->didWriteFile)
             {
                 ofLogError() << "HAD ERROR FILLING BUFFER, JUST WRITING WHAT WE HAVE";
-                grabber->writeFile();
+                engine->writeFile();
 
             }
         }
@@ -167,7 +167,7 @@ OMX_ERRORTYPE VideoModeEngine::encoderFillBufferDone(OMX_IN OMX_HANDLETYPE encod
 }
 
 
-void VideoModeEngine::configureCameraResolution()
+void VideoEngine::configureCameraResolution()
 {
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -238,7 +238,7 @@ void VideoModeEngine::configureCameraResolution()
 	 */
 }
 
-void VideoModeEngine::configureEncoder()
+void VideoEngine::configureEncoder()
 {
 	
 	OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -303,18 +303,18 @@ void VideoModeEngine::configureEncoder()
 
 }
 
-void VideoModeEngine::stopRecording()
+void VideoEngine::stopRecording()
 {
 	
 	stopRequested = true;
 }
 
-OMXCameraSettings& VideoModeEngine::getSettings()
+OMXCameraSettings& VideoEngine::getSettings()
 {
     return settings;
 }
 
-void VideoModeEngine::writeFile()
+void VideoEngine::writeFile()
 {
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
@@ -356,9 +356,9 @@ void VideoModeEngine::writeFile()
 	if(didWriteFile)
 	{
 		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
-        if(videoModeEngineListener)
+        if(listener)
         {
-            videoModeEngineListener->onRecordingComplete(filePath);
+            listener->onRecordingComplete(filePath);
         }
 	}
     else
@@ -378,20 +378,20 @@ void VideoModeEngine::writeFile()
 
 
 #pragma mark PIXELS
-void VideoModeEngine::enablePixels()
+void VideoEngine::enablePixels()
 {
     doPixels = true;
     
 }
 
 
-void VideoModeEngine::disablePixels()
+void VideoEngine::disablePixels()
 {
     doPixels = false;
 }
 
 
-void VideoModeEngine::updatePixels()
+void VideoEngine::updatePixels()
 {
     if (!doPixels) 
     {
@@ -414,13 +414,13 @@ void VideoModeEngine::updatePixels()
     fbo.end();
 }
 
-unsigned char * VideoModeEngine::getPixels()
+unsigned char * VideoEngine::getPixels()
 {
     return pixels;
 }
 
 
-void VideoModeEngine::generateEGLImage()
+void VideoEngine::generateEGLImage()
 {
     
     ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
@@ -470,7 +470,7 @@ void VideoModeEngine::generateEGLImage()
     }
 }
 
-OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
+OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
 {
     OMX_ERRORTYPE error;
     error = SetComponentState(camera, OMX_StateIdle);
@@ -487,7 +487,7 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     
     //Set up video splitter
     OMX_CALLBACKTYPE splitterCallbacks;
-    splitterCallbacks.EventHandler    = &VideoModeEngine::splitterEventHandlerCallback;
+    splitterCallbacks.EventHandler    = &VideoEngine::splitterEventHandlerCallback;
     
     error = OMX_GetHandle(&splitter, OMX_VIDEO_SPLITTER, this , &splitterCallbacks);
     OMX_TRACE(error);
@@ -500,16 +500,16 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     
     //Set up texture renderer
     OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler    = &VideoModeEngine::renderEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone    = &VideoModeEngine::renderEmptyBufferDone;
+    renderCallbacks.EventHandler    = &VideoEngine::renderEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone    = &VideoEngine::renderEmptyBufferDone;
     
     if(settings.enableTexture)
     {
         //Implementation specific
-        renderCallbacks.FillBufferDone    = &VideoModeEngine::textureRenderFillBufferDone;
+        renderCallbacks.FillBufferDone    = &VideoEngine::textureRenderFillBufferDone;
     }else
     {
-        renderCallbacks.FillBufferDone    = &VideoModeEngine::directRenderFillBufferDone;
+        renderCallbacks.FillBufferDone    = &VideoEngine::directRenderFillBufferDone;
     }
     
     OMX_STRING renderType = OMX_VIDEO_RENDER; 
@@ -533,9 +533,9 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     
     
     OMX_CALLBACKTYPE encoderCallbacks;
-    encoderCallbacks.EventHandler        = &VideoModeEngine::encoderEventHandlerCallback;
-    encoderCallbacks.EmptyBufferDone    = &VideoModeEngine::encoderEmptyBufferDone;
-    encoderCallbacks.FillBufferDone        = &VideoModeEngine::encoderFillBufferDone;
+    encoderCallbacks.EventHandler        = &VideoEngine::encoderEventHandlerCallback;
+    encoderCallbacks.EmptyBufferDone    = &VideoEngine::encoderEmptyBufferDone;
+    encoderCallbacks.FillBufferDone        = &VideoEngine::encoderFillBufferDone;
     
     error =OMX_GetHandle(&encoder, OMX_VIDEO_ENCODER, this , &encoderCallbacks);
     OMX_TRACE(error);
@@ -650,12 +650,12 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     
     
     isOpen = true;
-    videoModeEngineListener->onVideoEngineStart();
+    listener->onVideoEngineStart();
     return error;
 }
 
 
-void VideoModeEngine::startRecording()
+void VideoEngine::startRecording()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     isRecording = true;
@@ -668,7 +668,7 @@ void VideoModeEngine::startRecording()
     OMX_TRACE(error);
 }
 
-void VideoModeEngine::close()
+void VideoEngine::close()
 {
     
     if(isClosing) return;
@@ -718,183 +718,14 @@ void VideoModeEngine::close()
     error = OMX_FreeHandle(render);
     OMX_TRACE(error);
     
-    if(videoModeEngineListener)
+    if(listener)
     {
-        videoModeEngineListener->onVideoEngineClose();
+        listener->onVideoEngineClose();
     }
-    
+    listener = NULL;
 }
 
-#if 0
-void VideoModeEngine::close()
-{
-    OMX_ERRORTYPE error = OMX_ErrorNone;
-
-    if(isClosing) return;
-    
-    isClosing = true;
-    ofLogVerbose(__func__) << "START";
-    
-    
-    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
-    OMX_INIT_STRUCTURE(cameraport);
-    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
-    cameraport.bEnabled = OMX_FALSE;
-    
-    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);    
-    OMX_TRACE(error);
-    
-    
-    
-    
-    if(settings.doRecording && !didWriteFile)
-    {
-        writeFile();
-    }
-    
-    if(settings.doRecording)
-    {
-        error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
-        OMX_TRACE(error);
-        
-        error = DisableAllPortsForComponent(&encoder);
-        OMX_TRACE(error);
-    }
-    
-    int videoRenderInputPort = VIDEO_RENDER_INPUT_PORT;
-    if(settings.enableTexture)
-    {
-        videoRenderInputPort = EGL_RENDER_INPUT_PORT;
-    }
-    
-    error = FlushOMXComponent(camera, CAMERA_OUTPUT_PORT);
-    OMX_TRACE(error);
-    
-    error = FlushOMXComponent(render, videoRenderInputPort);
-    OMX_TRACE(error);
-    
-    error = SetComponentState(camera, OMX_StateIdle);
-    OMX_TRACE(error);
-    
-    error = DisableAllPortsForComponent(&camera);
-    OMX_TRACE(error);
-    
-    if(settings.doRecording)
-    {
-        
-        error = SetComponentState(encoder, OMX_StatePause);
-        OMX_TRACE(error);
-        
-        error = SetComponentState(encoder, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
-        OMX_TRACE(error);
-        
-        
-        error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
-        OMX_TRACE(error);
-        
-        
-        error = SetComponentState(encoder, OMX_StateLoaded);
-        OMX_TRACE(error);
-        
-        error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
-        OMX_TRACE(error);
-        
-        encoderOutputBuffer = NULL;
-    }
-  
-    error = SetComponentState(render, OMX_StateIdle);
-    OMX_TRACE(error);
-    
-    error = DisableAllPortsForComponent(&render);
-    OMX_TRACE(error);
-    
-    error = OMX_SetupTunnel(camera, CAMERA_OUTPUT_PORT,  NULL, 0);
-    OMX_TRACE(error);
-    
-    error = OMX_SetupTunnel(render, videoRenderInputPort,  NULL, 0);
-    OMX_TRACE(error);
-    
-    if(settings.enableTexture)
-    {
-        ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-        display = appEGLWindow->getEglDisplay();
-        context = appEGLWindow->getEglContext();
-        if (eglImage)
-        {
-            if (!eglDestroyImageKHR(display, eglImage))
-            {
-                ofLogError(__func__) << "eglDestroyImageKHR FAIL <---------------- :(";
-            }else
-            {
-                ofLogVerbose(__func__) << "eglDestroyImageKHR PASS <---------------- :)";
-                
-            }
-            eglImage = NULL;
-        }
-    }
-    
-    if(settings.doRecording)
-    {
-        
-        error = SetComponentState(splitter, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = SetComponentState(encoder, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        error = SetComponentState(render, OMX_StateIdle);
-        OMX_TRACE(error);
-        
-        //Destroy splitter->encoder Tunnel
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, NULL, 0);
-        OMX_TRACE(error);
-        
-        error = OMX_SetupTunnel(encoder, VIDEO_ENCODE_INPUT_PORT, NULL, 0);
-        OMX_TRACE(error);
-        
-        //Destroy splitter->render Tunnel
-        error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1, NULL, 0);
-        OMX_TRACE(error);
-        
-        error = OMX_SetupTunnel(render, videoRenderInputPort, NULL, 0);
-        OMX_TRACE(error);
-    }
-    
-
-    
-    error = OMX_FreeHandle(camera);
-    OMX_TRACE(error);
-    
-    if(settings.doRecording)
-    {
-        error = OMX_FreeHandle(encoder);
-        OMX_TRACE(error);
-        
-        error = OMX_FreeHandle(splitter);
-        OMX_TRACE(error);
-    }
-    
-    error = OMX_FreeHandle(render);
-    OMX_TRACE(error);
-    
-    if (pixels) 
-    {
-        delete[] pixels;
-        pixels = NULL;
-    }
-    if(videoModeEngineListener)
-    {
-        videoModeEngineListener->onVideoEngineClose();
-    }
-}
-#endif
-VideoModeEngine::~VideoModeEngine()
+VideoEngine::~VideoEngine()
 {
     
     close();

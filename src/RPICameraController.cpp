@@ -27,7 +27,7 @@ void RPICameraController::applyAllSettings()
     
     setSoftwareSharpening(settings.doDisableSoftwareSharpen);
     setSoftwareSaturation(settings.doDisableSoftwareSaturation);
-    applyExposure(__func__);
+    applyExposure();
     
     //Requires gpio program provided via wiringPi
     //sudo apt-get install wiringpi
@@ -313,7 +313,7 @@ OMX_ERRORTYPE RPICameraController::setAutoISO(bool doAutoISO)
         {
             exposureConfig.bAutoSensitivity = OMX_FALSE; 
         }
-        error = applyExposure(__func__);
+        error = applyExposure();
         OMX_TRACE(error);
         
     }
@@ -328,7 +328,7 @@ OMX_ERRORTYPE RPICameraController::setISO(int ISO_)
     if(error == OMX_ErrorNone) 
     {
         exposureConfig.nSensitivity    = ISO_;
-        error =  applyExposure(__func__);
+        error =  applyExposure();
         
         if(error == OMX_ErrorNone)
         {
@@ -346,7 +346,7 @@ OMX_ERRORTYPE RPICameraController::setShutterSpeed(int shutterSpeedMicroSeconds_
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposureConfig);
     OMX_TRACE(error);
     exposureConfig.nShutterSpeedMsec = shutterSpeedMicroSeconds_;
-    error =  applyExposure(__func__);
+    error =  applyExposure();
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
@@ -373,7 +373,7 @@ OMX_ERRORTYPE RPICameraController::setAutoShutter(bool doAutoShutter)
         {
             exposureConfig.bAutoShutterSpeed = OMX_FALSE; 
         }
-        error =  applyExposure(__func__);
+        error =  applyExposure();
         
         if(error == OMX_ErrorNone)
         {
@@ -614,7 +614,7 @@ void RPICameraController::setDRE(int level)
 OMX_ERRORTYPE RPICameraController::setMeteringType(OMX_METERINGTYPE meteringType_)
 {
     exposureConfig.eMetering = meteringType_;
-    OMX_ERRORTYPE error = applyExposure(__func__);
+    OMX_ERRORTYPE error = applyExposure();
     if(error == OMX_ErrorNone)
     {
         settings.meteringType     = getMeteringType();
@@ -633,7 +633,7 @@ OMX_ERRORTYPE RPICameraController::setMeteringType(string meteringType_)
     return setMeteringType(GetMetering(meteringType_));
 }
 
-OMX_ERRORTYPE RPICameraController::applyExposure(string caller)
+OMX_ERRORTYPE RPICameraController::applyExposure()
 {
     OMX_ERRORTYPE error = OMX_ErrorNone;
     error = OMX_SetConfig(camera, OMX_IndexConfigCommonExposureValue, &exposureConfig);
@@ -677,7 +677,7 @@ OMX_ERRORTYPE RPICameraController::setEvCompensation(int value)
     {
         exposureConfig.xEVCompensation = toQ16(value);
     }
-    OMX_ERRORTYPE error =  applyExposure(__func__);
+    OMX_ERRORTYPE error =  applyExposure();
     if(error == OMX_ErrorNone)
     {
         settings.evCompensation = getEvCompensation();

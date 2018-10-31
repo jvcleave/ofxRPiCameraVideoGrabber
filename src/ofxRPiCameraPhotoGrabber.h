@@ -12,13 +12,13 @@
 
 #include "RPICameraController.h"
 
-#include "StillCameraEngine.h"
+#include "PhotoEngine.h"
 
 
 
 
 
-class ofxRPiCameraPhotoGrabber : public RPICameraController, public StillCameraEngineListener
+class ofxRPiCameraPhotoGrabber : public RPICameraController, public PhotoEngineListener
 {
 
 public:
@@ -30,7 +30,7 @@ public:
 	int getWidth();
 	int getHeight();
     void takePhoto();
-    StillCameraEngine* engine;
+    PhotoEngine* engine;
     
     
     void draw(ofRectangle& rectangle);

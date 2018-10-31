@@ -41,7 +41,7 @@ public:
     void applyImageFilter(OMX_IMAGEFILTERTYPE);
     OMX_ERRORTYPE applyRotation();
     OMX_ERRORTYPE applyCurrentMeteringMode();
-    OMX_ERRORTYPE applyExposure(string caller="UNDEFINED");
+    OMX_ERRORTYPE applyExposure();
     OMX_ERRORTYPE updateSensorCrop();
     
     OMX_CONFIG_EXPOSURECONTROLTYPE exposurePresetConfig;

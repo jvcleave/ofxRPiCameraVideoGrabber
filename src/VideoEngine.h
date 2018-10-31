@@ -14,7 +14,7 @@
 #include "DirectDisplay.h"
 #include "ofAppEGLWindow.h"
 
-class VideoModeEngineListener
+class VideoEngineListener
 {
 public:
     virtual void onRecordingComplete(string filePath)=0;
@@ -24,13 +24,13 @@ public:
     
 };
 
-class VideoModeEngine
+class VideoEngine
 {
 public:
-	VideoModeEngine();
-    ~VideoModeEngine();
+	VideoEngine();
+    ~VideoEngine();
 
-	void setup(OMXCameraSettings&, VideoModeEngineListener*);
+	void setup(OMXCameraSettings&, VideoEngineListener*);
     int getFrameCounter();
 	OMXCameraSettings& getSettings();
     
@@ -39,7 +39,7 @@ public:
 	OMX_HANDLETYPE camera;
 	bool isOpen;
     bool isRecording;
-    VideoModeEngineListener* videoModeEngineListener;
+    VideoEngineListener* listener;
     DirectDisplay directDisplay;
 
     

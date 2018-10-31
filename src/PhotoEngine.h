@@ -1,5 +1,5 @@
 /*
- *  StillCameraEngine.h
+ *  PhotoEngine.h
  *
  *  Created by jason van cleave on 2/10/14.
  *  Copyright 2014 jasonvancleave.com. All rights reserved.
@@ -13,17 +13,17 @@
 #include "OMXCameraSettings.h"
 #include "DirectDisplay.h"
 
-class StillCameraEngineListener
+class PhotoEngineListener
 {
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
     
 };
-class StillCameraEngine
+class PhotoEngine
 {
 public:
-	StillCameraEngine();
-    ~StillCameraEngine();
+	PhotoEngine();
+    ~PhotoEngine();
     void setup(OMXCameraSettings&);
     
     void close();
@@ -37,7 +37,7 @@ public:
     OMXCameraSettings settings;
     DirectDisplay directDisplay;
     
-    StillCameraEngineListener* listener;
+    PhotoEngineListener* listener;
     
 private:
     bool hasCreatedRenderTunnel;
