@@ -49,7 +49,7 @@ void ofxRPiCameraPhotoGrabber::takePhoto()
         ofLogError() << "TAKE PHOTO FAILED";
         //ofLog() << "PRE RESET: " << settings.toString();
         //settings = engine->settings;
-        engine->closeEngine();
+        engine->close();
         setup(settings, true);
         
 
@@ -89,65 +89,39 @@ void ofxRPiCameraPhotoGrabber::draw(ofRectangle& rectangle)
 void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
 {
     setDisplayDrawRectangle(ofRectangle(x, y, width, height));
-
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayAlpha(int alpha)
 {
-    if(!getDisplayManager()) return;
-    getDisplayManager()->alpha = alpha;
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayAlpha(alpha);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayLayer(int layer)
 {
-    if(!getDisplayManager()) return;
-
-    getDisplayManager()->layer = layer;
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayAlpha(layer);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayRotation(int rotationDegrees)
 {
-    if(!getDisplayManager()) return;
-
-    getDisplayManager()->rotateDisplay(rotationDegrees);
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayRotation(rotationDegrees);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
 {
-    if(!getDisplayManager()) return;
-
-    getDisplayManager()->drawRectangle = drawRectangle;
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayDrawRectangle(drawRectangle);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
 {
-    if(!getDisplayManager()) return;
-
-    getDisplayManager()->cropRectangle = cropRectangle;
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayCropRectangle(cropRectangle);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayMirror(bool doMirror)
 {
-    if(!getDisplayManager()) return;
-
-    getDisplayManager()->doMirror = doMirror;
-    getDisplayManager()->applyConfig();
+    engine->directDisplay.setDisplayMirror(doMirror);
 }
 
-DirectDisplay* ofxRPiCameraPhotoGrabber::getDisplayManager()
-{
-    if(!engine && !engine->isOpen())
-    {
-        return NULL;
-    }
-    
-    return engine->getDisplayManager();
-}
+
 
 
 ofxRPiCameraPhotoGrabber::~ofxRPiCameraPhotoGrabber()

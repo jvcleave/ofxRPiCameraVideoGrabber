@@ -9,7 +9,6 @@ StillCameraEngine::StillCameraEngine()
     encoder = NULL;
     encoderOutputBuffer = NULL;
     hasCreatedRenderTunnel = false;
-    displayManager = NULL;
 }   
 
 
@@ -302,14 +301,8 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
     error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
     
-    
-    if(!displayManager)
-    {
-        displayManager = new DirectDisplay();
-        error = displayManager->setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
-        OMX_TRACE(error);
+    directDisplay.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
 
-    }
     
     //Start camera
     error = SetComponentState(camera, OMX_StateExecuting);
@@ -319,11 +312,7 @@ OMX_ERRORTYPE StillCameraEngine::buildNonCapturePipeline()
 }
 
 
-DirectDisplay* StillCameraEngine::getDisplayManager()
-{
-    
-    return displayManager;
-}
+
 
 
 
@@ -540,20 +529,15 @@ StillCameraEngine::~StillCameraEngine()
 {
     if(didOpen)
     {
-        closeEngine();
+        close();
     }
 }
 
 
-void StillCameraEngine::closeEngine()
+void StillCameraEngine::close()
 {
     
-    if(displayManager)
-    {
-        delete displayManager;
-        displayManager = NULL;
-        
-    }
+    directDisplay.close();
     OMX_ERRORTYPE error;
     //error =  OMX_SendCommand(camera, OMX_CommandFlush, CAMERA_STILL_OUTPUT_PORT, NULL);
     //OMX_TRACE(error, "camera: OMX_CommandFlush");
@@ -644,4 +628,5 @@ void StillCameraEngine::closeEngine()
     didOpen = false;
 
 }
+
 

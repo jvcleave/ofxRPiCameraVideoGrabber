@@ -26,7 +26,7 @@ public:
     ~StillCameraEngine();
     void setup(OMXCameraSettings&);
     
-    void closeEngine();
+    void close();
     OMX_HANDLETYPE camera;
 
     
@@ -35,8 +35,7 @@ public:
     bool takePhoto();
     
     OMXCameraSettings settings;
-    DirectDisplay* displayManager;
-    DirectDisplay* getDisplayManager();
+    DirectDisplay directDisplay;
     
     StillCameraEngineListener* listener;
     

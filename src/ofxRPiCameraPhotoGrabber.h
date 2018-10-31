@@ -42,7 +42,6 @@ public:
     void setDisplayCropRectangle(ofRectangle);
     void setDisplayMirror(bool);
 
-    DirectDisplay* getDisplayManager();
     ofxRPiCameraPhotoGrabberListener* listener;
     
     void onTakePhotoComplete(string filePath) override;

@@ -14,10 +14,14 @@
 #include "DirectDisplay.h"
 #include "ofAppEGLWindow.h"
 
-class RecordingListener
+class VideoModeEngineListener
 {
 public:
     virtual void onRecordingComplete(string filePath)=0;
+    virtual void onVideoEngineStart()=0;
+    virtual void onVideoEngineClose()=0;
+
+    
 };
 
 class VideoModeEngine
@@ -26,15 +30,15 @@ public:
 	VideoModeEngine();
     ~VideoModeEngine();
 
-	void setup(OMXCameraSettings&, RecordingListener*);
+	void setup(OMXCameraSettings&, VideoModeEngineListener*);
     int getFrameCounter();
 	OMXCameraSettings& getSettings();
     void stopRecording();
 	OMX_HANDLETYPE camera;
 	bool isOpen;
     bool isRecording;
-    RecordingListener* recordingListener;
-    DirectDisplay* directDisplay;
+    VideoModeEngineListener* videoModeEngineListener;
+    DirectDisplay directDisplay;
 
     
     
@@ -52,12 +56,6 @@ public:
         return texture;
     }
     
-    void setDisplayAlpha(int);
-    void setDisplayLayer(int);
-    void setDisplayRotation(int);
-    void setDisplayDrawRectangle(ofRectangle);
-    void setDisplayCropRectangle(ofRectangle);
-    void setDisplayMirror(bool);
     
     void close();
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();

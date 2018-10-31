@@ -16,7 +16,7 @@ using namespace std;
 
 
 
-class ofxRPiCameraVideoGrabber : public RPICameraController, public RecordingListener
+class ofxRPiCameraVideoGrabber : public RPICameraController, public VideoModeEngineListener
 {
 
 public:
@@ -42,7 +42,7 @@ public:
     void disablePixels();
     unsigned char * getPixels();
     
-    VideoModeEngine videoEngine;
+    VideoModeEngine engine;
     
     bool isReady();
     
@@ -61,9 +61,9 @@ public:
     void setDisplayCropRectangle(ofRectangle);
     void setDisplayMirror(bool);
     
-    DirectDisplay* getDisplayManager();
     void onRecordingComplete(string filePath) override;
-    
+    void onVideoEngineStart() override;
+    void onVideoEngineClose() override;
 private:
     ofTexture errorTexture;
     bool hasNewFrame;

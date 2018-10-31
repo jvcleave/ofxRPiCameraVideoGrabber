@@ -32,7 +32,6 @@ public:
     
     DirectDisplay()
     {
-
         isReady = false;
         doFullScreen=false;
         noAspectRatio=false;
@@ -50,10 +49,24 @@ public:
         OMX_INIT_STRUCTURE(displayConfig);
         displayConfig.nPortIndex = VIDEO_RENDER_INPUT_PORT;
         displayConfigDefaults = displayConfig;
+        
+  
     };
     
-    OMX_ERRORTYPE setup(OMX_HANDLETYPE renderComponent_, int x, int y, int width, int height)
+    ~DirectDisplay()
     {
+        close();
+    }
+    
+    void close()
+    {
+        renderComponent = NULL;
+    }
+    
+    void setup(OMX_HANDLETYPE renderComponent_, int x, int y, int width, int height)
+    {
+
+        
         renderComponent = renderComponent_;
         drawRectangle.set(x, y, width, height);
         cropRectangle.set(x, y, width, height);
@@ -61,16 +74,15 @@ public:
         
         isReady = true;
         
-        OMX_ERRORTYPE error = OMX_ErrorNone;
-        error = applyConfig();
-        OMX_TRACE(error);
-        return error;
+        applyConfig();
     }
     
 
     
-    OMX_ERRORTYPE applyConfig()
+    void applyConfig()
     {
+        if(!renderComponent) return;
+        
         displayConfig.set = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT| OMX_DISPLAY_SET_SRC_RECT | OMX_DISPLAY_SET_FULLSCREEN | OMX_DISPLAY_SET_NOASPECT | OMX_DISPLAY_SET_TRANSFORM | OMX_DISPLAY_SET_ALPHA | OMX_DISPLAY_SET_LAYER | OMX_DISPLAY_SET_MODE);
         
         displayConfig.dest_rect.x_offset  = drawRectangle.x;
@@ -104,21 +116,20 @@ public:
         OMX_ERRORTYPE error  = OMX_SetParameter(renderComponent, OMX_IndexConfigDisplayRegion, &displayConfig);
         OMX_TRACE(error);
         
-        return error;
     }
 
  
     
     
-    OMX_ERRORTYPE rotateDisplay(OMX_DISPLAYTRANSFORMTYPE type)
+    void rotateDisplay(OMX_DISPLAYTRANSFORMTYPE type)
     {
 
         rotationIndex = (int)type;
-        return applyConfig();
+        applyConfig();
     }
     
     
-    OMX_ERRORTYPE rotateDisplay(int degreesClockWise)
+    void rotateDisplay(int degreesClockWise)
     {
         OMX_DISPLAYTRANSFORMTYPE type = OMX_DISPLAY_ROT0;
         
@@ -159,10 +170,47 @@ public:
                     break;
             }
         }
-        return rotateDisplay(type);
+        rotateDisplay(type);
     }
     
 
+    
+    void setDisplayAlpha(int alpha_)
+    {
+        alpha = alpha_;
+        applyConfig();
+    }
+    
+    void setDisplayLayer(int layer_)
+    {
+        layer = layer_;
+        applyConfig();
+    }
+    
+    void setDisplayRotation(int rotationDegrees_)
+    {
+        rotateDisplay(rotationDegrees_);
+        applyConfig();
+    }
+    
+    void setDisplayDrawRectangle(ofRectangle drawRectangle_)
+    {
+        drawRectangle = drawRectangle_;
+        applyConfig();
+    }
+    
+    void setDisplayCropRectangle(ofRectangle cropRectangle_)
+    {
+        cropRectangle = cropRectangle_;
+        applyConfig();
+    }
+    
+    void setDisplayMirror(bool doMirror_)
+    {
+        doMirror = doMirror_;
+        applyConfig();
+    }
+    
 
     string toString()
     {

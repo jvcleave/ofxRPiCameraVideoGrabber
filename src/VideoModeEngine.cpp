@@ -10,7 +10,7 @@ VideoModeEngine::VideoModeEngine()
     isStopping = false;
     isRecording = false;
     recordedFrameCounter = 0;
-    recordingListener = NULL;
+    videoModeEngineListener = NULL;
     frameCounter = 0;
     isClosing = false;
     pixels = NULL;
@@ -71,11 +71,11 @@ OMX_ERRORTYPE VideoModeEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE
     return error;
 }
 
-void VideoModeEngine::setup(OMXCameraSettings& settings_, RecordingListener* recordingListener_)
+void VideoModeEngine::setup(OMXCameraSettings& settings_, VideoModeEngineListener* videoModeEngineListener_)
 {
     isClosing = false;
     settings = settings_;
-    recordingListener = recordingListener_;
+    videoModeEngineListener = videoModeEngineListener_;
     
     ofLogVerbose(__func__) << "settings: " << settings.toString();
     if(settings.enableTexture)
@@ -215,7 +215,7 @@ void VideoModeEngine::configureCameraResolution()
 
     error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &cameraOutputPortDefinition);
     OMX_TRACE(error);
-    PrintPortDef(cameraOutputPortDefinition);
+    //PrintPortDef(cameraOutputPortDefinition);
 	
 	//camera color spaces
 	/*
@@ -357,9 +357,9 @@ void VideoModeEngine::writeFile()
 	if(didWriteFile)
 	{
 		ofLogVerbose(__func__) << filePath  << " WRITE PASS";
-        if(recordingListener)
+        if(videoModeEngineListener)
         {
-            recordingListener->onRecordingComplete(filePath);
+            videoModeEngineListener->onRecordingComplete(filePath);
         }
 	}
     else
@@ -557,7 +557,7 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
         
         
-        //Create splitter->egl_render Tunnel
+        //Create splitter->render Tunnel
         error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT1,
                                 render, renderInputPort);
         OMX_TRACE(error);
@@ -672,9 +672,7 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
         OMX_TRACE(error);
     }else
     {
-        directDisplay = new DirectDisplay();
-        error = directDisplay->setup(render, 0, 0, settings.width, settings.height);
-        OMX_TRACE(error);
+        directDisplay.setup(render, 0, 0, settings.width, settings.height);
     }
     
     if(settings.doRecording)
@@ -685,79 +683,95 @@ OMX_ERRORTYPE VideoModeEngine::onCameraEventParamOrConfigChanged()
     }
     
     isOpen = true;
+    videoModeEngineListener->onVideoEngineStart();
     return error;
-}
-
-
-#pragma mark DRAW
-void VideoModeEngine::setDisplayAlpha(int alpha)
-{
-    if(directDisplay)
-    {
-        directDisplay->alpha = alpha;
-        directDisplay->applyConfig();
-    }
-}
-
-void VideoModeEngine::setDisplayLayer(int layer)
-{
-    if(directDisplay)
-    {
-        directDisplay->layer = layer;
-        directDisplay->applyConfig();
-    }
-}
-
-void VideoModeEngine::setDisplayRotation(int rotationDegrees)
-{
-    if(directDisplay)
-    {
-        directDisplay->rotateDisplay(rotationDegrees);
-        directDisplay->applyConfig();
-        
-    }
-}
-
-void VideoModeEngine::setDisplayDrawRectangle(ofRectangle drawRectangle)
-{
-    if(directDisplay)
-    {
-        directDisplay->drawRectangle = drawRectangle;
-        directDisplay->applyConfig();
-    }
-}
-
-void VideoModeEngine::setDisplayCropRectangle(ofRectangle cropRectangle)
-{
-    if(directDisplay)
-    {
-        directDisplay->cropRectangle = cropRectangle;
-        directDisplay->applyConfig();
-    }
-}
-
-void VideoModeEngine::setDisplayMirror(bool doMirror)
-{
-    if(directDisplay)
-    {
-        directDisplay->doMirror = doMirror;
-        directDisplay->applyConfig();
-    }
 }
 
 void VideoModeEngine::close()
 {
+    
+    if(isClosing) return;
+    
+    isClosing = true;
+    
+    if(settings.doRecording && !didWriteFile)
+    {
+        writeFile();
+    }
+    
+    directDisplay.close();
+    
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+
+    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+    OMX_INIT_STRUCTURE(cameraport);
+    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
+    cameraport.bEnabled = OMX_FALSE;
+    
+    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);    
+    OMX_TRACE(error);
+    
+    
+    error = DisableAllPortsForComponent(&camera);
+    OMX_TRACE(error);
+    
+    if(settings.doRecording)
+    {
+        error = DisableAllPortsForComponent(&splitter);
+        OMX_TRACE(error);
+        
+        error = DisableAllPortsForComponent(&encoder);
+        OMX_TRACE(error);
+    }
+    
+    error = DisableAllPortsForComponent(&render);
+    OMX_TRACE(error);
+    
+    
+    error = OMX_FreeHandle(camera);
+    OMX_TRACE(error);
+    
+    if(settings.doRecording)
+    {
+        error = OMX_FreeHandle(encoder);
+        OMX_TRACE(error);
+        
+        error = OMX_FreeHandle(splitter);
+        OMX_TRACE(error);
+    }
+    
+    error = OMX_FreeHandle(render);
+    OMX_TRACE(error);
+    
+    if(videoModeEngineListener)
+    {
+        videoModeEngineListener->onVideoEngineClose();
+    }
+    
+}
+
+#if 0
+void VideoModeEngine::close()
+{
+    OMX_ERRORTYPE error = OMX_ErrorNone;
+
     if(isClosing) return;
     
     isClosing = true;
     ofLogVerbose(__func__) << "START";
-    if(directDisplay)
-    {
-        delete directDisplay;
-        directDisplay = NULL;
-    }
     
-    OMX_ERRORTYPE error = OMX_ErrorNone;
+    
+    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
+    OMX_INIT_STRUCTURE(cameraport);
+    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
+    cameraport.bEnabled = OMX_FALSE;
+    
+    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);    
+    OMX_TRACE(error);
+    
+    
+    
+    
     if(settings.doRecording && !didWriteFile)
     {
         writeFile();
@@ -795,13 +809,28 @@ void VideoModeEngine::close()
     
     if(settings.doRecording)
     {
+        
+        error = SetComponentState(encoder, OMX_StatePause);
+        OMX_TRACE(error);
+        
+        error = SetComponentState(encoder, OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        error = FlushOMXComponent(encoder, VIDEO_ENCODE_OUTPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        error = SetComponentState(encoder, OMX_StateLoaded);
+        OMX_TRACE(error);
+        
         error = OMX_FreeBuffer(encoder, VIDEO_ENCODE_OUTPUT_PORT, encoderOutputBuffer);
         OMX_TRACE(error);
         
         encoderOutputBuffer = NULL;
-        
-        error = SetComponentState(encoder, OMX_StateIdle);
-        OMX_TRACE(error);
     }
   
     error = SetComponentState(render, OMX_StateIdle);
@@ -837,6 +866,16 @@ void VideoModeEngine::close()
     
     if(settings.doRecording)
     {
+        
+        error = SetComponentState(splitter, OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = SetComponentState(encoder, OMX_StateIdle);
+        OMX_TRACE(error);
+        
+        error = SetComponentState(render, OMX_StateIdle);
+        OMX_TRACE(error);
+        
         //Destroy splitter->encoder Tunnel
         error = OMX_SetupTunnel(splitter, VIDEO_SPLITTER_OUTPUT_PORT2, NULL, 0);
         OMX_TRACE(error);
@@ -852,13 +891,7 @@ void VideoModeEngine::close()
         OMX_TRACE(error);
     }
     
-    OMX_CONFIG_PORTBOOLEANTYPE cameraport;
-    OMX_INIT_STRUCTURE(cameraport);
-    cameraport.nPortIndex = CAMERA_OUTPUT_PORT;
-    cameraport.bEnabled = OMX_FALSE;
-    
-    error =OMX_SetParameter(camera, OMX_IndexConfigPortCapturing, &cameraport);    
-    OMX_TRACE(error);
+
     
     error = OMX_FreeHandle(camera);
     OMX_TRACE(error);
@@ -880,9 +913,12 @@ void VideoModeEngine::close()
         delete[] pixels;
         pixels = NULL;
     }
-    
+    if(videoModeEngineListener)
+    {
+        videoModeEngineListener->onVideoEngineClose();
+    }
 }
-
+#endif
 VideoModeEngine::~VideoModeEngine()
 {
     

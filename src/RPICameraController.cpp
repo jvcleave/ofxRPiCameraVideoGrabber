@@ -2,6 +2,8 @@
 
 void RPICameraController::applyAllSettings()
 {
+    ofLogNotice(__func__) << settings.toString();
+    
     setExposurePreset(settings.exposurePreset); 
     setMeteringType(settings.meteringType);
     setAutoISO(settings.autoISO);
