@@ -6,10 +6,13 @@ RPICameraController::RPICameraController()
     resetValues();
 }
 
+
 void RPICameraController::applyAllSettings()
 {
     if(!camera)
     {
+        ofLogError(__func__) << "NO CAMERA";
+        
         return;
     }
     ofLogNotice(__func__) << settings.toString();
@@ -28,7 +31,7 @@ void RPICameraController::applyAllSettings()
     setFrameStabilization(settings.frameStabilization);
     setWhiteBalance(settings.whiteBalance);
     setImageFilter(settings.imageFilter);
-    setColorEnhancement(false);     //TODO implement
+    //setColorEnhancement(false);     //TODO implement
     setDRE(settings.dreLevel);
     setSensorCrop(settings.cropRectangle);
     setZoomLevelNormalized(settings.zoomLevel);
@@ -305,7 +308,7 @@ void RPICameraController::setSaturation(int saturation_) //-100 to 100
     if(!camera) return;
     
     settings.saturation = saturation_;
-    
+    ofLogNotice(__func__) << "settings.saturation: " << settings.saturation;
     OMX_ERRORTYPE error = OMX_ErrorNone;
     saturationConfig.nSaturation    = settings.saturation; 
     
@@ -736,14 +739,15 @@ OMX_ERRORTYPE RPICameraController::setEvCompensation(int value)
 OMX_ERRORTYPE RPICameraController::setWhiteBalance(OMX_WHITEBALCONTROLTYPE whiteBalance_)
 {    
     if(!camera) return OMX_ErrorNone;
-
+    ofLogNotice(__func__) << GetWhiteBalanceString(whiteBalance_);
+    
     whiteBalanceConfig.eWhiteBalControl = whiteBalance_;
     
     OMX_ERRORTYPE error = OMX_SetConfig(camera, OMX_IndexConfigCommonWhiteBalance, &whiteBalanceConfig);
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        settings.whiteBalance = whiteBalance_;
+        settings.whiteBalance = GetWhiteBalanceString(whiteBalance_);
     }
     return error;
 }

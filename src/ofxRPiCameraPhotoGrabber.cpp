@@ -1,6 +1,6 @@
 #include "ofxRPiCameraPhotoGrabber.h"
 
-
+bool didTakePhoto = false;
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
     camera = NULL;
@@ -10,7 +10,7 @@ ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 void ofxRPiCameraPhotoGrabber::reset()
 {
     resetValues();
-    //settings.resetValues();
+    settings.resetValues();
     applyAllSettings();
 }
 
@@ -26,12 +26,6 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
-    
-    resetValues();
-    
-    OMX_ERRORTYPE error = applyExposure();
-    OMX_TRACE(error);
-    
     applyAllSettings();
 
 }
@@ -52,6 +46,7 @@ bool ofxRPiCameraPhotoGrabber::isReady()
 
 void ofxRPiCameraPhotoGrabber::takePhoto()
 {    
+    didTakePhoto = true;
     engine.takePhoto();
     camera = NULL;
 

@@ -18,6 +18,32 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
+    
+    OMX_CALLBACKTYPE encoderCallbacks;
+    
+    encoderCallbacks.EventHandler       = &PhotoEngine::nullEventHandlerCallback;
+    encoderCallbacks.EmptyBufferDone    = &PhotoEngine::nullEmptyBufferDone;
+    encoderCallbacks.FillBufferDone     = &PhotoEngine::encoderFillBufferDone;
+    
+    error =OMX_GetHandle(&encoder, OMX_IMAGE_ENCODER, this , &encoderCallbacks);
+    OMX_TRACE(error);
+    
+    error = DisableAllPortsForComponent(&encoder);
+    OMX_TRACE(error);
+    
+    
+    //Set up renderer
+    OMX_CALLBACKTYPE renderCallbacks;
+    renderCallbacks.EventHandler    = &PhotoEngine::nullEventHandlerCallback;
+    renderCallbacks.EmptyBufferDone    = &PhotoEngine::nullEmptyBufferDone;
+    renderCallbacks.FillBufferDone    = &PhotoEngine::nullFillBufferDone;
+    
+    
+    OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
+    DisableAllPortsForComponent(&render);
+    
+    
+    
     OMX_CALLBACKTYPE cameraCallbacks;
     
     cameraCallbacks.EventHandler    = &PhotoEngine::cameraEventHandlerCallback;
@@ -52,28 +78,6 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
     OMX_TRACE(error);
     
-    //Set the resolution
-    OMX_PARAM_PORTDEFINITIONTYPE stillPortConfig;
-    OMX_INIT_STRUCTURE(stillPortConfig);
-    stillPortConfig.nPortIndex = CAMERA_STILL_OUTPUT_PORT;
-    
-    error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
-    OMX_TRACE(error);
-    if(error == OMX_ErrorNone) 
-    {
-        stillPortConfig.format.image.nFrameWidth        = settings.width;
-        stillPortConfig.format.image.nFrameHeight       = settings.height;
-        
-        stillPortConfig.format.video.nStride            = settings.width;
-        
-        
-        //not setting also works
-        //stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
-        
-        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
-        OMX_TRACE(error);
-        
-    }
     
     //Set the preview resolution
     OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
@@ -100,7 +104,32 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
             ofLogError(__func__) << GetOMXErrorString(error) << " WITH Camera state: " << PrintOMXState(camera);
         }
     }
-    listener->onPhotoEngineStart(camera);
+    
+    
+    //Set the resolution
+    OMX_PARAM_PORTDEFINITIONTYPE stillPortConfig;
+    OMX_INIT_STRUCTURE(stillPortConfig);
+    stillPortConfig.nPortIndex = CAMERA_STILL_OUTPUT_PORT;
+    
+    error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
+    OMX_TRACE(error);
+    if(error == OMX_ErrorNone) 
+    {
+        stillPortConfig.format.image.nFrameWidth        = settings.width;
+        stillPortConfig.format.image.nFrameHeight       = settings.height;
+        
+        stillPortConfig.format.video.nStride            = settings.width;
+        
+        
+        //not setting also works
+        //stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
+        
+        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
+        OMX_TRACE(error);
+        
+    }
+    
+    
 
 }
 
@@ -167,6 +196,9 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     OMX_ERRORTYPE error = SetComponentState(camera, OMX_StateIdle);
     OMX_TRACE(error);
 
+    
+
+    
     //PrintSensorModes(camera);
     
     OMX_FRAMESIZETYPE frameSizeConfig;
@@ -203,37 +235,27 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);
     
 
-    
+    /*
     OMX_PARAM_CAMERACAPTUREMODETYPE captureMode;
     OMX_INIT_STRUCTURE( captureMode );
     captureMode.nPortIndex = OMX_ALL;
     captureMode.eMode = OMX_CameraCaptureModeResumeViewfinderImmediately;
     error =OMX_SetParameter(camera, OMX_IndexParamCameraCaptureMode, &captureMode);    
     OMX_TRACE(error);    
-    
-    //Set up renderer
-    OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler	= &PhotoEngine::nullEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone	= &PhotoEngine::nullEmptyBufferDone;
-    renderCallbacks.FillBufferDone	= &PhotoEngine::nullFillBufferDone;
-    
-
-    OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
-    DisableAllPortsForComponent(&render);
-    
+    */
+ 
 
     //Set renderer to Idle
     error = SetComponentState(render, OMX_StateIdle);
     OMX_TRACE(error);
    
-    //Set camera to Idle
-    error = SetComponentState(camera, OMX_StateIdle);
-    OMX_TRACE(error);
     
-
+    
     
     error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
     OMX_TRACE(error);
+    
+    
     
     //Enable camera preview port
     error = WaitForPortEnable(camera, CAMERA_PREVIEW_PORT);
@@ -244,11 +266,13 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     error = WaitForPortEnable(render, VIDEO_RENDER_INPUT_PORT);
     OMX_TRACE(error);
     
-    
+
+
     //Start camera
     error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);  
     
+
     //Start renderer
     error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
@@ -258,6 +282,9 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     directDisplay.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
     
     didOpen = true;
+    
+    listener->onPhotoEngineStart(camera);
+
     return error;
 }
 
@@ -275,22 +302,9 @@ void PhotoEngine::takePhoto()
     OMX_TRACE(error);
     
     
-    OMX_CALLBACKTYPE encoderCallbacks;
-    
-    encoderCallbacks.EventHandler       = &PhotoEngine::nullEventHandlerCallback;
-    encoderCallbacks.EmptyBufferDone    = &PhotoEngine::nullEmptyBufferDone;
-    encoderCallbacks.FillBufferDone     = &PhotoEngine::encoderFillBufferDone;
-    
-    error =OMX_GetHandle(&encoder, OMX_IMAGE_ENCODER, this , &encoderCallbacks);
+    //Set encoder to Idle
+    error = SetComponentState(encoder, OMX_StateIdle);
     OMX_TRACE(error);
-    
-    error = DisableAllPortsForComponent(&encoder);
-    OMX_TRACE(error);
-    
-    // Encoder input port definition is done automatically upon tunneling
-    
-    
-    // Configure video format emitted by encoder output port
     
     OMX_PARAM_PORTDEFINITIONTYPE encoderOutputPortDefinition;
     OMX_INIT_STRUCTURE(encoderOutputPortDefinition);
@@ -312,11 +326,6 @@ void PhotoEngine::takePhoto()
         
     }
     
-    //Set encoder to Idle
-    error = SetComponentState(encoder, OMX_StateIdle);
-    OMX_TRACE(error);
-    
-    
     //Create camera->encoder Tunnel
     error = OMX_SetupTunnel(camera, CAMERA_STILL_OUTPUT_PORT, encoder, IMAGE_ENCODER_INPUT_PORT);
     OMX_TRACE(error);
@@ -337,11 +346,12 @@ void PhotoEngine::takePhoto()
     
     error =  OMX_AllocateBuffer(encoder, &encoderOutputBuffer, IMAGE_ENCODER_OUTPUT_PORT, NULL, encoderOutputBufferSize);
     OMX_TRACE(error);
+    
+    
 
-        
     
     
-    //Start camera
+    
     error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);
     
@@ -349,6 +359,7 @@ void PhotoEngine::takePhoto()
     //Start encoder
     error = SetComponentState(encoder, OMX_StateExecuting);
     OMX_TRACE(error);
+    
     
     
     error = OMX_FillThisBuffer(encoder, encoderOutputBuffer);
@@ -447,7 +458,7 @@ void PhotoEngine::close(bool isExiting)
     error = OMX_FreeBuffer(encoder, IMAGE_ENCODER_OUTPUT_PORT, encoderOutputBuffer);
     OMX_TRACE(error);
     encoderOutputBuffer = NULL;
-
+/*
     error = FlushOMXComponent(render, VIDEO_RENDER_INPUT_PORT);
     OMX_TRACE(error);
     
@@ -462,7 +473,7 @@ void PhotoEngine::close(bool isExiting)
     
     error = FlushOMXComponent(encoder, IMAGE_ENCODER_OUTPUT_PORT);
     OMX_TRACE(error);
-    
+    */
     
     error = OMX_SetupTunnel(camera, CAMERA_STILL_OUTPUT_PORT, NULL, 0);
     OMX_TRACE(error);

@@ -20,9 +20,12 @@ void ofApp::setup()
     cameraSettings.stillPreviewWidth = 1280;
     cameraSettings.stillPreviewHeight = 720;
 
-    
     //cameraSettings.stillPreviewWidth = cameraSettings.width;
     //cameraSettings.stillPreviewHeight = cameraSettings.height;
+    cameraSettings.saturation = -100;
+    cameraSettings.sharpness = 100;
+    cameraSettings.brightness = 75;
+
     cameraSettings.photoGrabberListener = this;
 	photoGrabber.setup(cameraSettings);
 
@@ -31,7 +34,7 @@ void ofApp::setup()
     photoGrabber.setContrast(100);
     photoGrabber.setBrightness(100);
     //photoGrabber.setZoomLevelNormalized(0.2);
-    photoGrabber.setSaturation(-100);*/
+    */
     
     //photoGrabber.rotateClockwise();
     ofLogNotice(__func__) << photoGrabber.settings.toString();
@@ -43,7 +46,7 @@ void ofApp::setup()
 
 //--------------------------------------------------------------
 void ofApp::update()
-{
+{/*
     int saturation = photoGrabber.getSaturation();
     if(saturation+1 < 100)
     {
@@ -52,14 +55,14 @@ void ofApp::update()
     {
         saturation = -100;
     }
-    photoGrabber.setSaturation(saturation);
+    photoGrabber.setSaturation(saturation);*/
 }
 
 
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    photoGrabber.draw(0, 0, ofGetWidth(), ofGetHeight());
+    //photoGrabber.draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
 //--------------------------------------------------------------

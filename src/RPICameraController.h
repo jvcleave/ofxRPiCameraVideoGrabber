@@ -33,8 +33,6 @@ public:
     string getLEDPin();
     bool hasGPIOProgram;
     OMXCameraSettings settings;
-
-
     
     void checkBurstMode();
     void checkFlickerCancellation();

@@ -997,7 +997,7 @@ string omxErrorToString(OMX_ERRORTYPE error)
 #define OMX_LOG_LEVEL_SILENT 9
 
 #ifndef OMX_LOG_LEVEL
-#define OMX_LOG_LEVEL OMX_LOG_LEVEL_ERROR_ONLY
+#define OMX_LOG_LEVEL OMX_LOG_LEVEL_DEV
 #endif
 
 static  
@@ -1553,12 +1553,40 @@ OMX_ERRORTYPE WaitForPortEnable(OMX_HANDLETYPE component, int port)
 }
 
 static
+OMX_ERRORTYPE WaitForPortDisable(OMX_HANDLETYPE component, int port)
+{
+    int numAttempts = 0;
+    OMX_ERRORTYPE error = DisableComponentPort(component, port);
+    OMX_TRACE(error);
+    
+    if(error == OMX_ErrorNone)
+    {
+        bool ready = false;
+        while (!ready)
+        {
+            ready = !IsPortEnabled(component, port);
+            ofSleepMillis(20);
+            numAttempts++;
+            if(numAttempts >= 10)
+            {
+                ready = true;
+                ofLogError(__func__) << port << " TIMED OUT";
+            }
+        }
+    }
+    
+    return error;
+}
+
+static
 OMX_ERRORTYPE WaitForState(OMX_HANDLETYPE component, OMX_STATETYPE state)
 {
     int numAttempts = 0;
     
     OMX_ERRORTYPE error = SetComponentState(component, state);
-    OMX_TRACE(error);    
+    OMX_TRACE(error);  
+    if(error == OMX_ErrorSameState) return error;
+    
     if(error == OMX_ErrorNone)
     {
         bool ready = false;
@@ -1568,8 +1596,15 @@ OMX_ERRORTYPE WaitForState(OMX_HANDLETYPE component, OMX_STATETYPE state)
             OMX_STATETYPE currentState;
             error = OMX_GetState(component, &currentState);
             OMX_TRACE(error);    
-            
-            ready = (currentState == state);
+            if(currentState == state)
+            {
+                ready = true;
+                break;
+            }else
+            {
+                error = SetComponentState(component, state);
+                OMX_TRACE(error);
+            }
             ofSleepMillis(20);
             numAttempts++;
             if(numAttempts >= 10)
