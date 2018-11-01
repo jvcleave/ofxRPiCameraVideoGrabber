@@ -3,7 +3,7 @@
 
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
-    resetValues();
+    camera = NULL;
 }
 
 
@@ -21,9 +21,7 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     listener = settings.photoGrabberListener;
     ofLogNotice(__func__) << settings.toString();
    
-    engine.setup(settings, this);
-    camera = engine.camera;
-    
+    engine.setup(settings, this);    
 }
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
@@ -55,6 +53,8 @@ bool ofxRPiCameraPhotoGrabber::isReady()
 void ofxRPiCameraPhotoGrabber::takePhoto()
 {    
     engine.takePhoto();
+    camera = NULL;
+
 }
 
 void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)

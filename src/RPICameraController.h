@@ -26,7 +26,8 @@ class RPICameraController
 {
 public:
     
-    
+    RPICameraController();
+    virtual ~RPICameraController(){};
     OMX_HANDLETYPE camera;
 
     string getLEDPin();
