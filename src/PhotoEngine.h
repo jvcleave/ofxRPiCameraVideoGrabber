@@ -18,7 +18,6 @@ class PhotoEngineListener
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
     virtual void onPhotoEngineStart(OMX_HANDLETYPE)=0;
-    virtual void onPhotoEngineClose() = 0;
 
 };
 class PhotoEngine
@@ -29,7 +28,7 @@ public:
     void setup(OMXCameraSettings&, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
     void takePhoto();
-    void close(bool isExiting);
+    void close();
     
     
     OMX_HANDLETYPE camera;

@@ -46,9 +46,6 @@ public:
     
     void onTakePhotoComplete(string filePath) override;
     void onPhotoEngineStart(OMX_HANDLETYPE camera_) override;
-    
-    void onPhotoEngineClose() override;
     vector<string> photosTaken;
     
-    void reset();
 };

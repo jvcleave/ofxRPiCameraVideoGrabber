@@ -1,17 +1,8 @@
 #include "ofxRPiCameraPhotoGrabber.h"
 
-bool didTakePhoto = false;
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
     camera = NULL;
-}
-
-
-void ofxRPiCameraPhotoGrabber::reset()
-{
-    resetValues();
-    settings.resetValues();
-    applyAllSettings();
 }
 
 
@@ -21,22 +12,14 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     listener = settings.photoGrabberListener;
     ofLogNotice(__func__) << settings.toString();
    
-    engine.setup(settings, this);    
+    engine.setup(settings, this); //wait until onPhotoEngineStart to do anything   
 }
+
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
     applyAllSettings();
-
 }
-
-
-void ofxRPiCameraPhotoGrabber::onPhotoEngineClose()
-{
-    ofLogNotice(__func__) << endl;
-    //setup(settings);
-}
-
 
 
 bool ofxRPiCameraPhotoGrabber::isReady()
@@ -46,10 +29,8 @@ bool ofxRPiCameraPhotoGrabber::isReady()
 
 void ofxRPiCameraPhotoGrabber::takePhoto()
 {    
-    didTakePhoto = true;
     engine.takePhoto();
     camera = NULL;
-
 }
 
 void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
@@ -57,7 +38,6 @@ void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
     photosTaken.push_back(filePath);
     if(listener)
     {
-        
         listener->onTakePhotoComplete(filePath);
     }else
     {

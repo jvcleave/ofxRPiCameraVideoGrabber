@@ -12,13 +12,8 @@ public:
     OMX_CONFIG_DISPLAYREGIONTYPE displayConfig;
     OMX_CONFIG_DISPLAYREGIONTYPE displayConfigDefaults;
     bool isReady;
-    
     OMX_HANDLETYPE renderComponent;
-    
-
-    
-    bool doHDMISync;
-    
+    bool doHDMISync;    
     ofRectangle drawRectangle;
     ofRectangle cropRectangle;
     bool doFullScreen;
@@ -49,9 +44,8 @@ public:
         OMX_INIT_STRUCTURE(displayConfig);
         displayConfig.nPortIndex = VIDEO_RENDER_INPUT_PORT;
         displayConfigDefaults = displayConfig;
-        
-  
     };
+    
     
     ~DirectDisplay()
     {

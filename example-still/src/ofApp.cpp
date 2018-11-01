@@ -70,24 +70,20 @@ void ofApp::keyPressed  (int key)
 {
 	ofLog(OF_LOG_VERBOSE, "%c keyPressed", key);
 	
-	
-	if (key == 'e')
-	{
-		photoGrabber.setImageFilter(filterCollection.getNextFilter());
-	}
-	
-	if (key == 'g')
-	{
-		doDrawInfo = !doDrawInfo;
-	}
-	if (key == 'r')
-	{
-        photoGrabber.reset();
-	}
-	if (key == 't')
-	{
-		photoGrabber.takePhoto();
-	}
+    switch (key)
+    {
+        case 'e':
+        {
+            photoGrabber.setImageFilter(filterCollection.getNextFilter());
+            break;
+        }
+        case 't':
+        {
+            photoGrabber.takePhoto();
+            break;
+        } 
+    }
+
 }
 
 void ofApp::onCharacterReceived(KeyListenerEventData& e)
