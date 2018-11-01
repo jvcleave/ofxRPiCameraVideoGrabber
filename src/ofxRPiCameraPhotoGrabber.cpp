@@ -6,7 +6,16 @@ ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
     resetValues();
 }
 
-void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
+
+void ofxRPiCameraPhotoGrabber::reset()
+{
+    resetValues();
+    //settings.resetValues();
+    applyAllSettings();
+}
+
+
+void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     settings = omxCameraSettings_;
     listener = settings.photoGrabberListener;
@@ -19,6 +28,12 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
+    
+    resetValues();
+    
+    OMX_ERRORTYPE error = applyExposure();
+    OMX_TRACE(error);
+    
     applyAllSettings();
 
 }

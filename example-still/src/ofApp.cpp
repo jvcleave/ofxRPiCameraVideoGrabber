@@ -26,14 +26,15 @@ void ofApp::setup()
     cameraSettings.photoGrabberListener = this;
 	photoGrabber.setup(cameraSettings);
 
+    /*
     photoGrabber.setSharpness(100);
     photoGrabber.setContrast(100);
     photoGrabber.setBrightness(100);
     //photoGrabber.setZoomLevelNormalized(0.2);
-    photoGrabber.setSaturation(-100);
+    photoGrabber.setSaturation(-100);*/
     
     //photoGrabber.rotateClockwise();
-    ofLog() << photoGrabber.settings.toString();
+    ofLogNotice(__func__) << photoGrabber.settings.toString();
     
 	filterCollection.setup();
 	
@@ -43,7 +44,15 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
-	
+    int saturation = photoGrabber.getSaturation();
+    if(saturation+1 < 100)
+    {
+        saturation++;
+    }else
+    {
+        saturation = -100;
+    }
+    photoGrabber.setSaturation(saturation);
 }
 
 
@@ -68,8 +77,9 @@ void ofApp::keyPressed  (int key)
 	{
 		doDrawInfo = !doDrawInfo;
 	}
-	if (key == 'q')
+	if (key == 'r')
 	{
+        photoGrabber.reset();
 	}
 	if (key == 't')
 	{

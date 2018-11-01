@@ -100,6 +100,8 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
             ofLogError(__func__) << GetOMXErrorString(error) << " WITH Camera state: " << PrintOMXState(camera);
         }
     }
+    listener->onPhotoEngineStart(camera);
+
 }
 
 OMX_ERRORTYPE PhotoEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder, OMX_PTR photoEngine, OMX_BUFFERHEADERTYPE* encoderOutputBuffer)
@@ -116,8 +118,8 @@ OMX_ERRORTYPE PhotoEngine::encoderFillBufferDone(OMX_HANDLETYPE encoder, OMX_PTR
     bool endOfFrame = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_ENDOFFRAME);
     bool endOfStream = (encoderOutputBuffer->nFlags & OMX_BUFFERFLAG_EOS);
     
-    ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME: " << endOfFrame;
-    ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
+    //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_ENDOFFRAME: " << endOfFrame;
+    //ofLogVerbose(__func__) << "OMX_BUFFERFLAG_EOS: " << endOfStream;
     if(endOfFrame || endOfStream)
     {
         engine->writeFile();
@@ -256,7 +258,6 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     directDisplay.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
     
     didOpen = true;
-    listener->onPhotoEngineStart(camera);
     return error;
 }
 

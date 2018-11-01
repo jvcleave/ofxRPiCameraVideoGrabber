@@ -25,7 +25,7 @@ public:
     
 	ofxRPiCameraPhotoGrabber();
     ~ofxRPiCameraPhotoGrabber();
-    void setup(OMXCameraSettings&);
+    void setup(OMXCameraSettings);
     bool isReady();
 	int getWidth();
 	int getHeight();
@@ -49,4 +49,6 @@ public:
     
     void onPhotoEngineClose() override;
     vector<string> photosTaken;
+    
+    void reset();
 };
