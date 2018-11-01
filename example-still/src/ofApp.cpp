@@ -28,7 +28,7 @@ void ofApp::setup()
 
     photoGrabber.setSharpness(100);
     photoGrabber.setContrast(100);
-    //photoGrabber.setBrightness(100);
+    photoGrabber.setBrightness(100);
     //photoGrabber.setZoomLevelNormalized(0.2);
     photoGrabber.setSaturation(-100);
     

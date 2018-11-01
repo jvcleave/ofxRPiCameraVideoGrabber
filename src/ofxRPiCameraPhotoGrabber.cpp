@@ -10,7 +10,7 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 {
     settings = omxCameraSettings_;
     listener = settings.photoGrabberListener;
-    ofLog() << settings.toString();
+    ofLogNotice(__func__) << settings.toString();
    
     engine.setup(settings, this);
     camera = engine.camera;
@@ -27,8 +27,7 @@ void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 void ofxRPiCameraPhotoGrabber::onPhotoEngineClose()
 {
     ofLogNotice(__func__) << endl;
-    setup(settings);
-    
+    //setup(settings);
 }
 
 

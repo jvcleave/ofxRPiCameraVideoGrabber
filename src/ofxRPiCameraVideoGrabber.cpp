@@ -22,8 +22,8 @@ void ofxRPiCameraVideoGrabber::reset()
 void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
 {
     settings = omxCameraSettings_;
-    ofLog() << settings.toJSON().dump();
-    ofLogVerbose(__func__) << "settings: " << settings.toString();
+    ofLogNotice(__func__) << settings.toJSON().dump();
+    ofLogNotice(__func__) << "settings: " << settings.toString();
     engine.setup(settings, this);
 }
 

@@ -1526,6 +1526,64 @@ bool IsPortDisabled(OMX_HANDLETYPE handle, int port)
     return result;
 }
 
+static
+OMX_ERRORTYPE WaitForPortEnable(OMX_HANDLETYPE component, int port)
+{
+    int numAttempts = 0;
+    OMX_ERRORTYPE error = EnableComponentPort(component, port);
+    OMX_TRACE(error);
+    
+    if(error == OMX_ErrorNone)
+    {
+        bool ready = false;
+        while (!ready)
+        {
+            ready = IsPortEnabled(component, port);
+            ofSleepMillis(20);
+            numAttempts++;
+            if(numAttempts >= 10)
+            {
+                ready = true;
+                ofLogError(__func__) << port << " TIMED OUT";
+            }
+        }
+    }
+    
+    return error;
+}
+
+static
+OMX_ERRORTYPE WaitForState(OMX_HANDLETYPE component, OMX_STATETYPE state)
+{
+    int numAttempts = 0;
+    
+    OMX_ERRORTYPE error = SetComponentState(component, state);
+    OMX_TRACE(error);    
+    if(error == OMX_ErrorNone)
+    {
+        bool ready = false;
+        while (!ready)
+        {
+            
+            OMX_STATETYPE currentState;
+            error = OMX_GetState(component, &currentState);
+            OMX_TRACE(error);    
+            
+            ready = (currentState == state);
+            ofSleepMillis(20);
+            numAttempts++;
+            if(numAttempts >= 10)
+            {
+                ready = true;
+                ofLogError(__func__) << " TIMED OUT SETTING STATE" << GetOMXStateString(state);
+            }
+        }
+    }
+    
+    return error;
+}
+
+
 static 
 void PrintSensorModes(OMX_HANDLETYPE camera)
 {
