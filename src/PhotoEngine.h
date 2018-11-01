@@ -17,7 +17,9 @@ class PhotoEngineListener
 {
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
-    virtual void onPhotoEngineStart()=0;
+    virtual void onPhotoEngineStart(OMX_HANDLETYPE)=0;
+    virtual void onPhotoEngineClose() = 0;
+
 };
 class PhotoEngine
 {
@@ -27,7 +29,7 @@ public:
     void setup(OMXCameraSettings&, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
     void takePhoto();
-    void close();
+    void close(bool isExiting);
     
     
     OMX_HANDLETYPE camera;
@@ -35,7 +37,7 @@ public:
     DirectDisplay directDisplay;
     
     PhotoEngineListener* listener;
-    void onEncoderOutputPortEnabled();
+    OMX_ERRORTYPE onEncoderInputPortEnabled();
 private:
     
     bool didOpen;
@@ -44,9 +46,12 @@ private:
     OMX_HANDLETYPE encoder;
 
     
-    bool writeFile();
+    void writeFile();
     
-    OMX_U32 encoderBufferSize;
+    OMX_U32 encoderInputBufferSize;
+    OMX_U32 encoderOutputBufferSize;
+    OMX_U32 cameraOutputBufferSize;
+
     ofBuffer recordingFileBuffer;
 
     
@@ -55,6 +60,9 @@ private:
 
     
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
+    OMX_BUFFERHEADERTYPE* encoderInputBuffer;
+    OMX_BUFFERHEADERTYPE* cameraOutputBuffer;
+
 
     
     static OMX_ERRORTYPE 
@@ -87,6 +95,17 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     
+    static OMX_ERRORTYPE
+    cameraFillBufferDone(OMX_HANDLETYPE hComponent,
+                          OMX_PTR pAppData,
+                          OMX_BUFFERHEADERTYPE* pBuffer);
+    
+    static OMX_ERRORTYPE 
+    cameraEmptyBufferDone(OMX_HANDLETYPE hComponent, 
+                        OMX_PTR pAppData, 
+                        OMX_BUFFERHEADERTYPE* pBuffer);
+    
+    
     static OMX_ERRORTYPE 
     encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
                                OMX_PTR pAppData,  
@@ -95,9 +114,14 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     static OMX_ERRORTYPE
-    encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
-                          OMX_IN OMX_PTR pAppData,
-                          OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
+    encoderFillBufferDone(OMX_HANDLETYPE hComponent,
+                          OMX_PTR pAppData,
+                          OMX_BUFFERHEADERTYPE* pBuffer);
+    
+    static OMX_ERRORTYPE
+    encoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
+                         OMX_PTR pAppData,
+                         OMX_BUFFERHEADERTYPE* pBuffer);
 };
 
 

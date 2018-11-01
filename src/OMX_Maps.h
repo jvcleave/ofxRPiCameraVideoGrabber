@@ -1491,6 +1491,42 @@ OMX_ERRORTYPE FlushOMXComponent(OMX_HANDLETYPE handle, int port)
 }
 
 static 
+bool IsPortEnabled(OMX_HANDLETYPE handle, int port)
+{
+    OMX_ERRORTYPE error;
+    bool result = false;
+    OMX_PARAM_PORTDEFINITIONTYPE portdef;
+    OMX_INIT_STRUCTURE(portdef);
+    portdef.nPortIndex = port;
+    
+    error = OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &portdef);
+    OMX_TRACE(error);
+    if(portdef.bEnabled == OMX_TRUE)
+    {
+        result = true;
+    }
+    return result;
+}
+
+static 
+bool IsPortDisabled(OMX_HANDLETYPE handle, int port)
+{
+    OMX_ERRORTYPE error;
+    bool result = false;
+    OMX_PARAM_PORTDEFINITIONTYPE portdef;
+    OMX_INIT_STRUCTURE(portdef);
+    portdef.nPortIndex = port;
+    
+    error = OMX_GetParameter(handle, OMX_IndexParamPortDefinition, &portdef);
+    OMX_TRACE(error);
+    if(portdef.bEnabled == OMX_FALSE)
+    {
+        result = true;
+    }
+    return result;
+}
+
+static 
 void PrintSensorModes(OMX_HANDLETYPE camera)
 {
     OMX_ERRORTYPE error;

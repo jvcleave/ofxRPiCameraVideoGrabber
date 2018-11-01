@@ -16,11 +16,22 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
     camera = engine.camera;
     
 }
-void ofxRPiCameraPhotoGrabber::onPhotoEngineStart()
+void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
+    camera = camera_;
     applyAllSettings();
 
 }
+
+
+void ofxRPiCameraPhotoGrabber::onPhotoEngineClose()
+{
+    ofLogNotice(__func__) << endl;
+    setup(settings);
+    
+}
+
+
 
 bool ofxRPiCameraPhotoGrabber::isReady()
 {

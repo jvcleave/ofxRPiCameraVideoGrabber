@@ -45,6 +45,8 @@ public:
     ofxRPiCameraPhotoGrabberListener* listener;
     
     void onTakePhotoComplete(string filePath) override;
-    void onPhotoEngineStart() override;
+    void onPhotoEngineStart(OMX_HANDLETYPE camera_) override;
+    
+    void onPhotoEngineClose() override;
     vector<string> photosTaken;
 };
