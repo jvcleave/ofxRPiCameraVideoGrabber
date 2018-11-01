@@ -1,59 +1,54 @@
 #include "ofxRPiCameraPhotoGrabber.h"
 
-
+bool didTakePhoto = false;
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
-    resetValues();
-    engine = NULL;
+    camera = NULL;
 }
 
-void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings& omxCameraSettings_, bool doApplySettings)
+
+void ofxRPiCameraPhotoGrabber::reset()
+{
+    resetValues();
+    settings.resetValues();
+    applyAllSettings();
+}
+
+
+void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     settings = omxCameraSettings_;
     listener = settings.photoGrabberListener;
-    ofLog() << settings.toString();
-    if(engine)
-    {
-        delete engine;
-    }
-    engine = new PhotoEngine();
-    engine->listener = this;
-    engine->setup(settings);
-    camera = engine->camera;
-    if(doApplySettings)
-    {
-        resetValues();
-        applyAllSettings();
-    }
-    
+    ofLogNotice(__func__) << settings.toString();
+   
+    engine.setup(settings, this);    
 }
+void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
+{
+    camera = camera_;
+    applyAllSettings();
+
+}
+
+
+void ofxRPiCameraPhotoGrabber::onPhotoEngineClose()
+{
+    ofLogNotice(__func__) << endl;
+    //setup(settings);
+}
+
+
 
 bool ofxRPiCameraPhotoGrabber::isReady()
 {
-    if(engine)
-    {
-        return engine->isOpen();
-    }
-    return false;
+    return engine.isOpen();
 }
 
 void ofxRPiCameraPhotoGrabber::takePhoto()
-{
-    if(!engine) return;
-    
-    if(engine->takePhoto())
-    {
-        ofLog() << "TAKE PHOTO SUCCESS";
-    }else
-    {
-        ofLogError() << "TAKE PHOTO FAILED";
-        //ofLog() << "PRE RESET: " << settings.toString();
-        //settings = engine->settings;
-        engine->close();
-        setup(settings, true);
-        
-
-    }
+{    
+    didTakePhoto = true;
+    engine.takePhoto();
+    camera = NULL;
 
 }
 
@@ -93,43 +88,38 @@ void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
 
 void ofxRPiCameraPhotoGrabber::setDisplayAlpha(int alpha)
 {
-    engine->directDisplay.setDisplayAlpha(alpha);
+    engine.directDisplay.setDisplayAlpha(alpha);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayLayer(int layer)
 {
-    engine->directDisplay.setDisplayAlpha(layer);
+    engine.directDisplay.setDisplayAlpha(layer);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayRotation(int rotationDegrees)
 {
-    engine->directDisplay.setDisplayRotation(rotationDegrees);
+    engine.directDisplay.setDisplayRotation(rotationDegrees);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
 {
-    engine->directDisplay.setDisplayDrawRectangle(drawRectangle);
+    engine.directDisplay.setDisplayDrawRectangle(drawRectangle);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
 {
-    engine->directDisplay.setDisplayCropRectangle(cropRectangle);
+    engine.directDisplay.setDisplayCropRectangle(cropRectangle);
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayMirror(bool doMirror)
 {
-    engine->directDisplay.setDisplayMirror(doMirror);
+    engine.directDisplay.setDisplayMirror(doMirror);
 }
-
-
 
 
 ofxRPiCameraPhotoGrabber::~ofxRPiCameraPhotoGrabber()
 {
-    if(engine)
-    {
-        delete engine;
-    }
+    listener = NULL;
 }
 
 

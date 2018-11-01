@@ -17,44 +17,42 @@ class PhotoEngineListener
 {
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
-    
+    virtual void onPhotoEngineStart(OMX_HANDLETYPE)=0;
+    virtual void onPhotoEngineClose() = 0;
+
 };
 class PhotoEngine
 {
 public:
 	PhotoEngine();
     ~PhotoEngine();
-    void setup(OMXCameraSettings&);
-    
-    void close();
-    OMX_HANDLETYPE camera;
-
-    
+    void setup(OMXCameraSettings&, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
+    void takePhoto();
+    void close(bool isExiting);
     
-    bool takePhoto();
     
+    OMX_HANDLETYPE camera;
     OMXCameraSettings settings;
     DirectDisplay directDisplay;
     
     PhotoEngineListener* listener;
-    
 private:
-    bool hasCreatedRenderTunnel;
-    OMX_U32 encoderBufferSize;
-    OMX_ERRORTYPE buildNonCapturePipeline();
-    OMX_ERRORTYPE destroyEncoder();
     
-    bool writeFile();
-    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool didOpen;
-    OMX_ERRORTYPE configureEncoder();
-    ofBuffer recordingFileBuffer;
 
     OMX_HANDLETYPE render;
-    OMX_HANDLETYPE encoder;    
-    OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
+    OMX_HANDLETYPE encoder;
 
+    void writeFile();
+    
+    OMX_U32 encoderOutputBufferSize;
+
+    ofBuffer recordingFileBuffer;
+
+    OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
+    
+    OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
     
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
@@ -86,6 +84,17 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     
+    static OMX_ERRORTYPE
+    cameraFillBufferDone(OMX_HANDLETYPE hComponent,
+                          OMX_PTR pAppData,
+                          OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+    
+    static OMX_ERRORTYPE 
+    cameraEmptyBufferDone(OMX_HANDLETYPE hComponent, 
+                        OMX_PTR pAppData, 
+                        OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+    
+    
     static OMX_ERRORTYPE 
     encoderEventHandlerCallback(OMX_HANDLETYPE hComponent, 
                                OMX_PTR pAppData,  
@@ -94,9 +103,14 @@ private:
                                OMX_U32 nData2, 
                                OMX_PTR pEventData);
     static OMX_ERRORTYPE
-    encoderFillBufferDone(OMX_IN OMX_HANDLETYPE hComponent,
-                          OMX_IN OMX_PTR pAppData,
-                          OMX_IN OMX_BUFFERHEADERTYPE* pBuffer);
+    encoderFillBufferDone(OMX_HANDLETYPE hComponent,
+                          OMX_PTR pAppData,
+                          OMX_BUFFERHEADERTYPE* pBuffer);
+    
+    static OMX_ERRORTYPE
+    encoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
+                         OMX_PTR pAppData,
+                         OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
 };
 
 

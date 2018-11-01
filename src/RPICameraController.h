@@ -26,14 +26,13 @@ class RPICameraController
 {
 public:
     
-    
+    RPICameraController();
+    virtual ~RPICameraController(){};
     OMX_HANDLETYPE camera;
 
     string getLEDPin();
     bool hasGPIOProgram;
     OMXCameraSettings settings;
-
-
     
     void checkBurstMode();
     void checkFlickerCancellation();
