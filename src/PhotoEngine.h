@@ -34,10 +34,9 @@ public:
     OMX_HANDLETYPE camera;
     OMXCameraSettings settings;
     DirectDisplay directDisplay;
-    
+    OMX_IMAGE_CODINGTYPE codingType;    
     PhotoEngineListener* listener;
-private:
-    
+    OMX_U32 stride;
     bool didOpen;
 
     OMX_HANDLETYPE render;

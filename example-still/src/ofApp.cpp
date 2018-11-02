@@ -1,9 +1,14 @@
 #include "ofApp.h"
 
 
+
 void ofApp::onTakePhotoComplete(string fileName)
 {
-    ofLog() << "fileName: " << fileName;
+    ofLog() << "onTakePhotoComplete fileName: " << fileName;
+    
+    
+    
+    
 }
 //--------------------------------------------------------------
 void ofApp::setup()
@@ -26,8 +31,9 @@ void ofApp::setup()
     cameraSettings.sharpness = 100;
     //cameraSettings.brightness = 75;
     cameraSettings.stillImageType = "jpg";
-    
+    cameraSettings.stillQuality = 100;
     cameraSettings.photoGrabberListener = this;
+    cameraSettings.enableStillPreview = false;
 	photoGrabber.setup(cameraSettings);
 
     /*
@@ -80,7 +86,7 @@ void ofApp::keyPressed  (int key)
         }
         case 't':
         {
-            photoGrabber.takePhoto();
+            photoGrabber.takePhoto(10);
             break;
         } 
     }

@@ -29,7 +29,7 @@ public:
     bool isReady();
 	int getWidth();
 	int getHeight();
-    void takePhoto();
+    void takePhoto(int numShots=0);
     PhotoEngine engine;
     
     
@@ -47,5 +47,6 @@ public:
     void onTakePhotoComplete(string filePath) override;
     void onPhotoEngineStart(OMX_HANDLETYPE camera_) override;
     vector<string> photosTaken;
+
     
 };

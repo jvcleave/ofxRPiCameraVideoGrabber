@@ -1,10 +1,16 @@
 #include "ofxRPiCameraPhotoGrabber.h"
 
+int shotsRequested;
+int shotsTaken;
+
 ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 {
     camera = NULL;
+    shotsRequested = 0;
+    shotsTaken = 0;
 }
 
+int totalTime = 0;
 
 void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
@@ -15,10 +21,33 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     engine.setup(settings, this); //wait until onPhotoEngineStart to do anything   
 }
 
+
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
-    applyAllSettings();
+    //applyAllSettings();
+    ofLogNotice(__func__) << "shotsRequested: " << shotsRequested << " shotsTaken: " << shotsTaken;
+    if(shotsTaken)
+    {
+        if(shotsTaken < shotsRequested)
+        {
+            takePhoto();
+        }else
+        {
+            ofLog() << shotsTaken << " TOOK totalTime: " << totalTime << " EACH " << totalTime/shotsTaken;
+        }
+    }
+   
+    /*
+    string colorFormatName = OMX_Maps::getInstance().getColorFormatNames()[currentIndex];
+    
+    engine.colorFormatType = GetColorFormat(colorFormatName);
+    if(currentIndex +1 < OMX_Maps::getInstance().getColorFormatNames().size())
+    {
+        currentIndex++;
+        //ofSleepMillis(1000);
+        
+    }*/
 }
 
 
@@ -27,15 +56,33 @@ bool ofxRPiCameraPhotoGrabber::isReady()
     return engine.isOpen();
 }
 
-void ofxRPiCameraPhotoGrabber::takePhoto()
-{    
-    engine.takePhoto();
+
+int photoStart = 0;
+void ofxRPiCameraPhotoGrabber::takePhoto(int numShots)
+{   
+    shotsRequested+=numShots;
+    if(camera)
+    {
+        photoStart = ofGetElapsedTimeMillis();
+        engine.takePhoto();
+    }
+    
     camera = NULL;
 }
 
 void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
 {
+    
+    int end = ofGetElapsedTimeMillis();
+    int total = end-photoStart;
+    ofLog() << "PHOTO TOOK: " <<  total << "MS";
+    totalTime +=total;
+    photoStart = 0;
+    
     photosTaken.push_back(filePath);
+    shotsTaken++;
+    ofLogNotice(__func__) << "shotsRequested: " << shotsRequested << " shotsTaken: " << shotsTaken;
+
     if(listener)
     {
         listener->onTakePhotoComplete(filePath);

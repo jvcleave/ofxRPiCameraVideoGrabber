@@ -1617,7 +1617,12 @@ OMX_ERRORTYPE WaitForState(OMX_HANDLETYPE component, OMX_STATETYPE state)
     
     return error;
 }
-
+static
+uint32_t omxcam_round (uint32_t value, uint32_t multiplier)
+{
+    //Assumed that the rounding value is a power of 2
+    return (value + multiplier - 1) & ~(multiplier - 1);
+}
 
 static 
 void PrintSensorModes(OMX_HANDLETYPE camera)

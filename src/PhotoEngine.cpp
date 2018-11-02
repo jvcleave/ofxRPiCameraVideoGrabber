@@ -16,6 +16,12 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     settings = omxCameraSettings_;
     listener = listener_;
     
+    settings.width = omxcam_round(settings.width, 32);
+    settings.height = omxcam_round(settings.height, 16);
+
+    
+    settings.stillPreviewWidth = omxcam_round(settings.stillPreviewWidth, 32);
+    settings.stillPreviewHeight = omxcam_round(settings.stillPreviewHeight, 16);
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     
@@ -31,16 +37,19 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     error = DisableAllPortsForComponent(&encoder);
     OMX_TRACE(error);
     
-    
-    //Set up renderer
-    OMX_CALLBACKTYPE renderCallbacks;
-    renderCallbacks.EventHandler    = &PhotoEngine::nullEventHandlerCallback;
-    renderCallbacks.EmptyBufferDone = &PhotoEngine::nullEmptyBufferDone;
-    renderCallbacks.FillBufferDone  = &PhotoEngine::nullFillBufferDone;
-    
-    
-    OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
-    DisableAllPortsForComponent(&render);
+   if(settings.enableStillPreview) 
+   {
+       //Set up renderer
+       OMX_CALLBACKTYPE renderCallbacks;
+       renderCallbacks.EventHandler    = &PhotoEngine::nullEventHandlerCallback;
+       renderCallbacks.EmptyBufferDone = &PhotoEngine::nullEmptyBufferDone;
+       renderCallbacks.FillBufferDone  = &PhotoEngine::nullFillBufferDone;
+       
+       
+       OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
+       DisableAllPortsForComponent(&render);
+   }
+
     
     
     
@@ -78,32 +87,38 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     error = OMX_SetParameter(camera, OMX_IndexParamCameraDeviceNumber, &device);
     OMX_TRACE(error);
     
-    
-    //Set the preview resolution
-    OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
-    OMX_INIT_STRUCTURE(previewPortConfig);
-    previewPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
-    
-    error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
-    OMX_TRACE(error);
-    if(error == OMX_ErrorNone) 
-    {
-        previewPortConfig.format.video.nFrameWidth  = settings.stillPreviewWidth;
-        previewPortConfig.format.video.nFrameHeight = settings.stillPreviewHeight;
+    if(settings.enableStillPreview) 
+    { 
+        //Set the preview resolution
+        OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
+        OMX_INIT_STRUCTURE(previewPortConfig);
+        previewPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
         
-        previewPortConfig.format.video.nStride      = settings.stillPreviewWidth;
-        
-        
-        //not setting also works
-        //previewPortConfig.format.video.nSliceHeight    = round(settings.stillPreviewHeight / 16) * 16;
-        
-        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+        error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
         OMX_TRACE(error);
-        if(error != OMX_ErrorNone)
+        if(error == OMX_ErrorNone) 
         {
-            ofLogError(__func__) << GetOMXErrorString(error) << " WITH Camera state: " << PrintOMXState(camera);
+            previewPortConfig.format.video.nFrameWidth  = settings.stillPreviewWidth;
+            previewPortConfig.format.video.nFrameHeight = settings.stillPreviewHeight;
+            
+            previewPortConfig.format.video.nStride      = settings.stillPreviewWidth;
+            
+            
+            //not setting also works
+            previewPortConfig.format.video.nSliceHeight    = settings.stillPreviewHeight;
+            
+            error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
+            OMX_TRACE(error);
+            if(error != OMX_ErrorNone)
+            {
+                ofLogError(__func__) << GetOMXErrorString(error) << " WITH Camera state: " << PrintOMXState(camera);
+            }
         }
     }
+    
+    
+    
+    
     
     
     //Set the resolution
@@ -113,22 +128,68 @@ void PhotoEngine::setup(OMXCameraSettings& omxCameraSettings_, PhotoEngineListen
     
     error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
     OMX_TRACE(error);
-    if(error == OMX_ErrorNone) 
+    
+    stillPortConfig.format.image.nFrameWidth        = settings.width;
+    stillPortConfig.format.image.nFrameHeight       = settings.height;
+    stillPortConfig.format.image.nStride            = settings.width;
+    stillPortConfig.format.image.eCompressionFormat = OMX_IMAGE_CodingUnused;
+    
+    
+    OMX_COLOR_FORMATTYPE colorFormatType = OMX_COLOR_FormatUnused;
+    
+    codingType = settings.getStillImageType();
+    stride = settings.width;
+    switch (codingType)
     {
-        stillPortConfig.format.image.nFrameWidth    = settings.width;
-        stillPortConfig.format.image.nFrameHeight   = settings.height;
-        
-        stillPortConfig.format.image.nStride        = settings.width;
-        //stillPortConfig.format.video.eColorFormat = OMX_COLOR_FormatBRCMOpaque;
-
-        
-        //not setting also works
-        //stillPortConfig.format.video.nSliceHeight    = round(settings.height / 16) * 16;
-        
-        error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
-        OMX_TRACE(error);
-        
+        case OMX_IMAGE_CodingJPEG:
+        {
+            /*
+             OMX_IMAGE_PARAM_QFACTORTYPE compressionConfig;
+             OMX_INIT_STRUCTURE(compressionConfig);
+             compressionConfig.nPortIndex = IMAGE_ENCODER_OUTPUT_PORT;
+             error =OMX_GetParameter(encoder,
+             OMX_IndexParamQFactor,
+             &compressionConfig);
+             OMX_TRACE(error);
+             
+             compressionConfig.nQFactor = settings.stillQuality;
+             
+             error =OMX_SetParameter(encoder,
+             OMX_IndexParamQFactor,
+             &compressionConfig);
+             OMX_TRACE(error); 
+             */
+            break;
+            
+        }
+            
+        case OMX_IMAGE_CodingGIF:
+        case OMX_IMAGE_CodingPNG:
+        case OMX_IMAGE_CodingBMP:
+        {
+            //24bitBGR888
+            //encoderOutputPortDefinition.format.image.nStride = settings.width*4; 
+            stride = stride*3;
+            colorFormatType = OMX_COLOR_Format24bitRGB888;
+            break;
+        } 
     }
+    stillPortConfig.format.image.nStride = stride;
+    stillPortConfig.format.image.eColorFormat = colorFormatType;
+    //ofLog() << "CAMERA_STILL_OUTPUT_PORT DEFAULT: " << GetColorFormatString(stillPortConfig.format.image.eColorFormat);
+    //DEFAULT: YUV420PackedPlanar
+    //YUV420PackedSemiPlanar
+    //Unused
+    //YUV420PackedPlanar
+    //YUV420PackedSemiPlanar
+    //YUV422PackedPlanar
+    //YVU420PackedPlanar
+    //YVU420PackedSemiPlanar
+    error =  OMX_SetParameter(camera, OMX_IndexParamPortDefinition, &stillPortConfig);
+    OMX_TRACE(error);
+
+    
+    
     
     //may need https://github.com/6by9/dcraw to make useful
     if(settings.enableRaw)
@@ -260,28 +321,36 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);    
     
  
+    if(settings.enableStillPreview) 
+    { 
+        //Set renderer to Idle
+        error = SetComponentState(render, OMX_StateIdle);
+        OMX_TRACE(error);
+       
+        
+        
+        
+        error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
+        OMX_TRACE(error);
+        
+        
+        
+        //Enable camera preview port
+        error = WaitForPortEnable(camera, CAMERA_PREVIEW_PORT);
+        OMX_TRACE(error);
+        
+        
+        //Enable render input port
+        error = WaitForPortEnable(render, VIDEO_RENDER_INPUT_PORT);
+        OMX_TRACE(error);
+            
+        //Start renderer
+        error = SetComponentState(render, OMX_StateExecuting);
+        OMX_TRACE(error);
+        
+        directDisplay.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
 
-    //Set renderer to Idle
-    error = SetComponentState(render, OMX_StateIdle);
-    OMX_TRACE(error);
-   
-    
-    
-    
-    error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
-    OMX_TRACE(error);
-    
-    
-    
-    //Enable camera preview port
-    error = WaitForPortEnable(camera, CAMERA_PREVIEW_PORT);
-    OMX_TRACE(error);
-    
-    
-    //Enable render input port
-    error = WaitForPortEnable(render, VIDEO_RENDER_INPUT_PORT);
-    OMX_TRACE(error);
-    
+    }
 
 
     //Start camera
@@ -289,13 +358,10 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     OMX_TRACE(error);  
     
 
-    //Start renderer
-    error = SetComponentState(render, OMX_StateExecuting);
-    OMX_TRACE(error);
+   
     
 
         
-    directDisplay.setup(render, 0, 0, settings.stillPreviewWidth, settings.stillPreviewHeight);
     
     didOpen = true;
     
@@ -334,51 +400,59 @@ void PhotoEngine::takePhoto()
     {
         encoderOutputPortDefinition.format.image.nFrameWidth        = settings.width;
         encoderOutputPortDefinition.format.image.nFrameHeight       = settings.height;
-        encoderOutputPortDefinition.format.image.nStride            = settings.width; 
-        OMX_IMAGE_CODINGTYPE codingType = settings.getStillImageType();
+        encoderOutputPortDefinition.format.image.nSliceHeight       = settings.height;
         encoderOutputPortDefinition.format.image.eCompressionFormat = codingType;
+        encoderOutputPortDefinition.format.image.nStride            = stride;
+        
         OMX_COLOR_FORMATTYPE colorFormatType = OMX_COLOR_FormatUnused;
         switch (codingType)
         {
             case OMX_IMAGE_CodingJPEG:
             {
-                OMX_IMAGE_PARAM_QFACTORTYPE compressionConfig;
-                OMX_INIT_STRUCTURE(compressionConfig);
-                compressionConfig.nPortIndex = IMAGE_ENCODER_OUTPUT_PORT;
-                error =OMX_GetParameter(encoder,
-                                        OMX_IndexParamQFactor,
-                                        &compressionConfig);
-                OMX_TRACE(error);
-                
-                compressionConfig.nQFactor = settings.JPGCompressionLevel;
-                
-                error =OMX_SetParameter(encoder,
-                                        OMX_IndexParamQFactor,
-                                        &compressionConfig);
-                OMX_TRACE(error); 
-                
+                /*
+                 OMX_IMAGE_PARAM_QFACTORTYPE compressionConfig;
+                 OMX_INIT_STRUCTURE(compressionConfig);
+                 compressionConfig.nPortIndex = IMAGE_ENCODER_OUTPUT_PORT;
+                 error =OMX_GetParameter(encoder,
+                 OMX_IndexParamQFactor,
+                 &compressionConfig);
+                 OMX_TRACE(error);
+                 
+                 compressionConfig.nQFactor = settings.stillQuality;
+                 
+                 error =OMX_SetParameter(encoder,
+                 OMX_IndexParamQFactor,
+                 &compressionConfig);
+                 OMX_TRACE(error); 
+                 */
                 break;
                 
             }
                 
             case OMX_IMAGE_CodingGIF:
             {
-                colorFormatType = OMX_COLOR_Format8bitPalette;
+                //colorFormatType = OMX_COLOR_Format8bitPalette;
                 break;
                 
             }
             case OMX_IMAGE_CodingPNG:
             {
-                //colorFormatType = OMX_COLOR_FormatYUV420PackedPlanar;
+                //32bitARGB8888
+                //32bitABGR8888
+                //24bitBGR888
+                //colorFormatType = OMX_COLOR_Format24bitBGR888;
                 break;
                 
             }
             case OMX_IMAGE_CodingBMP:
             {
+                //24bitBGR888
+                //encoderOutputPortDefinition.format.image.nStride = settings.width*4; 
                 colorFormatType = OMX_COLOR_Format24bitBGR888;
                 break;
             } 
         }
+        
         encoderOutputPortDefinition.format.image.eColorFormat = colorFormatType;
         
         error =OMX_SetParameter(encoder, OMX_IndexParamPortDefinition, &encoderOutputPortDefinition);
@@ -448,7 +522,10 @@ void PhotoEngine::writeFile()
     
     if(recordingFileBuffer.size()>0)
     {
+        int start = ofGetElapsedTimeMillis();
         result = ofBufferToFile(filePath, recordingFileBuffer);
+        int end = ofGetElapsedTimeMillis();
+        ofLog() << "WRITE TOOK: " << end-start << "MS";
     }
     recordingFileBuffer.clear();
     
@@ -535,17 +612,23 @@ void PhotoEngine::close()
         OMX_TRACE(error);
     }
     
-    
-    if(camera)
-    {
-        error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, NULL, 0);
-        OMX_TRACE(error);
-    }
-    
-    if(render)
-    {
-        error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT, NULL, 0);
-        OMX_TRACE(error);
+    if(settings.enableStillPreview) 
+    {    
+        if(camera)
+        {
+            error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, NULL, 0);
+            OMX_TRACE(error);
+        }
+        
+        if(render)
+        {
+            error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT, NULL, 0);
+            OMX_TRACE(error);
+            
+            error =  OMX_FreeHandle(render);
+            OMX_TRACE(error);
+            render = NULL;
+        }
     }
     
     if(camera)
@@ -555,21 +638,12 @@ void PhotoEngine::close()
         camera = NULL;
     }
     
-    if(render)
-    {
-        error =  OMX_FreeHandle(render);
-        OMX_TRACE(error);
-        render = NULL;
-    }
-    
     if(encoder)
     {
         error = OMX_FreeHandle(encoder);
         OMX_TRACE(error); 
     }
-   
-    
-    //sessionConfig = NULL;
+
     didOpen = false;
 
 
