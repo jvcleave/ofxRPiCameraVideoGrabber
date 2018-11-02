@@ -22,6 +22,7 @@ public:
 class OMXCameraSettings
 {
 public:
+    
 	int width;
 	int height;
 	int framerate;
@@ -59,7 +60,9 @@ public:
     
     int stillPreviewWidth;
     int stillPreviewHeight;
-    
+    int JPGCompressionLevel;
+    string stillImageType;
+    bool rawEnabled;
     ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
     ofxRPiCameraVideoGrabberListener* videoGrabberListener;
 	OMXCameraSettings()
@@ -103,8 +106,31 @@ public:
         LED = true;
         stillPreviewWidth = 640;
         stillPreviewHeight = 480;
+        JPGCompressionLevel = 100;
+        stillImageType = "jpg"; //jpg, gif, png
+        rawEnabled = false;
+        
     }
     
+    
+    OMX_IMAGE_CODINGTYPE getStillImageType()
+    {
+        
+        if(stillImageType == "jpg")
+        {
+            return OMX_IMAGE_CodingJPEG;
+        }
+        if(stillImageType == "gif")
+        {
+            return OMX_IMAGE_CodingGIF;
+        }
+        if(stillImageType == "png")
+        {
+            return OMX_IMAGE_CodingPNG;
+        }
+        return OMX_IMAGE_CodingJPEG;
+
+    }
     string toString()
     {
         stringstream info;
@@ -135,6 +161,11 @@ public:
         info << "LED " << LED << endl;
         info << "stillPreviewWidth " << stillPreviewWidth << endl;
         info << "stillPreviewHeight " << stillPreviewHeight << endl;
+        info << "JPGCompressionLevel " << JPGCompressionLevel << endl;
+        info << "stillImageType " << stillImageType << endl;
+        info << "rawEnabled " << rawEnabled << endl;
+
+        
         return info.str();
     }
     
@@ -191,6 +222,14 @@ public:
         if(exists(json, "doDisableSoftwareSharpen")) doDisableSoftwareSharpen = json["doDisableSoftwareSharpen"].get<bool>();
         if(exists(json, "doDisableSoftwareSaturation")) doDisableSoftwareSaturation = json["doDisableSoftwareSaturation"].get<bool>();
         if(exists(json, "LED")) LED = json["LED"].get<bool>();
+        if(exists(json, "stillPreviewWidth")) stillPreviewWidth = json["stillPreviewWidth"].get<int>();
+        if(exists(json, "stillPreviewHeight")) stillPreviewHeight = json["stillPreviewHeight"].get<int>();
+        if(exists(json, "JPGCompressionLevel")) JPGCompressionLevel = json["JPGCompressionLevel"].get<int>();
+        if(exists(json, "stillImageType")) stillImageType = json["stillImageType"].get<int>();
+        if(exists(json, "rawEnabled")) rawEnabled = json["rawEnabled"].get<bool>();
+
+        
+        
         return true;
 
 
@@ -228,6 +267,13 @@ public:
         result["doDisableSoftwareSharpen"]=doDisableSoftwareSharpen;
         result["doDisableSoftwareSaturation"]=doDisableSoftwareSaturation;
         result["LED"]=LED;
+        result["stillPreviewWidth"]=stillPreviewWidth;
+        result["stillPreviewHeight"]=stillPreviewHeight;
+        result["JPGCompressionLevel"]=JPGCompressionLevel;
+        result["stillImageType"]=stillImageType;
+        result["rawEnabled"]=rawEnabled;
+        
+        
         
         return result;
     }

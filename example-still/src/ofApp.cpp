@@ -24,8 +24,9 @@ void ofApp::setup()
     //cameraSettings.stillPreviewHeight = cameraSettings.height;
     cameraSettings.saturation = -100;
     cameraSettings.sharpness = 100;
-    cameraSettings.brightness = 75;
-
+    //cameraSettings.brightness = 75;
+    cameraSettings.stillImageType = "jpg";
+    
     cameraSettings.photoGrabberListener = this;
 	photoGrabber.setup(cameraSettings);
 

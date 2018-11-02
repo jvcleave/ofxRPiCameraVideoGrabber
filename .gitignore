@@ -10,3 +10,5 @@ obj
 bin/ofxRPiCameraVideoGrabber
 bin/data/*.mp4
 example-still/bin/data/*.jpg
+*.pgm
+*.ppm
