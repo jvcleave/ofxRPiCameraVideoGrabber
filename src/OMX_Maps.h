@@ -1044,7 +1044,7 @@ void logOMXError(OMX_ERRORTYPE error, string comments="", string functionName=""
 }
 
 static
-void PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDefinition)
+string PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDef)
 {
     stringstream info;
     
@@ -1055,27 +1055,35 @@ void PrintPortDef(OMX_PARAM_PORTDEFINITIONTYPE portDefinition)
     
     
     //info << "nVersion: "		<< portDefinition.nVersion << endl;
-    info << "nPortIndex: "		<< portDefinition.nPortIndex << endl;
-    info << "eDir: "            << portDefinition.eDir << endl;
-    info << "nBufferCountActual: "  << portDefinition.nBufferCountActual << endl;
-    info << "nBufferCountMin: "     << portDefinition.nBufferCountMin << endl;
-    info << "nBufferSize: "         << portDefinition.nBufferSize << endl;
-    info << "bEnabled: "            << portDefinition.bEnabled << endl;
-    info << "bPopulated: "          << portDefinition.bPopulated << endl;
+    info << "nPortIndex: "                  << portDef.nPortIndex << endl;
+    info << "eDir: "                        << portDef.eDir << endl;
+    info << "nBufferCountActual: "          << portDef.nBufferCountActual << endl;
+    info << "nBufferCountMin: "             << portDef.nBufferCountMin << endl;
+    info << "nBufferSize: "                 << portDef.nBufferSize << endl;
+    info << "bEnabled: "                    << portDef.bEnabled << endl;
+    info << "bPopulated: "                  << portDef.bPopulated << endl;
+    
+    info << "image nFrameWidth: "           << portDef.format.image.nFrameWidth << endl;
+    info << "image nFrameHeight: "          << portDef.format.image.nFrameHeight << endl;
+    info << "image nStride: "               << portDef.format.image.nStride << endl;
+    info << "image nSliceHeight: "          << portDef.format.image.nSliceHeight << endl;
+    info << "image bFlagErrorConcealment: " << portDef.format.image.bFlagErrorConcealment << endl;
+    info << "image eColorFormat "           << GetColorFormatString(portDef.format.image.eColorFormat) << endl;
+    info << "image eCompressionFormat: "    << GetImageCodingString(portDef.format.image.eCompressionFormat) << endl;
     
     
-    info << "nFrameWidth: "		<< portDefinition.format.video.nFrameWidth << endl;
-    info << "nFrameHeight: "	<< portDefinition.format.video.nFrameHeight << endl;
-    info << "nStride: "			<< portDefinition.format.video.nStride << endl;
-    info << "nSliceHeight: "    << portDefinition.format.video.nSliceHeight << endl;
-    info << "nBitrate: "        << portDefinition.format.video.nBitrate << endl;
-    info << "xFramerate: "		<< (portDefinition.format.video.xFramerate >> 16) << endl;
-    info << "bFlagErrorConcealment: "   << portDefinition.format.video.bFlagErrorConcealment << endl;
-    info << "eCompressionFormat: "      << GetVideoCodingString(portDefinition.format.video.eCompressionFormat) << endl;
-    info << "eColorFormat: "            << GetColorFormatString(portDefinition.format.video.eColorFormat) << endl;
-    info << "pNativeWindow: "           << portDefinition.format.video.pNativeWindow << endl;
+    info << "video nFrameWidth: "           << portDef.format.video.nFrameWidth << endl;
+    info << "video nFrameHeight: "          << portDef.format.video.nFrameHeight << endl;
+    info << "video nStride: "               << portDef.format.video.nStride << endl;
+    info << "video nSliceHeight: "          << portDef.format.video.nSliceHeight << endl;
+    info << "video nBitrate: "              << portDef.format.video.nBitrate << endl;
+    info << "video xFramerate: "            << (portDef.format.video.xFramerate >> 16) << endl;
+    info << "video bFlagErrorConcealment: " << portDef.format.video.bFlagErrorConcealment << endl;
+    info << "video eCompressionFormat: "    << GetVideoCodingString(portDef.format.video.eCompressionFormat) << endl;
+    info << "video eColorFormat: "          << GetColorFormatString(portDef.format.video.eColorFormat) << endl;
+    info << "video pNativeWindow: "         << portDef.format.video.pNativeWindow << endl;
     
-    ofLogVerbose(__func__) << info.str();
+    return info.str();
     
     /*
      

@@ -61,7 +61,6 @@ public:
     int stillPreviewWidth;
     int stillPreviewHeight;
     int stillQuality;
-    string stillImageType;
     bool enableRaw;
     bool enableStillPreview;
     ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
@@ -108,34 +107,13 @@ public:
         stillPreviewWidth = 640;
         stillPreviewHeight = 480;
         stillQuality = 100;
-        stillImageType = "jpg"; //jpg, gif, png
         enableRaw = false;
         enableStillPreview = true;
+        burstModeEnabled = false;
     }
     
     
-    OMX_IMAGE_CODINGTYPE getStillImageType()
-    {
-        
-        if(stillImageType == "jpg")
-        {
-            return OMX_IMAGE_CodingJPEG;
-        }
-        if(stillImageType == "gif")
-        {
-            return OMX_IMAGE_CodingGIF;
-        }
-        if(stillImageType == "png")
-        {
-            return OMX_IMAGE_CodingPNG;
-        }
-        if(stillImageType == "bmp")
-        {
-            return OMX_IMAGE_CodingBMP;
-        }
-        return OMX_IMAGE_CodingJPEG;
 
-    }
     string toString()
     {
         stringstream info;
@@ -167,9 +145,9 @@ public:
         info << "stillPreviewWidth " << stillPreviewWidth << endl;
         info << "stillPreviewHeight " << stillPreviewHeight << endl;
         info << "stillQuality " << stillQuality << endl;
-        info << "stillImageType " << stillImageType << endl;
         info << "enableRaw " << enableRaw << endl;
         info << "enableStillPreview " << enableStillPreview << endl;
+        info << "burstModeEnabled " << burstModeEnabled << endl;
 
         
         return info.str();
@@ -231,9 +209,9 @@ public:
         if(exists(json, "stillPreviewWidth")) stillPreviewWidth = json["stillPreviewWidth"].get<int>();
         if(exists(json, "stillPreviewHeight")) stillPreviewHeight = json["stillPreviewHeight"].get<int>();
         if(exists(json, "stillQuality")) stillQuality = json["stillQuality"].get<int>();
-        if(exists(json, "stillImageType")) stillImageType = json["stillImageType"].get<int>();
         if(exists(json, "enableRaw")) enableRaw = json["enableRaw"].get<bool>();
         if(exists(json, "enableStillPreview")) enableStillPreview = json["enableStillPreview"].get<bool>();
+        if(exists(json, "burstModeEnabled")) burstModeEnabled = json["burstModeEnabled"].get<bool>();
 
         
         
@@ -277,11 +255,22 @@ public:
         result["stillPreviewWidth"]=stillPreviewWidth;
         result["stillPreviewHeight"]=stillPreviewHeight;
         result["stillQuality"]=stillQuality;
-        result["stillImageType"]=stillImageType;
         result["enableRaw"]=enableRaw;
         result["enableStillPreview"]=enableStillPreview;
+        result["burstModeEnabled"]=burstModeEnabled;
 
+        
+        
         return result;
+    }
+    
+    void saveJSONFile(string path="")
+    {
+        if(path == "")
+        {
+            path = "settings.json";
+        }
+        ofSavePrettyJson(path, toJSON());
     }
 /*
     https://www.raspberrypi.org/blog/new-camera-mode-released/

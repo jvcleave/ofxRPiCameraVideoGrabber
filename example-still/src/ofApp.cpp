@@ -13,37 +13,39 @@ void ofApp::onTakePhotoComplete(string fileName)
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+    ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
 	doDrawInfo	= true;
 		
 	consoleListener.setup(this);
 	
-    cameraSettings.width = 2592;
-    cameraSettings.height = 1944;
-    
-    cameraSettings.stillPreviewWidth = 1280;
-    cameraSettings.stillPreviewHeight = 720;
-
-    //cameraSettings.stillPreviewWidth = cameraSettings.width;
-    //cameraSettings.stillPreviewHeight = cameraSettings.height;
-    cameraSettings.saturation = -100;
-    cameraSettings.sharpness = 100;
-    //cameraSettings.brightness = 75;
-    cameraSettings.stillImageType = "jpg";
-    cameraSettings.stillQuality = 100;
-    cameraSettings.photoGrabberListener = this;
-    cameraSettings.enableStillPreview = false;
+    ofFile settingsFile("settings.json");
+    if(settingsFile.exists())
+    {
+        ofBuffer jsonBuffer = ofBufferFromFile("settings.json");
+        cameraSettings.parseJSON(jsonBuffer.getText());
+    }else
+    {
+        cameraSettings.width = 2592;
+        cameraSettings.height = 1944;
+        
+        cameraSettings.stillPreviewWidth = 1280;
+        cameraSettings.stillPreviewHeight = 720;
+        
+        //cameraSettings.stillPreviewWidth = cameraSettings.width;
+        //cameraSettings.stillPreviewHeight = cameraSettings.height;
+        cameraSettings.saturation = -100;
+        cameraSettings.sharpness = 100;
+        //cameraSettings.brightness = 75;
+        cameraSettings.stillQuality = 100;
+        cameraSettings.photoGrabberListener = this;
+        cameraSettings.enableStillPreview = true;
+        cameraSettings.burstModeEnabled = true;
+        cameraSettings.saveJSONFile();
+    }
 	photoGrabber.setup(cameraSettings);
 
-    /*
-    photoGrabber.setSharpness(100);
-    photoGrabber.setContrast(100);
-    photoGrabber.setBrightness(100);
-    //photoGrabber.setZoomLevelNormalized(0.2);
-    */
-    
-    //photoGrabber.rotateClockwise();
     ofLogNotice(__func__) << photoGrabber.settings.toString();
     
 	filterCollection.setup();

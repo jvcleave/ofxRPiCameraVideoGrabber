@@ -41,6 +41,7 @@ public:
 
     OMX_HANDLETYPE render;
     OMX_HANDLETYPE encoder;
+    OMX_HANDLETYPE nullSink;
 
     void writeFile();
     
@@ -109,6 +110,10 @@ public:
     encoderEmptyBufferDone(OMX_HANDLETYPE hComponent,
                          OMX_PTR pAppData,
                          OMX_BUFFERHEADERTYPE* pBuffer){return OMX_ErrorNone;};
+    
+    
+    OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
+
 };
 
 

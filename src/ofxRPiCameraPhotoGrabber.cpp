@@ -19,14 +19,17 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
     ofLogNotice(__func__) << settings.toString();
    
     engine.setup(settings, this); //wait until onPhotoEngineStart to do anything   
+
 }
 
 
 void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
-    //applyAllSettings();
+    
+    applyAllSettings();
     ofLogNotice(__func__) << "shotsRequested: " << shotsRequested << " shotsTaken: " << shotsTaken;
+    //ofSleepMillis(500);
     if(shotsTaken)
     {
         if(shotsTaken < shotsRequested)

@@ -1,8 +1,41 @@
 #include "RPICameraController.h"
 
+int zoomStepsSource[61] = 
+{
+    65536,  68157,  70124,  72745,
+    75366,  77988,  80609,  83231,
+    86508,  89784,  92406,  95683,
+    99615,  102892, 106168, 110100,
+    114033, 117965, 122552, 126484,
+    131072, 135660, 140247, 145490,
+    150733, 155976, 161219, 167117,
+    173015, 178913, 185467, 192020,
+    198574, 205783, 212992, 220201,
+    228065, 236585, 244449, 252969,
+    262144, 271319, 281149, 290980,
+    300810, 311951, 322437, 334234,
+    346030, 357827, 370934, 384041,
+    397148, 411566, 425984, 441057,
+    456131, 472515, 488899, 506593,
+    524288
+};
+
 RPICameraController::RPICameraController()
 {
     camera = NULL;
+    
+    //Requires gpio program provided via wiringPi
+    //sudo apt-get install wiringpi
+    ofFile gpioProgram("/usr/bin/gpio");
+    hasGPIOProgram = gpioProgram.exists();
+    if(zoomLevels.empty())
+    {
+        vector<int> converted(zoomStepsSource, 
+                              zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
+        zoomLevels = converted;
+        
+    }
+
     resetValues();
 }
 
@@ -16,7 +49,7 @@ void RPICameraController::applyAllSettings()
         return;
     }
     ofLogNotice(__func__) << settings.toString();
-    
+    setBurstMode(settings.burstModeEnabled);
     setExposurePreset(settings.exposurePreset); 
     setMeteringType(settings.meteringType);
     setAutoISO(settings.autoISO);
@@ -42,10 +75,8 @@ void RPICameraController::applyAllSettings()
     setSoftwareSaturation(settings.doDisableSoftwareSaturation);
     applyExposure();
     
-    //Requires gpio program provided via wiringPi
-    //sudo apt-get install wiringpi
-    ofFile gpioProgram("/usr/bin/gpio");
-    hasGPIOProgram = gpioProgram.exists();
+
+
     
     if(hasGPIOProgram)
     {
@@ -63,7 +94,7 @@ void RPICameraController::applyAllSettings()
         settings.LED = true;
         setLEDState(settings.LED);
     } 
-    ofLogNotice(__func__) << endl;
+    ofLogNotice(__func__)  << "END";
 }
 
 string RPICameraController::getLEDPin()
@@ -109,28 +140,7 @@ string RPICameraController::getLEDPin()
 
 void RPICameraController::resetValues()
 {
-    int zoomStepsSource[61] = 
-    {
-        65536,  68157,  70124,  72745,
-        75366,  77988,  80609,  83231,
-        86508,  89784,  92406,  95683,
-        99615,  102892, 106168, 110100,
-        114033, 117965, 122552, 126484,
-        131072, 135660, 140247, 145490,
-        150733, 155976, 161219, 167117,
-        173015, 178913, 185467, 192020,
-        198574, 205783, 212992, 220201,
-        228065, 236585, 244449, 252969,
-        262144, 271319, 281149, 290980,
-        300810, 311951, 322437, 334234,
-        346030, 357827, 370934, 384041,
-        397148, 411566, 425984, 441057,
-        456131, 472515, 488899, 506593,
-        524288
-    };
-    vector<int> converted(zoomStepsSource, 
-                          zoomStepsSource + sizeof zoomStepsSource / sizeof zoomStepsSource[0]);
-    zoomLevels = converted;
+
     
     
     
