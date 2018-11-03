@@ -25,14 +25,14 @@ class PhotoEngine
 public:
 	PhotoEngine();
     ~PhotoEngine();
-    void setup(OMXCameraSettings&, PhotoEngineListener*);
+    void setup(OMXCameraSettings*, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
     void takePhoto();
     void close();
     
     
     OMX_HANDLETYPE camera;
-    OMXCameraSettings settings;
+    OMXCameraSettings* settings;
     DirectDisplay directDisplay;
     OMX_IMAGE_CODINGTYPE codingType;    
     PhotoEngineListener* listener;
@@ -44,7 +44,7 @@ public:
     OMX_HANDLETYPE nullSink;
 
     void writeFile();
-    
+    string saveFolderAbsolutePath;
     OMX_U32 encoderOutputBufferSize;
 
     ofBuffer recordingFileBuffer;
@@ -52,7 +52,7 @@ public:
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
-    
+
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
                         OMX_PTR pAppData, 
@@ -113,7 +113,6 @@ public:
     
     
     OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
-
 };
 
 

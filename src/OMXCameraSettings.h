@@ -63,6 +63,8 @@ public:
     int stillQuality;
     bool enableRaw;
     bool enableStillPreview;
+    string savedPhotosFolderName;
+    
     ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
     ofxRPiCameraVideoGrabberListener* videoGrabberListener;
 	OMXCameraSettings()
@@ -110,6 +112,7 @@ public:
         enableRaw = false;
         enableStillPreview = true;
         burstModeEnabled = false;
+        savedPhotosFolderName = "photos";
     }
     
     
@@ -148,6 +151,7 @@ public:
         info << "enableRaw " << enableRaw << endl;
         info << "enableStillPreview " << enableStillPreview << endl;
         info << "burstModeEnabled " << burstModeEnabled << endl;
+        info << "savedPhotosFolderName " << savedPhotosFolderName << endl;
 
         
         return info.str();
@@ -212,6 +216,7 @@ public:
         if(exists(json, "enableRaw")) enableRaw = json["enableRaw"].get<bool>();
         if(exists(json, "enableStillPreview")) enableStillPreview = json["enableStillPreview"].get<bool>();
         if(exists(json, "burstModeEnabled")) burstModeEnabled = json["burstModeEnabled"].get<bool>();
+        if(exists(json, "savedPhotosFolderName")) savedPhotosFolderName = json["savedPhotosFolderName"].get<string>();
 
         
         
@@ -258,6 +263,7 @@ public:
         result["enableRaw"]=enableRaw;
         result["enableStillPreview"]=enableStillPreview;
         result["burstModeEnabled"]=burstModeEnabled;
+        result["savedPhotosFolderName"]=savedPhotosFolderName;
 
         
         

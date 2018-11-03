@@ -49,7 +49,6 @@ void RPICameraController::applyAllSettings()
         return;
     }
     ofLogNotice(__func__) << settings.toString();
-    setBurstMode(settings.burstModeEnabled);
     setExposurePreset(settings.exposurePreset); 
     setMeteringType(settings.meteringType);
     setAutoISO(settings.autoISO);
@@ -74,7 +73,8 @@ void RPICameraController::applyAllSettings()
     setSoftwareSharpening(settings.doDisableSoftwareSharpen);
     setSoftwareSaturation(settings.doDisableSoftwareSaturation);
     applyExposure();
-    
+    setBurstMode(settings.burstModeEnabled);
+
 
 
     
@@ -467,24 +467,28 @@ void RPICameraController::checkBurstMode()
 void RPICameraController::setBurstMode(bool doBurstMode)
 {
     if(!camera) return;
-    
+
     OMX_ERRORTYPE error = OMX_GetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
-    OMX_TRACE(error);
-    if(doBurstMode)
-    {
-        burstModeConfig.bEnabled = OMX_TRUE;  
-    }else
-    {
-        burstModeConfig.bEnabled = OMX_FALSE;  
-        
-    }
-    error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
     OMX_TRACE(error);
     if(error == OMX_ErrorNone)
     {
-        settings.burstModeEnabled = doBurstMode;
+        if(doBurstMode)
+        {
+            burstModeConfig.bEnabled = OMX_TRUE;  
+        }else
+        {
+            burstModeConfig.bEnabled = OMX_FALSE;  
+            
+        }
+        error = OMX_SetConfig(camera, OMX_IndexConfigBurstCapture, &burstModeConfig);
+        OMX_TRACE(error);
+        if(error == OMX_ErrorNone)
+        {
+            settings.burstModeEnabled = doBurstMode;
+        }
+        ofLogVerbose() << "burstModeEnabled: " << settings.burstModeEnabled;
     }
-    ofLogVerbose() << "burstModeEnabled: " << settings.burstModeEnabled;
+    
 }
 
 #pragma mark FLICKER CANCELLATION

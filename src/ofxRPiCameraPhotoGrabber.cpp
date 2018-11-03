@@ -16,9 +16,13 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 {
     settings = omxCameraSettings_;
     listener = settings.photoGrabberListener;
+    
+    
+    
+    
     ofLogNotice(__func__) << settings.toString();
    
-    engine.setup(settings, this); //wait until onPhotoEngineStart to do anything   
+    engine.setup(&settings, this); //wait until onPhotoEngineStart to do anything   
 
 }
 
@@ -29,9 +33,9 @@ void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
     
     applyAllSettings();
     ofLogNotice(__func__) << "shotsRequested: " << shotsRequested << " shotsTaken: " << shotsTaken;
-    //ofSleepMillis(500);
     if(shotsTaken)
     {
+        //setBurstMode(settings.burstModeEnabled);
         if(shotsTaken < shotsRequested)
         {
             takePhoto();
@@ -40,17 +44,6 @@ void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
             ofLog() << shotsTaken << " TOOK totalTime: " << totalTime << " EACH " << totalTime/shotsTaken;
         }
     }
-   
-    /*
-    string colorFormatName = OMX_Maps::getInstance().getColorFormatNames()[currentIndex];
-    
-    engine.colorFormatType = GetColorFormat(colorFormatName);
-    if(currentIndex +1 < OMX_Maps::getInstance().getColorFormatNames().size())
-    {
-        currentIndex++;
-        //ofSleepMillis(1000);
-        
-    }*/
 }
 
 

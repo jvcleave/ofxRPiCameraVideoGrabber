@@ -7,7 +7,13 @@ void ofApp::onTakePhotoComplete(string fileName)
     ofLog() << "onTakePhotoComplete fileName: " << fileName;
     
     
-    
+    if(photoGrabber.settings.stillQuality-1 > 0)
+    {
+        photoGrabber.settings.stillQuality--;
+    }else
+    {
+        photoGrabber.settings.stillQuality = 100;
+    }
     
 }
 //--------------------------------------------------------------
@@ -39,11 +45,13 @@ void ofApp::setup()
         cameraSettings.sharpness = 100;
         //cameraSettings.brightness = 75;
         cameraSettings.stillQuality = 100;
-        cameraSettings.photoGrabberListener = this;
         cameraSettings.enableStillPreview = true;
         cameraSettings.burstModeEnabled = true;
         cameraSettings.saveJSONFile();
     }
+    
+    
+    cameraSettings.photoGrabberListener = this; //not saved in JSON file
 	photoGrabber.setup(cameraSettings);
 
     ofLogNotice(__func__) << photoGrabber.settings.toString();
@@ -88,7 +96,12 @@ void ofApp::keyPressed  (int key)
         }
         case 't':
         {
-            photoGrabber.takePhoto(10);
+            photoGrabber.takePhoto(100);
+            break;
+        }
+        case 's':
+        {
+            photoGrabber.settings.saveJSONFile();
             break;
         } 
     }
