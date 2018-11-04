@@ -50,9 +50,7 @@ public:
     void disablePixels();
     unsigned char * getPixels();
     void updatePixels();
-    unsigned char * pixels;
     bool doPixels;
-    ofFbo fbo;
     ofTexture& getTexture()
     {
         return eglImageController.texture;

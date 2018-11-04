@@ -12,14 +12,18 @@ public:
     EGLDisplay display;
     EGLContext context;
     OMX_BUFFERHEADERTYPE* eglBuffer;
+    unsigned char* pixels;
     ofTexture texture;
     ofAppEGLWindow* appEGLWindow;
+    unsigned int textureID;
+    ofFbo fbo;
     EGLImageController()
     {
         eglImage = NULL;
         display = NULL;
         context = NULL;
         appEGLWindow = NULL;
+        pixels = NULL;
     }
     
     ~EGLImageController()
@@ -34,10 +38,15 @@ public:
         display = NULL;
         context = NULL;
         appEGLWindow = NULL;
+        if(pixels)
+        {
+            delete[] pixels;
+            pixels = NULL;
+        }
         
     }
     
-    /*
+    
     bool generateEGLImage(int videoWidth, int videoHeight)
     {
         bool success = false;
@@ -161,57 +170,6 @@ public:
         return success;
         
     }
-    */
-    void generateEGLImage(int width, int height)
-    {
-        
-        ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-        display = appEGLWindow->getEglDisplay();
-        context = appEGLWindow->getEglContext();
-        
-        
-        texture.allocate(width, height, GL_RGBA);
-        //texture.getTextureData().bFlipTexture = true;
-        
-        texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-        GLuint textureID = texture.getTextureData().textureID;
-        
-        glEnable(GL_TEXTURE_2D);
-        
-        // setup first texture
-        int dataSize = width * height * 4;
-        
-        GLubyte* pixelData = new GLubyte [dataSize];
-        
-        
-        memset(pixelData, 0xff, dataSize);  // white texture, opaque
-        
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-        
-        delete[] pixelData;
-        
-        
-        // Create EGL Image
-        eglImage = eglCreateImageKHR(
-                                     display,
-                                     context,
-                                     EGL_GL_TEXTURE_2D_KHR,
-                                     (EGLClientBuffer)textureID,
-                                     0);
-        glDisable(GL_TEXTURE_2D);
-        if (eglImage == EGL_NO_IMAGE_KHR)
-        {
-            ofLogError()    << "Create EGLImage FAIL";
-            return;
-        }
-        else
-        {
-            ofLogVerbose(__func__)    << "Create EGLImage PASS";
-        }
-    }
-    
     void destroyEGLImage()
     {
         

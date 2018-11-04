@@ -13,7 +13,6 @@ VideoEngine::VideoEngine()
     listener = NULL;
     frameCounter = 0;
     isClosing = false;
-    pixels = NULL;
 }
 
 int VideoEngine::getFrameCounter()
@@ -397,26 +396,16 @@ void VideoEngine::updatePixels()
     {
         return;
     }
-    
-    if (!fbo.isAllocated()) 
-    {
-        fbo.allocate(settings.width, settings.height, GL_RGBA);
-    }
-    int dataSize = settings.width * settings.height * 4;
-    if (pixels == NULL)
-    {
-        pixels = new unsigned char[dataSize];
-    }
-    fbo.begin();
+    eglImageController.fbo.begin();
     ofClear(0, 0, 0, 0);
     getTexture().draw(0, 0);
-    glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);    
-    fbo.end();
+    glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, eglImageController.pixels);    
+    eglImageController.fbo.end();
 }
 
 unsigned char * VideoEngine::getPixels()
 {
-    return pixels;
+    return eglImageController.pixels;
 }
 
 
