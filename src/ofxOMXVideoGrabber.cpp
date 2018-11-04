@@ -1,7 +1,7 @@
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 
 #pragma mark SETUP
-ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
+ofxOMXVideoGrabber::ofxOMXVideoGrabber()
 {
     resetValues();
 	updateFrameCounter = 0;
@@ -9,25 +9,25 @@ ofxRPiCameraVideoGrabber::ofxRPiCameraVideoGrabber()
 	hasNewFrame = false;
     camera = NULL;
 	pixelsRequested = false;
-	ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
+	ofAddListener(ofEvents().update, this, &ofxOMXVideoGrabber::onUpdate);    
 }
 
-void ofxRPiCameraVideoGrabber::reset()
+void ofxOMXVideoGrabber::reset()
 {
     resetValues();
     //settings.resetValues();
     applyAllSettings();
 }
 
-void ofxRPiCameraVideoGrabber::setup(OMXCameraSettings& omxCameraSettings_)
+void ofxOMXVideoGrabber::setup(ofxOMXCameraSettings& settings_)
 {
-    settings = omxCameraSettings_;
+    settings = settings_;
     ofLogNotice(__func__) << settings.toJSON().dump();
     ofLogNotice(__func__) << "settings: " << settings.toString();
     engine.setup(settings, this);
 }
 
-void ofxRPiCameraVideoGrabber::onVideoEngineStart()
+void ofxOMXVideoGrabber::onVideoEngineStart()
 {
     ofLogVerbose(__func__) << endl;
 
@@ -42,15 +42,15 @@ void ofxRPiCameraVideoGrabber::onVideoEngineStart()
     //checkFlickerCancellation();
     
     applyAllSettings();
-    ofAddListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);    
+    ofAddListener(ofEvents().update, this, &ofxOMXVideoGrabber::onUpdate);    
 }
 
-void ofxRPiCameraVideoGrabber::onVideoEngineClose()
+void ofxOMXVideoGrabber::onVideoEngineClose()
 {
     ofLogVerbose(__func__) << endl;
 }
 
-void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
+void ofxOMXVideoGrabber::onRecordingComplete(string filePath)
 {
     if(settings.videoGrabberListener)
     {
@@ -61,13 +61,13 @@ void ofxRPiCameraVideoGrabber::onRecordingComplete(string filePath)
     }
 }
 
-bool ofxRPiCameraVideoGrabber::isReady()
+bool ofxOMXVideoGrabber::isReady()
 {
     return engine.isOpen;
 }
 
 #pragma mark UPDATE
-void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
+void ofxOMXVideoGrabber::onUpdate(ofEventArgs & args)
 {
     
     frameCounter = engine.getFrameCounter();
@@ -98,38 +98,38 @@ void ofxRPiCameraVideoGrabber::onUpdate(ofEventArgs & args)
 
 #pragma mark GETTERS
 
-bool ofxRPiCameraVideoGrabber::isFrameNew()
+bool ofxOMXVideoGrabber::isFrameNew()
 {
     return hasNewFrame;
 }
 
-bool ofxRPiCameraVideoGrabber::isTextureEnabled()
+bool ofxOMXVideoGrabber::isTextureEnabled()
 {
     return settings.enableTexture;
 }
 
-int ofxRPiCameraVideoGrabber::getWidth()
+int ofxOMXVideoGrabber::getWidth()
 {
 	return settings.width;
 }
 
-int ofxRPiCameraVideoGrabber::getHeight()
+int ofxOMXVideoGrabber::getHeight()
 {
 	return settings.height;
 }
 
-int ofxRPiCameraVideoGrabber::getFrameRate()
+int ofxOMXVideoGrabber::getFrameRate()
 {
 	return settings.framerate;
 }
 
 #pragma mark PIXELS/TEXTURE
-GLuint ofxRPiCameraVideoGrabber::getTextureID()
+GLuint ofxOMXVideoGrabber::getTextureID()
 {
 	return engine.getTexture().texData.textureID;
 }
 
-void ofxRPiCameraVideoGrabber::enablePixels()
+void ofxOMXVideoGrabber::enablePixels()
 {
     if(settings.enableTexture)
     {
@@ -138,7 +138,7 @@ void ofxRPiCameraVideoGrabber::enablePixels()
     }
 }
 
-void ofxRPiCameraVideoGrabber::disablePixels()
+void ofxOMXVideoGrabber::disablePixels()
 {
     if(settings.enableTexture)
     {
@@ -147,12 +147,12 @@ void ofxRPiCameraVideoGrabber::disablePixels()
     }
 }
 
-unsigned char * ofxRPiCameraVideoGrabber::getPixels()
+unsigned char * ofxOMXVideoGrabber::getPixels()
 {
     return engine.getPixels();
 }
 
-ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
+ofTexture& ofxOMXVideoGrabber::getTextureReference()
 {
 	return engine.getTexture();
 }
@@ -160,55 +160,55 @@ ofTexture& ofxRPiCameraVideoGrabber::getTextureReference()
 #pragma mark RECORDING
 
 
-bool ofxRPiCameraVideoGrabber::isRecording()
+bool ofxOMXVideoGrabber::isRecording()
 {
     return engine.isRecording;
 }
 
-void ofxRPiCameraVideoGrabber::startRecording()
+void ofxOMXVideoGrabber::startRecording()
 {
     engine.startRecording();
 }
 
-void ofxRPiCameraVideoGrabber::stopRecording()
+void ofxOMXVideoGrabber::stopRecording()
 {
 	engine.stopRecording();
 }
 
 #pragma mark DRAW
-void ofxRPiCameraVideoGrabber::setDisplayAlpha(int alpha)
+void ofxOMXVideoGrabber::setDisplayAlpha(int alpha)
 {
     engine.directDisplay.setDisplayAlpha(alpha);
 }
 
-void ofxRPiCameraVideoGrabber::setDisplayLayer(int layer)
+void ofxOMXVideoGrabber::setDisplayLayer(int layer)
 {
     engine.directDisplay.setDisplayLayer(layer);
 }
 
-void ofxRPiCameraVideoGrabber::setDisplayRotation(int rotationDegrees)
+void ofxOMXVideoGrabber::setDisplayRotation(int rotationDegrees)
 {
     engine.directDisplay.setDisplayRotation(rotationDegrees);
 }
 
-void ofxRPiCameraVideoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
+void ofxOMXVideoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
 {
     engine.directDisplay.setDisplayDrawRectangle(drawRectangle);
 
 }
 
-void ofxRPiCameraVideoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
+void ofxOMXVideoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
 {
     engine.directDisplay.setDisplayCropRectangle(cropRectangle);
 
 }
 
-void ofxRPiCameraVideoGrabber::setDisplayMirror(bool doMirror)
+void ofxOMXVideoGrabber::setDisplayMirror(bool doMirror)
 {
     engine.directDisplay.setDisplayMirror(doMirror);
 }
 
-void ofxRPiCameraVideoGrabber::draw()
+void ofxOMXVideoGrabber::draw()
 {
 	if (settings.enableTexture)
 	{
@@ -219,12 +219,12 @@ void ofxRPiCameraVideoGrabber::draw()
         engine.directDisplay.setDisplayDrawRectangle(ofRectangle(0, 0, getWidth(), getHeight()));
     }    
 }
-void ofxRPiCameraVideoGrabber::draw(ofRectangle& rectangle)
+void ofxOMXVideoGrabber::draw(ofRectangle& rectangle)
 {
     draw(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 }
 
-void ofxRPiCameraVideoGrabber::draw(int x, int y)
+void ofxOMXVideoGrabber::draw(int x, int y)
 {
     if (settings.enableTexture)
     {
@@ -237,7 +237,7 @@ void ofxRPiCameraVideoGrabber::draw(int x, int y)
 }
 
 
-void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
+void ofxOMXVideoGrabber::draw(int x, int y, int width, int height)
 {
     if (settings.enableTexture)
     {
@@ -251,18 +251,18 @@ void ofxRPiCameraVideoGrabber::draw(int x, int y, int width, int height)
 
 #pragma mark EXIT
 
-void ofxRPiCameraVideoGrabber::close()
+void ofxOMXVideoGrabber::close()
 {
     
-    cout << "ofxRPiCameraVideoGrabber::close" << endl;
-    ofRemoveListener(ofEvents().update, this, &ofxRPiCameraVideoGrabber::onUpdate);
+    cout << "ofxOMXVideoGrabber::close" << endl;
+    ofRemoveListener(ofEvents().update, this, &ofxOMXVideoGrabber::onUpdate);
     engine.close();    
-    cout << "~ofxRPiCameraVideoGrabber::close END" << endl;
+    cout << "~ofxOMXVideoGrabber::close END" << endl;
 }
 
-ofxRPiCameraVideoGrabber::~ofxRPiCameraVideoGrabber()
+ofxOMXVideoGrabber::~ofxOMXVideoGrabber()
 {
-    cout << "~ofxRPiCameraVideoGrabber" << endl;
+    cout << "~ofxOMXVideoGrabber" << endl;
     close();
 }
 

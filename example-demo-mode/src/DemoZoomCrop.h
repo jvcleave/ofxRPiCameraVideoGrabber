@@ -15,7 +15,7 @@ public:
     bool doZoomOut;
     bool doRandomZoom;
     bool resetZoom;
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
 

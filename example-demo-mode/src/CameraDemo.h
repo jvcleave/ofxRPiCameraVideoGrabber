@@ -2,14 +2,14 @@
 
 #include "ofMain.h"
 //#include "ofAppEGLWindow.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
 class CameraDemo
 {
 public:
     
-    ofxRPiCameraVideoGrabber* videoGrabber;
+    ofxOMXVideoGrabber* videoGrabber;
     ImageFilterCollection filterCollection;
     
     string name;
@@ -21,7 +21,7 @@ public:
         filterCollection.setup();
     }
     
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         videoGrabber = videoGrabber_;
     }

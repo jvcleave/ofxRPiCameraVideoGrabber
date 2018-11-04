@@ -25,7 +25,7 @@ public:
     bool doDRE;
     int dreLevel;
     
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doSharpness = false;

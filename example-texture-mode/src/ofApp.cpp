@@ -11,13 +11,13 @@ void ofApp::setup()
 	consoleListener.setup(this);
 	
 	
-	omxCameraSettings.width = 1280; //default 1280
-	omxCameraSettings.height = 720; //default 720
-	omxCameraSettings.enableTexture = true; //default true
+	settings.width = 1280; //default 1280
+	settings.height = 720; //default 720
+	settings.enableTexture = true; //default true
 
 
 	//pass in the settings and it will start the camera
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 	
 	//ImageFilterCollection (filterCollection here) is helper class to iterate through available OpenMax filters
 	filterCollection.setup();
@@ -44,9 +44,9 @@ void ofApp::draw(){
 	videoGrabber.draw();
 	
 	//draw a smaller version via the getTextureReference() method
-	int drawWidth = omxCameraSettings.width/4;
-	int drawHeight = omxCameraSettings.height/4;
-	videoGrabber.getTextureReference().draw(omxCameraSettings.width-drawWidth, omxCameraSettings.height-drawHeight, drawWidth, drawHeight);
+	int drawWidth = settings.width/4;
+	int drawHeight = settings.height/4;
+	videoGrabber.getTextureReference().draw(settings.width-drawWidth, settings.height-drawHeight, drawWidth, drawHeight);
 
 	stringstream info;
 	info << "App FPS: " << ofGetFrameRate() << "\n";

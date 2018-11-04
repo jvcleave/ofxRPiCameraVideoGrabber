@@ -12,7 +12,7 @@ public:
     bool doChangeSaturation;
     bool doChangeStabilization;
     bool doChangeBurstMode;
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doChangeSharpening = false;

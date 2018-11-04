@@ -13,13 +13,13 @@ void ofApp::setup()
     consoleListener.setup(this);
 
     
-    omxCameraSettings.width = 1280;
-    omxCameraSettings.height = 720;
-    omxCameraSettings.framerate = 30;
-    omxCameraSettings.enableTexture = true;
+    settings.width = 1280;
+    settings.height = 720;
+    settings.framerate = 30;
+    settings.enableTexture = true;
     //pass in the settings and it will start the camera
 
-    videoGrabber.setup(omxCameraSettings);
+    videoGrabber.setup(settings);
     int demoCount = 0;
 
     DemoMetering*  meteringDemo = new DemoMetering();

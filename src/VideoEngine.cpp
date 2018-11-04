@@ -70,7 +70,7 @@ OMX_ERRORTYPE VideoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE ren
     return error;
 }
 
-void VideoEngine::setup(OMXCameraSettings& settings_, VideoEngineListener* listener_)
+void VideoEngine::setup(ofxOMXCameraSettings& settings_, VideoEngineListener* listener_)
 {
     isClosing = false;
     settings = settings_;
@@ -308,7 +308,7 @@ void VideoEngine::stopRecording()
 	stopRequested = true;
 }
 
-OMXCameraSettings& VideoEngine::getSettings()
+ofxOMXCameraSettings& VideoEngine::getSettings()
 {
     return settings;
 }

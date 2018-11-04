@@ -1,5 +1,5 @@
 meta:
-ADDON_NAME = ofxRPiCameraVideoGrabber
+ADDON_NAME = ofxOMXCamera
 ADDON_DESCRIPTION =  Control the Raspberry Pi Module with OpenMax
 ADDON_AUTHOR = Jason Van Cleave
 ADDON_TAGS = "raspberry pi, camera module"

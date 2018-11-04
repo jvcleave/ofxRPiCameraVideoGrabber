@@ -20,19 +20,19 @@ void ofApp::setup()
     
 	consoleListener.setup(this);
 	
-	omxCameraSettings.width					= 1280;
-	omxCameraSettings.height				= 720;
-	omxCameraSettings.enableTexture		= false;
+	settings.width					= 1280;
+	settings.height				= 720;
+	settings.enableTexture		= false;
 	
 	
 	
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 	filterCollection.setup();
     
     int step=200;
-    for(int i=0; i<omxCameraSettings.width; i+=step)
+    for(int i=0; i<settings.width; i+=step)
     {
-        for(int j=0; j<omxCameraSettings.height; j+=step)
+        for(int j=0; j<settings.height; j+=step)
         {
             ofRectangle grid(i, j, step, step);
             grids.push_back(grid);

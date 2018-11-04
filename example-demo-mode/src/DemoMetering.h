@@ -20,7 +20,7 @@ public:
     vector<string> meteringNames;
     int ISO;
     int shutterSpeed;
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doChangeMeteringMode = false;

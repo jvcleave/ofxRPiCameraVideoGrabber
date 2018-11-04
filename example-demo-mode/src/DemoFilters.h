@@ -9,7 +9,7 @@ public:
     
     
     bool doChangeFilter;
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doChangeFilter = false;

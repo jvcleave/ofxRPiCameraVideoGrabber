@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 #include "CameraDemo.h"
 
 #include "DemoEnhancement.h"
@@ -28,8 +28,8 @@ public:
     void onCharacterReceived(KeyListenerEventData& e);
     TerminalListener consoleListener;
     
-    OMXCameraSettings omxCameraSettings;
-    ofxRPiCameraVideoGrabber videoGrabber;
+    ofxOMXCameraSettings settings;
+    ofxOMXVideoGrabber videoGrabber;
     
     map<int, CameraDemo*> demos;
     int currentDemoID;

@@ -27,14 +27,14 @@ bool RPiVideoGrabber::initGrabber(int w, int h)
 {
     
     
-    omxCameraSettings.width = w; 
-    omxCameraSettings.height = h;
-    omxCameraSettings.enablePixels = true;
+    settings.width = w; 
+    settings.height = h;
+    settings.enablePixels = true;
     cameraWidth = w;
     cameraHeight = h;
     
-    omxCameraSettings.enableTexture = true; //default true
-    videoGrabber.setup(omxCameraSettings);
+    settings.enableTexture = true; //default true
+    videoGrabber.setup(settings);
     videoGrabber.enablePixels();
     
     pixels.setFromExternalPixels((unsigned char *)videoGrabber.getPixels(), cameraWidth, cameraHeight, OF_PIXELS_RGBA);
@@ -50,12 +50,12 @@ bool RPiVideoGrabber::isFrameNew() const
 
 void RPiVideoGrabber::setDesiredFrameRate(int framerate)
 {
-    omxCameraSettings.framerate = framerate;
+    settings.framerate = framerate;
 }
 
 int RPiVideoGrabber::getFrameRate()
 {
-    return omxCameraSettings.framerate;
+    return settings.framerate;
 }
 
 void RPiVideoGrabber::update()

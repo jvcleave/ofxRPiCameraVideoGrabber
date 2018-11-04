@@ -3,11 +3,11 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraPhotoGrabber.h"
+#include "ofxOMXPhotoGrabber.h"
 #include "ImageFilterCollection.h"
 
 
-class ofApp : public ofBaseApp, public KeyListener, public ofxRPiCameraPhotoGrabberListener
+class ofApp : public ofBaseApp, public KeyListener, public ofxOMXPhotoGrabberListener
 {
 
 	public:
@@ -19,10 +19,10 @@ class ofApp : public ofBaseApp, public KeyListener, public ofxRPiCameraPhotoGrab
 
 	void onCharacterReceived(KeyListenerEventData& e) override;
 	TerminalListener consoleListener;
-	ofxRPiCameraPhotoGrabber photoGrabber;
+	ofxOMXPhotoGrabber photoGrabber;
 	
 	ImageFilterCollection filterCollection;
-    OMXCameraSettings cameraSettings;
+    ofxOMXCameraSettings cameraSettings;
 
 	bool doDrawInfo;
     vector<string>photoFiles;

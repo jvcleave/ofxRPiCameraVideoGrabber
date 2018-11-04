@@ -1,5 +1,5 @@
 #### STATUS: PERPETUAL DEVELOPMENT    
-Master may be unstable, features untested. See [Releases](https://github.com/jvcleave/ofxRPiCameraVideoGrabber/releases) for tested versions
+Master may be unstable, features untested. See [Releases](https://github.com/jvcleave/ofxOMXVideoGrabber/releases) for tested versions
 
 #### DESCRIPTION:   
 openFrameworks addon to control the Raspberry Pi Camera Module. This does _not_ provide still camera functionality.
@@ -12,7 +12,7 @@ Desktop Mode (X11 enabled) may work but untested
 
 #### USAGE:   
 Clone into your openFrameworks/addons folder
-Either copy one of the examples into /myApps or add ofxRPiCameraVideoGrabber to the addons.make file in your project
+Either copy one of the examples into /myApps or add ofxOMXVideoGrabber to the addons.make file in your project
 
 LED Toggling requires gpio program provided via wiringPi   
 `$sudo apt-get install wiringpi`

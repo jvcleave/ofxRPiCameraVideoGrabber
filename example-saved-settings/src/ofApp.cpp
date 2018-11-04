@@ -21,13 +21,13 @@ void ofApp::setup()
     
     
     //can save like this
-    //ofSavePrettyJson("settings.json", omxCameraSettings.toJSON());
+    //ofSavePrettyJson("settings.json", settings.toJSON());
     
-    OMXCameraSettings omxCameraSettings;
+    ofxOMXCameraSettings settings;
     ofBuffer jsonBuffer = ofBufferFromFile("settings.json");
-    omxCameraSettings.parseJSON(jsonBuffer.getText());
-    //omxCameraSettings.applyPreset(OMXCameraSettings::PRESET_720P_40FPS);
-    videoGrabber.setup(omxCameraSettings);
+    settings.parseJSON(jsonBuffer.getText());
+    //settings.applyPreset(ofxOMXCameraSettings::PRESET_720P_40FPS);
+    videoGrabber.setup(settings);
 
 
 
@@ -50,9 +50,9 @@ void ofApp::update()
         ofLog() << "LOADING CONFIG: " << configFiles[currentConfigFileIndex].path();
         
         ofBuffer jsonBuffer = ofBufferFromFile(configFiles[currentConfigFileIndex]);
-        OMXCameraSettings omxCameraSettings;
-        omxCameraSettings.parseJSON(jsonBuffer.getText());
-        videoGrabber.setup(omxCameraSettings);
+        ofxOMXCameraSettings settings;
+        settings.parseJSON(jsonBuffer.getText());
+        videoGrabber.setup(settings);
         
     }
 

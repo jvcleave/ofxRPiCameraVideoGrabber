@@ -1,5 +1,5 @@
 /*
- *  ofxRPiCameraPhotoGrabber.h
+ *  ofxOMXPhotoGrabber.h
  *
  *  Created by jason van cleave on 6/1/13.
  *
@@ -10,7 +10,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 
-#include "RPICameraController.h"
+#include "OMXCameraController.h"
 
 #include "PhotoEngine.h"
 
@@ -18,14 +18,14 @@
 
 
 
-class ofxRPiCameraPhotoGrabber : public RPICameraController, public PhotoEngineListener
+class ofxOMXPhotoGrabber : public OMXCameraController, public PhotoEngineListener
 {
 
 public:
     
-	ofxRPiCameraPhotoGrabber();
-    ~ofxRPiCameraPhotoGrabber();
-    void setup(OMXCameraSettings);
+	ofxOMXPhotoGrabber();
+    ~ofxOMXPhotoGrabber();
+    void setup(ofxOMXCameraSettings);
     bool isReady();
 	int getWidth();
 	int getHeight();
@@ -42,7 +42,7 @@ public:
     void setDisplayCropRectangle(ofRectangle);
     void setDisplayMirror(bool);
 
-    ofxRPiCameraPhotoGrabberListener* listener;
+    ofxOMXPhotoGrabberListener* listener;
     
     void onTakePhotoComplete(string filePath) override;
     void onPhotoEngineStart(OMX_HANDLETYPE camera_) override;

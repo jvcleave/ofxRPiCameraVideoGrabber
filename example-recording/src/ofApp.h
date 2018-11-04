@@ -3,10 +3,10 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
-class ofApp : public ofBaseApp, public KeyListener, public ofxRPiCameraVideoGrabberListener
+class ofApp : public ofBaseApp, public KeyListener, public ofxOMXVideoGrabberListener
 {
     
 public:
@@ -18,17 +18,17 @@ public:
     
     void onCharacterReceived(KeyListenerEventData& e);
     TerminalListener consoleListener;
-    ofxRPiCameraVideoGrabber videoGrabber;
+    ofxOMXVideoGrabber videoGrabber;
     
     ImageFilterCollection filterCollection;
     
-    OMXCameraSettings omxCameraSettings;
+    ofxOMXCameraSettings settings;
     bool doDrawInfo;
     bool doStartRecording;
     bool doStopRecording;    
     
     
-    //required by ofxRPiCameraVideoGrabberListener
+    //required by ofxOMXVideoGrabberListener
     void onRecordingComplete(string filePath) override;
 };
 

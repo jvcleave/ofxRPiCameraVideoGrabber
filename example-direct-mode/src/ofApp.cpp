@@ -9,14 +9,14 @@ void ofApp::setup()
 		
 	consoleListener.setup(this);
 	
-	OMXCameraSettings omxCameraSettings;
-	omxCameraSettings.width					= 1280;
-	omxCameraSettings.height				= 720;
-	omxCameraSettings.enableTexture         = false;
+	ofxOMXCameraSettings settings;
+	settings.width					= 1280;
+	settings.height				= 720;
+	settings.enableTexture         = false;
 
 	
 	
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 	filterCollection.setup();
 	
 

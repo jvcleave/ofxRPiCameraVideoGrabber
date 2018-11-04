@@ -12,18 +12,18 @@ void ofApp::setup()
 		
 	consoleListener.setup(this);
 	
-	omxCameraSettings.width = 1280;
-	omxCameraSettings.height = 720;
-	omxCameraSettings.framerate = 30;
-	omxCameraSettings.enableTexture = true;
+	settings.width = 1280;
+	settings.height = 720;
+	settings.framerate = 30;
+	settings.enableTexture = true;
 	
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 	filterCollection.setup();
 
 	doShader = true;
 	shader.load("shaderExample");
 	
-	fbo.allocate(omxCameraSettings.width, omxCameraSettings.height);
+	fbo.allocate(settings.width, settings.height);
 	fbo.begin();
 		ofClear(0, 0, 0, 0);
 	fbo.end();

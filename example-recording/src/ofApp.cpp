@@ -13,13 +13,13 @@ void ofApp::setup()
     doStartRecording = false;
     doStopRecording =false;
     consoleListener.setup(this);
-    omxCameraSettings.enableTexture = false;
-    omxCameraSettings.width = 1280;
-    omxCameraSettings.height = 720;
-    omxCameraSettings.videoGrabberListener = this; //calls onRecordingComplete
+    settings.enableTexture = false;
+    settings.width = 1280;
+    settings.height = 720;
+    settings.videoGrabberListener = this; //calls onRecordingComplete
     
 	//pass in the settings and it will start the camera
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 	
 	//ImageFilterCollection (filterCollection here) is helper class to iterate through available OpenMax filters
 	filterCollection.setup();

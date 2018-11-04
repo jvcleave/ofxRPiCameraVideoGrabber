@@ -12,7 +12,7 @@ public:
     bool doChangeFlickerCancellation;
     size_t currentWhiteBalanceIndex;
     vector<string> whiteBalanceNames;
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         doChangeWhiteBalance = false;

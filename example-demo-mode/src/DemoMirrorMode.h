@@ -8,7 +8,7 @@ class DemoMirrorMode  : public CameraDemo
 public:
     
     
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup( videoGrabber_);
         

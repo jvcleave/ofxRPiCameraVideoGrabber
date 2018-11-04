@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 #include "ImageFilterCollection.h"
 
 
@@ -18,13 +18,13 @@ class ofApp : public ofBaseApp, public KeyListener{
 
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
-	ofxRPiCameraVideoGrabber videoGrabber;
+	ofxOMXVideoGrabber videoGrabber;
 	
 	ImageFilterCollection filterCollection;
 	
 	bool doDrawInfo;
 
-    OMXCameraSettings omxCameraSettings;
+    ofxOMXCameraSettings settings;
 
 };
 

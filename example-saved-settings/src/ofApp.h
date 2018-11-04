@@ -3,7 +3,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 
 class ofApp : public ofBaseApp, public KeyListener{
 
@@ -17,7 +17,7 @@ class ofApp : public ofBaseApp, public KeyListener{
 	void onCharacterReceived(KeyListenerEventData& e);
 	TerminalListener consoleListener;
     
-	ofxRPiCameraVideoGrabber videoGrabber;
+	ofxOMXVideoGrabber videoGrabber;
 		
 	bool doDrawInfo;
     ofDirectory dataFolder;	

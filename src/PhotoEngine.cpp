@@ -30,9 +30,9 @@ OMX_ERRORTYPE PhotoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE ren
 }
 
 
-void PhotoEngine::setup(OMXCameraSettings* omxCameraSettings_, PhotoEngineListener* listener_)
+void PhotoEngine::setup(ofxOMXCameraSettings* settings_, PhotoEngineListener* listener_)
 {
-    settings = omxCameraSettings_;
+    settings = settings_;
     listener = listener_;
     
     settings->width = omxcam_round(settings->width, 32);

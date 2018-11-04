@@ -1,1 +1,1 @@
-ofxRPiCameraVideoGrabber
+ofxOMXCamera

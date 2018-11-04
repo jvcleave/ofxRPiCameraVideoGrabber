@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 
 
 class RPiVideoGrabber: public ofBaseVideoGrabber
@@ -28,7 +28,7 @@ public:
     
     void draw(int x, int y);
     void draw(int x, int y, int width, int height); 
-    ofxRPiCameraVideoGrabber videoGrabber;
+    ofxOMXVideoGrabber videoGrabber;
     
     float cameraWidth;
     float cameraHeight;
@@ -37,7 +37,7 @@ public:
     
     bool hasNewFrame;
     
-    OMXCameraSettings omxCameraSettings;
+    ofxOMXCameraSettings settings;
     
     vector<ofVideoDevice> unused;
 };

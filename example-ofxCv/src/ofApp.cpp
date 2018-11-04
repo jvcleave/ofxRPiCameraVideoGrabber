@@ -6,12 +6,12 @@ void ofApp::setup()
 	ofSetLogLevel(OF_LOG_VERBOSE);			
 	consoleListener.setup(this);
     
-    omxCameraSettings.width = 640;
-    omxCameraSettings.height = 480;
-    omxCameraSettings.framerate = 30;
-    omxCameraSettings.enableTexture = true;
-    omxCameraSettings.enablePixels = true;
-    videoGrabber.setup(omxCameraSettings);
+    settings.width = 640;
+    settings.height = 480;
+    settings.framerate = 30;
+    settings.enableTexture = true;
+    settings.enablePixels = true;
+    videoGrabber.setup(settings);
     
     
     threshold1 = 0;
@@ -19,8 +19,8 @@ void ofApp::setup()
     apertureSize = 3;
     L2gradient = false;
 
-    cameraMat = cv::Mat(cvSize(omxCameraSettings.width,
-                               omxCameraSettings.height),
+    cameraMat = cv::Mat(cvSize(settings.width,
+                               settings.height),
                         CV_8UC4,
                         videoGrabber.getPixels(),
                         cv::Mat::AUTO_STEP);

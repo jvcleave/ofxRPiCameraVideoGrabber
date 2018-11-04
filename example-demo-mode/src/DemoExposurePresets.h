@@ -14,7 +14,7 @@ public:
     size_t numPresets;
     vector<string> exposurePresetNames;
     
-    void setup(ofxRPiCameraVideoGrabber* videoGrabber_)
+    void setup(ofxOMXVideoGrabber* videoGrabber_)
     {
         CameraDemo::setup(videoGrabber_);
         exposurePresetIndex = 0;

@@ -11,7 +11,7 @@
 #include "ofMain.h"
 #include "ofAppEGLWindow.h"
 #include "OMX_Maps.h"
-#include "OMXCameraSettings.h"
+#include "ofxOMXCameraSettings.h"
 #include "DirectDisplay.h"
 
 #include "EGLImageController.h"
@@ -31,9 +31,9 @@ public:
 	VideoEngine();
     ~VideoEngine();
 
-	void setup(OMXCameraSettings&, VideoEngineListener*);
+	void setup(ofxOMXCameraSettings&, VideoEngineListener*);
     int getFrameCounter();
-	OMXCameraSettings& getSettings();
+	ofxOMXCameraSettings& getSettings();
     
     void startRecording();
     void stopRecording();
@@ -64,7 +64,7 @@ public:
     EGLImageController eglImageController;
 protected:
 	
-    OMXCameraSettings settings;
+    ofxOMXCameraSettings settings;
 	void configureCameraResolution();
 	void configureEncoder();
 	

@@ -6,20 +6,20 @@
 
 
 
-class ofxRPiCameraPhotoGrabberListener
+class ofxOMXPhotoGrabberListener
 {
 public:
     virtual void onTakePhotoComplete(string filePath)=0;
     
 };
 
-class ofxRPiCameraVideoGrabberListener
+class ofxOMXVideoGrabberListener
 {
 public:
     virtual void onRecordingComplete(string filePath)=0;
 };
 
-class OMXCameraSettings
+class ofxOMXCameraSettings
 {
 public:
     
@@ -65,9 +65,9 @@ public:
     bool enableStillPreview;
     string savedPhotosFolderName;
     
-    ofxRPiCameraPhotoGrabberListener* photoGrabberListener;
-    ofxRPiCameraVideoGrabberListener* videoGrabberListener;
-	OMXCameraSettings()
+    ofxOMXPhotoGrabberListener* photoGrabberListener;
+    ofxOMXVideoGrabberListener* videoGrabberListener;
+	ofxOMXCameraSettings()
 	{
         photoGrabberListener = NULL;
         videoGrabberListener = NULL;

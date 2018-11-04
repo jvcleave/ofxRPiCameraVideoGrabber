@@ -2,7 +2,7 @@
 
 #include "ofMain.h"
 #include "TerminalListener.h"
-#include "ofxRPiCameraVideoGrabber.h"
+#include "ofxOMXVideoGrabber.h"
 #include "ofxCv.h"
 
 
@@ -22,8 +22,8 @@ class ofApp : public ofBaseApp, public KeyListener{
 
 	TerminalListener consoleListener;
     
-    OMXCameraSettings omxCameraSettings;
-    ofxRPiCameraVideoGrabber videoGrabber;
+    ofxOMXCameraSettings settings;
+    ofxOMXVideoGrabber videoGrabber;
     
     int threshold1;
     int threshold2;

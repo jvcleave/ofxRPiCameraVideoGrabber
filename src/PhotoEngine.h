@@ -10,7 +10,7 @@
 
 #include "ofMain.h"
 #include "OMX_Maps.h"
-#include "OMXCameraSettings.h"
+#include "ofxOMXCameraSettings.h"
 #include "DirectDisplay.h"
 #include "EGLImageController.h"
 class PhotoEngineListener
@@ -25,14 +25,14 @@ class PhotoEngine
 public:
 	PhotoEngine();
     ~PhotoEngine();
-    void setup(OMXCameraSettings*, PhotoEngineListener*);
+    void setup(ofxOMXCameraSettings*, PhotoEngineListener*);
     bool isOpen(){return didOpen;}
     void takePhoto();
     void close();
     
     
     OMX_HANDLETYPE camera;
-    OMXCameraSettings* settings;
+    ofxOMXCameraSettings* settings;
     DirectDisplay directDisplay;
     OMX_IMAGE_CODINGTYPE codingType;    
     PhotoEngineListener* listener;

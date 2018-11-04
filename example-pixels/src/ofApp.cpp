@@ -15,10 +15,10 @@ void ofApp::setup()
 		
 	consoleListener.setup(this);
 	
-	omxCameraSettings.width = 1280;
-	omxCameraSettings.height = 720;
-	omxCameraSettings.framerate = 30;
-	omxCameraSettings.enableTexture = true;
+	settings.width = 1280;
+	settings.height = 720;
+	settings.framerate = 30;
+	settings.enableTexture = true;
 	
 	
 	
@@ -28,11 +28,11 @@ void ofApp::setup()
 	doReloadPixels = true;
 	if (doPixels) 
 	{
-		omxCameraSettings.enablePixels = true;
-		videoTexture.allocate(omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+		settings.enablePixels = true;
+		videoTexture.allocate(settings.width, settings.height, GL_RGBA);
 	}
 
-	videoGrabber.setup(omxCameraSettings);
+	videoGrabber.setup(settings);
 		
 }	
 
@@ -48,7 +48,7 @@ void ofApp::update()
 	{
         if (videoGrabber.isFrameNew()) 
         {
-            videoTexture.loadData(videoGrabber.getPixels(), omxCameraSettings.width, omxCameraSettings.height, GL_RGBA);
+            videoTexture.loadData(videoGrabber.getPixels(), settings.width, settings.height, GL_RGBA);
         }
 
 	}
@@ -63,7 +63,7 @@ void ofApp::draw(){
 	videoGrabber.draw();
 	if(doPixels && doReloadPixels)
 	{
-		videoTexture.draw(0, 0, omxCameraSettings.width/2, omxCameraSettings.height/2);
+		videoTexture.draw(0, 0, settings.width/2, settings.height/2);
 	}
 
 	stringstream info;

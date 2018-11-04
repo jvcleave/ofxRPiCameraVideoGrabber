@@ -6,8 +6,7 @@ obj
 */bin/*
 !*/bin/data
 *._*
-*2013*.jpg
-bin/ofxRPiCameraVideoGrabber
+*201**.jpg
 bin/data/*.mp4
 example-still/bin/data/*.jpg
 *.pgm

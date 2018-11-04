@@ -1,5 +1,5 @@
 /*
- *  ofxRPiCameraVideoGrabber.h
+ *  ofxOMXVideoGrabber.h
  *
  *  Created by jason van cleave on 6/1/13.
  *
@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "RPICameraController.h"
+#include "OMXCameraController.h"
 #include "ofAppEGLWindow.h"
 #include "VideoEngine.h"
 
@@ -16,16 +16,16 @@ using namespace std;
 
 
 
-class ofxRPiCameraVideoGrabber : public RPICameraController, public VideoEngineListener
+class ofxOMXVideoGrabber : public OMXCameraController, public VideoEngineListener
 {
 
 public:
 	
 
-	ofxRPiCameraVideoGrabber();
-    ~ofxRPiCameraVideoGrabber();
+	ofxOMXVideoGrabber();
+    ~ofxOMXVideoGrabber();
         
-    void setup(OMXCameraSettings&);
+    void setup(ofxOMXCameraSettings&);
     int getWidth();
     int getHeight();
     int getFrameRate();

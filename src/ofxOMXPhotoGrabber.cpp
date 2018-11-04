@@ -1,9 +1,9 @@
-#include "ofxRPiCameraPhotoGrabber.h"
+#include "ofxOMXPhotoGrabber.h"
 
 int shotsRequested;
 int shotsTaken;
 
-ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
+ofxOMXPhotoGrabber::ofxOMXPhotoGrabber()
 {
     camera = NULL;
     shotsRequested = 0;
@@ -12,9 +12,9 @@ ofxRPiCameraPhotoGrabber::ofxRPiCameraPhotoGrabber()
 
 int totalTime = 0;
 
-void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
+void ofxOMXPhotoGrabber::setup(ofxOMXCameraSettings settings_)
 {
-    settings = omxCameraSettings_;
+    settings = settings_;
     listener = settings.photoGrabberListener;
     
     
@@ -27,7 +27,7 @@ void ofxRPiCameraPhotoGrabber::setup(OMXCameraSettings omxCameraSettings_)
 }
 
 
-void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
+void ofxOMXPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 {
     camera = camera_;
     
@@ -47,14 +47,14 @@ void ofxRPiCameraPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
 }
 
 
-bool ofxRPiCameraPhotoGrabber::isReady()
+bool ofxOMXPhotoGrabber::isReady()
 {
     return engine.isOpen();
 }
 
 
 int photoStart = 0;
-void ofxRPiCameraPhotoGrabber::takePhoto(int numShots)
+void ofxOMXPhotoGrabber::takePhoto(int numShots)
 {   
     shotsRequested+=numShots;
     if(camera)
@@ -66,7 +66,7 @@ void ofxRPiCameraPhotoGrabber::takePhoto(int numShots)
     camera = NULL;
 }
 
-void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
+void ofxOMXPhotoGrabber::onTakePhotoComplete(string filePath)
 {
     
     int end = ofGetElapsedTimeMillis();
@@ -88,23 +88,23 @@ void ofxRPiCameraPhotoGrabber::onTakePhotoComplete(string filePath)
     }
 }
 
-int ofxRPiCameraPhotoGrabber::getWidth()
+int ofxOMXPhotoGrabber::getWidth()
 {
     return settings.width;
 }
 
-int ofxRPiCameraPhotoGrabber::getHeight()
+int ofxOMXPhotoGrabber::getHeight()
 {
     return settings.height;
 }
 
 
-void ofxRPiCameraPhotoGrabber::draw(ofRectangle& rectangle)
+void ofxOMXPhotoGrabber::draw(ofRectangle& rectangle)
 {
     draw(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 }
 
-void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
+void ofxOMXPhotoGrabber::draw(int x, int y, int width, int height)
 {
     if(settings.enableTexture)
     {
@@ -118,38 +118,38 @@ void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
     }
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayAlpha(int alpha)
+void ofxOMXPhotoGrabber::setDisplayAlpha(int alpha)
 {
     engine.directDisplay.setDisplayAlpha(alpha);
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayLayer(int layer)
+void ofxOMXPhotoGrabber::setDisplayLayer(int layer)
 {
     engine.directDisplay.setDisplayAlpha(layer);
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayRotation(int rotationDegrees)
+void ofxOMXPhotoGrabber::setDisplayRotation(int rotationDegrees)
 {
     engine.directDisplay.setDisplayRotation(rotationDegrees);
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
+void ofxOMXPhotoGrabber::setDisplayDrawRectangle(ofRectangle drawRectangle)
 {
     engine.directDisplay.setDisplayDrawRectangle(drawRectangle);
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
+void ofxOMXPhotoGrabber::setDisplayCropRectangle(ofRectangle cropRectangle)
 {
     engine.directDisplay.setDisplayCropRectangle(cropRectangle);
 }
 
-void ofxRPiCameraPhotoGrabber::setDisplayMirror(bool doMirror)
+void ofxOMXPhotoGrabber::setDisplayMirror(bool doMirror)
 {
     engine.directDisplay.setDisplayMirror(doMirror);
 }
 
 
-ofxRPiCameraPhotoGrabber::~ofxRPiCameraPhotoGrabber()
+ofxOMXPhotoGrabber::~ofxOMXPhotoGrabber()
 {
     listener = NULL;
 }

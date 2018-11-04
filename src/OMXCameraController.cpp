@@ -1,4 +1,4 @@
-#include "RPICameraController.h"
+#include "OMXCameraController.h"
 
 int zoomStepsSource[61] = 
 {
@@ -20,7 +20,7 @@ int zoomStepsSource[61] =
     524288
 };
 
-RPICameraController::RPICameraController()
+OMXCameraController::OMXCameraController()
 {
     camera = NULL;
     
@@ -40,7 +40,7 @@ RPICameraController::RPICameraController()
 }
 
 
-void RPICameraController::applyAllSettings()
+void OMXCameraController::applyAllSettings()
 {
     if(!camera)
     {
@@ -102,7 +102,7 @@ void RPICameraController::applyAllSettings()
     ofLogNotice(__func__)  << "END";
 }
 
-string RPICameraController::getLEDPin()
+string OMXCameraController::getLEDPin()
 {
     //default as RPI1 GPIO Layout
     string result = "5";
@@ -143,7 +143,7 @@ string RPICameraController::getLEDPin()
     
 }
 
-void RPICameraController::resetValues()
+void OMXCameraController::resetValues()
 {
 
     
@@ -208,7 +208,7 @@ void RPICameraController::resetValues()
 #pragma mark IMAGE ENHANCEMENT
 
 
-OMX_ERRORTYPE RPICameraController::setSoftwareSaturation(bool state)
+OMX_ERRORTYPE OMXCameraController::setSoftwareSaturation(bool state)
 {
     if(!camera) return OMX_ErrorNone;
     
@@ -231,17 +231,17 @@ OMX_ERRORTYPE RPICameraController::setSoftwareSaturation(bool state)
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::enableSoftwareSaturation()
+OMX_ERRORTYPE OMXCameraController::enableSoftwareSaturation()
 {
     return setSoftwareSaturation(false);
 }
-OMX_ERRORTYPE RPICameraController::disableSoftwareSaturation()
+OMX_ERRORTYPE OMXCameraController::disableSoftwareSaturation()
 {
     
     return setSoftwareSaturation(true);
 }
 
-OMX_ERRORTYPE RPICameraController::setSoftwareSharpening(bool state)
+OMX_ERRORTYPE OMXCameraController::setSoftwareSharpening(bool state)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -262,18 +262,18 @@ OMX_ERRORTYPE RPICameraController::setSoftwareSharpening(bool state)
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::enableSoftwareSharpening()
+OMX_ERRORTYPE OMXCameraController::enableSoftwareSharpening()
 {
     return setSoftwareSharpening(false);
 }
 
-OMX_ERRORTYPE RPICameraController::disableSoftwareSharpening()
+OMX_ERRORTYPE OMXCameraController::disableSoftwareSharpening()
 {
     
     return setSoftwareSharpening(true);
 }
 
-void RPICameraController::setSharpness(int sharpness_) //-100 to 100
+void OMXCameraController::setSharpness(int sharpness_) //-100 to 100
 {
     
     if(!camera) return;
@@ -288,7 +288,7 @@ void RPICameraController::setSharpness(int sharpness_) //-100 to 100
     
 }
 
-void RPICameraController::setContrast(int contrast_ ) //-100 to 100 
+void OMXCameraController::setContrast(int contrast_ ) //-100 to 100 
 {
     
     if(!camera) return;
@@ -303,7 +303,7 @@ void RPICameraController::setContrast(int contrast_ ) //-100 to 100
     
 }
 
-void RPICameraController::setBrightness(int brightness_ ) //0 to 100
+void OMXCameraController::setBrightness(int brightness_ ) //0 to 100
 {
     if(!camera) return;
     
@@ -317,7 +317,7 @@ void RPICameraController::setBrightness(int brightness_ ) //0 to 100
     
 }
 
-void RPICameraController::setSaturation(int saturation_) //-100 to 100
+void OMXCameraController::setSaturation(int saturation_) //-100 to 100
 {
     
     if(!camera) return;
@@ -332,7 +332,7 @@ void RPICameraController::setSaturation(int saturation_) //-100 to 100
     
 }
 
-OMX_ERRORTYPE RPICameraController::setColorEnhancement(bool doColorEnhance, int U, int V)
+OMX_ERRORTYPE OMXCameraController::setColorEnhancement(bool doColorEnhance, int U, int V)
 {
     
     if(!camera) return OMX_ErrorNone;
@@ -347,7 +347,7 @@ OMX_ERRORTYPE RPICameraController::setColorEnhancement(bool doColorEnhance, int 
 }
 #pragma mark ISO
 
-OMX_ERRORTYPE RPICameraController::setAutoISO(bool doAutoISO)
+OMX_ERRORTYPE OMXCameraController::setAutoISO(bool doAutoISO)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -370,7 +370,7 @@ OMX_ERRORTYPE RPICameraController::setAutoISO(bool doAutoISO)
 }
 
 
-OMX_ERRORTYPE RPICameraController::setISO(int ISO_)
+OMX_ERRORTYPE OMXCameraController::setISO(int ISO_)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -391,7 +391,7 @@ OMX_ERRORTYPE RPICameraController::setISO(int ISO_)
 
 #pragma mark SHUTTER
 
-OMX_ERRORTYPE RPICameraController::setShutterSpeed(int shutterSpeedMicroSeconds_)
+OMX_ERRORTYPE OMXCameraController::setShutterSpeed(int shutterSpeedMicroSeconds_)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -411,7 +411,7 @@ OMX_ERRORTYPE RPICameraController::setShutterSpeed(int shutterSpeedMicroSeconds_
 
 
 
-OMX_ERRORTYPE RPICameraController::setAutoShutter(bool doAutoShutter)
+OMX_ERRORTYPE OMXCameraController::setAutoShutter(bool doAutoShutter)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -437,7 +437,7 @@ OMX_ERRORTYPE RPICameraController::setAutoShutter(bool doAutoShutter)
     return error;
 }
 
-void RPICameraController::setFrameStabilization(bool doStabilization)
+void OMXCameraController::setFrameStabilization(bool doStabilization)
 {
     if(!camera) return;
     
@@ -460,7 +460,7 @@ void RPICameraController::setFrameStabilization(bool doStabilization)
     
 }
 
-void RPICameraController::checkBurstMode()
+void OMXCameraController::checkBurstMode()
 {
     if(!camera) return;
     
@@ -469,7 +469,7 @@ void RPICameraController::checkBurstMode()
     settings.burstModeEnabled = fromOMXBool(burstModeConfig.bEnabled);
 }
 
-void RPICameraController::setBurstMode(bool doBurstMode)
+void OMXCameraController::setBurstMode(bool doBurstMode)
 {
     if(!camera) return;
 
@@ -498,7 +498,7 @@ void RPICameraController::setBurstMode(bool doBurstMode)
 
 #pragma mark FLICKER CANCELLATION
 
-void RPICameraController::checkFlickerCancellation()
+void OMXCameraController::checkFlickerCancellation()
 {
     if(!camera) return;
     
@@ -545,7 +545,7 @@ void RPICameraController::checkFlickerCancellation()
         settings.flickerCancellation = false;
     }
 }
-void RPICameraController::setFlickerCancellation(bool enable)
+void OMXCameraController::setFlickerCancellation(bool enable)
 {
     if(enable)
     {
@@ -557,18 +557,18 @@ void RPICameraController::setFlickerCancellation(bool enable)
     
 }
 
-void RPICameraController::enableFlickerCancellation()
+void OMXCameraController::enableFlickerCancellation()
 {
     setFlickerCancellation(true);
 }
 
-void RPICameraController::disableFlickerCancellation()
+void OMXCameraController::disableFlickerCancellation()
 {
     setFlickerCancellation(false);
 }
 
 
-OMX_ERRORTYPE RPICameraController::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
+OMX_ERRORTYPE OMXCameraController::setFlickerCancellation(OMX_COMMONFLICKERCANCELTYPE eFlickerCancel)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -630,7 +630,7 @@ OMX_ERRORTYPE RPICameraController::setFlickerCancellation(OMX_COMMONFLICKERCANCE
 
 #pragma mark DYNAMIC RANGE EXPANSION (DRE)
 
-void RPICameraController::setDRE(int level)
+void OMXCameraController::setDRE(int level)
 {
     OMX_DYNAMICRANGEEXPANSIONMODETYPE type = OMX_DynRangeExpOff;
     switch (level) 
@@ -676,7 +676,7 @@ void RPICameraController::setDRE(int level)
 
 #pragma mark METERING TYPE
 
-OMX_ERRORTYPE RPICameraController::setMeteringType(OMX_METERINGTYPE meteringType_)
+OMX_ERRORTYPE OMXCameraController::setMeteringType(OMX_METERINGTYPE meteringType_)
 {
     exposureConfig.eMetering = meteringType_;
     OMX_ERRORTYPE error = applyExposure();
@@ -688,17 +688,17 @@ OMX_ERRORTYPE RPICameraController::setMeteringType(OMX_METERINGTYPE meteringType
     return error;
 }
 
-string RPICameraController::getMeteringType()
+string OMXCameraController::getMeteringType()
 {
     return GetMeteringString(exposureConfig.eMetering);
 }
 
-OMX_ERRORTYPE RPICameraController::setMeteringType(string meteringType_)
+OMX_ERRORTYPE OMXCameraController::setMeteringType(string meteringType_)
 {    
     return setMeteringType(GetMetering(meteringType_));
 }
 
-OMX_ERRORTYPE RPICameraController::applyExposure()
+OMX_ERRORTYPE OMXCameraController::applyExposure()
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -738,7 +738,7 @@ OMX_ERRORTYPE RPICameraController::applyExposure()
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::setEvCompensation(int value)
+OMX_ERRORTYPE OMXCameraController::setEvCompensation(int value)
 {
     if ((value >= -4) && (value <= 4)) 
     {
@@ -755,7 +755,7 @@ OMX_ERRORTYPE RPICameraController::setEvCompensation(int value)
 
 #pragma mark WHITE BALANCE
 
-OMX_ERRORTYPE RPICameraController::setWhiteBalance(OMX_WHITEBALCONTROLTYPE whiteBalance_)
+OMX_ERRORTYPE OMXCameraController::setWhiteBalance(OMX_WHITEBALCONTROLTYPE whiteBalance_)
 {    
     if(!camera) return OMX_ErrorNone;
     ofLogNotice(__func__) << GetWhiteBalanceString(whiteBalance_);
@@ -771,31 +771,31 @@ OMX_ERRORTYPE RPICameraController::setWhiteBalance(OMX_WHITEBALCONTROLTYPE white
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::setWhiteBalance(string name)
+OMX_ERRORTYPE OMXCameraController::setWhiteBalance(string name)
 {    
     
     return setWhiteBalance(GetWhiteBalance(name));
 }
 
-string RPICameraController::getWhiteBalance()
+string OMXCameraController::getWhiteBalance()
 {
     return GetWhiteBalanceString(whiteBalanceConfig.eWhiteBalControl);
 }
 
 #pragma mark CROP
 
-OMX_ERRORTYPE RPICameraController::updateSensorCrop()
+OMX_ERRORTYPE OMXCameraController::updateSensorCrop()
 {
     return setSensorCrop(settings.cropRectangle);
 }
 
-OMX_ERRORTYPE RPICameraController::setSensorCrop(int left, int top, int width, int height)
+OMX_ERRORTYPE OMXCameraController::setSensorCrop(int left, int top, int width, int height)
 {
     settings.cropRectangle.set(left, top, width, height);
     return updateSensorCrop();
 }
 
-OMX_ERRORTYPE RPICameraController::setSensorCrop(ofRectangle& rectangle)
+OMX_ERRORTYPE OMXCameraController::setSensorCrop(ofRectangle& rectangle)
 {
     
     if(!camera) return OMX_ErrorNone;
@@ -824,7 +824,7 @@ OMX_ERRORTYPE RPICameraController::setSensorCrop(ofRectangle& rectangle)
 
 #pragma mark ZOOM
 
-OMX_ERRORTYPE RPICameraController::setZoomLevelNormalized(float value)
+OMX_ERRORTYPE OMXCameraController::setZoomLevelNormalized(float value)
 {
     if(value<0 || value>1)
     {
@@ -835,13 +835,13 @@ OMX_ERRORTYPE RPICameraController::setZoomLevelNormalized(float value)
     return setDigitalZoom();
 }
 
-OMX_ERRORTYPE RPICameraController::resetZoom()
+OMX_ERRORTYPE OMXCameraController::resetZoom()
 {
     settings.zoomLevel = 0;
     return setDigitalZoom();
 }
 
-OMX_ERRORTYPE RPICameraController::zoomIn()
+OMX_ERRORTYPE OMXCameraController::zoomIn()
 {
     if((unsigned int)settings.zoomLevel+1 < zoomLevels.size())
     {
@@ -850,7 +850,7 @@ OMX_ERRORTYPE RPICameraController::zoomIn()
     return setDigitalZoom();
 }
 
-OMX_ERRORTYPE RPICameraController::zoomOut()
+OMX_ERRORTYPE OMXCameraController::zoomOut()
 {
     settings.zoomLevel--;
     if(settings.zoomLevel<0)
@@ -861,7 +861,7 @@ OMX_ERRORTYPE RPICameraController::zoomOut()
     return setDigitalZoom();
 }
 
-OMX_ERRORTYPE RPICameraController::setDigitalZoom()
+OMX_ERRORTYPE OMXCameraController::setDigitalZoom()
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -887,31 +887,31 @@ OMX_ERRORTYPE RPICameraController::setDigitalZoom()
     
 }
 
-float RPICameraController::getZoomLevelNormalized()
+float OMXCameraController::getZoomLevelNormalized()
 {
     return ofMap(settings.zoomLevel, 0, zoomLevels.size(), 0.0f, 1.0f);
 }
 
 #pragma mark MIRROR
 
-string RPICameraController::getMirror()
+string OMXCameraController::getMirror()
 {
     
     return GetMirrorString(mirrorConfig.eMirror);    
 }
 
-OMX_ERRORTYPE RPICameraController::setMirror(int mirrorType)
+OMX_ERRORTYPE OMXCameraController::setMirror(int mirrorType)
 {
     mirrorConfig.eMirror = (OMX_MIRRORTYPE)mirrorType;
     return applyMirror();
 }
 
-OMX_ERRORTYPE RPICameraController::setMirror(string mirror_)
+OMX_ERRORTYPE OMXCameraController::setMirror(string mirror_)
 {
     return setMirror(GetMirror(mirror_));
 }
 
-OMX_ERRORTYPE RPICameraController::applyMirror()
+OMX_ERRORTYPE OMXCameraController::applyMirror()
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -926,12 +926,12 @@ OMX_ERRORTYPE RPICameraController::applyMirror()
 
 #pragma mark ROTATION
 
-OMX_ERRORTYPE RPICameraController::setRotation(int value)
+OMX_ERRORTYPE OMXCameraController::setRotation(int value)
 {
     return setRotation((ROTATION) value);
 }
 
-OMX_ERRORTYPE RPICameraController::setRotation(ROTATION value)
+OMX_ERRORTYPE OMXCameraController::setRotation(ROTATION value)
 {
     switch (value)
     {
@@ -944,12 +944,12 @@ OMX_ERRORTYPE RPICameraController::setRotation(ROTATION value)
     return applyRotation();
 }
 
-int RPICameraController::getRotation()
+int OMXCameraController::getRotation()
 {
     return rotationConfig.nRotation;
 }
 
-OMX_ERRORTYPE RPICameraController::applyRotation()
+OMX_ERRORTYPE OMXCameraController::applyRotation()
 {
     
     if(!camera) return OMX_ErrorNone;
@@ -963,7 +963,7 @@ OMX_ERRORTYPE RPICameraController::applyRotation()
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::rotateClockwise()
+OMX_ERRORTYPE OMXCameraController::rotateClockwise()
 {
     int currentRotation  = getRotation();
     if(currentRotation+90<360)
@@ -976,7 +976,7 @@ OMX_ERRORTYPE RPICameraController::rotateClockwise()
     return applyRotation();
 }
 
-OMX_ERRORTYPE RPICameraController::rotateCounterClockwise()
+OMX_ERRORTYPE OMXCameraController::rotateCounterClockwise()
 {
     int currentRotation  = getRotation();
     if(currentRotation-90>=0)
@@ -992,7 +992,7 @@ OMX_ERRORTYPE RPICameraController::rotateCounterClockwise()
 
 #pragma mark FILTERS
 
-OMX_ERRORTYPE RPICameraController::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter_)
+OMX_ERRORTYPE OMXCameraController::setImageFilter(OMX_IMAGEFILTERTYPE imageFilter_)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -1006,18 +1006,18 @@ OMX_ERRORTYPE RPICameraController::setImageFilter(OMX_IMAGEFILTERTYPE imageFilte
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::setImageFilter(string imageFilter_)
+OMX_ERRORTYPE OMXCameraController::setImageFilter(string imageFilter_)
 {
     return setImageFilter(GetImageFilter(imageFilter_));
 }
 
-string RPICameraController::getImageFilter()
+string OMXCameraController::getImageFilter()
 {
     return GetImageFilterString(imagefilterConfig.eImageFilter);
 }
 
 
-void RPICameraController::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
+void OMXCameraController::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 {
     
     if(!camera) return;
@@ -1032,7 +1032,7 @@ void RPICameraController::applyImageFilter(OMX_IMAGEFILTERTYPE imageFilter)
 
 #pragma mark EXPOSURE PRESETS
 
-OMX_ERRORTYPE RPICameraController::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposurePreset_)
+OMX_ERRORTYPE OMXCameraController::setExposurePreset(OMX_EXPOSURECONTROLTYPE exposurePreset_)
 {
     if(!camera) return OMX_ErrorNone;
 
@@ -1047,24 +1047,24 @@ OMX_ERRORTYPE RPICameraController::setExposurePreset(OMX_EXPOSURECONTROLTYPE exp
     return error;
 }
 
-OMX_ERRORTYPE RPICameraController::setExposurePreset(string exposurePreset_)
+OMX_ERRORTYPE OMXCameraController::setExposurePreset(string exposurePreset_)
 {
     
     return setExposurePreset(GetExposurePreset(exposurePreset_));
 }
 
 
-string RPICameraController::getExposurePreset()
+string OMXCameraController::getExposurePreset()
 {
     return GetExposurePresetString(exposurePresetConfig.eExposureControl);
 }
 
-void RPICameraController::toggleLED()
+void OMXCameraController::toggleLED()
 {
     setLEDState(!settings.LED);
 }
 
-void RPICameraController::setLEDState(bool stateRequested)
+void OMXCameraController::setLEDState(bool stateRequested)
 {
     if (!hasGPIOProgram) 
     {
@@ -1089,32 +1089,32 @@ void RPICameraController::setLEDState(bool stateRequested)
     }
 }
 
-int RPICameraController::getISO() 
+int OMXCameraController::getISO() 
 { 
     return exposureConfig.nSensitivity;
 }
 
-bool RPICameraController::getAutoISO()
+bool OMXCameraController::getAutoISO()
 {
     return fromOMXBool(exposureConfig.bAutoSensitivity);
 }
 
-bool RPICameraController::getAutoShutter()
+bool OMXCameraController::getAutoShutter()
 {
     return fromOMXBool(exposureConfig.bAutoShutterSpeed);
 }
 
-int RPICameraController::getShutterSpeed()
+int OMXCameraController::getShutterSpeed()
 {
     return exposureConfig.nShutterSpeedMsec;
 }
 
-int RPICameraController::getEvCompensation()
+int OMXCameraController::getEvCompensation()
 {
     return fromQ16(exposureConfig.xEVCompensation);
 }
 
-string RPICameraController::printExposure()
+string OMXCameraController::printExposure()
 {
     
     

@@ -2,7 +2,7 @@
 #include "ofMain.h"
 #include "OMX_Maps.h"
 #include "DirectDisplay.h"
-#include "OMXCameraSettings.h"
+#include "ofxOMXCameraSettings.h"
 
 
 enum MIRROR
@@ -22,17 +22,17 @@ enum ROTATION
 };
 
 
-class RPICameraController
+class OMXCameraController
 {
 public:
     
-    RPICameraController();
-    virtual ~RPICameraController(){};
+    OMXCameraController();
+    virtual ~OMXCameraController(){};
     OMX_HANDLETYPE camera;
 
     string getLEDPin();
     bool hasGPIOProgram;
-    OMXCameraSettings settings;
+    ofxOMXCameraSettings settings;
     
     void checkBurstMode();
     void checkFlickerCancellation();
