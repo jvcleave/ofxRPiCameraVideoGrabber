@@ -15,7 +15,7 @@ PhotoEngine::PhotoEngine()
     previewPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
     saveFolderAbsolutePath.clear();
     renderInputPort = VIDEO_RENDER_INPUT_PORT;
-
+    eglImageController = NULL;
 }   
 
 
@@ -30,17 +30,17 @@ OMX_ERRORTYPE PhotoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE ren
 }
 
 
-void PhotoEngine::setup(ofxOMXCameraSettings* settings_, PhotoEngineListener* listener_)
+void PhotoEngine::setup(ofxOMXCameraSettings* settings_, PhotoEngineListener* listener_, EGLImageController* eglImageController_)
 {
     settings = settings_;
     listener = listener_;
-    
-    settings->width = omxcam_round(settings->width, 32);
-    settings->height = omxcam_round(settings->height, 16);
+    eglImageController = eglImageController_;
+    //settings->width = omxcam_round(settings->width, 32);
+    //settings->height = omxcam_round(settings->height, 16);
 
     
-    settings->stillPreviewWidth = omxcam_round(settings->stillPreviewWidth, 32);
-    settings->stillPreviewHeight = omxcam_round(settings->stillPreviewHeight, 16);
+    //settings->stillPreviewWidth = omxcam_round(settings->stillPreviewWidth, 32);
+    //settings->stillPreviewHeight = omxcam_round(settings->stillPreviewHeight, 16);
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
     
@@ -74,7 +74,6 @@ void PhotoEngine::setup(ofxOMXCameraSettings* settings_, PhotoEngineListener* li
    {
        if(settings->enableTexture)
        {
-           eglImageController.generateEGLImage(settings->stillPreviewWidth, settings->stillPreviewHeight);
            renderInputPort = EGL_RENDER_INPUT_PORT;
        }
        //Set up renderer
@@ -386,7 +385,7 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
         if(settings->enableTexture)
         {
             //Set renderer to use texture
-            error = OMX_UseEGLImage(render, &eglImageController.eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController.eglImage);
+            error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController->eglImage);
             OMX_TRACE(error);
         }
         
@@ -449,7 +448,7 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
         {
             //start the buffer filling loop
             //once completed the callback will trigger and refill
-            error = OMX_FillThisBuffer(render, eglImageController.eglBuffer);
+            error = OMX_FillThisBuffer(render, eglBuffer);
             OMX_TRACE(error);
             ofLogNotice(__func__) << "TRIED OMX_FillThisBuffer";
         }else
@@ -464,11 +463,11 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
 
     
     //debug actual preview size
-    /*
+    
     error =  OMX_GetParameter(camera, OMX_IndexParamPortDefinition, &previewPortConfig);
     OMX_TRACE(error);
     ofLogNotice(__func__) << "previewPortConfig: " << PrintPortDef(previewPortConfig);
-    */
+    
     
     return error;
 }
@@ -619,7 +618,7 @@ void PhotoEngine::writeFile()
     }
     
     close();
-    setup(settings, listener);
+    setup(settings, listener, eglImageController);
 }
 
 
@@ -666,6 +665,14 @@ void PhotoEngine::close()
         
     }
     
+    error = FlushOMXComponent(render, renderInputPort);
+    OMX_TRACE(error);
+    if(settings->enableTexture)
+    {
+        error = FlushOMXComponent(render, EGL_RENDER_OUTPUT_PORT);
+        OMX_TRACE(error);
+
+    }
     
     
     if(encoder)

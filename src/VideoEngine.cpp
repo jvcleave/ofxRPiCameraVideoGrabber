@@ -13,6 +13,7 @@ VideoEngine::VideoEngine()
     listener = NULL;
     frameCounter = 0;
     isClosing = false;
+    eglImageController = NULL;
 }
 
 int VideoEngine::getFrameCounter()
@@ -70,18 +71,15 @@ OMX_ERRORTYPE VideoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE ren
     return error;
 }
 
-void VideoEngine::setup(ofxOMXCameraSettings& settings_, VideoEngineListener* listener_)
+void VideoEngine::setup(ofxOMXCameraSettings& settings_, VideoEngineListener* listener_, EGLImageController* eglImageController_)
 {
     isClosing = false;
     settings = settings_;
     listener = listener_;
+    eglImageController = eglImageController_;
     
     ofLogVerbose(__func__) << "settings: " << settings.toString();
-    if(settings.enableTexture)
-    {
-        eglImageController.generateEGLImage(settings.width, settings.height);
-        
-    }
+    
     
     OMX_ERRORTYPE error = OMX_ErrorNone;
     
@@ -91,11 +89,6 @@ void VideoEngine::setup(ofxOMXCameraSettings& settings_, VideoEngineListener* li
     error = OMX_GetHandle(&camera, OMX_CAMERA, this , &cameraCallbacks);
     OMX_TRACE(error);
     
-    if (settings.enableTexture && settings.enablePixels) 
-    {
-        enablePixels();
-        updatePixels();
-    }
     configureCameraResolution();
     
 }
@@ -376,40 +369,6 @@ void VideoEngine::writeFile()
 }
 
 
-#pragma mark PIXELS
-void VideoEngine::enablePixels()
-{
-    doPixels = true;
-    
-}
-
-
-void VideoEngine::disablePixels()
-{
-    doPixels = false;
-}
-
-
-void VideoEngine::updatePixels()
-{
-    if (!doPixels) 
-    {
-        return;
-    }
-    eglImageController.fbo.begin();
-    ofClear(0, 0, 0, 0);
-    getTexture().draw(0, 0);
-    glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, eglImageController.pixels);    
-    eglImageController.fbo.end();
-}
-
-unsigned char * VideoEngine::getPixels()
-{
-    return eglImageController.pixels;
-}
-
-
-
 
 OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
 {
@@ -556,10 +515,10 @@ OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
         ofLogError(__func__) << "UNABLE TO RECORD - MAY REQUIRE MORE GPU MEMORY";
     }
     
-    if(settings.enableTexture)
+    if(settings.enableTexture && eglImageController)
     {
         //Set renderer to use texture
-        error = OMX_UseEGLImage(render, &eglImageController.eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController.eglImage);
+        error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController->eglImage);
         OMX_TRACE(error);
     }
     
@@ -578,11 +537,11 @@ OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
     error = SetComponentState(render, OMX_StateExecuting);
     OMX_TRACE(error);
     
-    if(settings.enableTexture)
+    if(settings.enableTexture && eglImageController)
     {
         //start the buffer filling loop
         //once completed the callback will trigger and refill
-        error = OMX_FillThisBuffer(render, eglImageController.eglBuffer);
+        error = OMX_FillThisBuffer(render, eglBuffer);
         OMX_TRACE(error);
     }else
     {

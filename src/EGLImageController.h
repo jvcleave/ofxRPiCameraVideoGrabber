@@ -11,7 +11,6 @@ public:
     EGLImageKHR eglImage;
     EGLDisplay display;
     EGLContext context;
-    OMX_BUFFERHEADERTYPE* eglBuffer;
     unsigned char* pixels;
     ofTexture texture;
     ofAppEGLWindow* appEGLWindow;
@@ -24,6 +23,7 @@ public:
         context = NULL;
         appEGLWindow = NULL;
         pixels = NULL;
+        textureID = 0;
     }
     
     ~EGLImageController()

@@ -48,5 +48,5 @@ public:
     void onPhotoEngineStart(OMX_HANDLETYPE camera_) override;
     vector<string> photosTaken;
 
-    
+    EGLImageController eglImageController;
 };

@@ -64,7 +64,8 @@ public:
     void onVideoEngineClose() override;
     
     VideoEngine engine;
-    
+    EGLImageController eglImageController;
+
 private:
     bool hasNewFrame;
     

@@ -22,7 +22,16 @@ void ofxOMXPhotoGrabber::setup(ofxOMXCameraSettings settings_)
     
     ofLogNotice(__func__) << settings.toString();
    
-    engine.setup(&settings, this); //wait until onPhotoEngineStart to do anything   
+    if(settings.enableTexture)
+    {
+        eglImageController.generateEGLImage(settings.stillPreviewWidth, settings.stillPreviewHeight);
+        engine.setup(&settings, this, &eglImageController);  
+
+    }else
+    {
+        engine.setup(&settings, this, NULL);  
+
+    }
 
 }
 
@@ -108,8 +117,7 @@ void ofxOMXPhotoGrabber::draw(int x, int y, int width, int height)
 {
     if(settings.enableTexture)
     {
-        engine.eglImageController.texture.draw(x, y, width, height);
-        
+        eglImageController.texture.draw(x, y, width, height);
         
     }else
     {

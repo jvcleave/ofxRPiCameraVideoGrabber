@@ -24,7 +24,21 @@ void ofxOMXVideoGrabber::setup(ofxOMXCameraSettings& settings_)
     settings = settings_;
     ofLogNotice(__func__) << settings.toJSON().dump();
     ofLogNotice(__func__) << "settings: " << settings.toString();
-    engine.setup(settings, this);
+    
+    if(settings.enableTexture)
+    {
+        eglImageController.generateEGLImage(settings.width, settings.height);
+        engine.setup(settings, this, &eglImageController);
+        if(settings.enablePixels)
+        {
+            pixelsRequested = true;
+        }
+    }else
+    {
+        engine.setup(settings, this);
+
+    }
+    
 }
 
 void ofxOMXVideoGrabber::onVideoEngineStart()
@@ -84,10 +98,19 @@ void ofxOMXVideoGrabber::onUpdate(ofEventArgs & args)
 	{
 		if (settings.enableTexture) 
 		{
+            eglImageController.fbo.begin();
+            ofClear(0, 0, 0, 0);
+            eglImageController.texture.draw(0, 0);
 			if (pixelsRequested) 
 			{
-				engine.updatePixels();
+                glReadPixels(0, 0,
+                             eglImageController.texture.getWidth(),
+                             eglImageController.texture.getHeight(),
+                             GL_RGBA,
+                             GL_UNSIGNED_BYTE,
+                             eglImageController.pixels);    
 			}
+            eglImageController.fbo.end();
 		}
 	}
    
@@ -126,14 +149,13 @@ int ofxOMXVideoGrabber::getFrameRate()
 #pragma mark PIXELS/TEXTURE
 GLuint ofxOMXVideoGrabber::getTextureID()
 {
-	return engine.getTexture().texData.textureID;
+	return eglImageController.textureID;
 }
 
 void ofxOMXVideoGrabber::enablePixels()
 {
     if(settings.enableTexture)
     {
-        engine.enablePixels();
         pixelsRequested = true;
     }
 }
@@ -142,19 +164,18 @@ void ofxOMXVideoGrabber::disablePixels()
 {
     if(settings.enableTexture)
     {
-        engine.disablePixels();
         pixelsRequested = false;
     }
 }
 
 unsigned char * ofxOMXVideoGrabber::getPixels()
 {
-    return engine.getPixels();
+    return eglImageController.pixels;
 }
 
 ofTexture& ofxOMXVideoGrabber::getTextureReference()
 {
-	return engine.getTexture();
+	return eglImageController.texture;
 }
 
 #pragma mark RECORDING
@@ -212,7 +233,7 @@ void ofxOMXVideoGrabber::draw()
 {
 	if (settings.enableTexture)
 	{
-		engine.getTexture().draw(0, 0);
+		draw(0, 0);
         
 	}else
     {
@@ -228,7 +249,7 @@ void ofxOMXVideoGrabber::draw(int x, int y)
 {
     if (settings.enableTexture)
     {
-        engine.getTexture().draw(x, y);
+        eglImageController.fbo.draw(x, y);
     }else
     {
         setDisplayDrawRectangle(ofRectangle(x, y, getWidth(), getHeight()));
@@ -241,7 +262,7 @@ void ofxOMXVideoGrabber::draw(int x, int y, int width, int height)
 {
     if (settings.enableTexture)
     {
-        engine.getTexture().draw(x, y, width, height);
+        eglImageController.fbo.draw(x, y, width, height);
     }else
     {
         setDisplayDrawRectangle(ofRectangle(x, y, width, height));

@@ -39,6 +39,8 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::update()
 {
+    
+    
 	if (!doPixels)
 	{
 		return;

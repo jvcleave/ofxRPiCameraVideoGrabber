@@ -103,7 +103,7 @@ void ofApp::keyPressed  (int key)
         }
         case 't':
         {
-            photoGrabber.takePhoto(100);
+            photoGrabber.takePhoto(10);
             break;
         }
         case 's':

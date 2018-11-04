@@ -31,7 +31,7 @@ public:
 	VideoEngine();
     ~VideoEngine();
 
-	void setup(ofxOMXCameraSettings&, VideoEngineListener*);
+	void setup(ofxOMXCameraSettings&, VideoEngineListener*, EGLImageController* eglImageController_=NULL);
     int getFrameCounter();
 	ofxOMXCameraSettings& getSettings();
     
@@ -43,27 +43,16 @@ public:
     VideoEngineListener* listener;
     DirectDisplay directDisplay;
 
-    
-    
     int frameCounter;
-    void enablePixels();
-    void disablePixels();
-    unsigned char * getPixels();
-    void updatePixels();
-    bool doPixels;
-    ofTexture& getTexture()
-    {
-        return eglImageController.texture;
-    }
-    
-    
     void close();
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool isClosing;
     
-    EGLImageController eglImageController;
 protected:
 	
+    EGLImageController* eglImageController;
+    OMX_BUFFERHEADERTYPE* eglBuffer;
+
     ofxOMXCameraSettings settings;
 	void configureCameraResolution();
 	void configureEncoder();

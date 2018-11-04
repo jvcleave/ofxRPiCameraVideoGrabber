@@ -25,7 +25,7 @@ class PhotoEngine
 public:
 	PhotoEngine();
     ~PhotoEngine();
-    void setup(ofxOMXCameraSettings*, PhotoEngineListener*);
+    void setup(ofxOMXCameraSettings*, PhotoEngineListener*, EGLImageController* eglImageController_ = NULL);
     bool isOpen(){return didOpen;}
     void takePhoto();
     void close();
@@ -53,7 +53,7 @@ public:
     
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
     
-    EGLImageController eglImageController;
+    EGLImageController* eglImageController;
     
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
@@ -118,6 +118,7 @@ public:
     
     static OMX_ERRORTYPE textureRenderFillBufferDone( OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
     int renderInputPort;
+    OMX_BUFFERHEADERTYPE* eglBuffer;
 
 };
 

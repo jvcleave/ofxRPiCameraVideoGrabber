@@ -85,7 +85,7 @@ void RPiVideoGrabber::draw(int x, int y, int width, int height)
 
 ofTexture* RPiVideoGrabber::getTexturePtr()
 {
-    return &videoGrabber.engine.eglImageController.fbo.getTexture(); 
+    return &videoGrabber.eglImageController.fbo.getTexture(); 
 }
 
 bool RPiVideoGrabber::isInitialized() const
