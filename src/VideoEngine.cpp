@@ -409,7 +409,7 @@ void VideoEngine::updatePixels()
     }
     fbo.begin();
     ofClear(0, 0, 0, 0);
-    eglImageController.texture.draw(0, 0);
+    getTexture().draw(0, 0);
     glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);    
     fbo.end();
 }

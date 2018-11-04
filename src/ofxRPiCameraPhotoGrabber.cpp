@@ -109,6 +109,8 @@ void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
     if(settings.enableTexture)
     {
         engine.eglImageController.texture.draw(x, y, width, height);
+        
+        
     }else
     {
         setDisplayDrawRectangle(ofRectangle(x, y, width, height));

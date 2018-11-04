@@ -213,6 +213,7 @@ void ofxRPiCameraVideoGrabber::draw()
 	if (settings.enableTexture)
 	{
 		engine.getTexture().draw(0, 0);
+        
 	}else
     {
         engine.directDisplay.setDisplayDrawRectangle(ofRectangle(0, 0, getWidth(), getHeight()));
