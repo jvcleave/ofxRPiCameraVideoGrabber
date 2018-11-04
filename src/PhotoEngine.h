@@ -12,7 +12,7 @@
 #include "OMX_Maps.h"
 #include "OMXCameraSettings.h"
 #include "DirectDisplay.h"
-
+#include "EGLImageController.h"
 class PhotoEngineListener
 {
 public:
@@ -52,7 +52,9 @@ public:
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     
     OMX_BUFFERHEADERTYPE* encoderOutputBuffer;
-
+    
+    EGLImageController eglImageController;
+    
     static OMX_ERRORTYPE 
     nullEmptyBufferDone(OMX_HANDLETYPE hComponent, 
                         OMX_PTR pAppData, 
@@ -113,6 +115,10 @@ public:
     
     
     OMX_PARAM_PORTDEFINITIONTYPE previewPortConfig;
+    
+    static OMX_ERRORTYPE textureRenderFillBufferDone( OMX_HANDLETYPE, OMX_PTR, OMX_BUFFERHEADERTYPE*);
+    int renderInputPort;
+
 };
 
 

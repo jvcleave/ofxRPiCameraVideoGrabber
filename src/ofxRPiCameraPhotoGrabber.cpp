@@ -106,7 +106,14 @@ void ofxRPiCameraPhotoGrabber::draw(ofRectangle& rectangle)
 
 void ofxRPiCameraPhotoGrabber::draw(int x, int y, int width, int height)
 {
-    setDisplayDrawRectangle(ofRectangle(x, y, width, height));
+    if(settings.enableTexture)
+    {
+        engine.eglImageController.texture.draw(x, y, width, height);
+    }else
+    {
+        setDisplayDrawRectangle(ofRectangle(x, y, width, height));
+
+    }
 }
 
 void ofxRPiCameraPhotoGrabber::setDisplayAlpha(int alpha)

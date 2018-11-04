@@ -79,7 +79,14 @@ void ofApp::update()
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    //photoGrabber.draw(0, 0, ofGetWidth(), ofGetHeight());
+    if(photoGrabber.settings.enableTexture)
+    {
+        photoGrabber.draw(0, 0, ofGetWidth(), ofGetHeight()); 
+        ofDrawBitmapStringHighlight(photoGrabber.settings.toString(), 100, 100, ofColor::black, ofColor::yellow);
+
+    }
+
+    //
 }
 
 //--------------------------------------------------------------

@@ -9,11 +9,12 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofAppEGLWindow.h"
 #include "OMX_Maps.h"
 #include "OMXCameraSettings.h"
 #include "DirectDisplay.h"
-#include "ofAppEGLWindow.h"
 
+#include "EGLImageController.h"
 class VideoEngineListener
 {
 public:
@@ -45,7 +46,6 @@ public:
     
     
     int frameCounter;
-    void generateEGLImage();
     void enablePixels();
     void disablePixels();
     unsigned char * getPixels();
@@ -55,13 +55,15 @@ public:
     ofFbo fbo;
     ofTexture& getTexture()
     {
-        return texture;
+        return eglImageController.texture;
     }
     
     
     void close();
     OMX_ERRORTYPE onCameraEventParamOrConfigChanged();
     bool isClosing;
+    
+    EGLImageController eglImageController;
 protected:
 	
     OMXCameraSettings settings;
@@ -102,12 +104,8 @@ protected:
     static OMX_ERRORTYPE cameraEventHandlerCallback(OMX_HANDLETYPE camera, OMX_PTR videoModeEngine_, OMX_EVENTTYPE eEvent, OMX_U32 nData1, OMX_U32 nData2, OMX_PTR pEventData);
 
 
-    EGLImageKHR eglImage;
-    EGLDisplay display;
-    EGLContext context;
-    ofTexture texture;
+
     
-    OMX_BUFFERHEADERTYPE* eglBuffer;
     
 	
 };

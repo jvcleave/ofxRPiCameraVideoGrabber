@@ -73,7 +73,12 @@ void RPICameraController::applyAllSettings()
     setSoftwareSharpening(settings.doDisableSoftwareSharpen);
     setSoftwareSaturation(settings.doDisableSoftwareSaturation);
     applyExposure();
-    setBurstMode(settings.burstModeEnabled);
+    if(settings.burstModeEnabled)
+    {
+        //very specific so likely to fail so not checking unless really trying
+        setBurstMode(settings.burstModeEnabled);
+
+    }
 
 
 

@@ -14,8 +14,21 @@ PhotoEngine::PhotoEngine()
     OMX_INIT_STRUCTURE(previewPortConfig);
     previewPortConfig.nPortIndex = CAMERA_PREVIEW_PORT;
     saveFolderAbsolutePath.clear();
+    renderInputPort = VIDEO_RENDER_INPUT_PORT;
 
 }   
+
+
+OMX_ERRORTYPE PhotoEngine::textureRenderFillBufferDone(OMX_IN OMX_HANDLETYPE render, OMX_IN OMX_PTR photoEngine, OMX_IN OMX_BUFFERHEADERTYPE* pBuffer)
+{    
+    //ofLogNotice(__func__) << endl;
+    
+    //PhotoEngine* engine = static_cast<PhotoEngine*>(photoEngine);
+    OMX_ERRORTYPE error = OMX_FillThisBuffer(render, pBuffer);
+    OMX_TRACE(error);
+    return error;
+}
+
 
 void PhotoEngine::setup(OMXCameraSettings* omxCameraSettings_, PhotoEngineListener* listener_)
 {
@@ -59,15 +72,35 @@ void PhotoEngine::setup(OMXCameraSettings* omxCameraSettings_, PhotoEngineListen
     
    if(settings->enableStillPreview) 
    {
+       if(settings->enableTexture)
+       {
+           eglImageController.generateEGLImage(settings->stillPreviewWidth, settings->stillPreviewHeight);
+           renderInputPort = EGL_RENDER_INPUT_PORT;
+       }
        //Set up renderer
        OMX_CALLBACKTYPE renderCallbacks;
        renderCallbacks.EventHandler    = &PhotoEngine::nullEventHandlerCallback;
        renderCallbacks.EmptyBufferDone = &PhotoEngine::nullEmptyBufferDone;
        renderCallbacks.FillBufferDone  = &PhotoEngine::nullFillBufferDone;
        
+       OMX_STRING renderType = OMX_VIDEO_RENDER; 
        
-       OMX_GetHandle(&render, OMX_VIDEO_RENDER, this , &renderCallbacks);
-       DisableAllPortsForComponent(&render);
+       if(settings->enableTexture)
+       {
+           //Implementation specific
+           renderType = OMX_EGL_RENDER; 
+           renderInputPort = EGL_RENDER_INPUT_PORT;
+           renderCallbacks.FillBufferDone    = &PhotoEngine::textureRenderFillBufferDone;
+       }else
+       {
+           renderCallbacks.FillBufferDone    = &PhotoEngine::nullFillBufferDone;
+       }
+       error = OMX_GetHandle(&render, renderType, this , &renderCallbacks);
+       OMX_TRACE(error);
+       
+       error = DisableAllPortsForComponent(&render);
+       OMX_TRACE(error);
+       
    }
 
     
@@ -343,10 +376,22 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
         error = SetComponentState(render, OMX_StateIdle);
         OMX_TRACE(error);
        
+        if(settings->enableTexture)
+        {
+            //Enable render output port
+            error = EnableComponentPort(render, EGL_RENDER_OUTPUT_PORT);
+            OMX_TRACE(error);
+        }
+        
+        if(settings->enableTexture)
+        {
+            //Set renderer to use texture
+            error = OMX_UseEGLImage(render, &eglImageController.eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController.eglImage);
+            OMX_TRACE(error);
+        }
         
         
-        
-        error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, VIDEO_RENDER_INPUT_PORT);
+        error = OMX_SetupTunnel(camera, CAMERA_PREVIEW_PORT, render, renderInputPort);
         OMX_TRACE(error);
         
         
@@ -357,14 +402,9 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
         
         
         //Enable render input port
-        error = WaitForPortEnable(render, VIDEO_RENDER_INPUT_PORT);
-        OMX_TRACE(error);
-            
-        //Start renderer
-        error = SetComponentState(render, OMX_StateExecuting);
+        error = WaitForPortEnable(render, renderInputPort);
         OMX_TRACE(error);
         
-        directDisplay.setup(render, 0, 0, settings->stillPreviewWidth, settings->stillPreviewHeight);
 
     }else
     {
@@ -397,6 +437,27 @@ OMX_ERRORTYPE PhotoEngine::onCameraEventParamOrConfigChanged()
     error = SetComponentState(camera, OMX_StateExecuting);
     OMX_TRACE(error);  
 
+    
+    //Start renderer
+    error = SetComponentState(render, OMX_StateExecuting);
+    OMX_TRACE(error);
+    
+    
+    if(settings->enableStillPreview) 
+    { 
+        if(settings->enableTexture)
+        {
+            //start the buffer filling loop
+            //once completed the callback will trigger and refill
+            error = OMX_FillThisBuffer(render, eglImageController.eglBuffer);
+            OMX_TRACE(error);
+            ofLogNotice(__func__) << "TRIED OMX_FillThisBuffer";
+        }else
+        {
+            directDisplay.setup(render, 0, 0, settings->stillPreviewWidth, settings->stillPreviewHeight);
+        }
+    }
+    
     didOpen = true;
     
     listener->onPhotoEngineStart(camera);
@@ -640,7 +701,7 @@ void PhotoEngine::close()
         
         if(render)
         {
-            error = OMX_SetupTunnel(render, VIDEO_RENDER_INPUT_PORT, NULL, 0);
+            error = OMX_SetupTunnel(render, renderInputPort, NULL, 0);
             OMX_TRACE(error);
             
             error =  OMX_FreeHandle(render);

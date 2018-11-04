@@ -4,7 +4,7 @@
     "autoISO": true,
     "autoShutter": true,
     "brightness": 50,
-    "burstModeEnabled": true,
+    "burstModeEnabled": false,
     "contrast": -10,
     "cropRectangle": {
         "height": 100.0,

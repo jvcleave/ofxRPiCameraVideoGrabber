@@ -80,7 +80,7 @@ void VideoEngine::setup(OMXCameraSettings& settings_, VideoEngineListener* liste
     ofLogVerbose(__func__) << "settings: " << settings.toString();
     if(settings.enableTexture)
     {
-        generateEGLImage();
+        eglImageController.generateEGLImage(settings.width, settings.height);
         
     }
     
@@ -409,7 +409,7 @@ void VideoEngine::updatePixels()
     }
     fbo.begin();
     ofClear(0, 0, 0, 0);
-    texture.draw(0, 0);
+    eglImageController.texture.draw(0, 0);
     glReadPixels(0,0, settings.width, settings.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);    
     fbo.end();
 }
@@ -420,55 +420,7 @@ unsigned char * VideoEngine::getPixels()
 }
 
 
-void VideoEngine::generateEGLImage()
-{
-    
-    ofAppEGLWindow *appEGLWindow = (ofAppEGLWindow *) ofGetWindowPtr();
-    display = appEGLWindow->getEglDisplay();
-    context = appEGLWindow->getEglContext();
-    
-    
-    texture.allocate(settings.width, settings.height, GL_RGBA);
-    //texture.getTextureData().bFlipTexture = true;
-    
-    texture.setTextureWrap(GL_REPEAT, GL_REPEAT);
-    GLuint textureID = texture.getTextureData().textureID;
-    
-    glEnable(GL_TEXTURE_2D);
-    
-    // setup first texture
-    int dataSize = settings.width * settings.height * 4;
-    
-    GLubyte* pixelData = new GLubyte [dataSize];
-    
-    
-    memset(pixelData, 0xff, dataSize);  // white texture, opaque
-    
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, settings.width, settings.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-    
-    delete[] pixelData;
-    
-    
-    // Create EGL Image
-    eglImage = eglCreateImageKHR(
-                                 display,
-                                 context,
-                                 EGL_GL_TEXTURE_2D_KHR,
-                                 (EGLClientBuffer)textureID,
-                                 0);
-    glDisable(GL_TEXTURE_2D);
-    if (eglImage == EGL_NO_IMAGE_KHR)
-    {
-        ofLogError()    << "Create EGLImage FAIL";
-        return;
-    }
-    else
-    {
-        ofLogVerbose(__func__)    << "Create EGLImage PASS";
-    }
-}
+
 
 OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
 {
@@ -618,7 +570,7 @@ OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
     if(settings.enableTexture)
     {
         //Set renderer to use texture
-        error = OMX_UseEGLImage(render, &eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImage);
+        error = OMX_UseEGLImage(render, &eglImageController.eglBuffer, EGL_RENDER_OUTPUT_PORT, this, eglImageController.eglImage);
         OMX_TRACE(error);
     }
     
@@ -641,7 +593,7 @@ OMX_ERRORTYPE VideoEngine::onCameraEventParamOrConfigChanged()
     {
         //start the buffer filling loop
         //once completed the callback will trigger and refill
-        error = OMX_FillThisBuffer(render, eglBuffer);
+        error = OMX_FillThisBuffer(render, eglImageController.eglBuffer);
         OMX_TRACE(error);
     }else
     {
