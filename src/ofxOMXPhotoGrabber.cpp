@@ -45,6 +45,11 @@ void ofxOMXPhotoGrabber::onPhotoEngineStart(OMX_HANDLETYPE camera_)
     if(shotsTaken)
     {
         //setBurstMode(settings.burstModeEnabled);
+        if(shotsTaken >= 1)
+        {
+            //arbitrary timing so exposure doesn't fade to black :/
+            ofSleepMillis(300);
+        }
         if(shotsTaken < shotsRequested)
         {
             takePhoto();

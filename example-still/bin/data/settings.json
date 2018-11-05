@@ -17,7 +17,7 @@
     "dreLevel": 0,
     "enablePixels": false,
     "enableRaw": false,
-    "enableStillPreview": true,
+    "enableStillPreview": false,
     "enableTexture": true,
     "exposurePreset": "Auto",
     "flickerCancellation": false,
