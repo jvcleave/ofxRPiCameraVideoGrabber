@@ -1,4 +1,5 @@
-#### STATUS: PERPETUAL DEVELOPMENT    
+#### STATUS: DEPRECATED, See (ofxOMXCamera)[https://github.com/jvcleave/ofxOMXCamera] for future development/releases
+
 Master may be unstable, features untested. See [Releases](https://github.com/jvcleave/ofxRPiCameraVideoGrabber/releases) for tested versions
 
 #### DESCRIPTION:   
